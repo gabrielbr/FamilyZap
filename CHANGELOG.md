@@ -31,3 +31,8 @@
   - **New permissions:** `INTERNET` and `REQUEST_INSTALL_PACKAGES`, for self-update only.
   - **Releases:** `.github/workflows/release.yml` builds a signed APK and `SHA256SUMS.txt` on a `v*` tag, once the owner adds the signing secrets (`docs/release.md`).
   - **Tests:** portrait screenshots and the update rules (version compare, offer, sums, checks, throttle, sizes). 48 tests.
+- **Owner decisions, built:**
+  - "Pedir para adicionar alguém" on the kid's empty home. The parent sees "{kid} pediu para adicionar alguém" in Contatos. No names and no typing, so it can't reach anyone.
+  - Self-update reads the public `gabrielbr/oie-releases`, while the code stays private.
+  - The update sheet stays in the parent area only (design system divergence D-14).
+  - The six sticker words are approved.

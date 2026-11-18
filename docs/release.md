@@ -12,12 +12,13 @@ A release is what self-update offers (Gabriel Design System `docs/self-update.md
    - `OIE_KEYSTORE_PASSWORD`;
    - `OIE_KEY_ALIAS` (`oie`);
    - `OIE_KEY_PASSWORD`.
-3. Self-update reads the **public** GitHub API, so the repo (or a public releases-only repo set in `UpdateRules.REPO`) must be public for the check to work.
+3. Create an empty **public** repo, `gabrielbr/oie-releases`. Self-update reads its releases through GitHub's public API, while the code stays private here (owner's decision, 2026-11-18).
+4. Create a fine-grained GitHub token with **Contents: read and write** on `gabrielbr/oie-releases` only, and add it here as the secret `OIE_RELEASES_TOKEN`.
 
 ## Each release
 1. Bump `versionCode` and `versionName` in `app/build.gradle.kts`, and `BuildConfigInfo.VERSION` to match.
 2. Move the CHANGELOG's notes under a `## <version>` heading. They become the release notes in the update sheet.
 3. Merge to `main`, then tag: `git tag v0.3.0 && git push origin v0.3.0`.
-4. The `release` workflow tests, builds the signed APK, writes `SHA256SUMS.txt` and publishes both.
+4. The `release` workflow tests, builds the signed APK, writes `SHA256SUMS.txt`, and publishes both to `gabrielbr/oie-releases`.
 
 Debug builds (the CI artifact) are signed with a debug key, so they can't update themselves. Their About says so.

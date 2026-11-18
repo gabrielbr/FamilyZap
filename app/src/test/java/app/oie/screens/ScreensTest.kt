@@ -107,6 +107,8 @@ class ScreensTest {
     @Test fun conversationPortrait() = shot("12-conversation-portrait", false) { Conversation(ready().apply { kidNoticeSeen = true }, "vovo") }
     @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
     @Test fun parentPortrait() = shot("13-parent-portrait", false) { ParentArea(ready(), 0) }
+    @Test fun kidHomeEmpty() = shot("14-kid-home-empty", false) { KidHome(AppState(clock = { now }).apply { parentName = "Ana"; kidName = "Tito"; link.pretendLinked(); kidNoticeSeen = true; route = app.oie.data.Route.KidHome }) }
+    @Test fun parentSeesRequest() = shot("15-parent-request", false) { ParentArea(ready().apply { addRequested = true }, 0) }
     @Test fun riskNotice() = shot("05-setup-risk", false) { Setup(AppState(), 1, onClose = {}) }
     @Test fun names() = shot("06-setup-names", false) { Setup(AppState().apply { parentName = "Ana"; kidName = "Tito" }, 3, onClose = {}) }
     @Test fun createPin() = shot("07-setup-pin", false) { Setup(AppState(), 4, onClose = {}) }

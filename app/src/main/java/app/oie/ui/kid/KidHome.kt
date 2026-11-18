@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,6 +61,8 @@ fun KidHome(state: AppState) {
                 if (state.allowed.isEmpty()) {
                     // Empty: the kid can't fix it, so no button; the line says who can.
                     Text(tx.nobodyYet(state.parentName), style = OieType.body, color = c.muted)
+                    if (state.addRequested) Text(tx.askedToAdd(state.parentName), style = OieType.body, color = c.ink)
+                    else QuietButton(tx.askToAdd, { state.addRequested = true }, Modifier.padding(top = OTokens.Spacing.space4).height(OTokens.Size.button))
                 } else {
                     Text(tx.whoToTalk, style = OieType.body, color = c.muted)
                     FlowRow(

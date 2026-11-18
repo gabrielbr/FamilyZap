@@ -38,9 +38,12 @@ jobs:
           mkdir dist
           cp app/build/outputs/apk/release/app-release.apk "dist/Oie-${GITHUB_REF_NAME#v}.apk"
           cd dist && sha256sum Oie-*.apk > SHA256SUMS.txt && cat SHA256SUMS.txt
-      - name: Publish the release
+      - name: Publish the release to the public releases repo
+        # Self-update reads gabrielbr/oie-releases (public); the code stays private. OIE_RELEASES_TOKEN is a
+        # fine-grained token with Contents: read and write on that one repo only (docs/release.md).
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.OIE_RELEASES_TOKEN }}
         run: |
+          test -n "$GH_TOKEN" || { echo "Add the OIE_RELEASES_TOKEN secret first (docs/release.md)"; exit 1; }
           notes=$(awk '/^## /{n++} n==1' CHANGELOG.md | head -40)
-          gh release create "$GITHUB_REF_NAME" dist/* --title "Oiê ${GITHUB_REF_NAME#v}" --notes "$notes"
+          gh release create "$GITHUB_REF_NAME" dist/* --repo gabrielbr/oie-releases --title "Oiê ${GITHUB_REF_NAME#v}" --notes "$notes"
