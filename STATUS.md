@@ -21,6 +21,7 @@ Track: B · product with a team · Started: 2026-11-18
 ## Open items
 - [x] Keywords: Warm, Simple, Trustworthy, Close (2026-11-18).
 - [x] References: Headspace, Duolingo (2026-11-18).
-- [ ] Research spike: how the bridge reaches WhatsApp (official API, linked device, on-device Android, own messaging), including calls. Decision in `00 Brief/decisions/0001-bridge.md`.
+- [x] Research spike done (2026-11-18): `00 Brief/decisions/0001-bridge.md`. WhatsApp now has parent-managed accounts for under-13s in Brazil.
+- [ ] Owner decides the route in 0001 (recommended: test WhatsApp's parent-managed accounts first).
 - [ ] Parent home screen goal (Stage 5).
 - [x] Moved into the GitHub repo gabrielbr/familyzap (2026-11-18).
