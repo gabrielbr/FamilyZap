@@ -33,6 +33,8 @@ class PersistenceTest {
         messages += Message("p1", allowed[0].id, true, 1000L, Kind.PHOTO, media = "a.jpg")
         drafts[allowed[1].id] = "Oi m"
         lastSeen[allowed[0].id] = 999L
+        quietCount = 2
+        addRequested = true
         route = Route.Parent(0)
     }
 
@@ -46,6 +48,7 @@ class PersistenceTest {
         assertEquals(a.messages.toList(), b.messages.toList())
         assertEquals("Oi m", b.drafts[a.allowed[1].id]); assertEquals(999L, b.lastSeen[a.allowed[0].id])
         assertEquals("gallery", b.lastPhotoSource)
+        assertEquals(2, b.quietCount); assertTrue(b.addRequested)
         assertEquals(Route.KidHome, b.route) // never back into the parent area without the PIN
     }
 

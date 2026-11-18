@@ -126,7 +126,14 @@ fun ParentArea(state: AppState, section: Int) {
                     2 -> {
                         Text(tx.connection, style = OieType.title, color = c.ink)
                         Text(if (state.link.connected) tx.connectedTo(state.parentName) else tx.disconnected, style = OieType.body, color = c.ink)
-                        if (state.link.connected) TextLink(tx.simulateDrop, { state.link.pretendDropped(); state.route = Route.KidHome })
+                        if (state.link.connected) {
+                            val notifier = app.oie.LocalNotifier.current
+                            TextLink(tx.simulateIncoming, {
+                                val m = state.link.pretendIncoming(state.kidName, System.currentTimeMillis())
+                                if (state.receive(m) == app.oie.logic.Inbox.Decision.NOTIFY) notifier?.message(m, state.allowed.first { it.id == m.chatId }.name)
+                            })
+                            TextLink(tx.simulateDrop, { state.link.pretendDropped(); state.route = Route.KidHome })
+                        }
                         else PrimaryButton(tx.reconnect, { state.route = Route.Setup(2) })
                     }
                     else -> AboutAndHelp(state)

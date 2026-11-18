@@ -25,6 +25,10 @@ class SampleLink : WhatsAppLink {
     override val profileName: String = "Ana"
 
     fun pretendLinked() { connected = true }
+
+    /** Test only: a message from Grandma, the way the real link will hand one over. */
+    fun pretendIncoming(kidName: String, at: Long): Message =
+        Message("in$at", "vovo", false, at, app.oie.logic.Kind.TEXT, "$kidName, já chegou da escola?")
     fun pretendDropped() { connected = false }
 
     override fun contacts(): List<Contact> = listOf(

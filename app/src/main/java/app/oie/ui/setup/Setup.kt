@@ -88,7 +88,14 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
                     else -> {
                         Text(tx.done, style = OieType.display, color = c.ink)
                         Text(tx.handOver(state.kidName), style = OieType.body, color = c.ink)
-                        PrimaryButton(tx.openFor(state.kidName), { state.finishSetup() })
+                        // Notifications are asked for here, in context, after saying why (ux-user-flows §8).
+                        val ask = androidx.activity.compose.rememberLauncherForActivityResult(
+                            androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+                        ) { state.finishSetup() }
+                        if (android.os.Build.VERSION.SDK_INT >= 33) Text(tx.allowNotifications, style = OieType.body, color = c.muted)
+                        PrimaryButton(tx.openFor(state.kidName), {
+                            if (android.os.Build.VERSION.SDK_INT >= 33) ask.launch(android.Manifest.permission.POST_NOTIFICATIONS) else state.finishSetup()
+                        })
                     }
                 }
             }

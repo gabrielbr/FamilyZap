@@ -35,19 +35,33 @@ import app.oie.ui.setup.Setup
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 
-object BuildConfigInfo { const val VERSION = "0.3.0" }
+object BuildConfigInfo { const val VERSION = "0.4.0" }
 
 val LocalUpdater = androidx.compose.runtime.staticCompositionLocalOf<app.oie.update.Updater?> { null }
+val LocalNotifier = androidx.compose.runtime.staticCompositionLocalOf<app.oie.data.Notifier?> { null }
 
 class MainActivity : ComponentActivity() {
     private val updater by lazy { app.oie.update.Updater(applicationContext, this.lifecycleScope) }
 
-    /** Every return to the foreground checks for an update, at most every 15 minutes (docs/self-update.md). */
-    override fun onStart() { super.onStart(); updater.onForeground() }
+    private val tx by lazy { if (resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt }
+    private val notifier by lazy { app.oie.data.Notifier(applicationContext, tx) }
+    private var appState: AppState? = null
+
+    /** Every return to the foreground: an update check (at most every 15 minutes), and the quiet-hours summary if they ended. */
+    override fun onStart() {
+        super.onStart()
+        updater.onForeground()
+        appState?.let { notifier.quietSummary(it.takeQuietSummary()) }
+    }
 
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         if (intent.action == app.oie.update.Updater.ACTION_INSTALL_STATUS) app.oie.update.Updater.onInstallStatus(this, intent)
+        // A tapped notification opens that family member's chat (kid side only; never into the parent area).
+        if (intent.action == app.oie.data.Notifier.ACTION_OPEN_CHAT) appState?.let { s ->
+            val id = intent.getStringExtra(app.oie.data.Notifier.EXTRA_CONTACT)
+            if (s.route !is Route.Setup) s.route = if (id != null && s.allowed.any { it.id == id }) Route.Conversation(id) else Route.KidHome
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,14 +70,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             // Saved on the tablet only, sealed with a Keystore key (data/Persistence.kt).
             val store = remember { Store(File(filesDir, "state.sealed"), KeystoreSealer()) }
-            val state = remember { AppState().also { s -> store.read()?.let { Codec.decode(it, s) } } }
+            val state = remember { AppState().also { s -> store.read()?.let { Codec.decode(it, s) }; appState = s } }
             LaunchedEffect(state) {
                 snapshotFlow { Codec.encode(state) }.distinctUntilChanged().collectLatest { json ->
                     withContext(Dispatchers.IO) { store.write(json) }
                 }
             }
             OieTheme {
-              androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides app.oie.ui.text.stringsFor(), LocalUpdater provides updater) {
+              androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides app.oie.ui.text.stringsFor(), LocalUpdater provides updater, LocalNotifier provides notifier) {
                 val c = OieTheme.colors
                 // The 4dp frame round every screen (the core rule), in coral.
                 Box(

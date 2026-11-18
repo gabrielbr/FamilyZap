@@ -283,6 +283,7 @@ private fun Bubble(m: Message, name: String, status: String? = null) {
                 } ?: Text(m.text, style = OieType.title, color = ink)
                 Kind.PHOTO -> PhotoThumb(m.media)
                 Kind.UNSUPPORTED -> Text(tx.onlyInWhatsApp(name), style = OieType.body, color = c.muted)
+                Kind.DELETED -> Text(tx.deletedMessage, style = OieType.body.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic), color = c.muted)
                 else -> Text(m.text, style = OieType.body, color = ink)
             }
             Text(status ?: hour(tx, m.at), style = OieType.caption, color = c.muted)

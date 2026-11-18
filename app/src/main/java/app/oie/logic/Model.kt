@@ -14,7 +14,8 @@ data class Contact(
     val showWholeGroup: Boolean = false,
 )
 
-enum class Kind { TEXT, VOICE, PHOTO, STICKER, UNSUPPORTED }
+/** DELETED is WhatsApp's "delete for everyone": [Message.replyTo] names the message it removes. */
+enum class Kind { TEXT, VOICE, PHOTO, STICKER, UNSUPPORTED, DELETED }
 
 /** One message in a chat with an allowed contact, as the WhatsApp link reports it. */
 data class Message(
