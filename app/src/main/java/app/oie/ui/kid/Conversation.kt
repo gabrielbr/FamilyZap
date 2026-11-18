@@ -1,6 +1,16 @@
 package app.oie.ui.kid
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import app.oie.data.Photos
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,6 +49,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import app.oie.R
 import app.oie.data.AppState
 import app.oie.data.Route
@@ -72,8 +83,35 @@ fun Conversation(state: AppState, contactId: String) {
     var pending by remember { mutableStateOf<Message?>(null) }
     var stickers by remember { mutableStateOf(false) }
     var recordingSince by remember { mutableLongStateOf(0L) }
+    val context = LocalContext.current
+    var choosingPhoto by remember { mutableStateOf(false) }
+    var preview by remember { mutableStateOf<String?>(null) }
+    var photoError by remember { mutableStateOf(false) }
+    fun received(uri: Uri?) {
+        if (uri == null) return // the kid backed out of the picker: nothing changes
+        val kept = Photos.keep(context, uri)
+        photoError = kept == null
+        preview?.let { Photos.forget(context, it) } // Trocar: the old pick is dropped
+        preview = kept
+    }
+    val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { received(it) }
+    var cameraUri by remember { mutableStateOf<Uri?>(null) }
+    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> if (ok) received(cameraUri) }
+    fun open(source: String) {
+        choosingPhoto = false
+        state.lastPhotoSource = source
+        if (source == "camera") {
+            // The camera app writes into one temporary file shared through the FileProvider; made only when needed.
+            val uri = runCatching { FileProvider.getUriForFile(context, context.packageName + ".photos", Photos.newCameraTarget(context)) }.getOrNull()
+            if (uri == null) { photoError = true; return }
+            cameraUri = uri
+            camera.launch(uri)
+        } else {
+            gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
+    }
     val visible = state.visible(contactId)
-    LaunchedEffect(contactId, visible.size) { state.lastSeen[contactId] = System.currentTimeMillis() }
+    LaunchedEffect(contactId, visible.size) { state.lastSeen[contactId] = state.clock() }
 
     fun queue(m: Message) { pending = m }
     LaunchedEffect(pending) {
@@ -101,7 +139,7 @@ fun Conversation(state: AppState, contactId: String) {
                 items(visible, key = { it.id }) { m -> Bubble(m, contact.name) }
                 pending?.let { p -> item(key = "pending") { Bubble(p, contact.name, status = "Enviando…") } }
                 visible.lastOrNull { it.fromKid }?.takeIf { pending == null && visible.last().fromKid }?.let { last ->
-                    item { Text("Enviada · ${hour(last.at)}", style = OieType.caption, color = c.muted, modifier = Modifier.fillMaxWidth().padding(start = OTokens.Spacing.space16)) }
+                    item { Text("Enviada · ${hour(last.at)}", style = OieType.caption, color = c.muted, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth()) }
                 }
             }
             Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
@@ -120,6 +158,7 @@ fun Conversation(state: AppState, contactId: String) {
                     Text("Gravando…", style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
                     Text("Solte para enviar", style = OieType.bodySmall, color = c.muted)
                 } else {
+                    QuietButton(null, { choosingPhoto = true }, icon = R.drawable.gg_ic_camera, contentDescription = "Foto")
                     QuietButton(null, { stickers = true }, icon = R.drawable.gg_ic_sticker, contentDescription = "Figurinhas")
                     OutlinedTextField(
                         draft, { draft = it; state.drafts[contactId] = it }, Modifier.weight(1f),
@@ -132,19 +171,19 @@ fun Conversation(state: AppState, contactId: String) {
                     )
                     if (draft.isNotBlank()) {
                         PrimaryButton("Enviar", {
-                            queue(Message("k${System.nanoTime()}", contactId, true, System.currentTimeMillis(), Kind.TEXT, draft.trim()))
+                            queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.TEXT, draft.trim()))
                             draft = ""; state.drafts.remove(contactId)
                         }, icon = R.drawable.gg_ic_send)
                     }
                 }
                 if (canSend && draft.isBlank()) RecordButton(
                     recording = recordingSince > 0,
-                    onStart = { recordingSince = System.currentTimeMillis() },
+                    onStart = { recordingSince = state.clock() },
                     onStop = { send ->
-                        val secs = ((System.currentTimeMillis() - recordingSince) / 1000).toInt()
+                        val secs = ((state.clock() - recordingSince) / 1000).toInt()
                         recordingSince = 0
                         // Under 1 s is a slip, not a message (flow branch 3a).
-                        if (send && secs >= 1) queue(Message("k${System.nanoTime()}", contactId, true, System.currentTimeMillis(), Kind.VOICE, durationSec = secs))
+                        if (send && secs >= 1) queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.VOICE, durationSec = secs))
                     },
                 )
             }
@@ -161,15 +200,32 @@ fun Conversation(state: AppState, contactId: String) {
                     Modifier.height(OTokens.Spacing.space12).clickable(role = Role.Button) {
                         // Undo puts the content back, so nothing is lost.
                         if (it.kind == Kind.TEXT) draft = it.text
+                        if (it.kind == Kind.PHOTO) preview = it.media // back to the preview, nothing lost
                         pending = null
                     }.padding(horizontal = OTokens.Spacing.space3),
                     contentAlignment = Alignment.Center,
                 ) { Text("Desfazer", style = OieType.label, color = c.page) }
             }
         }
+        if (choosingPhoto) PhotoSourceSheet(first = state.lastPhotoSource, onPick = ::open, onClose = { choosingPhoto = false })
+        if (photoError) Text(
+            "Não deu para abrir essa foto. Tente outra.", style = OieType.body, color = c.coralText,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = OTokens.Size.header + OTokens.Spacing.space4)
+                .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.coralSoft).padding(OTokens.Spacing.space3),
+        )
+        preview?.let { name ->
+            PhotoPreview(name, contact.name,
+                onSwap = { choosingPhoto = true },
+                onSend = {
+                    preview = null
+                    queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.PHOTO, media = name))
+                },
+                onBack = { Photos.forget(context, name); preview = null },
+            )
+        }
         if (stickers) StickerSheet(onPick = { w ->
             stickers = false
-            queue(Message("k${System.nanoTime()}", contactId, true, System.currentTimeMillis(), Kind.STICKER, w))
+            queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.STICKER, w))
         }, onClose = { stickers = false })
     }
 }
@@ -215,6 +271,7 @@ private fun Bubble(m: Message, name: String, status: String? = null) {
             when (m.kind) {
                 Kind.VOICE -> { OIcon(R.drawable.gg_ic_play, tint = ink, contentDescription = "Ouvir áudio de ${m.durationSec} segundos"); Text("0:%02d".format(m.durationSec), style = OieType.caption, color = c.muted) }
                 Kind.STICKER -> Text(m.text, style = OieType.title, color = ink)
+                Kind.PHOTO -> PhotoThumb(m.media)
                 Kind.UNSUPPORTED -> Text("$name mandou algo que só abre no WhatsApp.", style = OieType.body, color = c.muted)
                 else -> Text(m.text, style = OieType.body, color = ink)
             }
@@ -250,4 +307,73 @@ private fun StickerSheet(onPick: (String) -> Unit, onClose: () -> Unit) {
 private fun hour(at: Long): String {
     val t = Instant.ofEpochMilli(at).atZone(ZoneId.systemDefault()).toLocalTime()
     return "%dh%02d".format(t.hour, t.minute)
+}
+
+
+/** "Câmera" or "Galeria", the last one used first (flow: Remembers). */
+@Composable
+private fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: () -> Unit) {
+    val c = OieTheme.colors
+    val options = listOf("camera" to "Câmera", "gallery" to "Galeria").sortedBy { if (it.first == first) 0 else 1 }
+    Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(onClick = onClose), contentAlignment = Alignment.BottomCenter) {
+        Column(
+            Modifier.widthIn(max = OTokens.Size.contentMax)
+                .clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
+                .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),
+            verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
+        ) {
+            Text("Foto", style = OieType.title, color = c.ink)
+            Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+                options.forEach { (key, label) ->
+                    QuietButton(label, { onPick(key) }, Modifier.height(OTokens.Size.button), icon = if (key == "camera") R.drawable.gg_ic_camera else R.drawable.gg_ic_image)
+                }
+            }
+        }
+    }
+}
+
+/** Prototype screen 17: the photo big, then Trocar or Enviar. Back drops it. */
+@Composable
+private fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: () -> Unit, onBack: () -> Unit) {
+    val c = OieTheme.colors
+    val context = LocalContext.current
+    val bmp = remember(name) { Photos.load(context, name, Photos.MAX_SIDE) }
+    androidx.activity.compose.BackHandler(onBack = onBack)
+    Column(Modifier.fillMaxSize().background(c.page)) {
+        Bar {
+            QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = "Voltar")
+            Text("Foto para $to", style = OieType.title, color = c.ink)
+        }
+        Column(
+            Modifier.fillMaxSize().padding(OTokens.Spacing.space6),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6, Alignment.CenterVertically),
+        ) {
+            if (bmp != null) Image(
+                bmp.asImageBitmap(), contentDescription = "A foto que você vai mandar",
+                modifier = Modifier.weight(1f, fill = false).clip(RoundedCornerShape(OTokens.Radius.radiusM)),
+                contentScale = ContentScale.Fit,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+                QuietButton("Trocar", onSwap, Modifier.height(OTokens.Size.button))
+                PrimaryButton("Enviar", onSend, icon = R.drawable.gg_ic_send)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PhotoThumb(media: String?) {
+    val c = OieTheme.colors
+    val context = LocalContext.current
+    val bmp = remember(media) { media?.let { Photos.load(context, it, Photos.MAX_SIDE / 4) } }
+    if (bmp == null) {
+        Text("Foto", style = OieType.body, color = c.muted)
+    } else {
+        Image(
+            bmp.asImageBitmap(), contentDescription = "Foto",
+            modifier = Modifier.size(OTokens.Size.contactTile * 2).clip(RoundedCornerShape(OTokens.Radius.radiusS)),
+            contentScale = ContentScale.Crop,
+        )
+    }
 }

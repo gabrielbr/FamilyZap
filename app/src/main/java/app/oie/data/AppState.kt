@@ -2,6 +2,7 @@ package app.oie.data
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import app.oie.logic.Contact
@@ -26,18 +27,22 @@ sealed interface Route {
 /**
  * The whole app state, in memory for v0.1. Next: persist on the tablet (encrypted), never on a server.
  */
-class AppState(val link: SampleLink = SampleLink()) {
+/** [clock] is the real time in the app; tests pin it so screenshots stay the same on every run. */
+class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = System::currentTimeMillis) {
     var route: Route by mutableStateOf(Route.Setup(0))
     var parentName by mutableStateOf("")
     var kidName by mutableStateOf("")
-    private var pinHash: String? = null
+    /** SHA-256 of the PIN, never the PIN itself. */
+    internal var pinHash: String? = null
     val pinGuard = Pin.Guard()
     var kidNoticeSeen by mutableStateOf(false)
     val allowed = mutableStateListOf<Contact>()
     val periods = mutableStateListOf<QuietPeriod>().apply { addAll(QuietHours.presets) }
     val messages = mutableStateListOf<Message>()
     /** Unsent drafts per contact (flow: Remembers). */
-    val drafts = mutableMapOf<String, String>()
+    val drafts = mutableStateMapOf<String, String>()
+    /** The last photo source the kid used, opened first next time (flow: Remembers). */
+    var lastPhotoSource by mutableStateOf("camera")
 
     fun setPin(pin: String) { pinHash = hash(pin) }
     fun checkPin(pin: String, now: Long): Boolean = pinGuard.attempt(pinHash == hash(pin), now)
@@ -53,7 +58,7 @@ class AppState(val link: SampleLink = SampleLink()) {
     }
 
     fun unread(contactId: String): Int = visible(contactId).count { !it.fromKid && it.at > lastSeen.getOrDefault(contactId, 0L) }
-    val lastSeen = mutableMapOf<String, Long>()
+    val lastSeen = mutableStateMapOf<String, Long>()
 
     fun finishSetup() {
         route = Route.KidHome
@@ -63,7 +68,7 @@ class AppState(val link: SampleLink = SampleLink()) {
     /** Sample chats so the shell shows real states. One private message to the parent stays hidden by the rule. */
     private fun seedSampleChat() {
         if (messages.isNotEmpty() || allowed.none { it.id == "vovo" }) return
-        val now = System.currentTimeMillis()
+        val now = clock()
         val h = 60L * 60 * 1000
         messages += Message("p1", "vovo", false, now - 30 * h, Kind.TEXT, "Filha, me liga quando puder") // private: hidden
         messages += Message("s1", "vovo", false, now - 2 * h, Kind.TEXT, "$kidName, como foi a escola?")

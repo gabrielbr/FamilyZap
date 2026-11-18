@@ -8,7 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import androidx.test.core.app.ApplicationProvider
 import app.oie.data.AppState
+import app.oie.data.Photos
+import app.oie.logic.Kind
+import app.oie.logic.Message
 import app.oie.data.Route
 import app.oie.ui.kid.Conversation
 import app.oie.ui.kid.KidHome
@@ -36,7 +43,12 @@ import org.robolectric.annotation.GraphicsMode
 class ScreensTest {
     @get:Rule val compose = createComposeRule()
 
-    private fun ready(): AppState = AppState().apply {
+    /** A fixed clock (18 Nov 2026, 16:40 UTC) and time zone, so the times in the screenshots never change. */
+    private val now = 1_795_020_000_000L
+
+    @org.junit.Before fun pinTimeZone() { java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC")) }
+
+    private fun ready(): AppState = AppState(clock = { now }).apply {
         parentName = "Ana"; kidName = "Tito"
         link.pretendLinked()
         allowed.addAll(link.contacts().take(5))
@@ -60,6 +72,22 @@ class ScreensTest {
     @Test fun kidHomeUnlinked() = shot("03-kid-home-unlinked", false) { KidHome(ready().apply { kidNoticeSeen = true; link.pretendDropped() }) }
     @Test fun conversationLight() = shot("04-conversation", false) { Conversation(ready().apply { kidNoticeSeen = true }, "vovo") }
     @Test fun conversationDark() = shot("04-conversation", true) { Conversation(ready().apply { kidNoticeSeen = true }, "vovo") }
+    @Test fun conversationWithPhoto() = shot("04b-conversation-photo", false) {
+        // A sample "photo": the brand rounds drawn on cream, stored the way Photos.keep stores a real one.
+        val ctx = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val bmp = Bitmap.createBitmap(800, 600, Bitmap.Config.ARGB_8888)
+        Canvas(bmp).apply {
+            drawColor(0xFFFFF6EE.toInt())
+            drawCircle(300f, 330f, 140f, Paint().apply { color = 0xFFE8573C.toInt(); style = Paint.Style.STROKE; strokeWidth = 90f })
+            drawCircle(520f, 180f, 60f, Paint().apply { color = 0xFFFCE1D6.toInt() })
+        }
+        java.io.File(Photos.dir(ctx), "sample.jpg").outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 85, it) }
+        val st = ready().apply {
+            kidNoticeSeen = true
+            messages += Message("ph", "vovo", true, now - 60_000, Kind.PHOTO, media = "sample.jpg")
+        }
+        Conversation(st, "vovo")
+    }
     @Test fun riskNotice() = shot("05-setup-risk", false) { Setup(AppState(), 1, onClose = {}) }
     @Test fun names() = shot("06-setup-names", false) { Setup(AppState().apply { parentName = "Ana"; kidName = "Tito" }, 3, onClose = {}) }
     @Test fun createPin() = shot("07-setup-pin", false) { Setup(AppState(), 4, onClose = {}) }

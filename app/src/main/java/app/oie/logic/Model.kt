@@ -28,6 +28,8 @@ data class Message(
     /** The id of the message this one replies to (quotes), if any. */
     val replyTo: String? = null,
     val durationSec: Int = 0,
+    /** A photo kept in the app's private storage on the tablet (data/Photos.kt): the file name only. */
+    val media: String? = null,
 )
 
 /** One quiet-hours period (docs/flows/contacts-quiet-hours.md). End before start means overnight. */

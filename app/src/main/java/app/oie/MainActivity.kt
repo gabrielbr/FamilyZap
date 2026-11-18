@@ -12,7 +12,17 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import app.oie.data.Codec
+import app.oie.data.KeystoreSealer
+import app.oie.data.Store
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Modifier
 import app.oie.data.AppState
 import app.oie.data.Route
@@ -31,7 +41,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val state = remember { AppState() }
+            // Saved on the tablet only, sealed with a Keystore key (data/Persistence.kt).
+            val store = remember { Store(File(filesDir, "state.sealed"), KeystoreSealer()) }
+            val state = remember { AppState().also { s -> store.read()?.let { Codec.decode(it, s) } } }
+            LaunchedEffect(state) {
+                snapshotFlow { Codec.encode(state) }.distinctUntilChanged().collectLatest { json ->
+                    withContext(Dispatchers.IO) { store.write(json) }
+                }
+            }
             OieTheme {
                 val c = OieTheme.colors
                 // The 4dp frame round every screen (the core rule), in coral.
