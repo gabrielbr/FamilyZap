@@ -7,7 +7,7 @@ Track: B · product with a team · Started: 2026-11-18
 | 1 Brief & sources | ✅ | 2026-11-18 | Brief, sources, PRODUCT.md; bridge decided (0001). |
 | 2 Strategy & name | ✅ | 2026-11-18 | Strategy in `02 Design System/README.md` §1; name Oiê (0002). |
 | 3 Identity | ✅ | 2026-11-18 | Logo C in coral, logo pack, voice, imagery and icons. |
-| 4 Design system | ⬜ | | |
+| 4 Design system | 🟡 | 2026-11-18 | design/ (core 0.31.1 + brand + layer), README filled, AGENTS.md brand rules. Gate open. |
 | 5 Screens & assets | ⬜ | | |
 | 6 Audit | ⬜ | | |
 | 7 Deliver & keep alive | ⬜ | | |
@@ -26,6 +26,10 @@ Track: B · product with a team · Started: 2026-11-18
 | Voice, risk notice and kid notice wording | Owner | 2026-11-18 | Claude session |
 | Imagery (photos + logo shapes) and icons (rounded line, bold) | Owner | 2026-11-18 | Claude session |
 | Stage 3 gate passed | Owner | 2026-11-18 | Claude session |
+| Build on the Gabriel Design System core (like Cochilo); light + dark; Nunito; ink on coral | Owner | 2026-11-18 | Claude session |
+| Full palette (design/brand/oie/brand.md) | Owner | 2026-11-18 | Claude session |
+| No fairy mode in Oiê (it would bring pink back) | Owner | 2026-11-18 | Claude session |
+| Icons: Phosphor Bold | Owner | 2026-11-18 | Claude session |
 
 ## Open items
 - [x] Keywords: Warm, Simple, Trustworthy, Close (2026-11-18).
@@ -39,3 +43,5 @@ Track: B · product with a team · Started: 2026-11-18
 - [ ] Rename the GitHub repo to `gabrielbr/oie` (owner); then update the git remote.
 - [ ] Check Instagram and TikTok handles for Oiê (owner).
 - [ ] Search INPI (classes 9 and 38) for Oiê before the first public release (owner).
+- [ ] Add Oiê's row to the design system's AGENTS.md app table (a PR in Gabriel-Deisgn-System).
+- [ ] Component previews with the first screens (Stage 5).

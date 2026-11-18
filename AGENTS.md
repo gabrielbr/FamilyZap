@@ -5,15 +5,29 @@ Oiê lets a kid aged 9–12 message and call family from an Android tablet throu
 This project follows the Gabriel Product Boilerplate playbook (PLAYBOOK.md in that repo).
 
 ## Brand rules
-1. **The one idea:** idea, tagline, what the brand never implies.
-2. **Voice and copy:** the rules from `voice.md`, banned words, buttons verb-first, no invented data.
-3. **Tokens:** every colour, size, radius and duration comes from the tokens. No literals in screens. Never hand-edit generated token files.
-4. **Type:** families, scale, one h1 per page, line length.
-5. **Logo:** use the files only; never retype or redraw. Clear space, minimum sizes.
-6. **Graphic rule:** the one device and where it may appear.
-7. **Texture and motion:** pausable; honours reduced motion; nothing that carries meaning is animated only.
-8. **Components and layout:** screens compose the component kit; one primary action per screen; 390 px works.
-9. **Before you finish, check:** contrast in every theme, colour never alone, targets ≥44–48, copy against the voice, the audit file written.
+The full system is in [`02 Design System/README.md`](02%20Design%20System/README.md); the values are in [`design/`](design/README.md).
+1. **The one idea:** Family, within reach. Tagline: "Send love home". Oiê never implies that it's a WhatsApp product, that a child is 100% safe, that the WhatsApp link is risk-free, or that it's for spying.
+2. **Voice and copy:** [`01 Brand/voice.md`](01%20Brand/voice.md).
+   - Warm, playful, plain: say it like you'd say it at the table. Informal "você"; Portuguese first.
+   - No "!" except in "Oiê!"; no emoji in UI text; no em dashes; buttons start with a verb.
+   - Never: hype words, Zap/Wpp, tech words (session, server, linked device) in the UI. No invented data.
+3. **Tokens:** every colour, size, radius and duration comes from `design/generated/` (`OTokens.kt`, `tokens.css`). No literals in screens.
+   - Change values in `design/brand/oie/` or `design/product/oie/`, then run `python3 design/build.py`. Never hand-edit `generated/` or `design/core/`.
+   - Spacing is 4, 8, 12, 16, 24, 32, 40, 48, 64.
+4. **Type:** Nunito only. Use the roles: display, title, label, body, body-small, caption. Nothing that carries meaning under 12sp.
+5. **Logo:** use the files in `01 Brand/logo/` only; never retype or redraw. Clear space is the i's dot; the wordmark minimum is 64 px. Never drop the circumflex.
+6. **Graphic rule:** the coral accent is one filled thing per screen. Picked things use `selected`. A 4dp coral frame goes round every screen. Colour is never the only carrier of meaning.
+7. **Texture and motion:** the touching rounds from the logo, at most one cluster per screen, never behind text. Motion 150/250 ms, no bounce, press scales to 97%. Honour "Remove animations".
+8. **Components and layout:** screens compose the components in the design system README §10.
+   - One main action per screen; 48dp targets, 52dp buttons.
+   - Phosphor Bold icons at 24dp with labels.
+   - Works at 360dp phone width and on the tablet (column max 600dp).
+9. **Before you finish, check:**
+   - `python3 design/build.py --check` passes;
+   - contrast holds in light and dark;
+   - colour is never alone;
+   - copy follows the voice;
+   - the audit file is written.
 
 ## Design work
 Every new or changed screen, flow, page or asset is designed with, and audited against, the skills in `.claude/skills/`, in this order:
