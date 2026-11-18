@@ -100,6 +100,10 @@ interface Strings {
     fun aboutVersion(v: String): String
     val notWhatsApp: String; val credits: String
     val theKid: String
+    // Receiving (docs/flows/kid-receives-messages.md)
+    val notifChannel: String; val notifVoice: String; val notifPhoto: String; val notifSticker: String
+    fun quietSummary(n: Int): String
+    val deletedMessage: String; val simulateIncoming: String; val allowNotifications: String
 
     // Self-update (Gabriel Design System docs/self-update.md, "Words")
     fun updateAvailable(v: String): String
@@ -222,6 +226,11 @@ object Pt : Strings {
     override val notWhatsApp = "O Oiê não é feito nem aprovado pelo WhatsApp ou pela Meta."
     override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System."
     override val theKid = "a criança"
+    override val notifChannel = "Mensagens da família"; override val notifVoice = "Mandou um áudio"
+    override val notifPhoto = "Mandou uma foto"; override val notifSticker = "Mandou uma figurinha"
+    override fun quietSummary(n: Int) = if (n == 1) "1 mensagem enquanto estava em silêncio" else "$n mensagens enquanto estava em silêncio"
+    override val deletedMessage = "Mensagem apagada"; override val simulateIncoming = "Simular mensagem da Vovó (teste)"
+    override val allowNotifications = "Para avisar quando a família mandar mensagem, o Oiê vai pedir permissão para notificações."
     override fun updateAvailable(v: String) = "Atualização disponível · $v"
     override fun updateButton(size: String) = "Atualizar · $size"
     override val updateLater = "Mais tarde"
@@ -350,6 +359,11 @@ object En : Strings {
     override val notWhatsApp = "Oiê isn't made or approved by WhatsApp or Meta."
     override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System."
     override val theKid = "your child"
+    override val notifChannel = "Messages from family"; override val notifVoice = "Sent a voice message"
+    override val notifPhoto = "Sent a photo"; override val notifSticker = "Sent a sticker"
+    override fun quietSummary(n: Int) = if (n == 1) "1 message during quiet hours" else "$n messages during quiet hours"
+    override val deletedMessage = "Message deleted"; override val simulateIncoming = "Pretend Grandma sent a message (test)"
+    override val allowNotifications = "To tell you when family sends a message, Oiê will ask to show notifications."
     override fun updateAvailable(v: String) = "Update available · $v"
     override fun updateButton(size: String) = "Update · $size"
     override val updateLater = "Later"

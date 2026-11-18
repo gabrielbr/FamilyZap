@@ -62,6 +62,31 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     fun unread(contactId: String): Int = visible(contactId).count { !it.fromKid && it.at > lastSeen.getOrDefault(contactId, 0L) }
     val lastSeen = mutableStateMapOf<String, Long>()
 
+    /** Messages that arrived quietly during quiet hours and haven't been summed up yet. */
+    var quietCount by mutableStateOf(0)
+
+    /** Every message from the WhatsApp link comes in here (logic/Inbox.kt decides). Returns what happened. */
+    fun receive(m: Message, now: LocalDateTime = LocalDateTime.now()): app.oie.logic.Inbox.Decision {
+        val history = messages.filter { it.chatId == m.chatId }
+        val d = app.oie.logic.Inbox.decide(m, allowed, history, kidName, periods, now)
+        when (d) {
+            app.oie.logic.Inbox.Decision.DROP -> {}
+            app.oie.logic.Inbox.Decision.DELETE -> {
+                val i = messages.indexOfFirst { it.id == m.replyTo }
+                if (i >= 0) messages[i] = messages[i].copy(kind = Kind.DELETED, text = "", media = null, durationSec = 0)
+            }
+            app.oie.logic.Inbox.Decision.QUIET -> { messages += m; if (!m.fromKid) quietCount++ }
+            app.oie.logic.Inbox.Decision.NOTIFY -> messages += m
+        }
+        return d
+    }
+
+    /** When quiet hours end, the quiet messages become one summary. Returns how many to announce (0 = nothing). */
+    fun takeQuietSummary(now: LocalDateTime = LocalDateTime.now()): Int {
+        if (quietCount == 0 || quietNow(now) != null) return 0
+        return quietCount.also { quietCount = 0 }
+    }
+
     fun finishSetup() {
         route = Route.KidHome
         seedSampleChat()

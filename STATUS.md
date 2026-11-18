@@ -72,3 +72,4 @@ Track: B · product with a team · Started: 2026-11-18
 - [ ] **Owner:** create the signing key and add the 4 `OIE_KEYSTORE_*` secrets; create the public repo `gabrielbr/oie-releases` and the `OIE_RELEASES_TOKEN` secret (docs/release.md).
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
+- [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).

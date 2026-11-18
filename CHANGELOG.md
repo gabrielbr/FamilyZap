@@ -36,3 +36,10 @@
   - Self-update reads the public `gabrielbr/oie-releases`, while the code stays private.
   - The update sheet stays in the parent area only (design system divergence D-14).
   - The six sticker words are approved.
+- **App v0.4, receiving** (flow "Kid receives messages"):
+  - **One way in:** every message from the WhatsApp link goes through `Inbox.decide`. Messages from chats that aren't allowed, and the parent's private messages, are **never stored** on the tablet. The rest is shown.
+  - **Notifications:** Oiê's own channel, one per family member, with the kind in words ("Mandou um áudio"). Tapping one opens that chat. Permission is asked at the end of setup, after saying why.
+  - **Quiet hours:** messages still arrive quietly, so the kid can read them, and become one summary notification when the period ends.
+  - **Delete for everyone:** the message turns into "Mensagem apagada" and its photo is dropped.
+  - **Test only:** "Simular mensagem da Vovó (teste)" in Conexão, until the real link exists.
+  - 59 tests.
