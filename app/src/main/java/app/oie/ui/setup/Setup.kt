@@ -1,0 +1,237 @@
+package app.oie.ui.setup
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
+import app.oie.R
+import app.oie.data.AppState
+import app.oie.data.Route
+import app.oie.logic.Pin
+import app.oie.ui.common.Bar
+import app.oie.ui.common.Initial
+import app.oie.ui.common.OIcon
+import app.oie.ui.common.PinPad
+import app.oie.ui.common.PrimaryButton
+import app.oie.ui.common.QuietButton
+import app.oie.ui.common.TextLink
+import app.oie.ui.theme.OTokens
+import app.oie.ui.theme.OieTheme
+import app.oie.ui.theme.OieType
+
+/** Flow: docs/flows/parent-setup-link.md. Steps 0–7; "Passo x de 6" on 1–6. */
+@Composable
+fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
+    val c = OieTheme.colors
+    val go = { s: Int -> state.route = Route.Setup(s) }
+    Column(Modifier.fillMaxSize()) {
+        Bar {
+            Wordmark()
+            Box(Modifier.weight(1f))
+            if (step in 1..6) Text("Passo $step de 6", style = OieType.caption, color = c.muted)
+        }
+        Box(Modifier.fillMaxSize().padding(OTokens.Spacing.space12), contentAlignment = Alignment.Center) {
+            Column(Modifier.widthIn(max = OTokens.Size.contentMax), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
+                when (step) {
+                    0 -> {
+                        Text("Oiê", style = OieType.display, color = c.ink)
+                        Text("O Oiê é para seu filho ou filha conversar com a família pelo seu WhatsApp, só com quem você escolher.", style = OieType.body, color = c.ink)
+                        PrimaryButton("Começar", { go(1) })
+                    }
+                    1 -> {
+                        Text("Antes de conectar", style = OieType.display, color = c.ink)
+                        // The approved risk notice (01 Brand/voice.md), in full, before anything is linked.
+                        Text(
+                            "O Oiê usa o seu WhatsApp de um jeito que o WhatsApp não oferece oficialmente. Ele pode limitar ou bloquear o seu número. Se isso acontecer, você perde o acesso até resolver com o WhatsApp.",
+                            style = OieType.body, color = c.ink,
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+                            PrimaryButton("Entendi, conectar", { go(2) })
+                            QuietButton("Agora não", onClose, Modifier.height(OTokens.Size.button))
+                        }
+                    }
+                    2 -> LinkStep(state, back = { go(1) }, next = { state.parentName = state.link.profileName; go(3) })
+                    3 -> NamesStep(state, back = { go(2) }, next = { go(4) })
+                    4 -> CreatePinStep(state, next = { go(5) })
+                    5 -> ContactsStep(state, next = { go(6) })
+                    6 -> QuietStep(state, next = { go(7) })
+                    else -> {
+                        Text("Pronto.", style = OieType.display, color = c.ink)
+                        Text("Entregue o tablet para ${state.kidName}.", style = OieType.body, color = c.ink)
+                        PrimaryButton("Abrir para ${state.kidName}", { state.finishSetup() })
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Wordmark() {
+    androidx.compose.foundation.Image(
+        painterResource(R.drawable.oie_wordmark), contentDescription = "Oiê",
+        modifier = Modifier.height(OTokens.Spacing.space8),
+    )
+}
+
+@Composable
+private fun LinkStep(state: AppState, back: () -> Unit, next: () -> Unit) {
+    val c = OieTheme.colors
+    Text("Conecte o seu WhatsApp", style = OieType.title, color = c.ink)
+    listOf(
+        "No seu celular, abra o WhatsApp.",
+        "Toque em Configurações e depois em Dispositivos conectados.",
+        "Toque em Conectar um dispositivo.",
+        "Aponte o celular para o código.",
+    ).forEachIndexed { i, s -> Text("${i + 1}. $s", style = OieType.body, color = c.ink) }
+    Box(
+        Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.qrGround).padding(OTokens.Spacing.space6),
+    ) {
+        Text("Versão de teste: o código do WhatsApp entra aqui na próxima versão.", style = OieType.caption, color = c.qrInk)
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+        // v0.1 has no real link (SampleLink). This button is labelled as a test so it can't be mistaken for the real thing.
+        PrimaryButton("Simular conexão (teste)", { state.link.pretendLinked(); next() })
+        QuietButton("Voltar", back, Modifier.height(OTokens.Size.button))
+    }
+}
+
+@Composable
+private fun NamesStep(state: AppState, back: () -> Unit, next: () -> Unit) {
+    val c = OieTheme.colors
+    Text("Como vocês se chamam?", style = OieType.title, color = c.ink)
+    Field("Seu nome", state.parentName, { state.parentName = it }, "Do seu WhatsApp. Aparece para ${state.kidName.ifBlank { "a criança" }} como \"WhatsApp de ${state.parentName}\".")
+    Field("Como a família chama seu filho ou filha?", state.kidName, { state.kidName = it }, "Vai junto das mensagens: \"${state.kidName.ifBlank { "Tito" }}: Oi, vó\".")
+    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+        PrimaryButton("Continuar", next, enabled = state.kidName.isNotBlank() && state.parentName.isNotBlank())
+        QuietButton("Voltar", back, Modifier.height(OTokens.Size.button))
+    }
+}
+
+@Composable
+fun Field(label: String, value: String, onChange: (String) -> Unit, help: String) {
+    val c = OieTheme.colors
+    Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+        Text(label, style = OieType.label, color = c.ink)
+        OutlinedTextField(
+            value, onChange, Modifier.fillMaxWidth(), textStyle = OieType.body, singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = c.ink, unfocusedTextColor = c.ink, focusedContainerColor = c.surface,
+                unfocusedContainerColor = c.surface, focusedBorderColor = c.ink, unfocusedBorderColor = c.line, cursorColor = c.ink,
+            ),
+        )
+        Text(help, style = OieType.caption, color = c.muted)
+    }
+}
+
+@Composable
+private fun CreatePinStep(state: AppState, next: () -> Unit) {
+    val c = OieTheme.colors
+    var first by remember { mutableStateOf<String?>(null) }
+    var entered by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+        Text(if (first == null) "Crie um PIN de 6 números" else "Digite o PIN de novo", style = OieType.title, color = c.ink)
+        Text(error ?: "Ele abre a área dos pais neste tablet. Não use o mesmo PIN do tablet.", style = OieType.body, color = if (error != null) c.coralText else c.muted, textAlign = TextAlign.Center)
+        PinPad(entered) { v ->
+            entered = v
+            if (v.length == Pin.LENGTH) {
+                val f = first
+                when {
+                    f == null && Pin.problem(v) == Pin.Problem.EASY -> { error = "Esse PIN é fácil de adivinhar. Escolha outro."; entered = "" }
+                    f == null -> { first = v; entered = ""; error = null }
+                    f == v -> { state.setPin(v); next() }
+                    else -> { error = "Os PINs não são iguais. Digite de novo."; entered = "" } // only the second entry clears
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContactsStep(state: AppState, next: () -> Unit) {
+    val c = OieTheme.colors
+    val picked = remember { mutableStateListOf<String>().apply { addAll(state.allowed.map { it.id }) } }
+    Text("Com quem ${state.kidName} pode falar?", style = OieType.title, color = c.ink)
+    LazyColumn(Modifier.height(OTokens.Size.contentMax / 2)) {
+        items(state.link.contacts(), key = { it.id }) { ct ->
+            val on = ct.id in picked
+            Row(
+                Modifier.fillMaxWidth().height(OTokens.Size.rowMin)
+                    .clickable(role = Role.Checkbox) { if (on) picked.remove(ct.id) else picked.add(ct.id) },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
+            ) {
+                Initial(ct.name, OTokens.Size.avatar)
+                Text(ct.name, style = OieType.label, color = c.ink)
+                if (ct.isGroup) Text("Grupo · todos do grupo veem as mensagens", style = OieType.caption, color = c.muted)
+                Box(Modifier.weight(1f))
+                if (on) OIcon(R.drawable.gg_ic_check, contentDescription = "Escolhido")
+            }
+        }
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+        PrimaryButton(if (picked.isEmpty()) "Continuar" else "Continuar · ${picked.size} escolhidos", {
+            state.allowed.clear(); state.allowed.addAll(state.link.contacts().filter { it.id in picked }); next()
+        })
+        QuietButton("Depois", next, Modifier.height(OTokens.Size.button))
+    }
+}
+
+@Composable
+private fun QuietStep(state: AppState, next: () -> Unit) {
+    val c = OieTheme.colors
+    Text("Horário de silêncio", style = OieType.title, color = c.ink)
+    Text("Nesse horário ${state.kidName} lê e ouve, mas não manda mensagens. Dá para mudar depois.", style = OieType.body, color = c.muted)
+    QuietList(state)
+    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+        PrimaryButton("Continuar", next)
+        QuietButton("Pular", next, Modifier.height(OTokens.Size.button))
+    }
+}
+
+/** The periods with their switches (setup step 6 and the parent area). */
+@Composable
+fun QuietList(state: AppState) {
+    val c = OieTheme.colors
+    state.periods.forEachIndexed { i, p ->
+        Row(Modifier.fillMaxWidth().height(OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+            Text(p.name, style = OieType.label, color = c.ink)
+            val days = if (p.days.size == 7) "Todos os dias" else "Seg a sex"
+            val end = if (p.end < p.start) "${p.end.hour}h do dia seguinte" else "${p.end.hour}h"
+            Text("$days · ${p.start.hour}h às $end", style = OieType.bodySmall, color = c.muted, modifier = Modifier.weight(1f))
+            Switch(
+                checked = p.on, onCheckedChange = { state.periods[i] = p.copy(on = it) },
+                colors = SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
+            )
+        }
+    }
+}

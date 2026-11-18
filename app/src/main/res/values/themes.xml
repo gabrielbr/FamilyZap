@@ -1,0 +1,6 @@
+<resources>
+    <!-- Compose draws everything; this only sets the window before the first frame (page colour, no action bar). -->
+    <style name="Theme.Oie" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/oie_page</item>
+    </style>
+</resources>

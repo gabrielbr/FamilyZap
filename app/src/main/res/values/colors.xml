@@ -1,0 +1,5 @@
+<resources>
+    <!-- Mirrors OTokens: page (light) and the app icon's coral and cream. Change them in design/, not here. -->
+    <color name="oie_page">#FFFFF6EE</color>
+    <color name="oie_icon_ground">#FFE8573C</color>
+</resources>
