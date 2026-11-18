@@ -1,24 +1,37 @@
 # Releasing Oiê
 
-A release is what self-update offers (Gabriel Design System `docs/self-update.md`): a signed APK named `Oie-<version>.apk` and `SHA256SUMS.txt`, published together as a GitHub release. The app installs an update only when it is newer, complete, its SHA-256 is in `SHA256SUMS.txt`, and it is signed with the same key as the installed app.
+A release is what self-update offers (Gabriel Design System `docs/self-update.md`): a signed APK named `Oie-<version>.apk` and `SHA256SUMS.txt`, published together as a GitHub release in the public `gabrielbr/oie-releases`. The app installs an update only when it's newer and complete, its SHA-256 is in `SHA256SUMS.txt`, and it's signed with the same key as the installed app.
 
-## Once: the signing key (owner only)
-1. Create a key, and keep it and its passwords somewhere safe outside the repo. Losing it means installed apps can never update again.
+## Once (owner only)
+1. **The signing key.** Create it, and keep it and its passwords somewhere safe outside the repo. If it's lost, installed apps can never update again.
    ```sh
    keytool -genkeypair -v -keystore oie.jks -alias oie -keyalg RSA -keysize 4096 -validity 10000
    ```
-2. In the GitHub repo's **Settings → Secrets and variables → Actions**, add:
+2. **The four signing secrets.** Add them in this repo under **Settings → Secrets and variables → Actions**:
    - `OIE_KEYSTORE_BASE64`: the output of `base64 -w0 oie.jks`;
    - `OIE_KEYSTORE_PASSWORD`;
    - `OIE_KEY_ALIAS` (`oie`);
    - `OIE_KEY_PASSWORD`.
-3. Create an empty **public** repo, `gabrielbr/oie-releases`. Self-update reads its releases through GitHub's public API, while the code stays private here (owner's decision, 2026-11-18).
-4. Create a fine-grained GitHub token with **Contents: read and write** on `gabrielbr/oie-releases` only, and add it here as the secret `OIE_RELEASES_TOKEN`.
+3. **The releases repo.** Create the **public** repo `gabrielbr/oie-releases`, and tick **Add a README**: a release needs at least one commit to tag. Self-update reads it through GitHub's public API, while the code stays private here (owner's decision, 2026-11-18).
+4. **The token.** Create a fine-grained GitHub token with **Contents: read and write** on `gabrielbr/oie-releases` only. Add it here as the secret `OIE_RELEASES_TOKEN`.
+5. **The first install.** Uninstall any debug copy from the tablet. A debug copy is signed with a different key, so Android won't put a release over it. Then install `Oie-<version>.apk` from the releases page. From then on, the app updates itself.
+
+Until the secrets exist, the `release` workflow only warns and skips.
 
 ## Each release
-1. Bump `versionCode` and `versionName` in `app/build.gradle.kts`, and `BuildConfigInfo.VERSION` to match.
-2. Move the CHANGELOG's notes under a `## <version>` heading. They become the release notes in the update sheet.
-3. Merge to `main`, then tag: `git tag v0.3.0 && git push origin v0.3.0`.
-4. The `release` workflow tests, builds the signed APK, writes `SHA256SUMS.txt`, and publishes both to `gabrielbr/oie-releases`.
+1. In the PR, bump `versionCode` and `versionName` in `app/build.gradle.kts`, and `BuildConfigInfo.VERSION` to match.
+2. Move the CHANGELOG's notes from `## Unreleased` to a `## <version>` heading. They become the notes in the update sheet, as plain text, so write them for the parent.
+3. Merge to `main`. The `release` workflow:
+   - sees that the version isn't released;
+   - runs the tests;
+   - builds and signs the APK and writes `SHA256SUMS.txt`;
+   - publishes the release;
+   - tags the commit `v<version>`.
 
-Debug builds (the CI artifact) are signed with a debug key, so they can't update themselves. Their About says so.
+   A merge that doesn't bump the version releases nothing.
+4. On the tablet, the parent area offers the update at the next check, or right away from **Sobre › Procurar atualizações**.
+
+You can also run the workflow by hand (**Actions › release › Run workflow**). It does the same check, so running it twice doesn't publish twice.
+
+## Testing between releases
+A debug copy (the CI artifact on each PR) can't update itself, and its About says so. To test a change on a tablet that runs a release, merge the change with a version bump instead.
