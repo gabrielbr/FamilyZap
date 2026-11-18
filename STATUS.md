@@ -6,7 +6,7 @@ Track: B · product with a team · Started: 2026-11-18
 |---|---|---|---|
 | 1 Brief & sources | ✅ | 2026-11-18 | Brief, sources, PRODUCT.md; bridge decided (0001). |
 | 2 Strategy & name | ✅ | 2026-11-18 | Strategy in `02 Design System/README.md` §1; name Oiê (0002). |
-| 3 Identity | ⬜ | | |
+| 3 Identity | 🟡 | 2026-11-18 | Logo approved (direction C) and the logo pack built. Next: voice doc, imagery, icons. |
 | 4 Design system | ⬜ | | |
 | 5 Screens & assets | ⬜ | | |
 | 6 Audit | ⬜ | | |
@@ -21,6 +21,8 @@ Track: B · product with a team · Started: 2026-11-18
 | Stage 1 gate passed | Owner | 2026-11-18 | Claude session |
 | Strategy: one idea, tagline, positioning, personality, never-implies, scope | Owner | 2026-11-18 | Claude session |
 | Name Oiê, app id `app.oie`, domain oie.app, code OIE; Oi_e risk accepted (0002) | Owner | 2026-11-18 | Claude session |
+| Logo direction C · Close (the "oi" symbol risk accepted) | Owner | 2026-11-18 | Claude session |
+| Logo colour coral #E8573C | Owner | 2026-11-18 | Claude session |
 
 ## Open items
 - [x] Keywords: Warm, Simple, Trustworthy, Close (2026-11-18).
