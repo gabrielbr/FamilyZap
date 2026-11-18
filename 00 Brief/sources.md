@@ -9,7 +9,7 @@
 | Decks / reports | none yet | | |
 | Design-tool files (Canva, Figma, Framer) | none yet | | never edit the master directly |
 | Fonts (and licences) | none yet | | |
-| References the owner likes | TBD (source needed) | | Asked; none yet |
+| References the owner likes | Headspace, Duolingo (owner picked from four suggestions; Monzo and Marco Polo not picked) | 2026-11-18 | For feel only; never copy their marks, mascots or layouts |
 | WhatsApp terms and APIs | TBD (research spike) | | Needed for the bridge decision |
 
 **Rule:** a value with no source is `TBD (source needed)`, never a guess.
