@@ -33,13 +33,13 @@ flowchart TD
 | # | Screen | What the parent does | What the system does |
 |---|---|---|---|
 | 1 | **Kid home › Pais** | Taps the small "Pais" button (48dp, a corner, muted, not coral) | Opens the PIN pad. The kid can see the button, but the PIN keeps the area shut. |
-| 2 | **PIN** | Types 6 digits | Wrong PIN: "PIN errado" and the dots shake (or appear without motion if animations are off). After 5 wrong tries, a 1-minute wait **(proposed)**, with **Esqueci o PIN** offered. |
-| 3 | **Área dos pais** | Picks a section | Four rows: **Contatos** ("3 pessoas, 1 grupo"), **Horário de silêncio** ("Escola · Dormir"), **Conexão** ("Conectado ao WhatsApp de {perfil}"), **Sobre** (version, Check for updates, Ajuda). The area closes after 2 minutes idle **(proposed)**. |
+| 2 | **PIN** | Types 6 digits | Wrong PIN: "PIN errado" and the dots shake (or appear without motion if animations are off). After 5 wrong tries, a 1-minute wait (owner, 2026-11-18), with **Esqueci o PIN** offered. |
+| 3 | **Área dos pais** | Picks a section | Four rows: **Contatos** ("3 pessoas, 1 grupo"), **Horário de silêncio** ("Escola · Dormir"), **Conexão** ("Conectado ao WhatsApp de {perfil}"), **Sobre** (version, Check for updates, Ajuda). The area closes after 2 minutes idle (owner, 2026-11-18). |
 | 4 | **Contatos** | Sees the allowed people and groups with photos | Lists them in the order the kid sees them. **+ Adicionar** is the one coral action. |
 | 5 | **Adicionar** | Searches by name, taps one or more | Searches the parent's WhatsApp contacts and groups. Those already allowed show a check. A tap adds; a second tap removes. |
 | 6 | **Remover** | Taps **Remover** on a row (a swipe also works) | Removes it at once with a **Desfazer** snackbar (5 s); no confirm. The conversation history stays on the tablet but is hidden from the kid. |
 | 7 | **Contact detail** | Toggles **Pode falar no horário de silêncio** | The per-contact exception (owner's decision). Default off. |
-| 8 | **Horário de silêncio** | Adds, edits or switches periods off | Each period has a name (Escola, Dormir…), days and start and end times. Suggested names come first; times are prefilled (Escola 7h–12h on weekdays, Dormir 21h–7h every day) **(proposed)**. A switch pauses a period (e.g. holidays) without deleting it. |
+| 8 | **Horário de silêncio** | Adds, edits or switches periods off | Each period has a name (Escola, Dormir…), days and start and end times. Suggested names come first; times are prefilled (Escola 7h–12h on weekdays, Dormir 21h–7h every day; owner, 2026-11-18). A switch pauses a period (e.g. holidays) without deleting it. |
 | 9 | **Sair** | Taps **Sair**, or leaves it | Back to the kid home; the changes are live already. |
 
 ## Branches
@@ -74,7 +74,7 @@ flowchart TD
 
 ## Notes
 - **Product law:** the allowed list is the only list. Oiê never shows the kid anyone else, and incoming messages from anyone else are never shown to the kid. They stay in the parent's WhatsApp as usual.
-- **Groups (proposed):** allowed, with the warning that everyone in the group sees the kid's messages. A family group is a common real case.
+- **Groups (owner, 2026-11-18):** allowed, with the warning that everyone in the group sees the kid's messages. A family group is a common real case.
 - **Data:** the list and the periods live on the tablet only.
 
 ## Flow review (ux-user-flows §13)
