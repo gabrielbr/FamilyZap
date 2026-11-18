@@ -2,7 +2,7 @@
 
 _For apps and websites (Stage 1). Agents and the impeccable skill read this as the product context._
 
-- **Who uses it:** a kid aged 9–12 on an Android tablet (reads and types), and the parent who sets it up and controls it on their Android phone. On the other end is the extended family, on WhatsApp as usual.
+- **Who uses it:** a kid aged 9–12 on an Android tablet (reads and types), and the parent who sets it up and controls it in a parent area on the same tablet, behind a 6-digit PIN. The parent's phone only scans a QR code once, in WhatsApp. On the other end is the extended family, on WhatsApp as usual.
 - **The job they hire it for:** the kid talks to family (voice messages, text, photos, stickers; calls later) through the parent's WhatsApp, only with contacts the parent allowed, without borrowing the parent's phone.
 - **Where and how:** the kid, sitting with the tablet. The parent, one-handed and in a hurry, at night, on the go, and sometimes sitting down to set things up (contacts, quiet hours).
 - **The one goal the home screen serves:** kid side: reach an allowed family member in one tap. Parent side: TBD (Stage 5 flows).
@@ -14,5 +14,5 @@ _For apps and websites (Stage 1). Agents and the impeccable skill read this as t
   - No safety promises: never claim to make a child "100% safe" or to replace a parent's attention.
   - No WhatsApp affiliation: never imply it's made or endorsed by WhatsApp or Meta; no WhatsApp logo.
 - **Name:** Oiê, said "oy-YEH"; Android id `app.oie` (decision 0002).
-- **Platforms:** Android tablet (kid), Android phone (parent), marketing website. iOS out of scope for now.
+- **Platforms:** one Android app on the kid's tablet (kid side + parent area); the parent's phone only needs WhatsApp. Marketing website. iOS out of scope for now.
 - **Brand commitments:** `02 Design System/README.md` (new brand, stages 2–4).
