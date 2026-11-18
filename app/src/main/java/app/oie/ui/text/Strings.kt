@@ -97,6 +97,20 @@ interface Strings {
     fun aboutVersion(v: String): String
     val notWhatsApp: String; val credits: String
     val theKid: String
+
+    // Self-update (Gabriel Design System docs/self-update.md, "Words")
+    fun updateAvailable(v: String): String
+    fun updateButton(size: String): String
+    val updateLater: String
+    fun downloading(pct: Int): String
+    val checkForUpdates: String; val checking: String
+    fun latest(v: String): String
+    fun couldNotCheck(reason: String): String
+    val downloadFailed: String; val checksumFailed: String; val signatureFailed: String; val allowInstalls: String
+    fun releaseOnly(v: String, id: String): String
+    val version: String
+    fun versionLine(v: String, code: Long): String
+    val decimalComma: Boolean
 }
 
 object Pt : Strings {
@@ -202,6 +216,21 @@ object Pt : Strings {
     override val notWhatsApp = "O Oiê não é feito nem aprovado pelo WhatsApp ou pela Meta."
     override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System."
     override val theKid = "a criança"
+    override fun updateAvailable(v: String) = "Atualização disponível · $v"
+    override fun updateButton(size: String) = "Atualizar · $size"
+    override val updateLater = "Mais tarde"
+    override fun downloading(pct: Int) = "Baixando… $pct%"
+    override val checkForUpdates = "Procurar atualizações"; override val checking = "Procurando…"
+    override fun latest(v: String) = "Você está na versão mais recente ($v)."
+    override fun couldNotCheck(reason: String) = "Não foi possível procurar atualizações ($reason). Tente de novo."
+    override val downloadFailed = "O download falhou. Tente de novo."
+    override val checksumFailed = "O download não confere com a soma de verificação da versão, então não foi instalado."
+    override val signatureFailed = "O download não foi assinado pelo Oiê, então não foi instalado."
+    override val allowInstalls = "Permita instalações deste app e toque em Atualizar de novo."
+    override fun releaseOnly(v: String, id: String) = "A atualização automática só funciona na versão de lançamento ($v / $id)."
+    override val version = "Versão"
+    override fun versionLine(v: String, code: Long) = "Oiê v$v ($code)"
+    override val decimalComma = true
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -312,6 +341,21 @@ object En : Strings {
     override val notWhatsApp = "Oiê isn't made or approved by WhatsApp or Meta."
     override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System."
     override val theKid = "your child"
+    override fun updateAvailable(v: String) = "Update available · $v"
+    override fun updateButton(size: String) = "Update · $size"
+    override val updateLater = "Later"
+    override fun downloading(pct: Int) = "Downloading… $pct%"
+    override val checkForUpdates = "Check for updates"; override val checking = "Checking…"
+    override fun latest(v: String) = "You're on the latest version ($v)."
+    override fun couldNotCheck(reason: String) = "Couldn't check for updates ($reason). Try again."
+    override val downloadFailed = "Download failed. Try again."
+    override val checksumFailed = "The download didn't match the release's checksum, so it wasn't installed."
+    override val signatureFailed = "The download wasn't signed by Oiê, so it wasn't installed."
+    override val allowInstalls = "Allow installs from this app, then tap Update again."
+    override fun releaseOnly(v: String, id: String) = "Self-update works in the release build only ($v / $id)."
+    override val version = "Version"
+    override fun versionLine(v: String, code: Long) = "Oiê v$v ($code)"
+    override val decimalComma = false
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

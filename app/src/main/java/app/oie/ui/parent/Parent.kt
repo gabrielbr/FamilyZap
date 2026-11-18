@@ -268,6 +268,7 @@ private fun AboutAndHelp(state: AppState) {
     }
     Text(tx.about, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     Text(tx.aboutVersion(BuildConfigInfo.VERSION), style = OieType.body, color = c.ink)
+    app.oie.LocalUpdater.current?.let { app.oie.update.UpdateAboutRows(it) }
     Text(tx.notWhatsApp, style = OieType.body, color = c.ink)
     Text(tx.credits, style = OieType.caption, color = c.muted)
 }
