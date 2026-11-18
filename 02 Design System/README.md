@@ -86,8 +86,10 @@ Full rules in [`01 Brand/imagery-and-icons.md`](../01%20Brand/imagery-and-icons.
 - **Banned:** stock families, identifiable kids' faces in marketing, devices as heroes, fear imagery.
 
 ## 9. Icons
-**Phosphor, Bold weight** (MIT licence), 24dp in a 48dp target:
-- colour: ink, or muted for secondary; coral only on the one main action;
+**The Gabriel Design System's line set** (the core rule): 22dp, stroke 1.75, in a 48dp target.
+- Files: the design system's `assets/icons/android/gg_ic_*.xml`.
+- Camera, image, sticker, send, link and clock are missing from the set. They are being added to the core in the same style (owner's decision, 2026-11-18), not drawn here.
+- Colour: ink, or muted for secondary; coral only on the one main action.
 - function only, always with a text label on the kid side;
 - never emoji as icons.
 
