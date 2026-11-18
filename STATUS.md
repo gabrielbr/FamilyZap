@@ -6,7 +6,7 @@ Track: B · product with a team · Started: 2026-11-18
 |---|---|---|---|
 | 1 Brief & sources | ✅ | 2026-11-18 | Brief, sources, PRODUCT.md; bridge decided (0001). |
 | 2 Strategy & name | ✅ | 2026-11-18 | Strategy in `02 Design System/README.md` §1; name Oiê (0002). |
-| 3 Identity | 🟡 | 2026-11-18 | Logo approved (direction C) and the logo pack built. Next: voice doc, imagery, icons. |
+| 3 Identity | ✅ | 2026-11-18 | Logo C in coral, logo pack, voice, imagery and icons. |
 | 4 Design system | ⬜ | | |
 | 5 Screens & assets | ⬜ | | |
 | 6 Audit | ⬜ | | |
@@ -25,6 +25,7 @@ Track: B · product with a team · Started: 2026-11-18
 | Logo colour coral #E8573C | Owner | 2026-11-18 | Claude session |
 | Voice, risk notice and kid notice wording | Owner | 2026-11-18 | Claude session |
 | Imagery (photos + logo shapes) and icons (rounded line, bold) | Owner | 2026-11-18 | Claude session |
+| Stage 3 gate passed | Owner | 2026-11-18 | Claude session |
 
 ## Open items
 - [x] Keywords: Warm, Simple, Trustworthy, Close (2026-11-18).
