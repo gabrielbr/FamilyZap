@@ -7,7 +7,7 @@ Track: B · product with a team · Started: 2026-11-18
 | 1 Brief & sources | ✅ | 2026-11-18 | Brief, sources, PRODUCT.md; bridge decided (0001). |
 | 2 Strategy & name | ✅ | 2026-11-18 | Strategy in `02 Design System/README.md` §1; name Oiê (0002). |
 | 3 Identity | ✅ | 2026-11-18 | Logo C in coral, logo pack, voice, imagery and icons. |
-| 4 Design system | 🟡 | 2026-11-18 | design/ (core 0.31.1 + brand + layer), README filled, AGENTS.md brand rules. Gate open. |
+| 4 Design system | ✅ | 2026-11-18 | design/ (core 0.31.1 + brand + layer), README, AGENTS.md brand rules, CI check. Component previews come with Stage 5. |
 | 5 Screens & assets | ⬜ | | |
 | 6 Audit | ⬜ | | |
 | 7 Deliver & keep alive | ⬜ | | |
@@ -30,6 +30,7 @@ Track: B · product with a team · Started: 2026-11-18
 | Full palette (design/brand/oie/brand.md) | Owner | 2026-11-18 | Claude session |
 | No fairy mode in Oiê (it would bring pink back) | Owner | 2026-11-18 | Claude session |
 | Icons: Phosphor Bold | Owner | 2026-11-18 | Claude session |
+| Stage 4 gate passed (previews deferred to Stage 5) | Owner | 2026-11-18 | Claude session |
 
 ## Open items
 - [x] Keywords: Warm, Simple, Trustworthy, Close (2026-11-18).
