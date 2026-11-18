@@ -6,7 +6,7 @@ _Stage 1. One page. Every line comes from the owner's answers on 2026-11-18, or 
 |---|---|
 | Project / code | Oiê (was Oiê; decision 0002) / OIE |
 | Track | B · product with a team (built by the owner alone, with Claude) |
-| Audience | Kids aged 9–12 on an Android tablet, and their whole extended family (parents, grandparents, aunts, uncles) on WhatsApp. The parent sets it up on their Android phone. |
+| Audience | Kids aged 9–12 on an Android tablet, and their whole extended family (parents, grandparents, aunts, uncles) on WhatsApp. The parent sets it up on the tablet, in a parent area behind a PIN; their phone only scans a QR code in WhatsApp (decided 2026-11-18). |
 | Job to be done | When my kid wants to talk to family, I want them to message and call from their tablet through my WhatsApp, only with contacts I allowed, so I don't have to hand over my phone. |
 | What the kid can do | Voice messages, text messages, photos and stickers. Calls: not in v1 (decision 0001). |
 | What the parent controls | Allowed contacts; sees everything (the messages stay in the parent's WhatsApp); quiet hours. |
@@ -14,7 +14,7 @@ _Stage 1. One page. Every line comes from the owner's answers on 2026-11-18, or 
 | Keywords (3–5) | Warm · Simple · Trustworthy · Close |
 | Aesthetic direction (and references they like) | Headspace (warm and calm: soft round shapes, warm colours, friendly without being childish) · Duolingo (confident and lively for kids and adults; bold colour, big clear buttons; not its mascot style). Chosen by the owner from suggestions. |
 | Never looks like | Babyish or cartoon (9–12s find it childish) · spy or surveillance (no eyes, locks, radar) · generic kid-app candy (no rainbow overload, no stock mascots) |
-| Channels | Android app (kid tablet + parent phone), marketing website |
+| Channels | Android app on the kid's tablet (kid side + parent area), marketing website |
 | Languages / locale | English and Brazilian Portuguese |
 | Deadline | None set |
 | Approver | The owner, in writing and dated, in this project (`STATUS.md` › Approvals) |

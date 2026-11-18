@@ -8,7 +8,7 @@ Track: B · product with a team · Started: 2026-11-18
 | 2 Strategy & name | ✅ | 2026-11-18 | Strategy in `02 Design System/README.md` §1; name Oiê (0002). |
 | 3 Identity | ✅ | 2026-11-18 | Logo C in coral, logo pack, voice, imagery and icons. |
 | 4 Design system | ✅ | 2026-11-18 | design/ (core 0.31.1 + brand + layer), README, AGENTS.md brand rules, CI check. Component previews come with Stage 5. |
-| 5 Screens & assets | 🟡 | 2026-11-18 | Flows: kid sends a message ✅ written; parent setup + link, contacts + quiet hours, kid receives ⬜. |
+| 5 Screens & assets | 🟡 | 2026-11-18 | Flows written: kid sends a message ✅, parent setup + link ✅. To do: contacts + quiet hours ⬜, kid receives ⬜. |
 | 6 Audit | ⬜ | | |
 | 7 Deliver & keep alive | ⬜ | | |
 
@@ -33,6 +33,8 @@ Track: B · product with a team · Started: 2026-11-18
 | Stage 4 gate passed (previews deferred to Stage 5) | Owner | 2026-11-18 | Claude session |
 | Icons follow the core line set; the 6 missing icons are added to the core | Owner | 2026-11-18 | Claude session |
 | Flow "Kid sends a message": can't send in quiet hours; camera and gallery; an Oiê sticker set; 5 s undo | Owner | 2026-11-18 | Claude session |
+| Per-contact exceptions to quiet hours | Owner | 2026-11-18 | Claude session |
+| Parent area on the tablet behind a 6-digit Oiê PIN (no parent app, no server); setup asks names, first contacts, quiet hours | Owner | 2026-11-18 | Claude session |
 
 ## Open items
 - [x] Keywords: Warm, Simple, Trustworthy, Close (2026-11-18).
