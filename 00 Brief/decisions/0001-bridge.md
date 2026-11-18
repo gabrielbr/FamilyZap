@@ -1,8 +1,8 @@
 # 0001 · How FamilyZap reaches WhatsApp
 
 - **Date:** 2026-11-18
-- **Status:** proposed (research done; the owner decides)
-- **Approved by:** (none yet)
+- **Status:** approved
+- **Approved by:** the owner, 2026-11-18, in the Claude session (chose option A against the recommendation, knowing the ban risk)
 
 ## Context
 The brief says a kid aged 9–12 messages and calls family from an Android tablet through a
@@ -12,7 +12,17 @@ depends on how it connects. This research spike (Stage 1 open item) compares the
 are listed at the end, read on 2026-11-18. Most are news and vendor blogs; the WhatsApp help pages
 and Meta's developer docs are the primary ones.
 
-## The finding that changes the brief
+## Decision
+**Option A: a linked-device bridge, running on the kid's tablet.**
+- The tablet signs in to the parent's WhatsApp as a linked device. Nothing passes through a server
+  of ours, so "messages are never stored on our servers" still holds.
+- v1 sends and receives text, voice messages, photos and stickers. **No calls in v1**; calls go
+  on the roadmap.
+- Parents are told plainly, before setup, that this is not an official WhatsApp feature and that
+  WhatsApp may restrict or ban their number for it. No dark patterns around this.
+- Keep usage human-paced (one family, a kid's volume of messages) to keep the risk low; never bulk send.
+
+## The finding that changed the brief
 **WhatsApp now has its own parent-managed accounts for under-13s.** It was announced on
 11 March 2026 and has been rolling out gradually in Brazil since October 2026. A parent aged 18 or
 over sets it up with both phones side by side, behind a 6-digit PIN. The parent chooses who can
@@ -37,7 +47,7 @@ inside WhatsApp itself. What it does not cover, compared with the brief:
 | E · Build on WhatsApp's parent-managed accounts | Accept that the kid has their own WhatsApp account; FamilyZap becomes the warm, simple kid-side experience and setup guide around it (or we drop the WhatsApp part) | Changes the brief: the kid has their own number; the parent doesn't read messages | No terms risk. But WhatsApp's own app may make FamilyZap unnecessary; the product would need a reason to exist beyond it (e.g. quiet hours, a kid-first home with family faces, tablet without SIM). |
 | F · Own family messaging | Our own end-to-end encrypted messaging between the kid's tablet and family apps; no WhatsApp | Changes the brief: family must install FamilyZap | No WhatsApp risk, full control (quiet hours, parent view). Biggest build, hardest adoption (grandparents must install an app), competes with Messenger Kids and WhatsApp's own accounts. Product law "no data on our servers" needs relay-only, end-to-end encrypted design. |
 
-## Recommendation (the owner decides)
+## Recommendation given (not followed)
 1. **Not A.** It puts the parent's own WhatsApp at risk, and it can't do calls.
 2. **First, try WhatsApp's parent-managed accounts on a real family setup** (option E, a one-week test).
    If it does the job, FamilyZap needs a new reason to exist, and Stage 1 is rewritten before we
@@ -47,7 +57,11 @@ inside WhatsApp itself. What it does not cover, compared with the brief:
    (our own messaging), and rewrite the job to be done around that gap.
 
 ## Consequences
-- Stage 2 (strategy and name) waits for this decision.
+- The parent's own WhatsApp number is at risk; the setup flow must say so before linking (Stage 5).
+- Google Play may refuse an app that uses WhatsApp unofficially; distribution may need to be outside
+  Play (direct APK with self-update). To check before Stage 7.
+- WhatsApp's own parent-managed accounts are the main alternative parents will compare us with.
+- Stage 2 (strategy and name) can start.
 - The name: if WhatsApp isn't in the product (F), "Zap" points at something we aren't; if it is
   (E), it risks looking affiliated with WhatsApp. Either way the name is open in Stage 2.
 - The brief's "messages show as the parent" and "parent sees everything" may change.
