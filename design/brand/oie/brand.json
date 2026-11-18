@@ -1,0 +1,100 @@
+{
+  "$comment": "The Oiê brand (design/brand/oie/brand.md): it swaps colour roles and the one type family of the layer that wears it, nothing else (the core's brands rule, check_brands).",
+  "oie": {
+    "name": "Oiê",
+    "doc": "design/brand/oie/brand.md",
+    "source": "Owner's approvals in the Claude session, 2026-11-18: logo coral #E8573C, cream #FFF6EE, ink #2A1714 (01 Brand/logo/README.md); the full palette approved the same day (STATUS.md); Nunito chosen as the one family.",
+    "type": {
+      "family": "\"Nunito\", system-ui, sans-serif",
+      "faces": [
+        "nunito_regular.ttf (400)",
+        "nunito_semibold.ttf (600)",
+        "nunito_bold.ttf (700)",
+        "nunito_extrabold.ttf (800)"
+      ],
+      "licence": "SIL Open Font License 1.1"
+    },
+    "color": [
+      {
+        "replaces": "page",
+        "value": {
+          "light": "#FFF6EE",
+          "dark": "#1F1210"
+        },
+        "usage": "Cream paper by day; a warm near-black at night."
+      },
+      {
+        "replaces": "surface",
+        "value": {
+          "light": "#FFFFFF",
+          "dark": "#2A1714"
+        },
+        "usage": "White cards on cream; the logo's ink as the dark card."
+      },
+      {
+        "replaces": "ink",
+        "value": {
+          "light": "#2A1714",
+          "dark": "#FBEFE6"
+        },
+        "usage": "Warm ink, the logo's dark. 16:1 on page in both themes."
+      },
+      {
+        "replaces": "muted",
+        "value": {
+          "light": "#6E5650",
+          "dark": "#C9B3AA"
+        },
+        "usage": "Secondary text. 6.3:1 (light) and 9.1:1 (dark) on page."
+      },
+      {
+        "replaces": "line",
+        "value": {
+          "light": "#EFD9CC",
+          "dark": "#3D2823"
+        },
+        "usage": "Hairlines. Never text."
+      },
+      {
+        "replaces": "mint",
+        "value": {
+          "light": "#E8573C",
+          "dark": "#E8573C"
+        },
+        "usage": "Coral, the logo's colour, in the brand-accent role: one filled action per screen, the frame, the active thing. Fill only, never text (3.4:1 on cream). Ink on it."
+      },
+      {
+        "replaces": "on-mint",
+        "value": {
+          "light": "#2A1714",
+          "dark": "#1F1210"
+        },
+        "usage": "Ink on coral: 4.8:1 (light), 5.1:1 (dark)."
+      },
+      {
+        "replaces": "coral",
+        "value": {
+          "light": "#B23A2E",
+          "dark": "#FF8C78"
+        },
+        "usage": "Stop and destructive fills (remove a contact, unlink). A deeper brick than the brand coral, always with a word. Text on it is on-stop (product layer)."
+      },
+      {
+        "replaces": "coral-text",
+        "value": {
+          "light": "#A12E24",
+          "dark": "#FF9A88"
+        },
+        "usage": "Stop and error as text: 6.7:1 on page (light), 8.9:1 (dark)."
+      },
+      {
+        "replaces": "coral-soft",
+        "value": {
+          "light": "#FBE3DC",
+          "dark": "#3A1E19"
+        },
+        "usage": "The tint behind error and stop messages."
+      }
+    ]
+  }
+}
