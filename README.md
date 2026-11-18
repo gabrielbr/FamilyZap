@@ -6,3 +6,6 @@ with contacts the parent allowed.
 Built with the Gabriel Product Boilerplate playbook (track B). Where things stand: [STATUS.md](STATUS.md).
 What the product is: [PRODUCT.md](PRODUCT.md). The brief: [00 Brief/brief.md](00%20Brief/brief.md).
 Agents start at [AGENTS.md](AGENTS.md).
+
+## Design
+`python3 design/build.py --check` checks the tokens (it runs in CI). See [design/README.md](design/README.md).
