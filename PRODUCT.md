@@ -1,4 +1,4 @@
-# Product: FamilyZap
+# Product: Oiê
 
 _For apps and websites (Stage 1). Agents and the impeccable skill read this as the product context._
 
@@ -13,5 +13,6 @@ _For apps and websites (Stage 1). Agents and the impeccable skill read this as t
   - No strangers: the kid can never reach, or be reached by, a contact the parent didn't allow.
   - No safety promises: never claim to make a child "100% safe" or to replace a parent's attention.
   - No WhatsApp affiliation: never imply it's made or endorsed by WhatsApp or Meta; no WhatsApp logo.
+- **Name:** Oiê, said "oy-YEH"; Android id `app.oie` (decision 0002).
 - **Platforms:** Android tablet (kid), Android phone (parent), marketing website. iOS out of scope for now.
 - **Brand commitments:** `02 Design System/README.md` (new brand, stages 2–4).

@@ -1,4 +1,4 @@
-# FamilyZap (working name)
+# Oiê
 
 A kid aged 9–12 messages and calls family from an Android tablet through a parent's WhatsApp, only
 with contacts the parent allowed.

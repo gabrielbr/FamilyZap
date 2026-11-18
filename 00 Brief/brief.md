@@ -1,10 +1,10 @@
-# Brief: FamilyZap
+# Brief: Oiê
 
 _Stage 1. One page. Every line comes from the owner's answers on 2026-11-18, or says `TBD`._
 
 | | |
 |---|---|
-| Project / code | FamilyZap (working name; final name in Stage 2) / FAM |
+| Project / code | Oiê (was Oiê; decision 0002) / OIE |
 | Track | B · product with a team (built by the owner alone, with Claude) |
 | Audience | Kids aged 9–12 on an Android tablet, and their whole extended family (parents, grandparents, aunts, uncles) on WhatsApp. The parent sets it up on their Android phone. |
 | Job to be done | When my kid wants to talk to family, I want them to message and call from their tablet through my WhatsApp, only with contacts I allowed, so I don't have to hand over my phone. |

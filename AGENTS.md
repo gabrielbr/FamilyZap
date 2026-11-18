@@ -1,6 +1,6 @@
 # Working in this repo (for agents)
 
-FamilyZap lets a kid aged 9–12 message and call family from an Android tablet through a parent's WhatsApp, only with contacts the parent allowed. Read [PRODUCT.md](PRODUCT.md) and [STATUS.md](STATUS.md) first.
+Oiê lets a kid aged 9–12 message and call family from an Android tablet through a parent's WhatsApp, only with contacts the parent allowed. Read [PRODUCT.md](PRODUCT.md) and [STATUS.md](STATUS.md) first.
 
 This project follows the Gabriel Product Boilerplate playbook (PLAYBOOK.md in that repo).
 
@@ -31,7 +31,7 @@ The audit goes in `audits/YYYY-MM-DD-<version>-<topic>.md`. Fix P0 and P1 before
 
 ## Product law
 - **Data:** messages and contacts are never stored on our servers; the WhatsApp link runs on the kid's tablet. No ads, no tracking of kids.
-- **Honesty about the bridge:** FamilyZap uses WhatsApp unofficially (decision 0001). Parents are told before linking that their number could be restricted or banned. Never hide or soften this, and never bulk send.
+- **Honesty about the bridge:** Oiê uses WhatsApp unofficially (decision 0001). Parents are told before linking that their number could be restricted or banned. Never hide or soften this, and never bulk send.
 - **Contacts:** the kid can never reach, or be reached by, a contact the parent didn't allow.
 - **Claims:** never claim to make a child "100% safe" or to replace a parent's attention. Never imply it's made or endorsed by WhatsApp or Meta; no WhatsApp logo.
 - **Stop and ask before:** deploying, sending messages, moving money, deleting data, renaming ids.
