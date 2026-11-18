@@ -52,7 +52,7 @@ class Updater(private val context: Context, private val scope: CoroutineScope) {
     private val prefs = context.getSharedPreferences("update", Context.MODE_PRIVATE)
     private var job: Job? = null
 
-    val installed: PackageInfo get() = context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+    val installed: PackageInfo get() = context.packageManager.getPackageInfo(context.packageName, SIGNER_FLAG)
     val versionName: String get() = installed.versionName ?: "0"
     @Suppress("DEPRECATION") val versionCode: Long get() = if (Build.VERSION.SDK_INT >= 28) installed.longVersionCode else installed.versionCode.toLong()
     /** A debug copy is signed with a different key, so it can't update itself. */
@@ -153,11 +153,18 @@ class Updater(private val context: Context, private val scope: CoroutineScope) {
     /** Same package, signed with the installed app's key. */
     private fun sameSigner(file: File): Boolean {
         val pm = context.packageManager
-        val apk = pm.getPackageArchiveInfo(file.path, PackageManager.GET_SIGNING_CERTIFICATES) ?: return false
+        val apk = pm.getPackageArchiveInfo(file.path, SIGNER_FLAG) ?: return false
         if (apk.packageName != context.packageName) return false
-        val mine = installed.signingInfo?.apkContentsSigners?.map { it.toByteArray().contentHashCode() }?.toSet() ?: return false
-        val theirs = apk.signingInfo?.apkContentsSigners?.map { it.toByteArray().contentHashCode() }?.toSet() ?: return false
-        return mine == theirs
+        val mine = signers(installed)
+        return mine.isNotEmpty() && mine == signers(apk)
+    }
+
+    /** SHA-256 of each signing certificate: signingInfo on Android 9+, the older signatures field on 8 and 8.1. */
+    @Suppress("DEPRECATION")
+    private fun signers(info: PackageInfo): Set<String> {
+        val certs = if (Build.VERSION.SDK_INT >= 28) info.signingInfo?.apkContentsSigners else info.signatures
+        val sha = MessageDigest.getInstance("SHA-256")
+        return certs.orEmpty().map { c -> sha.digest(c.toByteArray()).joinToString("") { "%02x".format(it) } }.toSet()
     }
 
     /** Hands the verified file to Android's PackageInstaller; Android asks the person to confirm. */
@@ -176,6 +183,8 @@ class Updater(private val context: Context, private val scope: CoroutineScope) {
 
     companion object {
         const val ACTION_INSTALL_STATUS = "app.oie.INSTALL_STATUS"
+        @Suppress("DEPRECATION")
+        private val SIGNER_FLAG = if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES else PackageManager.GET_SIGNATURES
 
         /** Called by MainActivity with the installer's answer: shows Android's confirmation when it asks for one. */
         fun onInstallStatus(context: Context, intent: Intent) {
