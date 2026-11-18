@@ -13,12 +13,24 @@ android {
         applicationId = "app.oie" // permanent (decision 0002): never rename
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
+    }
+
+    // Release signing comes only from CI secrets (docs/release.md). Without them the release build is unsigned.
+    val ks = System.getenv("OIE_KEYSTORE_FILE")
+    signingConfigs {
+        if (ks != null) create("release") {
+            storeFile = file(ks)
+            storePassword = System.getenv("OIE_KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("OIE_KEY_ALIAS")
+            keyPassword = System.getenv("OIE_KEY_PASSWORD")
+        }
     }
 
     buildTypes {
         release {
+            if (ks != null) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
         }

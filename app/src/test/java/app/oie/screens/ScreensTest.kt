@@ -101,6 +101,12 @@ class ScreensTest {
     @Test fun kidHomeEnglish() = shot("02-kid-home-en", false, english = true) { KidHome(ready().apply { kidNoticeSeen = true }) }
     @Test fun parentQuietEditorEnglishDark() = shot("10b-parent-help-en", true, english = true) { ParentArea(ready(), 3) }
     @Test fun parentHelp() = shot("10c-parent-help", false) { ParentArea(ready(), 3) }
+    @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    @Test fun kidHomePortrait() = shot("11-kid-home-portrait", false) { KidHome(ready().apply { kidNoticeSeen = true }) }
+    @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    @Test fun conversationPortrait() = shot("12-conversation-portrait", false) { Conversation(ready().apply { kidNoticeSeen = true }, "vovo") }
+    @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    @Test fun parentPortrait() = shot("13-parent-portrait", false) { ParentArea(ready(), 0) }
     @Test fun riskNotice() = shot("05-setup-risk", false) { Setup(AppState(), 1, onClose = {}) }
     @Test fun names() = shot("06-setup-names", false) { Setup(AppState().apply { parentName = "Ana"; kidName = "Tito" }, 3, onClose = {}) }
     @Test fun createPin() = shot("07-setup-pin", false) { Setup(AppState(), 4, onClose = {}) }

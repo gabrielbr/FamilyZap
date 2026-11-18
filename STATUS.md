@@ -66,4 +66,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [ ] The real WhatsApp link (after the message rule test): choose the library, decision 0003.
 - [x] Photo sending and saving on the tablet (encrypted), 2026-11-18.
 - [x] Sticker images, the quiet-hours editor, Ajuda e sobre, encrypted photo files, English (v0.2, 2026-11-18).
-- [ ] Still missing in the app: self-update with SHA256SUMS, portrait screenshot tests, a native English reader check.
+- [x] Self-update and the release workflow; portrait screenshots (v0.3, 2026-11-18).
+- [ ] **Owner:** create the signing key and add the 4 `OIE_KEYSTORE_*` secrets (docs/release.md); make the repo (or a releases-only repo) public so the update check can read it.
+- [ ] **Owner:** confirm the update sheet shows only in the parent area, not to the kid (a proposed difference from the design system's rule).
+- [ ] A native English reader check of `Strings.kt`.

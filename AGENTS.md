@@ -57,3 +57,4 @@ python3 design/build.py --check \
 ```
 - A screen change re-records its screenshots on purpose: `./gradlew recordRoborazziDebug`, then look at every changed PNG in `app/src/test/screenshots/` before committing.
 - The WhatsApp link is `SampleLink` (sample data, no network) until the message rule is tested (STATUS.md). The real link goes behind the same `WhatsAppLink` interface and must keep the product law.
+- Network use today is self-update only (`update/`), to GitHub's public API. It never sends anything about the family. Releases follow `docs/release.md`.

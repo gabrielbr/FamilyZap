@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import app.oie.data.AppState
 import app.oie.data.Route
 import app.oie.ui.kid.Conversation
@@ -34,9 +35,21 @@ import app.oie.ui.setup.Setup
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 
-object BuildConfigInfo { const val VERSION = "0.2.0" }
+object BuildConfigInfo { const val VERSION = "0.3.0" }
+
+val LocalUpdater = androidx.compose.runtime.staticCompositionLocalOf<app.oie.update.Updater?> { null }
 
 class MainActivity : ComponentActivity() {
+    private val updater by lazy { app.oie.update.Updater(applicationContext, this.lifecycleScope) }
+
+    /** Every return to the foreground checks for an update, at most every 15 minutes (docs/self-update.md). */
+    override fun onStart() { super.onStart(); updater.onForeground() }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        if (intent.action == app.oie.update.Updater.ACTION_INSTALL_STATUS) app.oie.update.Updater.onInstallStatus(this, intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -50,7 +63,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             OieTheme {
-              androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides app.oie.ui.text.stringsFor()) {
+              androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides app.oie.ui.text.stringsFor(), LocalUpdater provides updater) {
                 val c = OieTheme.colors
                 // The 4dp frame round every screen (the core rule), in coral.
                 Box(
@@ -65,6 +78,8 @@ class MainActivity : ComponentActivity() {
                             Route.ParentPin -> ParentPin(state)
                             is Route.Parent -> ParentArea(state, r.section)
                         }
+                        // The update sheet shows only in the parent area: the kid isn't asked to update the app.
+                        if (state.route is Route.Parent || state.route == Route.ParentPin) app.oie.update.UpdateSheet(updater)
                     }
                 }
                 // System Back always works (android.md): one step back, never trapped.

@@ -24,3 +24,10 @@
   - **Ajuda e sobre:** short answers to eight questions the flows raise, the risk notice repeated, version, "not made or approved by WhatsApp or Meta", and the licences.
   - **Photo files encrypted:** each photo is sealed under its own Keystore key.
   - **English:** every word lives in one typed `Strings` with Portuguese (the source) and English, picked from the device or per-app language. Tests check the voice rules (no "!", no em dash, no Zap/Wpp) in both languages.
+- **App v0.3: self-update** (the Gabriel Design System's rule, `docs/self-update.md`):
+  - **The check:** on every return to the foreground, at most every 15 minutes, with ETag. It asks GitHub's public API for the latest release and sends nothing about the family.
+  - **Install rules:** only a newer, non-prerelease release with an `Oie-*.apk` and `SHA256SUMS.txt` is offered. The download installs only if it's complete, its SHA-256 matches, and it's the same package signed with the same key. Then Android asks to confirm.
+  - **Where it shows:** the "Atualização disponível" sheet appears **only in the parent area**, not to the kid (proposed, for the owner to confirm). About has the version and "Procurar atualizações". A debug copy says it can't update itself.
+  - **New permissions:** `INTERNET` and `REQUEST_INSTALL_PACKAGES`, for self-update only.
+  - **Releases:** `.github/workflows/release.yml` builds a signed APK and `SHA256SUMS.txt` on a `v*` tag, once the owner adds the signing secrets (`docs/release.md`).
+  - **Tests:** portrait screenshots and the update rules (version compare, offer, sums, checks, throttle, sizes). 48 tests.
