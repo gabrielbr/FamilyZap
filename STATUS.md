@@ -7,8 +7,8 @@ Track: B · product with a team · Started: 2026-11-18
 | 1 Brief & sources | ✅ | 2026-11-18 | Brief, sources, PRODUCT.md; bridge decided (0001). |
 | 2 Strategy & name | ✅ | 2026-11-18 | Strategy in `02 Design System/README.md` §1; name Oiê (0002). |
 | 3 Identity | ✅ | 2026-11-18 | Logo C in coral, logo pack, voice, imagery and icons. |
-| 4 Design system | 🟡 | 2026-11-18 | design/ (core 0.31.1 + brand + layer), README filled, AGENTS.md brand rules. Gate open. |
-| 5 Screens & assets | ⬜ | | |
+| 4 Design system | ✅ | 2026-11-18 | design/ (core 0.31.1 + brand + layer), README, AGENTS.md brand rules, CI check. Component previews come with Stage 5. |
+| 5 Screens & assets | 🟡 | 2026-11-18 | Flows: kid sends a message ✅ written; parent setup + link, contacts + quiet hours, kid receives ⬜. |
 | 6 Audit | ⬜ | | |
 | 7 Deliver & keep alive | ⬜ | | |
 
@@ -29,7 +29,10 @@ Track: B · product with a team · Started: 2026-11-18
 | Build on the Gabriel Design System core (like Cochilo); light + dark; Nunito; ink on coral | Owner | 2026-11-18 | Claude session |
 | Full palette (design/brand/oie/brand.md) | Owner | 2026-11-18 | Claude session |
 | No fairy mode in Oiê (it would bring pink back) | Owner | 2026-11-18 | Claude session |
-| Icons: Phosphor Bold | Owner | 2026-11-18 | Claude session |
+| Icons: Phosphor Bold (replaced the same day, see below) | Owner | 2026-11-18 | Claude session |
+| Stage 4 gate passed (previews deferred to Stage 5) | Owner | 2026-11-18 | Claude session |
+| Icons follow the core line set; the 6 missing icons are added to the core | Owner | 2026-11-18 | Claude session |
+| Flow "Kid sends a message": can't send in quiet hours; camera and gallery; an Oiê sticker set; 5 s undo | Owner | 2026-11-18 | Claude session |
 
 ## Open items
 - [x] Keywords: Warm, Simple, Trustworthy, Close (2026-11-18).
@@ -43,5 +46,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [ ] Rename the GitHub repo to `gabrielbr/oie` (owner); then update the git remote.
 - [ ] Check Instagram and TikTok handles for Oiê (owner).
 - [ ] Search INPI (classes 9 and 38) for Oiê before the first public release (owner).
-- [ ] Add Oiê's row to the design system's AGENTS.md app table (a PR in Gabriel-Deisgn-System).
+- [x] Oiê's row added to the design system (its 0.31.2, PR #12).
+- [ ] Add camera, image, sticker, send, link and clock icons to the design system's core set.
+- [ ] Draw the Oiê sticker set.
 - [ ] Component previews with the first screens (Stage 5).

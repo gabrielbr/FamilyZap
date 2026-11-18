@@ -15,10 +15,11 @@ _Stage 3. Approved by the owner on 2026-11-18._
   - Speech bubbles, hearts, houses, mascots or faces drawn on the logo shapes.
   - Anything green, yellow or pink that echoes WhatsApp or the telecom Oi.
 
-## Icons: one rounded line set, bold
-- One line icon set with round caps and joins, at a bold stroke that sits with the logo's round letters.
-- **Size:** 24 dp grid; touch target 48 dp.
-- **Colour:** ink, or ink-muted for secondary. Coral only on the one primary action of a screen.
-- **Function only:** icons label actions and objects; they never decorate. An icon that carries meaning always has a text label (kid side: always).
+## Icons: the core line set
+_Changed on 2026-11-18. Stage 3 said "rounded line, bold, 24dp", and Stage 4 picked Phosphor Bold. The owner then chose to follow the Gabriel Design System's rule instead: one line set for every app._
+- **The set:** the design system's icons (`assets/icons/android/gg_ic_*.xml`): 22dp, stroke 1.75, round caps.
+- **Missing icons:** camera, image, sticker, send, link and clock are added to the core in the same style, not drawn in Oiê.
+- **Target:** 48dp.
+- **Colour:** ink, or muted for secondary. Coral only on the one main action.
+- **Function only:** icons label actions and objects, and always have a text label on the kid side.
 - **Never emoji as icons.**
-- **The set:** chosen in Stage 4 (candidates: Phosphor Bold, Material Symbols Rounded at a heavy weight). Check that it has every icon v1 needs: microphone, camera or photo, sticker, send, contacts, clock or quiet hours, settings, link. Check the licence too.

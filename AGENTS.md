@@ -20,7 +20,7 @@ The full system is in [`02 Design System/README.md`](02%20Design%20System/README
 7. **Texture and motion:** the touching rounds from the logo, at most one cluster per screen, never behind text. Motion 150/250 ms, no bounce, press scales to 97%. Honour "Remove animations".
 8. **Components and layout:** screens compose the components in the design system README §10.
    - One main action per screen; 48dp targets, 52dp buttons.
-   - Phosphor Bold icons at 24dp with labels.
+   - Icons: the design system's line set (22dp, stroke 1.75) with labels. Never another set, never emoji.
    - Works at 360dp phone width and on the tablet (column max 600dp).
 9. **Before you finish, check:**
    - `python3 design/build.py --check` passes;
