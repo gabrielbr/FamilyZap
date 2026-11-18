@@ -10,7 +10,7 @@ Track: B · product with a team · Started: 2026-11-18
 | 4 Design system | ✅ | 2026-11-18 | design/ (core 0.31.1 + brand + layer), README, AGENTS.md brand rules, CI check. Component previews come with Stage 5. |
 | 5 Screens & assets | ✅ | 2026-11-18 | All 4 v1 flows written; tablet prototype (8 screens, light/dark, portrait). Every screen uses only tokens, the core icons and the logo files. Remaining states are open items. |
 | 6 Audit | ✅ | 2026-11-18 | `audits/2026-11-18-stage6-v0.1-prototype.md`: five skills; no open P0/P1; the message rule is decided and must be tested before the build. |
-| 7 Deliver & keep alive | ⬜ | | Needs the Compose app (not started). CI and docs are in place. |
+| 7 Deliver & keep alive | 🟡 | 2026-11-18 | App v0.1 (Compose shell, sample data, no real WhatsApp link): 13 unit tests, 12 screenshot tests, CI. Not released. |
 
 **Legend:** ✅ gate passed · 🟡 in progress · ⬜ not started
 
@@ -61,4 +61,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [ ] Still proposed, no owner preference yet: no saving of photos, no read receipts, the kid's "Pedir para adicionar" request.
 - [x] Remaining states drawn (screens 09–21, 2026-11-18). Ajuda/About still to draw (I-7).
 - [ ] Pick the final sticker words (6 proposed in `01 Brand/stickers/`).
-- [ ] Build the Android app (Compose, app.oie) from design/generated/OTokens.kt; check on a real tablet.
+- [x] App v0.1 built: the UI shell with sample data (2026-11-18).
+- [ ] Check v0.1 on a real tablet: install `app-debug.apk` from the CI run, with TalkBack and large text.
+- [ ] The real WhatsApp link (after the message rule test): choose the library, decision 0003.
+- [ ] Still missing in the app: photo sending, the sticker images (the SVGs need outlined words), persistence on the tablet (encrypted), add-period in quiet hours, Ajuda/About, English strings, self-update with SHA256SUMS.

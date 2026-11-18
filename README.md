@@ -9,3 +9,14 @@ Agents start at [AGENTS.md](AGENTS.md).
 
 ## Design
 `python3 design/build.py --check` checks the tokens (it runs in CI). See [design/README.md](design/README.md).
+
+## The app (v0.1)
+An Android app for the kid's tablet: Jetpack Compose, `app.oie`, min Android 8. The kid side, the setup, the PIN and the parent area all work with **sample family data**. There is **no real WhatsApp connection yet** (`app/src/main/java/app/oie/data/WhatsAppLink.kt`).
+
+```sh
+./gradlew assembleDebug            # app/build/outputs/apk/debug/app-debug.apk
+./gradlew testDebugUnitTest        # the message rule, quiet hours, PIN
+./gradlew verifyRoborazziDebug     # screenshots of the real screens, light and dark
+```
+Needs JDK 17+ and the Android SDK (platform 35). The logic lives in `app/src/main/java/app/oie/logic/`, with tests in `app/src/test/`.
+

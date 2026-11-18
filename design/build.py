@@ -25,7 +25,11 @@ sys.path.insert(0, str(DESIGN / "core" / "scripts"))
 import check_tokens  # noqa: E402  (the core's checks)
 import gen_tokens  # noqa: E402  (the core's generator)
 
-OUT = {"kt": DESIGN / "generated" / "OTokens.kt", "css": DESIGN / "generated" / "tokens.css"}
+OUT = {
+    "kt": DESIGN / "generated" / "OTokens.kt",
+    "app_kt": REPO / "app/src/main/java/app/oie/ui/theme/OTokens.kt",  # the app's copy, kept identical
+    "css": DESIGN / "generated" / "tokens.css",
+}
 BRAND = "oie"
 LAYER = "oie"
 
@@ -63,7 +67,8 @@ def kotlin(t):
 
 
 def outputs(t):
-    return {"kt": kotlin(t), "css": gen_tokens.css(t, LAYER)}
+    kt = kotlin(t)
+    return {"kt": kt, "app_kt": kt, "css": gen_tokens.css(t, LAYER)}
 
 
 def checks(t):
