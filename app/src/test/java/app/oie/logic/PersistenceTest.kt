@@ -17,6 +17,7 @@ import org.robolectric.RobolectricTestRunner
 
 /** Saving on the tablet: what goes in comes back, the parent area is never restored open, a bad file starts fresh. */
 @RunWith(RobolectricTestRunner::class)
+@org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
 class PersistenceTest {
     /** A stand-in for the Keystore (not available on the JVM): XOR is enough to prove the file isn't plain text. */
     private val xor = object : Sealer {
@@ -61,6 +62,18 @@ class PersistenceTest {
         store.write(json)
         assertFalse(String(File(dir, "state.sealed").readBytes()).contains("Tito")) // not plain text on disk
         assertEquals(json, store.read())
+    }
+
+    @Test fun photosAreSealedOnDisk() {
+        val ctx = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+        app.oie.data.Photos.sealer = xor
+        val bmp = android.graphics.Bitmap.createBitmap(64, 48, android.graphics.Bitmap.Config.ARGB_8888)
+        val name = app.oie.data.Photos.store(ctx, bmp)
+        val raw = File(app.oie.data.Photos.dir(ctx), name).readBytes()
+        // A JPEG starts FF D8; the sealed file must not.
+        assertFalse(raw[0] == 0xFF.toByte() && raw[1] == 0xD8.toByte())
+        val back = app.oie.data.Photos.load(ctx, name, 64)
+        assertEquals(64, back?.width)
     }
 
     @Test fun badFileStartsFresh() {
