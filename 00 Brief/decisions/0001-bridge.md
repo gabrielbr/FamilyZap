@@ -57,6 +57,7 @@ inside WhatsApp itself. What it does not cover, compared with the brief:
    (our own messaging), and rewrite the job to be done around that gap.
 
 ## Consequences
+- **How (2026-11-18):** built on whatsmeow (decision 0003), under the rules L1–L9 in `docs/whatsapp-link.md`.
 - The parent's own WhatsApp number is at risk; the setup flow must say so before linking (Stage 5).
 - Google Play may refuse an app that uses WhatsApp unofficially; distribution may need to be outside
   Play (direct APK with self-update). To check before Stage 7.

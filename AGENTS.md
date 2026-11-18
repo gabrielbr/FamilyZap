@@ -56,5 +56,6 @@ python3 design/build.py --check \
   && ./gradlew testDebugUnitTest verifyRoborazziDebug lintDebug assembleDebug
 ```
 - A screen change re-records its screenshots on purpose: `./gradlew recordRoborazziDebug`, then look at every changed PNG in `app/src/test/screenshots/` before committing.
+- A change in `link/` (the Go module that wraps whatsmeow) also runs `cd link && go test ./...`, and follows the rules L1–L9 in `docs/whatsapp-link.md`.
 - The WhatsApp link is `SampleLink` (sample data, no network) until the message rule is tested (STATUS.md). The real link goes behind the same `WhatsAppLink` interface and must keep the product law.
 - Network use today is self-update only (`update/`), to GitHub's public API. It never sends anything about the family. Releases follow `docs/release.md`.

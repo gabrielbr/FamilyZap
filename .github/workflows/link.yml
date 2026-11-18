@@ -1,0 +1,18 @@
+name: link
+# The Go module that wraps whatsmeow (docs/whatsapp-link.md): vet and test on every change to it.
+on:
+  pull_request:
+    paths: ["link/**", ".github/workflows/link.yml"]
+  push:
+    branches: [main]
+    paths: ["link/**"]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: link/go.mod
+      - run: go vet ./... && go test ./...
+        working-directory: link

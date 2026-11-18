@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **The WhatsApp link, chosen and tried:**
+  - It uses whatsmeow (decision 0003). A spike in `link/` builds it for Android and opens its session store.
+  - The rules that keep the link from looking like a bot (L1–L9) are in `docs/whatsapp-link.md`. The first one, human pace (`SendPace`), is in the app with tests.
+  - Nothing is wired in yet: the app still uses sample data.
 - **Updates without a tag:** merging a version bump to `main` now publishes the release by itself, so the tablet offers it at the next check. Release notes come from this file's `## <version>` section (`docs/release.md`).
 
 ## 0.4.0
