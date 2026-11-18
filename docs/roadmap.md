@@ -7,7 +7,7 @@ Ideas and planned work. When something ships, move it into the docs.
 ## Next (v1)
 1. Decide the "meant for the kid" rule with real chats (see `docs/flows/kid-receives-messages.md`).
 2. ~~Draw the remaining states~~ (done in prototype v0.2).
-3. ~~Build the Compose app shell~~ (v0.1, sample data). Next: the real WhatsApp link, persistence, photos, sticker images, self-update.
+3. ~~Build the Compose app shell~~ (v0.1, sample data). Persistence, photos, sticker images, receiving and self-update are done (v0.2–v0.4). Next: the real WhatsApp link on whatsmeow (decision 0003, `docs/whatsapp-link.md`), once item 1 is decided.
 4. Test with 3–5 kids and 3–5 parents; check on a real tablet with TalkBack and large text.
 5. Decide distribution (Play or a direct APK with SHA256SUMS).
 
