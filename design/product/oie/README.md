@@ -6,6 +6,7 @@
 |---|---|---|
 | on-coral | `#FFFFFF` / `#1F1210` | text on a stop fill |
 | selected / on-selected | `#FCE1D6` / `#4A2620`, ink on it | the active tab, a picked chip or contact, without a second filled coral |
+| qr-ground / qr-ink | `#FFFFFF` / `#2A1714` in both themes | the QR code on the link screen must stay dark on white to scan |
 | frame-line | coral | the core's frame, in the brand colour |
 | snackbar | ink | snackbar ground |
 | contact-tile | 96dp | a family member's photo on the kid's home: one tap to talk |

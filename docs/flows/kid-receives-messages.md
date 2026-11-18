@@ -1,0 +1,100 @@
+# Flow: Kid receives messages
+
+_Stage 5. Designed with `ux-user-flows` on 2026-11-18. Defaults marked **(proposed)** are Claude's, for the owner to confirm._
+
+- **Actor and job story:** the kid with the tablet. *When someone in my family answers me or sends me something, I want to know and see or hear it easily, so I can feel close and answer back.*
+- **Success measure:**
+  - the kid opens a new message within the day it arrives;
+  - replying from a notification takes 2 taps.
+- **Entry points:**
+  1. A notification on the tablet, which opens the conversation.
+  2. The kid home, where an unread mark sits on the photo.
+  3. The conversation already open, where the message appears live.
+- **Preconditions:** the link is connected; the sender is an allowed contact.
+- **Taps on the common path:** tap the notification, then press play on a voice message. That's 2 taps.
+
+```mermaid
+flowchart TD
+  wa([A message arrives in the parent's WhatsApp]) --> allowed{From an allowed contact or group?}
+  allowed -- No --> ignore([Not shown on the tablet at all.<br/>Stays only in the parent's WhatsApp])
+  allowed -- Yes --> forKid{Meant for the kid? proposed rule}
+  forKid -- No, an ordinary chat with the parent --> ignore
+  forKid -- Yes --> quiet{Quiet hours and not an exception?}
+  quiet -- Yes --> held[Kept quietly, no sound or notification] --> ends([At the end of the period: one notification<br/>'3 mensagens enquanto estava em silêncio'])
+  quiet -- No --> notify[Notification: photo, name, 'Mandou um áudio']
+  notify -- tap --> convo[Conversation, scrolled to the new message]
+  convo -- voice --> play[Play, with the waveform and time]
+  convo -- photo --> view[Full-screen photo, Voltar]
+  convo -- reply --> send([Flow 'Kid sends a message'])
+```
+
+## Which messages reach the kid (the key rule) **(proposed)**
+The parent's WhatsApp carries all of the parent's own chats. The kid must see only the family talking **to the kid**:
+- **In a 1:1 chat with an allowed contact:** the tablet shows only messages sent **after the kid's last message** in that chat, for a window of 24 h. It also shows any message that **replies to** (quotes) one of the kid's messages, at any time. The parent's own chats with grandma before and between stay private.
+- **In an allowed group:** the same rule, by default. The parent can switch a group to **"Mostrar tudo do grupo"** in the contact detail, for a family group made for the kid.
+- **A family member starting a new conversation with the kid:** they start the message with the kid's name ("Tito, …") or reply to the kid's last message. Oiê shows a message that starts with the kid's name.
+
+This rule needs testing. The trade-off is privacy for the parent's own chats against missing a message meant for the kid. It's the riskiest assumption in v1.
+
+## Steps
+| # | Screen | What the kid does | What the system does |
+|---|---|---|---|
+| 1 | **Notification** | Sees it on the tablet | Shows the sender's photo and name, plus what kind of message it is ("Mandou um áudio", "Mandou uma foto") or the first line of text. Oiê's own sound. One notification per contact, grouped. |
+| 2 | **Conversation** | Taps the notification or the photo on the home | Opens scrolled to the first unread message, with a "Novas" line above it. |
+| 3a | **Voice message** | Taps play | Plays it, with the waveform and time; tap again to pause. Speed 1× only **(proposed)**. |
+| 3b | **Photo** | Taps it | Full screen, then **Voltar**. Saving to the tablet's gallery is off **(proposed: the parent's photos stay in WhatsApp)**. |
+| 3c | **Sticker / text** | Reads | Shown inline. Stickers from the family's WhatsApp are shown as received. |
+| 4 | **Reply** | Uses the composer | Flow "Kid sends a message". |
+
+## Branches
+| At step | If | Then |
+|---|---|---|
+| — | From someone not allowed | Never shown, never notified (product law). It stays in the parent's WhatsApp. |
+| — | Quiet hours, sender not an exception | Kept without sound. One summary notification when the period ends. |
+| — | Quiet hours, sender is an exception | Normal notification. |
+| 3a | Media still downloading | "Baixando…" with progress; tap to retry if it fails: "Não abriu. Toque para tentar de novo." |
+| 3 | A message type Oiê can't show (a document, a location, a poll) | "{Vovó} mandou algo que só abre no WhatsApp." No link to WhatsApp (the tablet doesn't have it). |
+| — | A message is deleted for everyone in WhatsApp | Removed on the tablet too, with "Mensagem apagada". |
+| — | The link drops | The conversation still shows what's on the tablet. New messages stop, and the home shows "Peça para {nome} conectar de novo". |
+
+## States per step
+| Step | Empty | Loading | Error | Success | Offline |
+|---|---|---|---|---|---|
+| Conversation | "Mande o primeiro oi para {Vovó}." | Skeleton under 1 s | Media failed: retry | New messages under "Novas" | What's on the tablet; "Sem internet" |
+| Voice | — | "Baixando…" | Retry | Plays | Plays if already downloaded |
+
+## Exits
+- Reply (flow "Kid sends a message").
+- Back to the home; the unread mark clears.
+
+## Remembers
+- Read and unread per message.
+- The playback position of a long voice message.
+
+## Notes
+- **Data:** received messages are stored on the tablet only, encrypted at rest **(proposed)**, and never on our servers.
+- **Notifications:** Oiê's own channel, so the parent can silence it in Android's settings too.
+- **Product law** is tested here: an automated test sends from an un-allowed number and checks that nothing appears.
+
+## Flow review (ux-user-flows §13)
+| # | Question | Result |
+|---|---|---|
+| 1 | Job | ✅ |
+| 2 | Entries | ✅ Notification, home, live. |
+| 3 | Happy path | ✅ 2 taps to hear a voice message. |
+| 4 | Branches | ✅ Not allowed, quiet hours, exceptions, unsupported, deleted, offline, unlinked. |
+| 5 | States | ✅ |
+| 6 | Errors | ✅ Retry on media; plain words. |
+| 7 | Control | ✅ Back everywhere. |
+| 8 | Progress and resume | ✅ "Novas" line; playback position kept. |
+| 9 | Memory | ✅ |
+| 10 | Exits | ✅ |
+| 11 | Conventions | ✅ Grouped notifications; tap to play. |
+| 12 | Speed | ✅ |
+| 13 | Accessibility | ✅ Notifications are read aloud by TalkBack with the type in words; the play button has a 48dp target and a state label. |
+| 14 | Ethics | ✅ No read receipts pushed onto the kid **(proposed: the kid's reads are not reported back)**; no streaks. |
+| 15 | Evidence | 🔴 **The rule for which messages reach the kid is untested and is the riskiest decision in v1.** Prototype it with real family chats before building. |
+
+**Issues**
+- **Critical (for the build, not for this doc):** the "meant for the kid" rule. If it's wrong, either the kid sees the parent's private chats or misses family messages. Fix: test it with 3 families' real chat patterns before Stage 7, and decide with the owner.
+- **Important:** a family member may not know to start with the kid's name. Fix: the kid's messages arrive tagged "Tito: …", so replies naturally follow; and add a one-line tip in the website's "for family" section.

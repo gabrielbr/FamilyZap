@@ -17,6 +17,8 @@
   --gds-on-selected: #2A1714;
   --gds-frame-line: #E8573C;
   --gds-snackbar: #2A1714;
+  --gds-qr-ground: #FFFFFF;
+  --gds-qr-ink: #2A1714;
 }
 
 [data-theme="dark"] {
@@ -35,6 +37,8 @@
   --gds-on-selected: #FBEFE6;
   --gds-frame-line: #E8573C;
   --gds-snackbar: #FBEFE6;
+  --gds-qr-ground: #FFFFFF;
+  --gds-qr-ink: #2A1714;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -53,6 +57,8 @@
     --gds-on-selected: #FBEFE6;
     --gds-frame-line: #E8573C;
     --gds-snackbar: #FBEFE6;
+    --gds-qr-ground: #FFFFFF;
+    --gds-qr-ink: #2A1714;
   }
 }
 

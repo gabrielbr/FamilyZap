@@ -8,9 +8,9 @@ Track: B · product with a team · Started: 2026-11-18
 | 2 Strategy & name | ✅ | 2026-11-18 | Strategy in `02 Design System/README.md` §1; name Oiê (0002). |
 | 3 Identity | ✅ | 2026-11-18 | Logo C in coral, logo pack, voice, imagery and icons. |
 | 4 Design system | ✅ | 2026-11-18 | design/ (core 0.31.1 + brand + layer), README, AGENTS.md brand rules, CI check. Component previews come with Stage 5. |
-| 5 Screens & assets | 🟡 | 2026-11-18 | Flows written: kid sends a message ✅, parent setup + link ✅. To do: contacts + quiet hours ⬜, kid receives ⬜. |
-| 6 Audit | ⬜ | | |
-| 7 Deliver & keep alive | ⬜ | | |
+| 5 Screens & assets | 🟡 | 2026-11-18 | All 4 v1 flows written; tablet prototype (8 screens, light/dark, portrait). Gate ready for the owner: every screen uses only tokens, the core icons and the logo files. |
+| 6 Audit | 🟡 | 2026-11-18 | `audits/2026-11-18-stage6-v0.1-prototype.md`: five skills; no open P0/P1; one 🔴 decision to make before the build. Gate ready for the owner. |
+| 7 Deliver & keep alive | ⬜ | | Needs the Compose app (not started). CI and docs are in place. |
 
 **Legend:** ✅ gate passed · 🟡 in progress · ⬜ not started
 
@@ -52,3 +52,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [ ] Add camera, image, sticker, send, link and clock icons to the design system's core set.
 - [ ] Draw the Oiê sticker set.
 - [ ] Component previews with the first screens (Stage 5).
+- [ ] **Decide the "meant for the kid" rule** (docs/flows/kid-receives-messages.md), after testing with real family chats. Riskiest decision in v1.
+- [ ] Confirm the proposed defaults: the PIN wait after 5 tries, a 2-minute idle lock, quiet-hours presets, groups allowed with a warning, no saving of photos, no read receipts, the kid's "Pedir para adicionar" request.
+- [ ] Draw the remaining states (audit I-6, I-7).
+- [ ] Build the Android app (Compose, app.oie) from design/generated/OTokens.kt; check on a real tablet.

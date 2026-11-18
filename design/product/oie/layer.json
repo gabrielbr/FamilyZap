@@ -61,6 +61,22 @@
           "dark": "#FBEFE6"
         },
         "usage": "Snackbar ground (ink); its text is page."
+      },
+      {
+        "name": "qr-ground",
+        "value": {
+          "light": "#FFFFFF",
+          "dark": "#FFFFFF"
+        },
+        "usage": "The QR code's ground: always white, in both themes, so the phone's camera reads it."
+      },
+      {
+        "name": "qr-ink",
+        "value": {
+          "light": "#2A1714",
+          "dark": "#2A1714"
+        },
+        "usage": "The QR code's modules: always dark on qr-ground. Also the caption on the QR card."
       }
     ],
     "type": [
@@ -278,6 +294,15 @@
       "layers": [
         "oie"
       ]
+    },
+    {
+      "fg": "qr-ink",
+      "bg": "qr-ground",
+      "min": 4.5,
+      "layers": [
+        "oie"
+      ],
+      "note": "The QR must scan, and its caption must read, in both themes."
     }
   ]
 }
