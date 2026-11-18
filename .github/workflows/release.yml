@@ -1,49 +1,83 @@
 name: release
-# Push a tag v<x.y.z> (matching versionName) to publish a signed APK and SHA256SUMS.txt as a GitHub release.
+# Every push to main whose versionName isn't released yet publishes a signed APK and SHA256SUMS.txt to the public
+# gabrielbr/oie-releases. Self-update offers it at the tablet's next check. To release: bump versionCode and
+# versionName in a PR, write the "## <version>" notes in CHANGELOG.md, merge (docs/release.md).
 # Self-update installs only an APK whose SHA-256 is in SHA256SUMS.txt and whose key matches the installed app.
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+  workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: release
+  cancel-in-progress: false
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      RELEASES_REPO: gabrielbr/oie-releases
+      GH_TOKEN: ${{ secrets.OIE_RELEASES_TOKEN }}
+      HAS_KEY: ${{ secrets.OIE_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
+      - name: Version, and whether it's released
+        id: v
+        run: |
+          v=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_KEY" != "true" ] || [ -z "$GH_TOKEN" ]; then
+            echo "::warning::No release: add the signing and OIE_RELEASES_TOKEN secrets first (docs/release.md)."
+            echo "go=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if gh release view "v$v" --repo "$RELEASES_REPO" > /dev/null 2>&1; then
+            echo "v$v is already released; bump versionName to release again."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Release notes from CHANGELOG.md
+        if: steps.v.outputs.go == 'true'
+        env:
+          V: ${{ steps.v.outputs.version }}
+        run: |
+          # The "## <version>" section, as plain text: the update sheet shows it as is.
+          awk -v h="## $V" '$0==h{f=1;next} /^## /{f=0} f' CHANGELOG.md | sed -e 's/\*\*//g' -e 's/`//g' > "$RUNNER_TEMP/notes.txt"
+          test -s "$RUNNER_TEMP/notes.txt" || { echo "CHANGELOG.md has no '## $V' section"; exit 1; }
+          cat "$RUNNER_TEMP/notes.txt"
       - uses: actions/setup-java@v4
+        if: steps.v.outputs.go == 'true'
         with:
           distribution: temurin
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
+        if: steps.v.outputs.go == 'true'
       - name: Signing key from secrets
+        if: steps.v.outputs.go == 'true'
         env:
           OIE_KEYSTORE_BASE64: ${{ secrets.OIE_KEYSTORE_BASE64 }}
         run: |
-          test -n "$OIE_KEYSTORE_BASE64" || { echo "Add the OIE_KEYSTORE_* secrets first (docs/release.md)"; exit 1; }
           echo "$OIE_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/oie.jks"
           echo "OIE_KEYSTORE_FILE=$RUNNER_TEMP/oie.jks" >> "$GITHUB_ENV"
-      - name: Tag matches versionName
-        run: |
-          v=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
-          test "v$v" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME doesn't match versionName $v"; exit 1; }
       - name: Test and build the signed release
+        if: steps.v.outputs.go == 'true'
         env:
           OIE_KEYSTORE_PASSWORD: ${{ secrets.OIE_KEYSTORE_PASSWORD }}
           OIE_KEY_ALIAS: ${{ secrets.OIE_KEY_ALIAS }}
           OIE_KEY_PASSWORD: ${{ secrets.OIE_KEY_PASSWORD }}
         run: ./gradlew --no-daemon testDebugUnitTest verifyRoborazziDebug lintDebug assembleRelease
       - name: APK and SHA256SUMS.txt
+        if: steps.v.outputs.go == 'true'
+        env:
+          V: ${{ steps.v.outputs.version }}
         run: |
           mkdir dist
-          cp app/build/outputs/apk/release/app-release.apk "dist/Oie-${GITHUB_REF_NAME#v}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "dist/Oie-$V.apk"
           cd dist && sha256sum Oie-*.apk > SHA256SUMS.txt && cat SHA256SUMS.txt
-      - name: Publish the release to the public releases repo
-        # Self-update reads gabrielbr/oie-releases (public); the code stays private. OIE_RELEASES_TOKEN is a
-        # fine-grained token with Contents: read and write on that one repo only (docs/release.md).
+      - name: Publish to the public releases repo, and tag this commit
+        if: steps.v.outputs.go == 'true'
         env:
-          GH_TOKEN: ${{ secrets.OIE_RELEASES_TOKEN }}
+          V: ${{ steps.v.outputs.version }}
         run: |
-          test -n "$GH_TOKEN" || { echo "Add the OIE_RELEASES_TOKEN secret first (docs/release.md)"; exit 1; }
-          notes=$(awk '/^## /{n++} n==1' CHANGELOG.md | head -40)
-          gh release create "$GITHUB_REF_NAME" dist/* --repo gabrielbr/oie-releases --title "Oiê ${GITHUB_REF_NAME#v}" --notes "$notes"
+          gh release create "v$V" dist/* --repo "$RELEASES_REPO" --title "Oiê $V" --notes-file "$RUNNER_TEMP/notes.txt"
+          git tag "v$V" && git push origin "v$V"
