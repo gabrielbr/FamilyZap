@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.core.content.FileProvider
 import app.oie.data.Photos
 import androidx.compose.foundation.background
@@ -60,6 +61,7 @@ import app.oie.ui.common.Initial
 import app.oie.ui.common.OIcon
 import app.oie.ui.common.PrimaryButton
 import app.oie.ui.common.QuietButton
+import app.oie.ui.text.str
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 import app.oie.ui.theme.OieType
@@ -70,13 +72,17 @@ import kotlinx.coroutines.delay
 /** The 5-second undo before a message leaves the tablet (owner, 2026-11-18). */
 private const val UNDO_MS = 5_000L
 
-/** The Oiê sticker set (01 Brand/stickers), by word. */
-val STICKERS = listOf("Oiê!", "Saudade", "Boa noite", "Te amo", "Tô chegando", "Obrigado")
+/** The Oiê sticker set (01 Brand/stickers, outlined _02 masters → res/drawable), by word. */
+val STICKERS = linkedMapOf(
+    "Oiê!" to R.drawable.sticker_oie, "Saudade" to R.drawable.sticker_saudade, "Boa noite" to R.drawable.sticker_boa_noite,
+    "Te amo" to R.drawable.sticker_te_amo, "Tô chegando" to R.drawable.sticker_to_chegando, "Obrigado" to R.drawable.sticker_obrigado,
+)
 
 /** Prototype screens 03, 16–20. Flows: kid-sends-message.md, kid-receives-messages.md. */
 @Composable
 fun Conversation(state: AppState, contactId: String) {
     val c = OieTheme.colors
+    val tx = str
     val contact = state.allowed.firstOrNull { it.id == contactId } ?: return
     val canSend = state.canSend(contact) && state.link.connected
     var draft by remember { mutableStateOf(state.drafts[contactId] ?: "") }
@@ -125,7 +131,7 @@ fun Conversation(state: AppState, contactId: String) {
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             Bar {
-                QuietButton(null, { state.drafts[contactId] = draft; state.route = Route.KidHome }, icon = R.drawable.gg_ic_back, contentDescription = "Voltar")
+                QuietButton(null, { state.drafts[contactId] = draft; state.route = Route.KidHome }, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
                 Initial(contact.name, OTokens.Size.avatar)
                 Text(contact.name, style = OieType.title, color = c.ink)
             }
@@ -135,11 +141,11 @@ fun Conversation(state: AppState, contactId: String) {
                 state = list, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
             ) {
                 item { Box(Modifier.height(OTokens.Spacing.space6)) }
-                if (visible.isEmpty() && pending == null) item { Text("Mande o primeiro oi para ${contact.name}.", style = OieType.body, color = c.muted) }
+                if (visible.isEmpty() && pending == null) item { Text(tx.firstHi(contact.name), style = OieType.body, color = c.muted) }
                 items(visible, key = { it.id }) { m -> Bubble(m, contact.name) }
-                pending?.let { p -> item(key = "pending") { Bubble(p, contact.name, status = "Enviando…") } }
+                pending?.let { p -> item(key = "pending") { Bubble(p, contact.name, status = tx.sending) } }
                 visible.lastOrNull { it.fromKid }?.takeIf { pending == null && visible.last().fromKid }?.let { last ->
-                    item { Text("Enviada · ${hour(last.at)}", style = OieType.caption, color = c.muted, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth()) }
+                    item { Text(tx.sentAt(hour(tx, last.at)), style = OieType.caption, color = c.muted, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth()) }
                 }
             }
             Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
@@ -151,18 +157,18 @@ fun Conversation(state: AppState, contactId: String) {
                 if (!canSend) {
                     val q = state.quietNow()
                     Text(
-                        if (!state.link.connected) "Peça para ${state.parentName} conectar de novo." else "Horário de silêncio até ${q?.end?.hour}h.",
+                        if (!state.link.connected) tx.askReconnect(state.parentName) else tx.quietUntilShort(q?.end?.hour ?: 0),
                         style = OieType.body, color = c.muted,
                     )
                 } else if (recordingSince > 0) {
-                    Text("Gravando…", style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
-                    Text("Solte para enviar", style = OieType.bodySmall, color = c.muted)
+                    Text(tx.recording, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
+                    Text(tx.releaseToSend, style = OieType.bodySmall, color = c.muted)
                 } else {
-                    QuietButton(null, { choosingPhoto = true }, icon = R.drawable.gg_ic_camera, contentDescription = "Foto")
-                    QuietButton(null, { stickers = true }, icon = R.drawable.gg_ic_sticker, contentDescription = "Figurinhas")
+                    QuietButton(null, { choosingPhoto = true }, icon = R.drawable.gg_ic_camera, contentDescription = tx.photoButton)
+                    QuietButton(null, { stickers = true }, icon = R.drawable.gg_ic_sticker, contentDescription = tx.stickerButton)
                     OutlinedTextField(
                         draft, { draft = it; state.drafts[contactId] = it }, Modifier.weight(1f),
-                        placeholder = { Text("Escreva para ${contact.name}", style = OieType.body, color = c.muted) },
+                        placeholder = { Text(tx.writeTo(contact.name), style = OieType.body, color = c.muted) },
                         textStyle = OieType.body,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = c.ink, unfocusedTextColor = c.ink, focusedContainerColor = c.surface,
@@ -170,7 +176,7 @@ fun Conversation(state: AppState, contactId: String) {
                         ),
                     )
                     if (draft.isNotBlank()) {
-                        PrimaryButton("Enviar", {
+                        PrimaryButton(tx.send, {
                             queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.TEXT, draft.trim()))
                             draft = ""; state.drafts.remove(contactId)
                         }, icon = R.drawable.gg_ic_send)
@@ -195,7 +201,7 @@ fun Conversation(state: AppState, contactId: String) {
                     .padding(start = OTokens.Spacing.space6, end = OTokens.Spacing.space2),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6),
             ) {
-                Text("Enviando para ${contact.name}", style = OieType.body, color = c.page)
+                Text(tx.sendingTo(contact.name), style = OieType.body, color = c.page)
                 Box(
                     Modifier.height(OTokens.Spacing.space12).clickable(role = Role.Button) {
                         // Undo puts the content back, so nothing is lost.
@@ -204,12 +210,12 @@ fun Conversation(state: AppState, contactId: String) {
                         pending = null
                     }.padding(horizontal = OTokens.Spacing.space3),
                     contentAlignment = Alignment.Center,
-                ) { Text("Desfazer", style = OieType.label, color = c.page) }
+                ) { Text(tx.undo, style = OieType.label, color = c.page) }
             }
         }
         if (choosingPhoto) PhotoSourceSheet(first = state.lastPhotoSource, onPick = ::open, onClose = { choosingPhoto = false })
         if (photoError) Text(
-            "Não deu para abrir essa foto. Tente outra.", style = OieType.body, color = c.coralText,
+            tx.photoError, style = OieType.body, color = c.coralText,
             modifier = Modifier.align(Alignment.TopCenter).padding(top = OTokens.Size.header + OTokens.Spacing.space4)
                 .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.coralSoft).padding(OTokens.Spacing.space3),
         )
@@ -234,10 +240,11 @@ fun Conversation(state: AppState, contactId: String) {
 @Composable
 private fun RecordButton(recording: Boolean, onStart: () -> Unit, onStop: (send: Boolean) -> Unit) {
     val c = OieTheme.colors
+    val tx = str
     Box(
         Modifier.size(OTokens.Size.record).scale(if (recording) 0.97f else 1f).clip(CircleShape).background(c.mint)
             .semantics {
-                contentDescription = if (recording) "Gravando. Toque para enviar" else "Gravar áudio"
+                contentDescription = if (recording) tx.recordingA11y else tx.recordA11y
                 onClick { if (recording) onStop(true) else onStart(); true }
             }
             .pointerInput(recording) {
@@ -257,6 +264,7 @@ private fun RecordButton(recording: Boolean, onStart: () -> Unit, onStop: (send:
 @Composable
 private fun Bubble(m: Message, name: String, status: String? = null) {
     val c = OieTheme.colors
+    val tx = str
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (m.fromKid) Arrangement.End else Arrangement.Start) {
         Row(
             Modifier.widthIn(max = OTokens.Size.contentMax)
@@ -269,13 +277,15 @@ private fun Bubble(m: Message, name: String, status: String? = null) {
         ) {
             val ink = if (m.fromKid) c.onSelected else c.ink
             when (m.kind) {
-                Kind.VOICE -> { OIcon(R.drawable.gg_ic_play, tint = ink, contentDescription = "Ouvir áudio de ${m.durationSec} segundos"); Text("0:%02d".format(m.durationSec), style = OieType.caption, color = c.muted) }
-                Kind.STICKER -> Text(m.text, style = OieType.title, color = ink)
+                Kind.VOICE -> { OIcon(R.drawable.gg_ic_play, tint = ink, contentDescription = tx.listenA11y(m.durationSec)); Text("0:%02d".format(m.durationSec), style = OieType.caption, color = c.muted) }
+                Kind.STICKER -> STICKERS[m.text]?.let {
+                    Image(painterResource(it), contentDescription = tx.stickerA11y(m.text), modifier = Modifier.size(OTokens.Size.contactTile + OTokens.Spacing.space8))
+                } ?: Text(m.text, style = OieType.title, color = ink)
                 Kind.PHOTO -> PhotoThumb(m.media)
-                Kind.UNSUPPORTED -> Text("$name mandou algo que só abre no WhatsApp.", style = OieType.body, color = c.muted)
+                Kind.UNSUPPORTED -> Text(tx.onlyInWhatsApp(name), style = OieType.body, color = c.muted)
                 else -> Text(m.text, style = OieType.body, color = ink)
             }
-            Text(status ?: hour(m.at), style = OieType.caption, color = c.muted)
+            Text(status ?: hour(tx, m.at), style = OieType.caption, color = c.muted)
         }
     }
 }
@@ -283,6 +293,7 @@ private fun Bubble(m: Message, name: String, status: String? = null) {
 @Composable
 private fun StickerSheet(onPick: (String) -> Unit, onClose: () -> Unit) {
     val c = OieTheme.colors
+    val tx = str
     Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(onClick = onClose), contentAlignment = Alignment.BottomCenter) {
         Column(
             Modifier.widthIn(max = OTokens.Size.contentMax + OTokens.Spacing.space16 * 4)
@@ -290,23 +301,23 @@ private fun StickerSheet(onPick: (String) -> Unit, onClose: () -> Unit) {
                 .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
         ) {
-            Text("Figurinhas", style = OieType.title, color = c.ink)
+            Text(tx.stickers, style = OieType.title, color = c.ink)
             Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                STICKERS.forEach { w ->
-                    Box(
-                        Modifier.size(OTokens.Size.contactTile + OTokens.Spacing.space6).clip(RoundedCornerShape(OTokens.Radius.radiusL))
-                            .background(c.page).clickable(role = Role.Button, onClickLabel = "Mandar figurinha $w") { onPick(w) },
-                        contentAlignment = Alignment.Center,
-                    ) { Text(w, style = OieType.label, color = c.ink) }
+                STICKERS.forEach { (w, res) ->
+                    Image(
+                        painterResource(res), contentDescription = tx.sendSticker(w),
+                        modifier = Modifier.size(OTokens.Size.contactTile + OTokens.Spacing.space6).clip(RoundedCornerShape(OTokens.Radius.radiusL))
+                            .clickable(role = Role.Button) { onPick(w) },
+                    )
                 }
             }
         }
     }
 }
 
-private fun hour(at: Long): String {
+private fun hour(tx: app.oie.ui.text.Strings, at: Long): String {
     val t = Instant.ofEpochMilli(at).atZone(ZoneId.systemDefault()).toLocalTime()
-    return "%dh%02d".format(t.hour, t.minute)
+    return tx.clock(t.hour, t.minute).let { if (t.minute == 0 && it.endsWith("h")) it + "00" else it }
 }
 
 
@@ -314,7 +325,8 @@ private fun hour(at: Long): String {
 @Composable
 private fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: () -> Unit) {
     val c = OieTheme.colors
-    val options = listOf("camera" to "Câmera", "gallery" to "Galeria").sortedBy { if (it.first == first) 0 else 1 }
+    val tx = str
+    val options = listOf("camera" to tx.camera, "gallery" to tx.gallery).sortedBy { if (it.first == first) 0 else 1 }
     Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(onClick = onClose), contentAlignment = Alignment.BottomCenter) {
         Column(
             Modifier.widthIn(max = OTokens.Size.contentMax)
@@ -322,7 +334,7 @@ private fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: (
                 .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
         ) {
-            Text("Foto", style = OieType.title, color = c.ink)
+            Text(tx.photo, style = OieType.title, color = c.ink)
             Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
                 options.forEach { (key, label) ->
                     QuietButton(label, { onPick(key) }, Modifier.height(OTokens.Size.button), icon = if (key == "camera") R.drawable.gg_ic_camera else R.drawable.gg_ic_image)
@@ -336,13 +348,14 @@ private fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: (
 @Composable
 private fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: () -> Unit, onBack: () -> Unit) {
     val c = OieTheme.colors
+    val tx = str
     val context = LocalContext.current
     val bmp = remember(name) { Photos.load(context, name, Photos.MAX_SIDE) }
     androidx.activity.compose.BackHandler(onBack = onBack)
     Column(Modifier.fillMaxSize().background(c.page)) {
         Bar {
-            QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = "Voltar")
-            Text("Foto para $to", style = OieType.title, color = c.ink)
+            QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
+            Text(tx.photoFor(to), style = OieType.title, color = c.ink)
         }
         Column(
             Modifier.fillMaxSize().padding(OTokens.Spacing.space6),
@@ -350,13 +363,13 @@ private fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: (
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6, Alignment.CenterVertically),
         ) {
             if (bmp != null) Image(
-                bmp.asImageBitmap(), contentDescription = "A foto que você vai mandar",
+                bmp.asImageBitmap(), contentDescription = tx.photoPreviewA11y,
                 modifier = Modifier.weight(1f, fill = false).clip(RoundedCornerShape(OTokens.Radius.radiusM)),
                 contentScale = ContentScale.Fit,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                QuietButton("Trocar", onSwap, Modifier.height(OTokens.Size.button))
-                PrimaryButton("Enviar", onSend, icon = R.drawable.gg_ic_send)
+                QuietButton(tx.swap, onSwap, Modifier.height(OTokens.Size.button))
+                PrimaryButton(tx.send, onSend, icon = R.drawable.gg_ic_send)
             }
         }
     }
@@ -365,13 +378,14 @@ private fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: (
 @Composable
 private fun PhotoThumb(media: String?) {
     val c = OieTheme.colors
+    val tx = str
     val context = LocalContext.current
     val bmp = remember(media) { media?.let { Photos.load(context, it, Photos.MAX_SIDE / 4) } }
     if (bmp == null) {
-        Text("Foto", style = OieType.body, color = c.muted)
+        Text(tx.photo, style = OieType.body, color = c.muted)
     } else {
         Image(
-            bmp.asImageBitmap(), contentDescription = "Foto",
+            bmp.asImageBitmap(), contentDescription = tx.photo,
             modifier = Modifier.size(OTokens.Size.contactTile * 2).clip(RoundedCornerShape(OTokens.Radius.radiusS)),
             contentScale = ContentScale.Crop,
         )

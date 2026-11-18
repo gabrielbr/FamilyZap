@@ -18,3 +18,9 @@
 - **Photo sending:** camera or gallery through Android's own camera app and photo picker, so Oiê asks for no permission. The last source used comes first. A preview offers Trocar and Enviar, undo returns to the preview, and the photo shows in the chat. Photos are re-encoded on the way in (at most 1600 px), which drops the camera's metadata, including location.
 - **Saving on the tablet:** the whole state (setup, names, the PIN hash, contacts, quiet hours, messages, drafts) is saved as it changes. It is sealed with AES-GCM under a key kept in the Android Keystore, in the app's private storage; nothing goes to a server. Setup resumes at the same step; the parent area always asks for the PIN again. A damaged file starts fresh instead of crashing.
 - Tests: 30 in total (6 message rule, 7 quiet hours and PIN, 4 saving, 13 screenshots). The screenshots use a pinned clock and time zone so CI can compare them.
+- **App v0.2:**
+  - **Sticker images:** the six stickers are real images. Their words are outlined with Nunito (`_02` masters) and converted to Android vectors by `tools/svg2vector.py`.
+  - **Quiet hours in the parent area:** add, edit (name, days, start and end with a time picker) and delete with undo.
+  - **Ajuda e sobre:** short answers to eight questions the flows raise, the risk notice repeated, version, "not made or approved by WhatsApp or Meta", and the licences.
+  - **Photo files encrypted:** each photo is sealed under its own Keystore key.
+  - **English:** every word lives in one typed `Strings` with Portuguese (the source) and English, picked from the device or per-app language. Tests check the voice rules (no "!", no em dash, no Zap/Wpp) in both languages.

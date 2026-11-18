@@ -21,6 +21,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import app.oie.R
 import app.oie.logic.Pin
+import app.oie.ui.text.str
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 import app.oie.ui.theme.OieType
@@ -29,9 +30,10 @@ import app.oie.ui.theme.OieType
 @Composable
 fun PinPad(entered: String, onChange: (String) -> Unit) {
     val c = OieTheme.colors
+    val tx = str
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
         Row(
-            Modifier.semantics { contentDescription = "${entered.length} de ${Pin.LENGTH} números" },
+            Modifier.semantics { contentDescription = tx.pinDots(entered.length, Pin.LENGTH) },
             horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
         ) {
             repeat(Pin.LENGTH) { i ->
@@ -48,7 +50,7 @@ fun PinPad(entered: String, onChange: (String) -> Unit) {
                 row.forEach { k ->
                     when (k) {
                         ' ' -> Spacer(Modifier.size(OTokens.Size.record))
-                        '<' -> Key(onClick = { onChange(entered.dropLast(1)) }, label = "Apagar") { OIcon(R.drawable.gg_ic_back) }
+                        '<' -> Key(onClick = { onChange(entered.dropLast(1)) }, label = tx.erase) { OIcon(R.drawable.gg_ic_back) }
                         else -> Key(onClick = { if (entered.length < Pin.LENGTH) onChange(entered + k) }, label = k.toString()) {
                             Text(k.toString(), style = OieType.title, color = c.ink)
                         }
@@ -62,6 +64,7 @@ fun PinPad(entered: String, onChange: (String) -> Unit) {
 @Composable
 private fun Key(onClick: () -> Unit, label: String, content: @Composable () -> Unit) {
     val c = OieTheme.colors
+    val tx = str
     Box(
         Modifier.size(OTokens.Size.record).clip(CircleShape).background(c.surface)
             .border(BorderStroke(OTokens.Size.hairline, c.line), CircleShape)

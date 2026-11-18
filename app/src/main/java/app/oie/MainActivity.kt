@@ -34,7 +34,7 @@ import app.oie.ui.setup.Setup
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 
-object BuildConfigInfo { const val VERSION = "0.1.0" }
+object BuildConfigInfo { const val VERSION = "0.2.0" }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +50,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             OieTheme {
+              androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides app.oie.ui.text.stringsFor()) {
                 val c = OieTheme.colors
                 // The 4dp frame round every screen (the core rule), in coral.
                 Box(
@@ -73,6 +74,7 @@ class MainActivity : ComponentActivity() {
                         else -> Route.KidHome
                     }
                 }
+              }
             }
         }
     }

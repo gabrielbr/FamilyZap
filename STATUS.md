@@ -65,4 +65,5 @@ Track: B · product with a team · Started: 2026-11-18
 - [ ] Check v0.1 on a real tablet: install `app-debug.apk` from the CI run, with TalkBack and large text.
 - [ ] The real WhatsApp link (after the message rule test): choose the library, decision 0003.
 - [x] Photo sending and saving on the tablet (encrypted), 2026-11-18.
-- [ ] Still missing in the app: the sticker images (the SVGs need outlined words), photos encrypted at rest (today: private storage), add-period in quiet hours, Ajuda/About, English strings, self-update with SHA256SUMS.
+- [x] Sticker images, the quiet-hours editor, Ajuda e sobre, encrypted photo files, English (v0.2, 2026-11-18).
+- [ ] Still missing in the app: self-update with SHA256SUMS, portrait screenshot tests, a native English reader check.

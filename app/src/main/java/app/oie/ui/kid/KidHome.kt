@@ -29,6 +29,7 @@ import app.oie.ui.common.Initial
 import app.oie.ui.common.PrimaryButton
 import app.oie.ui.common.QuietButton
 import app.oie.ui.setup.Wordmark
+import app.oie.ui.text.str
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 import app.oie.ui.theme.OieType
@@ -38,28 +39,29 @@ import app.oie.ui.theme.OieType
 @Composable
 fun KidHome(state: AppState) {
     val c = OieTheme.colors
+    val tx = str
     val quiet = state.quietNow()
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             Bar {
                 Wordmark()
                 Box(Modifier.weight(1f))
-                QuietButton("Pais", { state.route = Route.ParentPin }, icon = R.drawable.gg_ic_gear)
+                QuietButton(tx.parentButton, { state.route = Route.ParentPin }, icon = R.drawable.gg_ic_gear)
             }
             when {
-                !state.link.connected -> Banner(R.drawable.gg_ic_link, "O Oiê se desconectou. Peça para ${state.parentName} conectar de novo.")
-                quiet != null -> Banner(R.drawable.gg_ic_clock, "Horário de silêncio até ${quiet.end.hour}h. Dá para ler e ouvir, mas não para mandar.")
+                !state.link.connected -> Banner(R.drawable.gg_ic_link, tx.linkDropped(state.parentName))
+                quiet != null -> Banner(R.drawable.gg_ic_clock, tx.quietUntil(quiet.end.hour))
             }
             Column(
                 Modifier.fillMaxWidth().padding(horizontal = OTokens.Spacing.space16, vertical = OTokens.Spacing.space10),
                 verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
             ) {
-                Text("Oiê, ${state.kidName}", style = OieType.display, color = c.ink)
+                Text(tx.hello(state.kidName), style = OieType.display, color = c.ink)
                 if (state.allowed.isEmpty()) {
                     // Empty: the kid can't fix it, so no button; the line says who can.
-                    Text("Ainda não tem ninguém aqui. Peça para ${state.parentName} escolher quem você pode chamar.", style = OieType.body, color = c.muted)
+                    Text(tx.nobodyYet(state.parentName), style = OieType.body, color = c.muted)
                 } else {
-                    Text("Com quem você quer falar?", style = OieType.body, color = c.muted)
+                    Text(tx.whoToTalk, style = OieType.body, color = c.muted)
                     FlowRow(
                         Modifier.padding(top = OTokens.Spacing.space8),
                         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space8),
@@ -67,7 +69,7 @@ fun KidHome(state: AppState) {
                     ) {
                         state.allowed.forEach { ct ->
                             val unread = state.unread(ct.id)
-                            val label = ct.name + if (unread > 0) ", $unread ${if (unread == 1) "nova" else "novas"}" else ""
+                            val label = ct.name + if (unread > 0) ", " + tx.newCount(unread) else ""
                             Column(
                                 Modifier.width(OTokens.Size.contactTile + OTokens.Spacing.space12)
                                     .clip(RoundedCornerShape(OTokens.Radius.radiusM))
@@ -80,7 +82,7 @@ fun KidHome(state: AppState) {
                                 Initial(ct.name, OTokens.Size.contactTile)
                                 Text(ct.name, style = OieType.label, color = c.ink)
                                 if (unread > 0) Text(
-                                    "$unread ${if (unread == 1) "nova" else "novas"}", style = OieType.caption, color = c.page,
+                                    tx.newCount(unread), style = OieType.caption, color = c.page,
                                     modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(c.ink)
                                         .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1 / 2),
                                 )
@@ -98,6 +100,7 @@ fun KidHome(state: AppState) {
 @Composable
 private fun KidNotice(state: AppState) {
     val c = OieTheme.colors
+    val tx = str
     Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(enabled = false) {}, contentAlignment = Alignment.BottomCenter) {
         Column(
             Modifier.width(OTokens.Size.contentMax)
@@ -105,9 +108,9 @@ private fun KidNotice(state: AppState) {
                 .background(c.surface).padding(OTokens.Spacing.space8),
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
         ) {
-            Text("Antes de começar", style = OieType.title, color = c.ink)
-            Text("Suas mensagens saem do WhatsApp de ${state.parentName}, então ${state.parentName} pode ver o que você manda.", style = OieType.body, color = c.ink)
-            PrimaryButton("Entendi", { state.kidNoticeSeen = true }, Modifier.fillMaxWidth())
+            Text(tx.noticeTitle, style = OieType.title, color = c.ink)
+            Text(tx.noticeBody(state.parentName), style = OieType.body, color = c.ink)
+            PrimaryButton(tx.understood, { state.kidNoticeSeen = true }, Modifier.fillMaxWidth())
         }
     }
 }

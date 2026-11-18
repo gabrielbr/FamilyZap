@@ -37,6 +37,12 @@ import org.robolectric.annotation.GraphicsMode
  * Record: ./gradlew recordRoborazziDebug  ·  check against the goldens: ./gradlew verifyRoborazziDebug
  * Goldens live in app/src/test/screenshots/.
  */
+/** The Keystore isn't on the JVM; photo tests store plain bytes. */
+object PassThrough : app.oie.data.Sealer {
+    override fun seal(plain: ByteArray) = plain
+    override fun open(sealed: ByteArray) = sealed
+}
+
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34], qualifiers = "w1280dp-h800dp-land-mdpi")
@@ -56,11 +62,13 @@ class ScreensTest {
         finishSetup()
     }
 
-    private fun shot(name: String, dark: Boolean, content: @Composable () -> Unit) {
+    private fun shot(name: String, dark: Boolean, english: Boolean = false, content: @Composable () -> Unit) {
         compose.setContent {
             OieTheme(dark = dark) {
                 val c = OieTheme.colors
-                Box(Modifier.fillMaxSize().background(c.page).border(OTokens.Size.frame, c.frameLine)) { content() }
+                androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides if (english) app.oie.ui.text.En else app.oie.ui.text.Pt) {
+                    Box(Modifier.fillMaxSize().background(c.page).border(OTokens.Size.frame, c.frameLine)) { content() }
+                }
             }
         }
         compose.onRoot().captureRoboImage("src/test/screenshots/$name-${if (dark) "dark" else "light"}.png")
@@ -81,13 +89,18 @@ class ScreensTest {
             drawCircle(300f, 330f, 140f, Paint().apply { color = 0xFFE8573C.toInt(); style = Paint.Style.STROKE; strokeWidth = 90f })
             drawCircle(520f, 180f, 60f, Paint().apply { color = 0xFFFCE1D6.toInt() })
         }
-        java.io.File(Photos.dir(ctx), "sample.jpg").outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 85, it) }
+        Photos.sealer = PassThrough
+        val stored = Photos.store(ctx, bmp)
         val st = ready().apply {
             kidNoticeSeen = true
-            messages += Message("ph", "vovo", true, now - 60_000, Kind.PHOTO, media = "sample.jpg")
+            messages += Message("ph", "vovo", true, now - 60_000, Kind.PHOTO, media = stored)
         }
         Conversation(st, "vovo")
     }
+    @Test fun riskNoticeEnglish() = shot("05-setup-risk-en", false, english = true) { Setup(AppState(), 1, onClose = {}) }
+    @Test fun kidHomeEnglish() = shot("02-kid-home-en", false, english = true) { KidHome(ready().apply { kidNoticeSeen = true }) }
+    @Test fun parentQuietEditorEnglishDark() = shot("10b-parent-help-en", true, english = true) { ParentArea(ready(), 3) }
+    @Test fun parentHelp() = shot("10c-parent-help", false) { ParentArea(ready(), 3) }
     @Test fun riskNotice() = shot("05-setup-risk", false) { Setup(AppState(), 1, onClose = {}) }
     @Test fun names() = shot("06-setup-names", false) { Setup(AppState().apply { parentName = "Ana"; kidName = "Tito" }, 3, onClose = {}) }
     @Test fun createPin() = shot("07-setup-pin", false) { Setup(AppState(), 4, onClose = {}) }

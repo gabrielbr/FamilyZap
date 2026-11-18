@@ -43,6 +43,7 @@ import app.oie.ui.common.PinPad
 import app.oie.ui.common.PrimaryButton
 import app.oie.ui.common.QuietButton
 import app.oie.ui.common.TextLink
+import app.oie.ui.text.str
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 import app.oie.ui.theme.OieType
@@ -51,31 +52,32 @@ import app.oie.ui.theme.OieType
 @Composable
 fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
     val c = OieTheme.colors
+    val tx = str
     val go = { s: Int -> state.route = Route.Setup(s) }
     Column(Modifier.fillMaxSize()) {
         Bar {
             Wordmark()
             Box(Modifier.weight(1f))
-            if (step in 1..6) Text("Passo $step de 6", style = OieType.caption, color = c.muted)
+            if (step in 1..6) Text(tx.stepOf(step), style = OieType.caption, color = c.muted)
         }
         Box(Modifier.fillMaxSize().padding(OTokens.Spacing.space12), contentAlignment = Alignment.Center) {
             Column(Modifier.widthIn(max = OTokens.Size.contentMax), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
                 when (step) {
                     0 -> {
-                        Text("Oiê", style = OieType.display, color = c.ink)
-                        Text("O Oiê é para seu filho ou filha conversar com a família pelo seu WhatsApp, só com quem você escolher.", style = OieType.body, color = c.ink)
-                        PrimaryButton("Começar", { go(1) })
+                        Text(app.oie.ui.theme.OTokens.Brand.name, style = OieType.display, color = c.ink)
+                        Text(tx.welcomeBody, style = OieType.body, color = c.ink)
+                        PrimaryButton(tx.start, { go(1) })
                     }
                     1 -> {
-                        Text("Antes de conectar", style = OieType.display, color = c.ink)
+                        Text(tx.riskTitle, style = OieType.display, color = c.ink)
                         // The approved risk notice (01 Brand/voice.md), in full, before anything is linked.
                         Text(
-                            "O Oiê usa o seu WhatsApp de um jeito que o WhatsApp não oferece oficialmente. Ele pode limitar ou bloquear o seu número. Se isso acontecer, você perde o acesso até resolver com o WhatsApp.",
+                            tx.riskBody,
                             style = OieType.body, color = c.ink,
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                            PrimaryButton("Entendi, conectar", { go(2) })
-                            QuietButton("Agora não", onClose, Modifier.height(OTokens.Size.button))
+                            PrimaryButton(tx.riskAccept, { go(2) })
+                            QuietButton(tx.riskDecline, onClose, Modifier.height(OTokens.Size.button))
                         }
                     }
                     2 -> LinkStep(state, back = { go(1) }, next = { state.parentName = state.link.profileName; go(3) })
@@ -84,9 +86,9 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
                     5 -> ContactsStep(state, next = { go(6) })
                     6 -> QuietStep(state, next = { go(7) })
                     else -> {
-                        Text("Pronto.", style = OieType.display, color = c.ink)
-                        Text("Entregue o tablet para ${state.kidName}.", style = OieType.body, color = c.ink)
-                        PrimaryButton("Abrir para ${state.kidName}", { state.finishSetup() })
+                        Text(tx.done, style = OieType.display, color = c.ink)
+                        Text(tx.handOver(state.kidName), style = OieType.body, color = c.ink)
+                        PrimaryButton(tx.openFor(state.kidName), { state.finishSetup() })
                     }
                 }
             }
@@ -105,40 +107,38 @@ fun Wordmark() {
 @Composable
 private fun LinkStep(state: AppState, back: () -> Unit, next: () -> Unit) {
     val c = OieTheme.colors
-    Text("Conecte o seu WhatsApp", style = OieType.title, color = c.ink)
-    listOf(
-        "No seu celular, abra o WhatsApp.",
-        "Toque em Configurações e depois em Dispositivos conectados.",
-        "Toque em Conectar um dispositivo.",
-        "Aponte o celular para o código.",
-    ).forEachIndexed { i, s -> Text("${i + 1}. $s", style = OieType.body, color = c.ink) }
+    val tx = str
+    Text(tx.linkTitle, style = OieType.title, color = c.ink)
+    tx.linkSteps.forEachIndexed { i, s -> Text("${i + 1}. $s", style = OieType.body, color = c.ink) }
     Box(
         Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.qrGround).padding(OTokens.Spacing.space6),
     ) {
-        Text("Versão de teste: o código do WhatsApp entra aqui na próxima versão.", style = OieType.caption, color = c.qrInk)
+        Text(tx.linkPlaceholder, style = OieType.caption, color = c.qrInk)
     }
     Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
         // v0.1 has no real link (SampleLink). This button is labelled as a test so it can't be mistaken for the real thing.
-        PrimaryButton("Simular conexão (teste)", { state.link.pretendLinked(); next() })
-        QuietButton("Voltar", back, Modifier.height(OTokens.Size.button))
+        PrimaryButton(tx.linkSimulate, { state.link.pretendLinked(); next() })
+        QuietButton(tx.back, back, Modifier.height(OTokens.Size.button))
     }
 }
 
 @Composable
 private fun NamesStep(state: AppState, back: () -> Unit, next: () -> Unit) {
     val c = OieTheme.colors
-    Text("Como vocês se chamam?", style = OieType.title, color = c.ink)
-    Field("Seu nome", state.parentName, { state.parentName = it }, "Do seu WhatsApp. Aparece para ${state.kidName.ifBlank { "a criança" }} como \"WhatsApp de ${state.parentName}\".")
-    Field("Como a família chama seu filho ou filha?", state.kidName, { state.kidName = it }, "Vai junto das mensagens: \"${state.kidName.ifBlank { "Tito" }}: Oi, vó\".")
+    val tx = str
+    Text(tx.namesTitle, style = OieType.title, color = c.ink)
+    Field(tx.yourName, state.parentName, { state.parentName = it }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName))
+    Field(tx.kidNameLabel, state.kidName, { state.kidName = it }, tx.kidNameHelp(state.kidName.ifBlank { "Tito" }))
     Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-        PrimaryButton("Continuar", next, enabled = state.kidName.isNotBlank() && state.parentName.isNotBlank())
-        QuietButton("Voltar", back, Modifier.height(OTokens.Size.button))
+        PrimaryButton(tx.cont, next, enabled = state.kidName.isNotBlank() && state.parentName.isNotBlank())
+        QuietButton(tx.back, back, Modifier.height(OTokens.Size.button))
     }
 }
 
 @Composable
 fun Field(label: String, value: String, onChange: (String) -> Unit, help: String) {
     val c = OieTheme.colors
+    val tx = str
     Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
         Text(label, style = OieType.label, color = c.ink)
         OutlinedTextField(
@@ -155,21 +155,22 @@ fun Field(label: String, value: String, onChange: (String) -> Unit, help: String
 @Composable
 private fun CreatePinStep(state: AppState, next: () -> Unit) {
     val c = OieTheme.colors
+    val tx = str
     var first by remember { mutableStateOf<String?>(null) }
     var entered by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-        Text(if (first == null) "Crie um PIN de 6 números" else "Digite o PIN de novo", style = OieType.title, color = c.ink)
-        Text(error ?: "Ele abre a área dos pais neste tablet. Não use o mesmo PIN do tablet.", style = OieType.body, color = if (error != null) c.coralText else c.muted, textAlign = TextAlign.Center)
+        Text(if (first == null) tx.pinCreate else tx.pinAgain, style = OieType.title, color = c.ink)
+        Text(error ?: tx.pinCreateHelp, style = OieType.body, color = if (error != null) c.coralText else c.muted, textAlign = TextAlign.Center)
         PinPad(entered) { v ->
             entered = v
             if (v.length == Pin.LENGTH) {
                 val f = first
                 when {
-                    f == null && Pin.problem(v) == Pin.Problem.EASY -> { error = "Esse PIN é fácil de adivinhar. Escolha outro."; entered = "" }
+                    f == null && Pin.problem(v) == Pin.Problem.EASY -> { error = tx.pinEasy; entered = "" }
                     f == null -> { first = v; entered = ""; error = null }
                     f == v -> { state.setPin(v); next() }
-                    else -> { error = "Os PINs não são iguais. Digite de novo."; entered = "" } // only the second entry clears
+                    else -> { error = tx.pinMismatch; entered = "" } // only the second entry clears
                 }
             }
         }
@@ -179,8 +180,9 @@ private fun CreatePinStep(state: AppState, next: () -> Unit) {
 @Composable
 private fun ContactsStep(state: AppState, next: () -> Unit) {
     val c = OieTheme.colors
+    val tx = str
     val picked = remember { mutableStateListOf<String>().apply { addAll(state.allowed.map { it.id }) } }
-    Text("Com quem ${state.kidName} pode falar?", style = OieType.title, color = c.ink)
+    Text(tx.canTalkTo(state.kidName), style = OieType.title, color = c.ink)
     LazyColumn(Modifier.height(OTokens.Size.contentMax / 2)) {
         items(state.link.contacts(), key = { it.id }) { ct ->
             val on = ct.id in picked
@@ -192,29 +194,30 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
             ) {
                 Initial(ct.name, OTokens.Size.avatar)
                 Text(ct.name, style = OieType.label, color = c.ink)
-                if (ct.isGroup) Text("Grupo · todos do grupo veem as mensagens", style = OieType.caption, color = c.muted)
+                if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted)
                 Box(Modifier.weight(1f))
                 if (on) OIcon(R.drawable.gg_ic_check, contentDescription = "Escolhido")
             }
         }
     }
     Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-        PrimaryButton(if (picked.isEmpty()) "Continuar" else "Continuar · ${picked.size} escolhidos", {
+        PrimaryButton(tx.continueWith(picked.size), {
             state.allowed.clear(); state.allowed.addAll(state.link.contacts().filter { it.id in picked }); next()
         })
-        QuietButton("Depois", next, Modifier.height(OTokens.Size.button))
+        QuietButton(tx.later, next, Modifier.height(OTokens.Size.button))
     }
 }
 
 @Composable
 private fun QuietStep(state: AppState, next: () -> Unit) {
     val c = OieTheme.colors
-    Text("Horário de silêncio", style = OieType.title, color = c.ink)
-    Text("Nesse horário ${state.kidName} lê e ouve, mas não manda mensagens. Dá para mudar depois.", style = OieType.body, color = c.muted)
+    val tx = str
+    Text(tx.quietTitle, style = OieType.title, color = c.ink)
+    Text(tx.quietSetupBody(state.kidName), style = OieType.body, color = c.muted)
     QuietList(state)
     Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-        PrimaryButton("Continuar", next)
-        QuietButton("Pular", next, Modifier.height(OTokens.Size.button))
+        PrimaryButton(tx.cont, next)
+        QuietButton(tx.skip, next, Modifier.height(OTokens.Size.button))
     }
 }
 
@@ -222,12 +225,11 @@ private fun QuietStep(state: AppState, next: () -> Unit) {
 @Composable
 fun QuietList(state: AppState) {
     val c = OieTheme.colors
+    val tx = str
     state.periods.forEachIndexed { i, p ->
         Row(Modifier.fillMaxWidth().height(OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
             Text(p.name, style = OieType.label, color = c.ink)
-            val days = if (p.days.size == 7) "Todos os dias" else "Seg a sex"
-            val end = if (p.end < p.start) "${p.end.hour}h do dia seguinte" else "${p.end.hour}h"
-            Text("$days · ${p.start.hour}h às $end", style = OieType.bodySmall, color = c.muted, modifier = Modifier.weight(1f))
+            Text("${app.oie.ui.parent.daysLabel(tx, p.days)} · ${app.oie.ui.parent.hoursLabel(tx, p)}", style = OieType.bodySmall, color = c.muted, modifier = Modifier.weight(1f))
             Switch(
                 checked = p.on, onCheckedChange = { state.periods[i] = p.copy(on = it) },
                 colors = SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),

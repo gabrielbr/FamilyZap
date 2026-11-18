@@ -4,5 +4,8 @@ Six stickers for the kid's sticker tray (flow "Kid sends a message", decided 202
 
 - **Made from the brand:** the logo's round shapes (rings, dots, stems), in coral, soft coral, ink and cream, with the word in Nunito 800.
 - **None of the banned shapes:** no hearts, faces, speech bubbles, houses or mascots (`01 Brand/imagery-and-icons.md`).
-- **Format:** 512×512 SVG masters. The words are still live text, so they need converting to outlines (or exporting as 512×512 WebP with Nunito embedded) before they ship in the app.
+- **Format:** 512×512 SVG masters.
+  - `_01` has the words as live text (Nunito 800).
+  - `_02` has the words outlined with fontTools.
+  - The app uses `_02`, converted by `tools/svg2vector.py` into `app/src/main/res/drawable/sticker_*.xml`.
 - **Status:** proposed set; the owner picks the final words. Native-reader check needed for the PT words.
