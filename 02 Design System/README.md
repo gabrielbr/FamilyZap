@@ -1,9 +1,26 @@
-# FamilyZap Design System
+# Oiê Design System
 
 _Stage 4. Keep this outline. Every value lives in `tokens.json`; this file explains how to use it._
 
 ## 1. Character
-One idea in 2–4 words. Three words. The "never" list.
+_Stage 2 strategy, approved by the owner on 2026-11-18._
+
+- **The one idea:** Family, within reach.
+- **Tagline:** Send love home.
+- **Positioning:** For families with kids aged 9–12, Oiê lets the kid message the people they love from a tablet, through a parent's WhatsApp, with only the contacts the parent chose. Unlike giving a kid their own phone or account, the family keeps talking where it already does. It is not a monitoring app and not made by WhatsApp.
+- **Personality (this, not that):**
+  - Warm, not sugary: kind and close, never cute-talk or babyish.
+  - Simple, not childish: big and clear for a 9–12 kid, without treating them as small.
+  - Honest, not alarming: tells parents the truth, including the ban risk, calmly.
+  - Trusting, not watching: parents set the circle; it never feels like spying on the kid.
+- **Never implies:**
+  - that it's a WhatsApp or Meta product (no green bubbles, no WhatsApp logo or shapes);
+  - that a child is "100% safe", or that it replaces a parent's attention;
+  - that the WhatsApp link is official or risk-free for the parent's number;
+  - that it's a way to watch, track or read up on the kid.
+- **Scope:** Oiê is for talking with family: the people a parent chose. It is not social media, not a game and not a way to meet anyone new. It runs on the kid's tablet and stores nothing on our servers.
+- **Name:** Oiê, said "oy-YEH" ([decision 0002](../00%20Brief/decisions/0002-name.md)). Never written like the telecom Oi's "Oi_e".
+- **Three words:** warm · simple · trustworthy (and close).
 
 ## 2. Voice
 Summary of `01 Brand/voice.md`.
