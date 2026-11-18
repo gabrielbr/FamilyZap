@@ -28,7 +28,8 @@ flowchart TD
   convo -- reply --> send([Flow 'Kid sends a message'])
 ```
 
-## Which messages reach the kid (the key rule) **(proposed)**
+## Which messages reach the kid (the key rule)
+_Approved by the owner on 2026-11-18, **to be tested with 3 families' real chats before the build**._
 The parent's WhatsApp carries all of the parent's own chats. The kid must see only the family talking **to the kid**:
 - **In a 1:1 chat with an allowed contact:** the tablet shows only messages sent **after the kid's last message** in that chat, for a window of 24 h. It also shows any message that **replies to** (quotes) one of the kid's messages, at any time. The parent's own chats with grandma before and between stay private.
 - **In an allowed group:** the same rule, by default. The parent can switch a group to **"Mostrar tudo do grupo"** in the contact detail, for a family group made for the kid.

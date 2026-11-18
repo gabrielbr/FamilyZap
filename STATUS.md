@@ -8,8 +8,8 @@ Track: B · product with a team · Started: 2026-11-18
 | 2 Strategy & name | ✅ | 2026-11-18 | Strategy in `02 Design System/README.md` §1; name Oiê (0002). |
 | 3 Identity | ✅ | 2026-11-18 | Logo C in coral, logo pack, voice, imagery and icons. |
 | 4 Design system | ✅ | 2026-11-18 | design/ (core 0.31.1 + brand + layer), README, AGENTS.md brand rules, CI check. Component previews come with Stage 5. |
-| 5 Screens & assets | 🟡 | 2026-11-18 | All 4 v1 flows written; tablet prototype (8 screens, light/dark, portrait). Gate ready for the owner: every screen uses only tokens, the core icons and the logo files. |
-| 6 Audit | 🟡 | 2026-11-18 | `audits/2026-11-18-stage6-v0.1-prototype.md`: five skills; no open P0/P1; one 🔴 decision to make before the build. Gate ready for the owner. |
+| 5 Screens & assets | ✅ | 2026-11-18 | All 4 v1 flows written; tablet prototype (8 screens, light/dark, portrait). Every screen uses only tokens, the core icons and the logo files. Remaining states are open items. |
+| 6 Audit | ✅ | 2026-11-18 | `audits/2026-11-18-stage6-v0.1-prototype.md`: five skills; no open P0/P1; the message rule is decided and must be tested before the build. |
 | 7 Deliver & keep alive | ⬜ | | Needs the Compose app (not started). CI and docs are in place. |
 
 **Legend:** ✅ gate passed · 🟡 in progress · ⬜ not started
@@ -31,6 +31,9 @@ Track: B · product with a team · Started: 2026-11-18
 | No fairy mode in Oiê (it would bring pink back) | Owner | 2026-11-18 | Claude session |
 | Icons: Phosphor Bold (replaced the same day, see below) | Owner | 2026-11-18 | Claude session |
 | Stage 4 gate passed (previews deferred to Stage 5) | Owner | 2026-11-18 | Claude session |
+| Message rule: replies to the kid, messages starting with the kid's name, and 24 h after the kid's last message (to test first) | Owner | 2026-11-18 | Claude session |
+| PIN: 1-minute wait after 5 wrong tries; parent area closes after 2 min idle; groups allowed with a warning; quiet-hours presets Escola 7h–12h, Dormir 21h–7h | Owner | 2026-11-18 | Claude session |
+| Stage 5 and Stage 6 gates passed | Owner | 2026-11-18 | Claude session |
 | Icons follow the core line set; the 6 missing icons are added to the core | Owner | 2026-11-18 | Claude session |
 | Flow "Kid sends a message": can't send in quiet hours; camera and gallery; an Oiê sticker set; 5 s undo | Owner | 2026-11-18 | Claude session |
 | Per-contact exceptions to quiet hours | Owner | 2026-11-18 | Claude session |
@@ -52,7 +55,9 @@ Track: B · product with a team · Started: 2026-11-18
 - [ ] Add camera, image, sticker, send, link and clock icons to the design system's core set.
 - [ ] Draw the Oiê sticker set.
 - [ ] Component previews with the first screens (Stage 5).
-- [ ] **Decide the "meant for the kid" rule** (docs/flows/kid-receives-messages.md), after testing with real family chats. Riskiest decision in v1.
-- [ ] Confirm the proposed defaults: the PIN wait after 5 tries, a 2-minute idle lock, quiet-hours presets, groups allowed with a warning, no saving of photos, no read receipts, the kid's "Pedir para adicionar" request.
+- [x] Message rule decided (2026-11-18).
+- [ ] **Test the message rule with 3 families' real chats before the build** (riskiest decision in v1).
+- [x] Defaults confirmed (PIN wait, idle lock, presets, groups).
+- [ ] Still proposed, no owner preference yet: no saving of photos, no read receipts, the kid's "Pedir para adicionar" request.
 - [ ] Draw the remaining states (audit I-6, I-7).
 - [ ] Build the Android app (Compose, app.oie) from design/generated/OTokens.kt; check on a real tablet.
