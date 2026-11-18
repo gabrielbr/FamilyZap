@@ -26,6 +26,8 @@ object OTokens {
         val onSelected: Color,
         val frameLine: Color,
         val snackbar: Color,
+        val qrGround: Color,
+        val qrInk: Color,
     )
 
     val Light = Palette(
@@ -44,6 +46,8 @@ object OTokens {
         onSelected = Color(0xFF2A1714), // Ink on selected: 13.7:1 (light), 11.7:1 (dark).
         frameLine = Color(0xFFE8573C), // The frame round every screen (the core rule), in the brand coral.
         snackbar = Color(0xFF2A1714), // Snackbar ground (ink); its text is page.
+        qrGround = Color(0xFFFFFFFF), // The QR code's ground: always white, in both themes, so the phone's camera reads it.
+        qrInk = Color(0xFF2A1714), // The QR code's modules: always dark on qr-ground. Also the caption on the QR card.
     )
 
     val Dark = Palette(
@@ -62,6 +66,8 @@ object OTokens {
         onSelected = Color(0xFFFBEFE6), // Ink on selected: 13.7:1 (light), 11.7:1 (dark).
         frameLine = Color(0xFFE8573C), // The frame round every screen (the core rule), in the brand coral.
         snackbar = Color(0xFFFBEFE6), // Snackbar ground (ink); its text is page.
+        qrGround = Color(0xFFFFFFFF), // The QR code's ground: always white, in both themes, so the phone's camera reads it.
+        qrInk = Color(0xFF2A1714), // The QR code's modules: always dark on qr-ground. Also the caption on the QR card.
     )
 
     object Spacing {
