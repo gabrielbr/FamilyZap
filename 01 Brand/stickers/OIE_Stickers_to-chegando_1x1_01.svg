@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="128" fill="#FFF6EE"/>
+<g transform="translate(256 196) scale(.78) translate(-256 -236)">
+<circle cx="132" cy="236" r="40" fill="#FCE1D6"/><circle cx="256" cy="236" r="56" fill="#E8573C"/><circle cx="392" cy="236" r="72" fill="#E8573C"/>
+</g>
+<text x="256" y="452" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="54" fill="#2A1714">Tô chegando</text>
+</svg>

@@ -53,11 +53,12 @@ Track: B · product with a team · Started: 2026-11-18
 - [ ] Search INPI (classes 9 and 38) for Oiê before the first public release (owner).
 - [x] Oiê's row added to the design system (its 0.31.2, PR #12).
 - [ ] Add camera, image, sticker, send, link and clock icons to the design system's core set.
-- [ ] Draw the Oiê sticker set.
+- [x] Oiê sticker set drawn (proposed, 6).
 - [ ] Component previews with the first screens (Stage 5).
 - [x] Message rule decided (2026-11-18).
 - [ ] **Test the message rule with 3 families' real chats before the build** (riskiest decision in v1).
 - [x] Defaults confirmed (PIN wait, idle lock, presets, groups).
 - [ ] Still proposed, no owner preference yet: no saving of photos, no read receipts, the kid's "Pedir para adicionar" request.
-- [ ] Draw the remaining states (audit I-6, I-7).
+- [x] Remaining states drawn (screens 09–21, 2026-11-18). Ajuda/About still to draw (I-7).
+- [ ] Pick the final sticker words (6 proposed in `01 Brand/stickers/`).
 - [ ] Build the Android app (Compose, app.oie) from design/generated/OTokens.kt; check on a real tablet.

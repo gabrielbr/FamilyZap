@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="128" fill="#FFF6EE"/>
+<g transform="translate(256 196) scale(.78) translate(-256 -236)">
+<rect x="228" y="150" width="56" height="190" rx="28" fill="#E8573C"/><circle cx="256" cy="96" r="34" fill="#E8573C"/><circle cx="160" cy="250" r="64" fill="none" stroke="#FCE1D6" stroke-width="40"/>
+</g>
+<text x="256" y="452" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="64" fill="#2A1714">Obrigado</text>
+</svg>
