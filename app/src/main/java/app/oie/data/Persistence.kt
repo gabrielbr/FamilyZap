@@ -32,6 +32,7 @@ object Codec {
         put("kidName", s.kidName)
         put("pinHash", s.pinHash ?: JSONObject.NULL)
         put("kidNoticeSeen", s.kidNoticeSeen)
+        put("addRequested", s.addRequested)
         put("linked", s.link.connected)
         put("lastPhotoSource", s.lastPhotoSource)
         put("allowed", JSONArray(s.allowed.map {
@@ -59,6 +60,7 @@ object Codec {
         s.kidName = o.optString("kidName")
         s.pinHash = if (o.isNull("pinHash")) null else o.getString("pinHash")
         s.kidNoticeSeen = o.optBoolean("kidNoticeSeen")
+        s.addRequested = o.optBoolean("addRequested")
         s.lastPhotoSource = o.optString("lastPhotoSource", "camera")
         if (o.optBoolean("linked")) s.link.pretendLinked()
         s.allowed.clear()

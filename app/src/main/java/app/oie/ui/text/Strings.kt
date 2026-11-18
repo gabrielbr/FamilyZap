@@ -37,6 +37,9 @@ interface Strings {
     fun hello(kid: String): String
     val whoToTalk: String
     fun nobodyYet(parent: String): String
+    val askToAdd: String
+    fun askedToAdd(parent: String): String
+    fun kidAsked(kid: String): String
     fun newCount(n: Int): String
     val noticeTitle: String
     fun noticeBody(parent: String): String
@@ -144,6 +147,9 @@ object Pt : Strings {
     override fun hello(kid: String) = "Oiê, $kid"
     override val whoToTalk = "Com quem você quer falar?"
     override fun nobodyYet(parent: String) = "Ainda não tem ninguém aqui. Peça para $parent escolher quem você pode chamar."
+    override val askToAdd = "Pedir para adicionar alguém"
+    override fun askedToAdd(parent: String) = "Pedido enviado. $parent vai ver na área dos pais."
+    override fun kidAsked(kid: String) = "$kid pediu para adicionar alguém."
     override fun newCount(n: Int) = "$n ${if (n == 1) "nova" else "novas"}"
     override val noticeTitle = "Antes de começar"
     override fun noticeBody(parent: String) = "Suas mensagens saem do WhatsApp de $parent, então $parent pode ver o que você manda."
@@ -265,6 +271,9 @@ object En : Strings {
     override fun hello(kid: String) = "Oiê, $kid"
     override val whoToTalk = "Who do you want to talk to?"
     override fun nobodyYet(parent: String) = "Nobody here yet. Ask $parent to choose who you can call."
+    override val askToAdd = "Ask to add someone"
+    override fun askedToAdd(parent: String) = "Request sent. $parent will see it in the parent area."
+    override fun kidAsked(kid: String) = "$kid asked you to add someone."
     override fun newCount(n: Int) = "$n new"
     override val noticeTitle = "Before you start"
     override fun noticeBody(parent: String) = "Your messages go out from $parent's WhatsApp, so $parent can see what you send."

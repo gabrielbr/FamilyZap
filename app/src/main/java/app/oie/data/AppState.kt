@@ -36,6 +36,8 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     internal var pinHash: String? = null
     val pinGuard = Pin.Guard()
     var kidNoticeSeen by mutableStateOf(false)
+    /** The kid asked the parent to add someone (owner, 2026-11-18). No names, no typing: just a flag. */
+    var addRequested by mutableStateOf(false)
     val allowed = mutableStateListOf<Contact>()
     val periods = mutableStateListOf<QuietPeriod>().apply { addAll(QuietHours.presets) }
     val messages = mutableStateListOf<Message>()

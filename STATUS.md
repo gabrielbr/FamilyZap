@@ -34,6 +34,7 @@ Track: B · product with a team · Started: 2026-11-18
 | Message rule: replies to the kid, messages starting with the kid's name, and 24 h after the kid's last message (to test first) | Owner | 2026-11-18 | Claude session |
 | PIN: 1-minute wait after 5 wrong tries; parent area closes after 2 min idle; groups allowed with a warning; quiet-hours presets Escola 7h–12h, Dormir 21h–7h | Owner | 2026-11-18 | Claude session |
 | Stage 5 and Stage 6 gates passed | Owner | 2026-11-18 | Claude session |
+| Update sheet only in the parent area; releases in a separate public repo `gabrielbr/oie-releases`; "Pedir para adicionar" yes; the six sticker words | Owner | 2026-11-18 | Claude session |
 | Icons follow the core line set; the 6 missing icons are added to the core | Owner | 2026-11-18 | Claude session |
 | Flow "Kid sends a message": can't send in quiet hours; camera and gallery; an Oiê sticker set; 5 s undo | Owner | 2026-11-18 | Claude session |
 | Per-contact exceptions to quiet hours | Owner | 2026-11-18 | Claude session |
@@ -58,15 +59,16 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Message rule decided (2026-11-18).
 - [ ] **Test the message rule with 3 families' real chats before the build** (riskiest decision in v1).
 - [x] Defaults confirmed (PIN wait, idle lock, presets, groups).
-- [ ] Still proposed, no owner preference yet: no saving of photos, no read receipts, the kid's "Pedir para adicionar" request.
+- [x] "Pedir para adicionar" approved and built (owner, 2026-11-18).
+- [ ] Still proposed, no owner preference yet: no saving of received photos, no read receipts.
 - [x] Remaining states drawn (screens 09–21, 2026-11-18). Ajuda/About still to draw (I-7).
-- [ ] Pick the final sticker words (6 proposed in `01 Brand/stickers/`).
+- [x] Sticker words approved: Oiê!, Saudade, Boa noite, Te amo, Tô chegando, Obrigado (owner, 2026-11-18).
 - [x] App v0.1 built: the UI shell with sample data (2026-11-18).
 - [ ] Check v0.1 on a real tablet: install `app-debug.apk` from the CI run, with TalkBack and large text.
 - [ ] The real WhatsApp link (after the message rule test): choose the library, decision 0003.
 - [x] Photo sending and saving on the tablet (encrypted), 2026-11-18.
 - [x] Sticker images, the quiet-hours editor, Ajuda e sobre, encrypted photo files, English (v0.2, 2026-11-18).
 - [x] Self-update and the release workflow; portrait screenshots (v0.3, 2026-11-18).
-- [ ] **Owner:** create the signing key and add the 4 `OIE_KEYSTORE_*` secrets (docs/release.md); make the repo (or a releases-only repo) public so the update check can read it.
-- [ ] **Owner:** confirm the update sheet shows only in the parent area, not to the kid (a proposed difference from the design system's rule).
+- [ ] **Owner:** create the signing key and add the 4 `OIE_KEYSTORE_*` secrets; create the public repo `gabrielbr/oie-releases` and the `OIE_RELEASES_TOKEN` secret (docs/release.md).
+- [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.

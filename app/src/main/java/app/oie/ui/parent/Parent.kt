@@ -148,6 +148,14 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
             Text(tx.peopleAndGroups(state.allowed.count { !it.isGroup }, state.allowed.count { it.isGroup }), style = OieType.caption, color = c.muted)
         }
     }
+    if (state.addRequested) Row(
+        Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space3).clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.selected)
+            .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
+    ) {
+        Text(tx.kidAsked(state.kidName), style = OieType.label, color = c.onSelected, modifier = Modifier.weight(1f))
+        TextLink(tx.understood, { touched(); state.addRequested = false })
+    }
     state.allowed.toList().forEachIndexed { i, ct ->
         Row(Modifier.fillMaxWidth().height(OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
             Initial(ct.name, OTokens.Size.avatar)

@@ -5,8 +5,8 @@ package app.oie.update
  * are unit-tested. Android-facing parts live in UpdateChecker / ApkInstaller.
  */
 object UpdateRules {
-    /** GitHub repo whose public releases carry Oiê's APKs. Rename here when the repo becomes gabrielbr/oie. */
-    const val REPO = "gabrielbr/familyzap"
+    /** The public repo that holds only Oiê's releases; the code stays private (owner, 2026-11-18). */
+    const val REPO = "gabrielbr/oie-releases"
     const val ASSET_PREFIX = "Oie-"
     const val SUMS = "SHA256SUMS.txt"
     const val MIN_INTERVAL_MS = 15 * 60 * 1000L
