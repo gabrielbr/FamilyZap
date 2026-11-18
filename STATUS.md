@@ -23,6 +23,8 @@ Track: B · product with a team · Started: 2026-11-18
 | Name Oiê, app id `app.oie`, domain oie.app, code OIE; Oi_e risk accepted (0002) | Owner | 2026-11-18 | Claude session |
 | Logo direction C · Close (the "oi" symbol risk accepted) | Owner | 2026-11-18 | Claude session |
 | Logo colour coral #E8573C | Owner | 2026-11-18 | Claude session |
+| Voice, risk notice and kid notice wording | Owner | 2026-11-18 | Claude session |
+| Imagery (photos + logo shapes) and icons (rounded line, bold) | Owner | 2026-11-18 | Claude session |
 
 ## Open items
 - [x] Keywords: Warm, Simple, Trustworthy, Close (2026-11-18).
