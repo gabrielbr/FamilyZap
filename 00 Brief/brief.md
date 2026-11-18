@@ -11,8 +11,8 @@ _Stage 1. One page. Every line comes from the owner's answers on 2026-11-18, or 
 | What the kid can do | Voice messages, text messages, photos and stickers, calls. |
 | What the parent controls | Allowed contacts; sees everything (the messages stay in the parent's WhatsApp); quiet hours. |
 | How the family sees it | Messages come from the parent's number, tagged with the kid's name. |
-| Keywords (3–5) | Warm · TBD (owner to add 2–4 more) |
-| Aesthetic direction (and references they like) | TBD (no references yet) |
+| Keywords (3–5) | Warm · Simple · Trustworthy · Close |
+| Aesthetic direction (and references they like) | Headspace (warm and calm: soft round shapes, warm colours, friendly without being childish) · Duolingo (confident and lively for kids and adults; bold colour, big clear buttons; not its mascot style). Chosen by the owner from suggestions. |
 | Never looks like | Babyish or cartoon (9–12s find it childish) · spy or surveillance (no eyes, locks, radar) · generic kid-app candy (no rainbow overload, no stock mascots) |
 | Channels | Android app (kid tablet + parent phone), marketing website |
 | Languages / locale | English and Brazilian Portuguese |
