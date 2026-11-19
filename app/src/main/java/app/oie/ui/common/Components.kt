@@ -136,3 +136,19 @@ fun Banner(icon: Int, text: String) {
     }
     Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
 }
+
+/**
+ * The link as the screens show it (LinkView, v0.24), re-read once when the 30-second grace ends, so
+ * "connecting" turns into "down" by itself if the link doesn't come up.
+ */
+@Composable
+fun linkShown(state: app.oie.data.AppState): app.oie.logic.LinkView.Shown {
+    val tick = androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    val since = maxOf(state.linkState.downSince, state.startedAt)
+    androidx.compose.runtime.LaunchedEffect(since, state.linkState.status) {
+        val wait = since + app.oie.logic.LinkView.GRACE_MS - state.clock()
+        if (wait > 0) { kotlinx.coroutines.delay(wait); tick.intValue++ }
+    }
+    @Suppress("UNUSED_VARIABLE") val read = tick.intValue // re-read the clock when the grace ends
+    return state.linkShown()
+}

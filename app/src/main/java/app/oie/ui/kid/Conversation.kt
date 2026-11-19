@@ -91,7 +91,9 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
         androidx.compose.runtime.LaunchedEffect(contactId) { state.route = app.oie.data.Route.KidHome }
         return
     }
-    val canSend = state.canSend(contact) && state.wa.connected
+    // v0.24: while the link reconnects the kid can still write; messages wait and go out on connect (L4).
+    val linkDown = app.oie.ui.common.linkShown(state) == app.oie.logic.LinkView.Shown.DOWN
+    val canSend = state.canSend(contact) && !linkDown
     var draft by remember { mutableStateOf(state.drafts[contactId] ?: "") }
     var pending by remember { mutableStateOf<Message?>(null) }
     var stickers by remember { mutableStateOf(openStickers) }
@@ -173,7 +175,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                 if (!canSend) {
                     val q = state.quietNow()
                     Text(
-                        if (!state.wa.connected) tx.askReconnect(state.parentName) else tx.quietUntilShort(q?.end?.hour ?: 0),
+                        if (linkDown) tx.askReconnect(state.parentName) else tx.quietUntilShort(q?.end?.hour ?: 0),
                         style = OieType.body, color = c.muted,
                     )
                 } else if (recordingSince > 0) {

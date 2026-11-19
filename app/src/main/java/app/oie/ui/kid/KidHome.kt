@@ -49,8 +49,10 @@ fun KidHome(state: AppState) {
                 Box(Modifier.weight(1f))
                 QuietButton(tx.parentButton, { state.route = Route.ParentPin }, icon = R.drawable.gg_ic_gear)
             }
+            // v0.24: only a link that stayed down for 30 s gets the banner; reconnecting after an update says nothing.
+            val link = app.oie.ui.common.linkShown(state)
             when {
-                !state.wa.connected -> Banner(R.drawable.gg_ic_link, tx.linkDropped(state.parentName))
+                link == app.oie.logic.LinkView.Shown.DOWN -> Banner(R.drawable.gg_ic_link, tx.linkDropped(state.parentName))
                 quiet != null -> Banner(R.drawable.gg_ic_clock, tx.quietUntil(quiet.end.hour))
             }
             Column(

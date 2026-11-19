@@ -131,6 +131,23 @@ _The owner's report (2026-11-19): the link works and the contacts arrive, but af
 | Desconectado | up | stayed wrong until a restart | turns "conectado" when Oiê opens |
 | Conectado or desconectado | down | reconnected | reconnects ("conectando", then "conectado") |
 
+## v0.24: "Conectando…" is not "desconectado"
+_The owner's report (2026-11-19): after updating, Oiê says it needs to connect again, but it is connected._
+
+- **Cause:** after an update (or any restart), Oiê takes a few seconds to reconnect by itself. Every screen read "not connected yet" as "disconnected":
+  - Ajustes › Conexão said "O Oiê se desconectou do seu WhatsApp" and offered **Conectar o WhatsApp**;
+  - the kid's home said "Peça para Ana conectar de novo".
+  A short network drop that WhatsApp's library fixes on its own did the same.
+- **Now, three states as the screens see them** (`LinkView`):
+
+| Shown | When | Kid's home | Conversation | Conexão |
+|---|---|---|---|---|
+| **Conectado** | the link is up | nothing | can send | "Conectado ao WhatsApp de Ana." |
+| **Conectando** | linked, not up yet, for less than 30 s (since Oiê opened, or since the drop) | nothing | can send: messages wait and go out on connect (L4) | "Conectando ao WhatsApp de Ana…", no button |
+| **Desconectado** | still not up after 30 s, or never linked | "Peça para Ana conectar de novo" | "Peça para Ana conectar" | "O Oiê se desconectou…" with **Conectar o WhatsApp** |
+
+- **Unchanged:** logged out, banned and unavailable keep their own screens. A real drop still shows, 30 seconds later. The problem report still records every change.
+
 ## States per step
 | Step | Empty | Loading | Error | Success | Offline |
 |---|---|---|---|---|---|

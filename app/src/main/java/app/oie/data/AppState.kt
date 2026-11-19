@@ -39,6 +39,16 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var kidEmoji by mutableStateOf("")
     /** The kid's name first, then the nicknames. */
     fun kidNames(): List<String> = app.oie.logic.KidNames.all(kidName, kidNicknames)
+    /** When this run of the app started: right after an update the link is still on its way (v0.24). */
+    val startedAt: Long = clock()
+
+    /** The link as the screens show it: connected, connecting (for 30 s), or down (LinkView, v0.24). */
+    fun linkShown(now: Long = clock()): app.oie.logic.LinkView.Shown {
+        if (!realMode) return if (wa.connected) app.oie.logic.LinkView.Shown.CONNECTED else app.oie.logic.LinkView.Shown.DOWN
+        val s = linkState.status
+        val trying = s == LinkState.Status.Off || s == LinkState.Status.Connecting || s == LinkState.Status.Disconnected
+        return app.oie.logic.LinkView.of(wa.connected, linkState.on, trying, maxOf(linkState.downSince, startedAt), now)
+    }
     /** The contacts on the kid's side: the allowed ones the parent hasn't paused from their WhatsApp (v0.21). */
     val reachable: List<Contact> get() = allowed.filter { !it.paused }
     /** SHA-256 of the PIN, never the PIN itself. */
