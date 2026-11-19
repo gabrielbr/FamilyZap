@@ -59,7 +59,13 @@ type Link struct {
 	readOnly bool
 	stopped  bool
 	lastSend time.Time
+	// Media the app may still download, by message id. Bounded: the oldest go first.
+	media      map[string]whatsmeow.DownloadableMessage
+	mediaOrder []string
 }
+
+// MaxPendingMedia is how many received photos, voice notes and stickers stay downloadable.
+const MaxPendingMedia = 200
 
 func init() {
 	// L1: the parent sees "Oiê" in WhatsApp's Linked devices, so it's never a mystery device.
@@ -195,15 +201,12 @@ func (k *Link) SendText(chat, text, quotedID string) (string, error) {
 
 // SendTextWithID sends with a given id, so a retry after a reconnect can't make a duplicate.
 func (k *Link) SendTextWithID(chat, text, quotedID, id string) (string, error) {
-	if err := k.maySend(); err != nil {
-		return "", err
-	}
-	to, err := types.ParseJID(chat)
+	to, err := k.target(chat)
 	if err != nil {
 		return "", err
 	}
-	if own := k.c.Store.ID; own != nil && to.User == own.User && to.Server == types.DefaultUserServer {
-		return "", errors.New("never to the parent's own number") // L2
+	if err := k.maySend(); err != nil {
+		return "", err
 	}
 	msg := &waE2E.Message{Conversation: proto.String(text)}
 	if quotedID != "" {
@@ -239,6 +242,9 @@ func (k *Link) handle(e interface{}) {
 	switch v := e.(type) {
 	case *events.Message:
 		if in, ok := ToIncoming(v.Info, v.Message); ok {
+			if d := downloadable(v.Message); d != nil {
+				k.remember(in.ID, d)
+			}
 			k.emit("message", in)
 		}
 	case *events.Connected:
@@ -258,6 +264,111 @@ func (k *Link) handle(e interface{}) {
 		k.emit("temporaryBan", map[string]any{"code": int(v.Code), "expiresInSeconds": int64(v.Expire.Seconds())})
 	}
 	// History sync (events.HistorySync) is ignored on purpose (rule L6).
+}
+
+func (k *Link) remember(id string, d whatsmeow.DownloadableMessage) {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	if k.media == nil {
+		k.media = map[string]whatsmeow.DownloadableMessage{}
+	}
+	if _, ok := k.media[id]; !ok {
+		k.mediaOrder = append(k.mediaOrder, id)
+	}
+	k.media[id] = d
+	for len(k.mediaOrder) > MaxPendingMedia {
+		delete(k.media, k.mediaOrder[0])
+		k.mediaOrder = k.mediaOrder[1:]
+	}
+}
+
+// Download returns the decrypted bytes of a received photo, voice note or sticker. The app seals
+// them before they touch the disk. It works for messages received since the link opened.
+func (k *Link) Download(id string) ([]byte, error) {
+	k.mu.Lock()
+	d := k.media[id]
+	k.mu.Unlock()
+	if d == nil {
+		return nil, errors.New("no media for this message")
+	}
+	return k.c.Download(context.Background(), d)
+}
+
+// SendImage sends a JPEG photo (the app has already re-encoded it, so it carries no location).
+// Same rules as SendTextWithID: read-only, pace, ban, never to the parent's own number, one id.
+func (k *Link) SendImage(chat string, jpeg []byte, caption, id string) (string, error) {
+	return k.sendMedia(chat, id, func(up whatsmeow.UploadResponse) *waE2E.Message {
+		return ImageMessage(up, caption)
+	}, jpeg, whatsmeow.MediaImage)
+}
+
+// SendVoice sends a voice note. mimetype is "audio/ogg; codecs=opus" for WhatsApp's own voice notes.
+func (k *Link) SendVoice(chat string, audio []byte, seconds int, mimetype, id string) (string, error) {
+	return k.sendMedia(chat, id, func(up whatsmeow.UploadResponse) *waE2E.Message {
+		return VoiceMessage(up, seconds, mimetype)
+	}, audio, whatsmeow.MediaAudio)
+}
+
+func (k *Link) sendMedia(chat, id string, build func(whatsmeow.UploadResponse) *waE2E.Message, data []byte, kind whatsmeow.MediaType) (string, error) {
+	to, err := k.target(chat)
+	if err != nil {
+		return "", err
+	}
+	if err := k.maySend(); err != nil {
+		return "", err
+	}
+	up, err := k.c.Upload(context.Background(), data, kind)
+	if err != nil {
+		return "", err
+	}
+	_, err = k.c.SendMessage(context.Background(), to, build(up), whatsmeow.SendRequestExtra{ID: types.MessageID(id)})
+	return id, err
+}
+
+// target parses an allowed chat and refuses the parent's own number (rule L2).
+func (k *Link) target(chat string) (types.JID, error) {
+	to, err := types.ParseJID(chat)
+	if err != nil {
+		return to, err
+	}
+	if own := k.c.Store.ID; own != nil && to.User == own.User && to.Server == types.DefaultUserServer {
+		return to, errors.New("never to the parent's own number")
+	}
+	return to, nil
+}
+
+// ImageMessage builds the message for an uploaded photo.
+func ImageMessage(up whatsmeow.UploadResponse, caption string) *waE2E.Message {
+	m := &waE2E.ImageMessage{
+		URL: proto.String(up.URL), DirectPath: proto.String(up.DirectPath), MediaKey: up.MediaKey,
+		FileEncSHA256: up.FileEncSHA256, FileSHA256: up.FileSHA256, FileLength: proto.Uint64(up.FileLength),
+		Mimetype: proto.String("image/jpeg"),
+	}
+	if caption != "" {
+		m.Caption = proto.String(caption)
+	}
+	return &waE2E.Message{ImageMessage: m}
+}
+
+// VoiceMessage builds the message for an uploaded voice note (PTT: shown as a voice message).
+func VoiceMessage(up whatsmeow.UploadResponse, seconds int, mimetype string) *waE2E.Message {
+	return &waE2E.Message{AudioMessage: &waE2E.AudioMessage{
+		URL: proto.String(up.URL), DirectPath: proto.String(up.DirectPath), MediaKey: up.MediaKey,
+		FileEncSHA256: up.FileEncSHA256, FileSHA256: up.FileSHA256, FileLength: proto.Uint64(up.FileLength),
+		Mimetype: proto.String(mimetype), Seconds: proto.Uint32(uint32(seconds)), PTT: proto.Bool(true),
+	}}
+}
+
+func downloadable(m *waE2E.Message) whatsmeow.DownloadableMessage {
+	switch {
+	case m.GetImageMessage() != nil:
+		return m.GetImageMessage()
+	case m.GetAudioMessage() != nil:
+		return m.GetAudioMessage()
+	case m.GetStickerMessage() != nil:
+		return m.GetStickerMessage()
+	}
+	return nil
 }
 
 func (k *Link) emit(kind string, payload any) {

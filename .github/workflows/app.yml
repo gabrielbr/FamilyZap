@@ -31,6 +31,6 @@ jobs:
         with:
           name: oie-debug
           path: |
-            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/debug/app-universal-debug.apk
             app/build/outputs/roborazzi/
           if-no-files-found: ignore

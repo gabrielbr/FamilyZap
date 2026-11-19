@@ -58,6 +58,7 @@ object Codec {
                 .put("entries", JSONArray(t.entries.map {
                     JSONObject().put("chat", it.chatId).put("name", it.chatName).put("at", it.at).put("kind", it.kind.name)
                         .put("shown", it.shown).put("why", it.why.name).put("text", it.text ?: JSONObject.NULL)
+                        .put("id", it.id).put("dur", it.durationSec).put("media", it.media ?: JSONObject.NULL)
                 }))
         })
     }.toString()
@@ -110,6 +111,7 @@ object Codec {
                     t.entries += app.oie.logic.RuleTest.Entry(
                         getString("chat"), getString("name"), getLong("at"), Kind.valueOf(getString("kind")), getBoolean("shown"),
                         app.oie.logic.RuleTest.Why.valueOf(getString("why")), if (isNull("text")) null else getString("text"),
+                        optString("id"), optInt("dur"), if (isNull("media")) null else optString("media").ifEmpty { null },
                     )
                 }
             }

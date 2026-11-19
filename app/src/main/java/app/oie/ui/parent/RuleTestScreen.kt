@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -198,7 +199,7 @@ private fun EntryRow(e: RuleTest.Entry, kid: String) {
     val time = Instant.ofEpochMilli(e.at).atZone(ZoneId.systemDefault()).toLocalTime()
     val what = when (e.kind) {
         Kind.TEXT -> e.text
-        Kind.VOICE -> tx.notifVoice
+        Kind.VOICE -> if (e.durationSec > 0) "${tx.notifVoice} · ${e.durationSec} s" else tx.notifVoice
         Kind.PHOTO -> tx.notifPhoto
         Kind.STICKER -> tx.notifSticker
         Kind.DELETED -> tx.deletedMessage
@@ -212,6 +213,7 @@ private fun EntryRow(e: RuleTest.Entry, kid: String) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
             Text("${e.chatName} · ${tx.clock(time.hour, time.minute)}", style = OieType.label, color = c.ink)
             if (what != null) Text(what, style = OieType.body, color = c.ink)
+            e.media?.let { MediaThumb(it) }
             Text(tx.why(kid, e.why), style = OieType.caption, color = c.muted)
         }
         // The verdict in words; the fill only repeats it (colour is never alone).
@@ -222,4 +224,18 @@ private fun EntryRow(e: RuleTest.Entry, kid: String) {
                 .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
         )
     }
+}
+
+/** A photo or sticker that would reach the kid, opened from its sealed file. */
+@Composable
+private fun MediaThumb(name: String) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val side = OTokens.Size.contactTile * 2
+    val px = with(androidx.compose.ui.platform.LocalDensity.current) { side.roundToPx() }
+    val bmp = remember(name) { app.oie.data.Photos.load(context, name, px) } ?: return
+    androidx.compose.foundation.Image(
+        bmp.asImageBitmap(), contentDescription = null,
+        modifier = Modifier.size(side).clip(RoundedCornerShape(OTokens.Radius.radiusS)),
+        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+    )
 }

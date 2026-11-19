@@ -70,7 +70,7 @@ class Updater(private val context: Context, private val scope: CoroutineScope) {
             prefs.edit().putLong("last", now).apply()
             state = when {
                 result.isFailure -> if (manual) State.CouldNotCheck(result.exceptionOrNull()?.message ?: "erro") else State.Idle
-                else -> result.getOrNull()?.let { UpdateRules.offer(it, versionName) }?.let { State.Available(it) }
+                else -> result.getOrNull()?.let { UpdateRules.offer(it, versionName, android.os.Build.SUPPORTED_ABIS.toList()) }?.let { State.Available(it) }
                     ?: if (manual) State.UpToDate(versionName) else State.Idle
             }
         }

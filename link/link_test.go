@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/proto/waCommon"
 	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/store"
@@ -113,5 +114,42 @@ func TestReadOnlyAndPaceBlockSends(t *testing.T) {
 	k.stop()
 	if err := k.maySend(); err != ErrStopped {
 		t.Fatalf("after a ban nothing sends, got %v", err)
+	}
+}
+
+func TestMediaMessagesCarryTheUpload(t *testing.T) {
+	up := whatsmeow.UploadResponse{URL: "https://u", DirectPath: "/d", MediaKey: []byte{1}, FileEncSHA256: []byte{2}, FileSHA256: []byte{3}, FileLength: 42}
+	img := ImageMessage(up, "olha").GetImageMessage()
+	if img.GetDirectPath() != "/d" || img.GetFileLength() != 42 || img.GetMimetype() != "image/jpeg" || img.GetCaption() != "olha" {
+		t.Fatalf("image: %+v", img)
+	}
+	v := VoiceMessage(up, 7, "audio/ogg; codecs=opus").GetAudioMessage()
+	if !v.GetPTT() || v.GetSeconds() != 7 || v.GetMimetype() != "audio/ogg; codecs=opus" {
+		t.Fatalf("voice: %+v", v)
+	}
+}
+
+func TestPendingMediaIsBounded(t *testing.T) {
+	k := &Link{}
+	for i := 0; i < MaxPendingMedia+5; i++ {
+		k.remember(string(rune('a'+i%26))+time.Duration(i).String(), &waE2E.ImageMessage{})
+	}
+	if len(k.media) != MaxPendingMedia || len(k.mediaOrder) != MaxPendingMedia {
+		t.Fatalf("kept %d", len(k.media))
+	}
+	if _, err := k.Download("nope"); err == nil {
+		t.Fatal("unknown media must fail")
+	}
+}
+
+func TestOwnNumberRefused(t *testing.T) {
+	k, _ := Open(filepath.Join(t.TempDir(), "s.db"), nl{})
+	own := types.NewJID("5511900000000", types.DefaultUserServer)
+	k.c.Store.ID = &own
+	if _, err := k.target("5511900000000@s.whatsapp.net"); err == nil {
+		t.Fatal("the parent's own number must be refused")
+	}
+	if _, err := k.target("5511900000001@s.whatsapp.net"); err != nil {
+		t.Fatal(err)
 	}
 }

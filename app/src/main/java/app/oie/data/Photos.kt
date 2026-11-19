@@ -48,6 +48,13 @@ object Photos {
         return name
     }
 
+    /** Seals and stores bytes received through the WhatsApp link (a photo, a sticker, a voice note) as they are. */
+    fun keepBytes(context: Context, bytes: ByteArray): String {
+        val name = UUID.randomUUID().toString() + ".sealed"
+        File(dir(context), name).writeBytes(sealer.seal(bytes))
+        return name
+    }
+
     /** A small bitmap for the chat bubble or the preview. */
     fun load(context: Context, name: String, maxSide: Int): Bitmap? {
         val f = File(dir(context), name)

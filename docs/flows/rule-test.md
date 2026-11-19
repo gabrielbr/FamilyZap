@@ -36,7 +36,7 @@ flowchart TD
 | 1 | **Intro** | Reads, taps **Conectar para testar** | Says plainly: read-only, nothing sent, stays on this tablet. Says the ban risk and suggests a spare number. |
 | 2 | **QR** | Scans it in WhatsApp › Dispositivos conectados | The link pairs read-only. In WhatsApp the tablet shows as "Oiê" (rule L1). History is limited to 1 day (L6). |
 | 3 | **Pick chats** | Searches, taps a chat or group | Only picked chats are judged. A group shows the "everyone sees" line. |
-| 4 | **Results** | Reads each message as it arrives | Each row has who, when, the verdict in words (**Chegaria** / **Fica com você**) and why. The text is shown only for messages that would reach the kid. Messages from other chats are only counted. |
+| 4 | **Results** | Reads each message as it arrives | Each row has who, when, the verdict in words (**Chegaria** / **Fica com você**) and why. The text is shown only for messages that would reach the kid, and so is a photo or sticker (downloaded and sealed, v0.6). A voice message shows its length. Messages from other chats are only counted. |
 | 5 | **Fingir que {kid} falou agora** | Taps it for a chat | It opens the rule's 24-hour window for that chat, as if the kid had sent a message (the test sends nothing, so this is the only way to try that part of the rule). |
 | 6 | **Desconectar e apagar o teste** | Taps it when done | Logs out of WhatsApp. Deletes the session and every result from the tablet. |
 

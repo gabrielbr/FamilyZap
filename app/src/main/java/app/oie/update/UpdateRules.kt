@@ -8,6 +8,9 @@ object UpdateRules {
     /** The public repo that holds only Oiê's releases; the code stays private (owner, 2026-11-18). */
     const val REPO = "gabrielbr/oie-releases"
     const val ASSET_PREFIX = "Oie-"
+    /** Per-architecture APKs ("Oie_arm64-v8a_0.6.0.apk"), about half the size. Older copies of Oiê
+     *  don't know this name and take the universal "Oie-<version>.apk", which every release keeps. */
+    const val ABI_PREFIX = "Oie_"
     const val SUMS = "SHA256SUMS.txt"
     const val MIN_INTERVAL_MS = 15 * 60 * 1000L
 
@@ -33,10 +36,15 @@ object UpdateRules {
         return false
     }
 
-    /** What to offer, or null: drafts, prereleases, older or equal versions, and releases without an APK or sums. */
-    fun offer(release: Release, installed: String): Offer? {
+    /**
+     * What to offer, or null: drafts, prereleases, older or equal versions, and releases without an APK or sums.
+     * [abis] is the device's supported architectures, best first (Build.SUPPORTED_ABIS): the first one
+     * with its own APK wins, else the universal one.
+     */
+    fun offer(release: Release, installed: String, abis: List<String> = emptyList()): Offer? {
         if (release.draft || release.prerelease || !isNewer(release.tag, installed)) return null
-        val apk = release.assets.firstOrNull { it.name.startsWith(ASSET_PREFIX) && it.name.endsWith(".apk") } ?: return null
+        val apk = abis.firstNotNullOfOrNull { abi -> release.assets.firstOrNull { it.name.startsWith("$ABI_PREFIX${abi}_") && it.name.endsWith(".apk") } }
+            ?: release.assets.firstOrNull { it.name.startsWith(ASSET_PREFIX) && it.name.endsWith(".apk") } ?: return null
         val sums = release.assets.firstOrNull { it.name == SUMS } ?: return null
         if (!apk.url.startsWith("https://") || !sums.url.startsWith("https://")) return null
         return Offer(release.tag.removePrefix("v").substringBefore('+'), release.notes, apk, sums)
