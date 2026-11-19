@@ -35,7 +35,7 @@ import app.oie.ui.setup.Setup
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 
-object BuildConfigInfo { const val VERSION = "0.4.0" }
+object BuildConfigInfo { const val VERSION = "0.5.0" }
 
 val LocalUpdater = androidx.compose.runtime.staticCompositionLocalOf<app.oie.update.Updater?> { null }
 val LocalNotifier = androidx.compose.runtime.staticCompositionLocalOf<app.oie.data.Notifier?> { null }
@@ -46,12 +46,21 @@ class MainActivity : ComponentActivity() {
     private val tx by lazy { if (resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt }
     private val notifier by lazy { app.oie.data.Notifier(applicationContext, tx) }
     private var appState: AppState? = null
+    /** The real WhatsApp link, used only by the rule test for now (docs/flows/rule-test.md). */
+    private var realLink: app.oie.data.RealLink? = null
 
     /** Every return to the foreground: an update check (at most every 15 minutes), and the quiet-hours summary if they ended. */
     override fun onStart() {
         super.onStart()
         updater.onForeground()
         appState?.let { notifier.quietSummary(it.takeQuietSummary()) }
+        // The rule test listens only while Oiê is open.
+        if (appState?.linkTest?.on == true) realLink?.start()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        realLink?.stop()
     }
 
     override fun onNewIntent(intent: android.content.Intent) {
@@ -71,13 +80,14 @@ class MainActivity : ComponentActivity() {
             // Saved on the tablet only, sealed with a Keystore key (data/Persistence.kt).
             val store = remember { Store(File(filesDir, "state.sealed"), KeystoreSealer()) }
             val state = remember { AppState().also { s -> store.read()?.let { Codec.decode(it, s) }; appState = s } }
+            val real = remember { app.oie.data.RealLink(applicationContext, state).also { realLink = it; if (state.linkTest.on) it.start() } }
             LaunchedEffect(state) {
                 snapshotFlow { Codec.encode(state) }.distinctUntilChanged().collectLatest { json ->
                     withContext(Dispatchers.IO) { store.write(json) }
                 }
             }
             OieTheme {
-              androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides app.oie.ui.text.stringsFor(), LocalUpdater provides updater, LocalNotifier provides notifier) {
+              androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides app.oie.ui.text.stringsFor(), LocalUpdater provides updater, LocalNotifier provides notifier, app.oie.ui.parent.LocalRealLink provides real) {
                 val c = OieTheme.colors
                 // The 4dp frame round every screen (the core rule), in coral.
                 Box(
@@ -91,15 +101,17 @@ class MainActivity : ComponentActivity() {
                             is Route.Conversation -> Conversation(state, r.contactId)
                             Route.ParentPin -> ParentPin(state)
                             is Route.Parent -> ParentArea(state, r.section)
+                            Route.RuleTest -> app.oie.ui.parent.RuleTestScreen(state)
                         }
                         // The update sheet shows only in the parent area: the kid isn't asked to update the app.
-                        if (state.route is Route.Parent || state.route == Route.ParentPin) app.oie.update.UpdateSheet(updater)
+                        if (state.route is Route.Parent || state.route == Route.ParentPin || state.route == Route.RuleTest) app.oie.update.UpdateSheet(updater)
                     }
                 }
                 // System Back always works (android.md): one step back, never trapped.
                 BackHandler(enabled = state.route !is Route.KidHome && state.route != Route.Setup(0)) {
                     state.route = when (val r = state.route) {
                         is Route.Setup -> Route.Setup(r.step - 1)
+                        Route.RuleTest -> Route.Parent(2)
                         else -> Route.KidHome
                     }
                 }

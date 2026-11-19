@@ -17,14 +17,20 @@ import java.text.Normalizer
 object MessageRule {
     const val WINDOW_MS: Long = 24L * 60 * 60 * 1000
 
-    fun isForKid(message: Message, chat: Contact, history: List<Message>, kidName: String): Boolean {
-        if (message.fromKid) return true
-        if (chat.isGroup && chat.showWholeGroup) return true
+    /** Why a message reaches the kid, or null when it stays private to the parent's WhatsApp. */
+    enum class Reason { FROM_KID, WHOLE_GROUP, REPLY, NAME, WINDOW }
+
+    fun isForKid(message: Message, chat: Contact, history: List<Message>, kidName: String): Boolean =
+        reason(message, chat, history, kidName) != null
+
+    fun reason(message: Message, chat: Contact, history: List<Message>, kidName: String): Reason? {
+        if (message.fromKid) return Reason.FROM_KID
+        if (chat.isGroup && chat.showWholeGroup) return Reason.WHOLE_GROUP
         val kidMessages = history.filter { it.fromKid && it.chatId == message.chatId && it.at <= message.at }
-        if (message.replyTo != null && kidMessages.any { it.id == message.replyTo }) return true
-        if (startsWithName(message.text, kidName)) return true
-        val lastKid = kidMessages.maxOfOrNull { it.at } ?: return false
-        return message.at - lastKid <= WINDOW_MS
+        if (message.replyTo != null && kidMessages.any { it.id == message.replyTo }) return Reason.REPLY
+        if (startsWithName(message.text, kidName)) return Reason.NAME
+        val lastKid = kidMessages.maxOfOrNull { it.at } ?: return null
+        return if (message.at - lastKid <= WINDOW_MS) Reason.WINDOW else null
     }
 
     /** "Tito, …", "tito!", "Títo:" all count; "Titozão" doesn't (the name must end the word). */

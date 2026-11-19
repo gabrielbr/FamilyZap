@@ -18,6 +18,9 @@ A release is what self-update offers (Gabriel Design System `docs/self-update.md
 
 Until the secrets exist, the `release` workflow only warns and skips.
 
+## Building
+The app needs the WhatsApp link library: `link/build-aar.sh` builds it, with Go and the Android NDK. The workflows build it before Gradle.
+
 ## Each release
 1. In the PR, bump `versionCode` and `versionName` in `app/build.gradle.kts`, and `BuildConfigInfo.VERSION` to match.
 2. Move the CHANGELOG's notes from `## Unreleased` to a `## <version>` heading. They become the notes in the update sheet, as plain text, so write them for the parent.

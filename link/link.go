@@ -1,8 +1,11 @@
 // Package oielink is Oiê's link to the parent's WhatsApp: whatsmeow, wrapped for gomobile.
 //
-// Status: a feasibility spike (docs/whatsapp-link.md). It builds for Android and opens its session
-// store; it is not wired into the app. The app keeps using SampleLink until the message rule is
-// tested with real chats (STATUS.md). The rules L1–L9 in docs/whatsapp-link.md apply to all of it.
+// The app (Kotlin) drives it through Link and hears back through Listener as (kind, json) events.
+// Everything that decides what the kid sees stays in Kotlin (Inbox.decide): this package only
+// translates. The rules L1–L9 in docs/whatsapp-link.md apply to all of it.
+//
+// Status: not wired into the app yet; the app runs on SampleLink until the message rule is tested
+// with real chats (STATUS.md).
 //
 // whatsmeow is MPL-2.0: we use it unmodified and say where its source is (docs/whatsapp-link.md).
 package oielink
@@ -10,12 +13,19 @@ package oielink
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"sort"
+	"sync"
+	"time"
 
 	"go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
+	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 	waLog "go.mau.fi/whatsmeow/util/log"
+	"google.golang.org/protobuf/proto"
 	_ "modernc.org/sqlite"
 )
 
@@ -23,25 +33,44 @@ import (
 // the app (rule L5). Its own wait grows 2 s per try.
 const MaxReconnects = 8
 
-// Listener receives events as (kind, json). Kotlin implements it.
-type Listener interface{ OnEvent(kind string, payload string) }
+// MinSendGap backs up the app's SendPace (rule L3): even a bug in the app can't send faster.
+const MinSendGap = 2 * time.Second
 
+var (
+	ErrReadOnly  = errors.New("read-only: sending is off")
+	ErrTooFast   = errors.New("too fast: wait before sending again")
+	ErrNotLinked = errors.New("not linked")
+	ErrStopped   = errors.New("stopped after a ban or logout")
+)
+
+// Listener receives events as (kind, json). Kotlin implements it. Kinds:
+//
+//	qr {code, timeoutSeconds} · paired {} · pairError {error} · connected {} · disconnected {}
+//	message (Incoming) · loggedOut {reason} · temporaryBan {code, expiresInSeconds} · replaced {}
+type Listener interface {
+	OnEvent(kind string, payload string)
+}
+
+// Link is one tablet's link to one WhatsApp account.
 type Link struct {
-	c *whatsmeow.Client
-	l Listener
+	c        *whatsmeow.Client
+	l        Listener
+	mu       sync.Mutex
+	readOnly bool
+	stopped  bool
+	lastSend time.Time
 }
 
 func init() {
 	// L1: the parent sees "Oiê" in WhatsApp's Linked devices, so it's never a mystery device.
-	store.SetOSInfo("Oiê", [3]uint32{0, 4, 0})
-	// L6: pull as little history as WhatsApp allows. Oiê needs none from before linking.
+	store.SetOSInfo("Oiê", [3]uint32{0, 5, 0})
+	// L6: pull as little history as WhatsApp allows. Oiê shows nothing from before the link.
 	one := uint32(1)
 	store.DeviceProps.HistorySyncConfig.FullSyncDaysLimit = &one
 	store.DeviceProps.HistorySyncConfig.RecentSyncDaysLimit = &one
 }
 
-// Open opens (or creates) the session store at dbPath. The app keeps that file in its private
-// storage, inside the area it encrypts (rule L8).
+// Open opens (or creates) the session store at dbPath, in the app's private storage (rule L8).
 func Open(dbPath string, l Listener) (*Link, error) {
 	ctx := context.Background()
 	container, err := sqlstore.New(ctx, "sqlite", "file:"+dbPath+"?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)", waLog.Noop)
@@ -56,23 +85,273 @@ func Open(dbPath string, l Listener) (*Link, error) {
 	// L5: bounded reconnects; after that the app reconnects when the network or the app comes back.
 	c.AutoReconnectHook = func(error) bool { return c.AutoReconnectErrors < MaxReconnects }
 	k := &Link{c: c, l: l}
-	c.AddEventHandler(func(e interface{}) {
-		switch v := e.(type) {
-		case *events.Message:
-			b, _ := json.Marshal(map[string]any{"chat": v.Info.Chat.String(), "fromMe": v.Info.IsFromMe, "text": v.Message.GetConversation()})
-			l.OnEvent("message", string(b))
-		case *events.Connected:
-			l.OnEvent("connected", "{}")
-		case *events.LoggedOut:
-			l.OnEvent("loggedOut", "{}")
-		case *events.TemporaryBan:
-			// L9: stop everything and tell the parent plainly.
-			b, _ := json.Marshal(map[string]any{"code": int(v.Code), "expiresInSeconds": int64(v.Expire.Seconds())})
-			l.OnEvent("temporaryBan", string(b))
-		}
-	})
+	c.AddEventHandler(k.handle)
 	return k, nil
 }
 
 // Paired says whether the tablet is already linked to a WhatsApp account.
 func (k *Link) Paired() bool { return k.c.Store.ID != nil }
+
+// SetReadOnly turns sending off (true) or on. Read-only is for testing the message rule on a real
+// account: the link only listens.
+func (k *Link) SetReadOnly(on bool) { k.mu.Lock(); k.readOnly = on; k.mu.Unlock() }
+
+// Connect connects. When the tablet isn't linked yet, it emits "qr" events for the parent to scan
+// in WhatsApp › Linked devices, then "paired" or "pairError".
+func (k *Link) Connect() error {
+	if k.isStopped() {
+		return ErrStopped
+	}
+	ctx := context.Background()
+	if k.Paired() {
+		return k.c.Connect()
+	}
+	qr, err := k.c.GetQRChannel(ctx)
+	if err != nil {
+		return err
+	}
+	if err := k.c.Connect(); err != nil {
+		return err
+	}
+	go func() {
+		for item := range qr {
+			switch item.Event {
+			case "code":
+				k.emit("qr", map[string]any{"code": item.Code, "timeoutSeconds": int(item.Timeout.Seconds())})
+			case "success":
+				k.emit("paired", map[string]any{})
+			default:
+				msg := item.Event
+				if item.Error != nil {
+					msg = item.Error.Error()
+				}
+				k.emit("pairError", map[string]any{"error": msg})
+			}
+		}
+	}()
+	return nil
+}
+
+// PairWithCode is the "Usar código" option: it returns the 8-character code the parent types in
+// WhatsApp › Linked devices › Link with phone number. Call after Connect.
+func (k *Link) PairWithCode(phone string) (string, error) {
+	return k.c.PairPhone(context.Background(), phone, true, whatsmeow.PairClientChrome, "Chrome (Linux)")
+}
+
+// Disconnect closes the connection; the link stays (the tablet can reconnect without a new QR).
+func (k *Link) Disconnect() { k.c.Disconnect() }
+
+// Unlink logs out and deletes the session from the tablet (rule L8).
+func (k *Link) Unlink() error {
+	ctx := context.Background()
+	if k.Paired() {
+		if err := k.c.Logout(ctx); err != nil {
+			// Logged out on the phone already, or offline: delete the local session anyway.
+			_ = k.c.Store.Delete(ctx)
+		}
+	}
+	return nil
+}
+
+// Contacts returns the parent's WhatsApp contacts and groups as JSON, for the parent to choose
+// from: [{"id","name","isGroup"}], sorted by name. It never goes to the kid's screens.
+func (k *Link) Contacts() (string, error) {
+	if !k.Paired() {
+		return "", ErrNotLinked
+	}
+	ctx := context.Background()
+	type entry struct {
+		ID      string `json:"id"`
+		Name    string `json:"name"`
+		IsGroup bool   `json:"isGroup"`
+	}
+	var out []entry
+	all, err := k.c.Store.Contacts.GetAllContacts(ctx)
+	if err != nil {
+		return "", err
+	}
+	for jid, info := range all {
+		if name := contactName(info); name != "" {
+			out = append(out, entry{jid.ToNonAD().String(), name, false})
+		}
+	}
+	groups, err := k.c.GetJoinedGroups(ctx)
+	if err == nil {
+		for _, g := range groups {
+			out = append(out, entry{g.JID.String(), g.GroupName.Name, true})
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	b, err := json.Marshal(out)
+	return string(b), err
+}
+
+// SendText sends a text to an allowed chat (the app checks the list, rule L2) and returns the
+// message id. quotedID replies to a message; empty for none. A failure is reported, never retried
+// here (rule L4): the app retries once with the same id via SendTextWithID.
+func (k *Link) SendText(chat, text, quotedID string) (string, error) {
+	return k.SendTextWithID(chat, text, quotedID, string(k.c.GenerateMessageID()))
+}
+
+// SendTextWithID sends with a given id, so a retry after a reconnect can't make a duplicate.
+func (k *Link) SendTextWithID(chat, text, quotedID, id string) (string, error) {
+	if err := k.maySend(); err != nil {
+		return "", err
+	}
+	to, err := types.ParseJID(chat)
+	if err != nil {
+		return "", err
+	}
+	if own := k.c.Store.ID; own != nil && to.User == own.User && to.Server == types.DefaultUserServer {
+		return "", errors.New("never to the parent's own number") // L2
+	}
+	msg := &waE2E.Message{Conversation: proto.String(text)}
+	if quotedID != "" {
+		msg = &waE2E.Message{ExtendedTextMessage: &waE2E.ExtendedTextMessage{
+			Text:        proto.String(text),
+			ContextInfo: &waE2E.ContextInfo{StanzaID: proto.String(quotedID)},
+		}}
+	}
+	_, err = k.c.SendMessage(context.Background(), to, msg, whatsmeow.SendRequestExtra{ID: types.MessageID(id)})
+	return id, err
+}
+
+func (k *Link) maySend() error {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	switch {
+	case k.stopped:
+		return ErrStopped
+	case k.readOnly:
+		return ErrReadOnly
+	case !k.lastSend.IsZero() && time.Since(k.lastSend) < MinSendGap:
+		return ErrTooFast
+	}
+	k.lastSend = time.Now()
+	return nil
+}
+
+func (k *Link) isStopped() bool { k.mu.Lock(); defer k.mu.Unlock(); return k.stopped }
+
+func (k *Link) stop() { k.mu.Lock(); k.stopped = true; k.mu.Unlock() }
+
+func (k *Link) handle(e interface{}) {
+	switch v := e.(type) {
+	case *events.Message:
+		if in, ok := ToIncoming(v.Info, v.Message); ok {
+			k.emit("message", in)
+		}
+	case *events.Connected:
+		// L7: one presence so WhatsApp has the name, and it's "unavailable": the parent never
+		// shows as online because of the tablet.
+		_ = k.c.SendPresence(context.Background(), types.PresenceUnavailable)
+		k.emit("connected", map[string]any{})
+	case *events.Disconnected:
+		k.emit("disconnected", map[string]any{})
+	case *events.StreamReplaced:
+		k.emit("replaced", map[string]any{})
+	case *events.LoggedOut:
+		k.stop() // L9
+		k.emit("loggedOut", map[string]any{"reason": int(v.Reason)})
+	case *events.TemporaryBan:
+		k.stop() // L9: stop everything and tell the parent plainly.
+		k.emit("temporaryBan", map[string]any{"code": int(v.Code), "expiresInSeconds": int64(v.Expire.Seconds())})
+	}
+	// History sync (events.HistorySync) is ignored on purpose (rule L6).
+}
+
+func (k *Link) emit(kind string, payload any) {
+	b, _ := json.Marshal(payload)
+	k.l.OnEvent(kind, string(b))
+}
+
+func contactName(c types.ContactInfo) string {
+	for _, n := range []string{c.FullName, c.FirstName, c.PushName, c.BusinessName} {
+		if n != "" {
+			return n
+		}
+	}
+	return ""
+}
+
+// Incoming is one message as the app gets it, matching the Kotlin Message and Kind.
+type Incoming struct {
+	ID   string `json:"id"`
+	Chat string `json:"chat"`
+	// ChatAlt is the chat's other address (phone number or LID), when WhatsApp gives one: the app
+	// matches the allowed list against both.
+	ChatAlt string `json:"chatAlt,omitempty"`
+	Sender  string `json:"sender"`
+	// FromMe means sent by the parent's account: from the tablet (the kid) or from the parent's
+	// own phone. The app tells them apart by the ids it sent; the parent's own are dropped.
+	FromMe      bool   `json:"fromMe"`
+	At          int64  `json:"at"`
+	Kind        string `json:"kind"`
+	Text        string `json:"text,omitempty"`
+	ReplyTo     string `json:"replyTo,omitempty"`
+	DurationSec int    `json:"durationSec,omitempty"`
+}
+
+// ToIncoming translates a whatsmeow message for the app. ok is false for what the app never needs
+// (reactions, edits, receipts-like protocol messages, status updates).
+func ToIncoming(info types.MessageInfo, m *waE2E.Message) (Incoming, bool) {
+	if m == nil || info.Chat.Server == types.BroadcastServer {
+		return Incoming{}, false
+	}
+	in := Incoming{
+		ID:     string(info.ID),
+		Chat:   info.Chat.ToNonAD().String(),
+		Sender: info.Sender.ToNonAD().String(),
+		FromMe: info.IsFromMe,
+		At:     info.Timestamp.UnixMilli(),
+	}
+	alt := info.SenderAlt
+	if info.IsFromMe {
+		alt = info.RecipientAlt
+	}
+	if !info.IsGroup && !alt.IsEmpty() {
+		in.ChatAlt = alt.ToNonAD().String()
+	}
+	var ctx *waE2E.ContextInfo
+	switch {
+	case m.GetProtocolMessage() != nil:
+		p := m.GetProtocolMessage()
+		if p.GetType() != waE2E.ProtocolMessage_REVOKE {
+			return Incoming{}, false
+		}
+		in.Kind, in.ReplyTo = "DELETED", p.GetKey().GetID()
+	case m.Conversation != nil:
+		in.Kind, in.Text = "TEXT", m.GetConversation()
+	case m.GetExtendedTextMessage() != nil:
+		t := m.GetExtendedTextMessage()
+		in.Kind, in.Text, ctx = "TEXT", t.GetText(), t.GetContextInfo()
+	case m.GetImageMessage() != nil:
+		i := m.GetImageMessage()
+		in.Kind, in.Text, ctx = "PHOTO", i.GetCaption(), i.GetContextInfo()
+	case m.GetAudioMessage() != nil:
+		a := m.GetAudioMessage()
+		in.Kind, in.DurationSec, ctx = "VOICE", int(a.GetSeconds()), a.GetContextInfo()
+	case m.GetStickerMessage() != nil:
+		s := m.GetStickerMessage()
+		in.Kind, ctx = "STICKER", s.GetContextInfo()
+	case m.GetReactionMessage() != nil, m.GetEditedMessage() != nil, keysOnly(m):
+		return Incoming{}, false
+	default:
+		in.Kind = "UNSUPPORTED" // a document, a location, a poll: "só abre no WhatsApp"
+	}
+	if ctx != nil {
+		in.ReplyTo = ctx.GetStanzaID()
+	}
+	return in, true
+}
+
+// keysOnly spots a message that carries only group encryption keys, nothing to show.
+func keysOnly(m *waE2E.Message) bool {
+	if m.GetSenderKeyDistributionMessage() == nil {
+		return false
+	}
+	c := proto.Clone(m).(*waE2E.Message)
+	c.SenderKeyDistributionMessage = nil
+	c.MessageContextInfo = nil
+	return proto.Size(c) == 0
+}

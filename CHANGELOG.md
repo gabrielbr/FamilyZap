@@ -1,6 +1,16 @@
 # Changelog
 
 ## Unreleased
+
+## 0.5.0
+- Test the message rule with your real WhatsApp. In the parent area, open Conexão and tap Testar a regra com seu WhatsApp.
+- It links your WhatsApp to read only: nothing is sent.
+- Pick a few chats. Each new message shows whether it would reach your kid ("Chegaria") or stay with you ("Fica com você"), and why.
+- Only the text of messages that would reach your kid is kept. Messages from other chats are only counted.
+- "Fingir que Tito falou agora" tries the 24-hour part of the rule.
+- Desconectar e apagar o teste logs out and deletes the test from the tablet.
+- The kid's side still uses sample data.
+- The app is bigger (about 40 MB), because it now carries the WhatsApp link.
 - **The WhatsApp link, chosen and tried:**
   - It uses whatsmeow (decision 0003). A spike in `link/` builds it for Android and opens its session store.
   - The rules that keep the link from looking like a bot (L1–L9) are in `docs/whatsapp-link.md`. The first one, human pace (`SendPace`), is in the app with tests.

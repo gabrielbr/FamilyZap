@@ -22,6 +22,7 @@ sealed interface Route {
     data class Conversation(val contactId: String) : Route
     data object ParentPin : Route
     data class Parent(val section: Int) : Route // 0 contacts, 1 quiet hours, 2 connection, 3 about
+    data object RuleTest : Route // Conexão › Testar a regra (docs/flows/rule-test.md)
 }
 
 /**
@@ -41,6 +42,8 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     val allowed = mutableStateListOf<Contact>()
     val periods = mutableStateListOf<QuietPeriod>().apply { addAll(QuietHours.presets) }
     val messages = mutableStateListOf<Message>()
+    /** The rule test with the parent's real WhatsApp (docs/flows/rule-test.md). */
+    val linkTest = LinkTest()
     /** Unsent drafts per contact (flow: Remembers). */
     val drafts = mutableStateMapOf<String, String>()
     /** The last photo source the kid used, opened first next time (flow: Remembers). */
