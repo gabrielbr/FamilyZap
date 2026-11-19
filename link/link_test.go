@@ -2,6 +2,7 @@ package oielink
 
 import (
 	"bytes"
+	"database/sql"
 	"errors"
 	"fmt"
 	"image"
@@ -321,5 +322,20 @@ func TestSelfNoteNeedsALinkedTablet(t *testing.T) {
 	}
 	if _, err := k.SendSelfNote("Oiê: ok"); !errors.Is(err, ErrNotLinked) {
 		t.Fatalf("got %v", err)
+	}
+}
+
+func TestTheStoreKeepsTemporaryTablesInMemory(t *testing.T) {
+	db, err := sql.Open("sqlite", storeDSN(filepath.Join(t.TempDir(), "t.db")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	var mode int
+	if err := db.QueryRow("PRAGMA temp_store").Scan(&mode); err != nil {
+		t.Fatal(err)
+	}
+	if mode != 2 {
+		t.Fatalf("temp_store = %d: on Android SQLite finds no temp folder (issue #34)", mode)
 	}
 }
