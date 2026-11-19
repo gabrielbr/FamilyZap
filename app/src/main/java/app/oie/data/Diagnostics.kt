@@ -93,6 +93,12 @@ object Diagnostics {
 
     fun isEmpty(): Boolean = synchronized(lock) { file?.let { !it.exists() || it.length() == 0L } ?: true }
 
+    /** The first line of the report: version, Android and tablet. */
+    fun header(): String = header
+
+    /** The report's lines, oldest first. */
+    fun lines(): List<String> = synchronized(lock) { file?.takeIf { it.exists() }?.readLines()?.filter { it.isNotBlank() } ?: emptyList() }
+
     /** The text the parent copies. */
     fun report(): String = synchronized(lock) {
         header + "\n\n" + (file?.takeIf { it.exists() }?.readText() ?: "")

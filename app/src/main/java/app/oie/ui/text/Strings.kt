@@ -130,6 +130,9 @@ interface Strings {
     val problems: String; val noProblems: String; val copyReport: String; val copied: String; val clearReport: String; val reportPrivacy: String
     fun closedByItself(day: Int, month: Int, time: String): String
     val crashPointer: String; val openReport: String
+    val sendToGitHub: String
+    fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean): String
+    fun reportCut(kept: Int, total: Int): String
 
     // Self-update (Gabriel Design System docs/self-update.md, "Words")
     fun updateAvailable(v: String): String
@@ -296,9 +299,12 @@ object Pt : Strings {
     override val chosen = "Escolhido"
     override val problems = "Problemas"; override val noProblems = "Nenhum problema guardado."
     override val copyReport = "Copiar relatório"; override val copied = "Copiado"; override val clearReport = "Apagar relatório"
-    override val reportPrivacy = "O relatório fica só neste tablet e não tem mensagens nem nomes. Copie e cole onde quiser mandar."
+    override val reportPrivacy = "O relatório fica só neste tablet e não tem mensagens nem nomes. Copie, ou abra no GitHub e envie você mesmo."
     override fun closedByItself(day: Int, month: Int, time: String) = "O Oiê fechou sozinho em %02d/%02d às %s.".format(day, month, time)
     override val crashPointer = "O Oiê fechou sozinho há pouco. Há um relatório para copiar."; override val openReport = "Ver relatório"
+    override val sendToGitHub = "Enviar para o GitHub"
+    override fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean) = "Relatório do tablet · Oiê $version · %02d/%02d".format(day, month) + if (crashed) " · fechou sozinho" else ""
+    override fun reportCut(kept: Int, total: Int) = "Só as últimas $kept de $total linhas cabem aqui. O relatório inteiro pode ser copiado no tablet."
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -456,9 +462,12 @@ object En : Strings {
     override val chosen = "Chosen"
     override val problems = "Problems"; override val noProblems = "No problems saved."
     override val copyReport = "Copy report"; override val copied = "Copied"; override val clearReport = "Delete report"
-    override val reportPrivacy = "The report stays on this tablet and holds no messages or names. Copy it and paste it wherever you want to send it."
+    override val reportPrivacy = "The report stays on this tablet and holds no messages or names. Copy it, or open it in GitHub and send it yourself."
     override fun closedByItself(day: Int, month: Int, time: String) = "Oiê closed by itself on %02d/%02d at %s.".format(day, month, time)
     override val crashPointer = "Oiê closed by itself recently. There's a report to copy."; override val openReport = "See report"
+    override val sendToGitHub = "Send to GitHub"
+    override fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean) = "Tablet report · Oiê $version · %02d/%02d".format(day, month) + if (crashed) " · closed by itself" else ""
+    override fun reportCut(kept: Int, total: Int) = "Only the last $kept of $total lines fit here. The whole report can be copied on the tablet."
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

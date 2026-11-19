@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 0.18.0
+- In Ajustes e ajuda › Problemas, "Enviar para o GitHub" opens a new issue in the private FamilyZap repo, with the report already filled in. You read it and tap Submit, logged in as yourself. Oiê holds no password and sends nothing on its own. "Copiar relatório" is still there.
+
 ## 0.17.0
 - After you link, WhatsApp takes a few seconds to a minute to send your contacts. Groups come straight away, so the list used to show only groups. Now setup and Contatos say "Trazendo seus contatos do WhatsApp… N até agora", and the list fills in as they arrive, people first.
 - If it takes more than a minute, Oiê says so and opens "Adicionar pelo número". If your WhatsApp has no contacts, it says that. You can always continue and choose later.
