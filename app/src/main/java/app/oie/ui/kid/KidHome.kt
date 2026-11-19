@@ -54,7 +54,7 @@ fun KidHome(state: AppState) {
                 quiet != null -> Banner(R.drawable.gg_ic_clock, tx.quietUntil(quiet.end.hour))
             }
             Column(
-                Modifier.fillMaxWidth().padding(horizontal = OTokens.Spacing.space16, vertical = OTokens.Spacing.space10),
+                Modifier.fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space10),
                 verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
             ) {
                 Text(tx.hello(state.kidName), style = OieType.display, color = c.ink)

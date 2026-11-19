@@ -73,6 +73,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.13: full design audit of every screen with the four skills (16/20 native audit, was 12/20); phone width fixed; phone and large-text screenshots added (2026-11-19).
 - [x] v0.12: test features removed (sample, simulations, rule test); contacts reload as they arrive; add by number (2026-11-19). The owner tests the real link now.
 - [x] v0.11: real voice messages, recorded and played (2026-11-19).
 - [x] v0.10: family stickers. The parent sends a sticker to their own chat; the kid keeps it and sends it as a real sticker (2026-11-19).

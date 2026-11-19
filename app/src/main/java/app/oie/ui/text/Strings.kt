@@ -121,6 +121,8 @@ interface Strings {
     val search: String; val searchHelp: String
     val addByNumber: String; val numberLabel: String; val numberHelp: String; val contactNameLabel: String
     val notOnWhatsApp: String; val lookUpFailed: String; val looking: String
+    fun unlinkConfirm(kid: String): String
+    val onlyOutsideQuiet: String; val contactsArriving: String
 
     // Self-update (Gabriel Design System docs/self-update.md, "Words")
     fun updateAvailable(v: String): String
@@ -279,6 +281,9 @@ object Pt : Strings {
     override val addByNumber = "Adicionar pelo número"; override val numberLabel = "Número com DDD"; override val numberHelp = "Com o código do país: 55 11 99999-0000."
     override val contactNameLabel = "Nome"; override val notOnWhatsApp = "Esse número não está no WhatsApp."
     override val lookUpFailed = "Não deu para procurar agora. Tente de novo."; override val looking = "Procurando…"
+    override fun unlinkConfirm(kid: String) = "$kid para de receber e mandar mensagens até você conectar de novo com o código."
+    override val onlyOutsideQuiet = "Só fora do silêncio"
+    override val contactsArriving = "Carregando seus contatos do WhatsApp…"
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -428,6 +433,9 @@ object En : Strings {
     override val addByNumber = "Add by number"; override val numberLabel = "Phone number"; override val numberHelp = "With the country code: 55 11 99999-0000."
     override val contactNameLabel = "Name"; override val notOnWhatsApp = "That number isn't on WhatsApp."
     override val lookUpFailed = "Couldn't look it up now. Try again."; override val looking = "Looking…"
+    override fun unlinkConfirm(kid: String) = "$kid stops sending and receiving messages until you link again with the code."
+    override val onlyOutsideQuiet = "Only outside quiet hours"
+    override val contactsArriving = "Loading your WhatsApp contacts…"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }
