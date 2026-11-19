@@ -22,8 +22,7 @@ sealed interface Route {
     data class Conversation(val contactId: String) : Route
     data object ParentPin : Route
     data class Parent(val section: Int) : Route // 0 contacts, 1 quiet hours, 2 connection, 3 about
-    data object RuleTest : Route // Conexão › Testar a regra (docs/flows/rule-test.md)
-    data object Pair : Route // Conexão › Conectar de novo, on the real WhatsApp (v0.8)
+    data object Pair : Route // Conexão › Conectar o WhatsApp
 }
 
 /**
@@ -44,7 +43,7 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     val periods = mutableStateListOf<QuietPeriod>().apply { addAll(QuietHours.presets) }
     val messages = mutableStateListOf<Message>()
     /** The rule test with the parent's real WhatsApp (docs/flows/rule-test.md). */
-    val linkTest = LinkTest()
+    val linkState = LinkState()
     /** The kid's side uses the parent's real WhatsApp (v0.8). Off until the parent turns it on; there's no way back but unlinking. */
     var realMode by mutableStateOf(false)
     /** The real link, set by the app (OieApp); null in tests. */

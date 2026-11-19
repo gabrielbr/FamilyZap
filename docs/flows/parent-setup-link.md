@@ -69,7 +69,11 @@ Both names from setup step 3 can be changed later in Parent area › **Ajustes e
 
 ## v0.8: the real link
 - **Step 2:** "Conectar o WhatsApp" shows the QR and WhatsApp's own steps. When the phone scans it, the kid's side uses the real WhatsApp (`AppState.realMode`), and the contacts step lists the parent's real contacts, with a search when there are more than 12. **Usar exemplo por enquanto** keeps the sample, for trying Oiê out.
-- **Later:** an existing tablet on the sample turns to the real WhatsApp from Conexão. The rule test must be connected first; then "Usar o WhatsApp de verdade com {kid}", with the effect and the ban risk said above the button. The sample chats go and the parent picks real contacts. There is no switch back: "Desconectar o WhatsApp" unlinks, and "Conectar de novo" links again.
+- **Since v0.12 there is no sample.** Setup step 2 links the real WhatsApp, with no "use the sample" way out. A tablet updated from the sample drops its sample chats and contacts. Conexão then shows **Conectar o WhatsApp**, which shows the risk and the QR, and lands in Contatos when nobody is chosen yet. **Desconectar o WhatsApp** unlinks.
+- **Contatos (v0.12):**
+  - the parent's contacts arrive a few seconds after linking; the list reloads as they come and each time Contatos opens;
+  - people come before groups, with a search;
+  - **Adicionar pelo número** adds someone missing from the list, once WhatsApp confirms the number. Otherwise: "Esse número não está no WhatsApp."
 
 ## Reconnect and forgot PIN
 - **Reconnect** (the link dropped). The kid's side says "Peça para {nome} conectar de novo." The parent opens **Área dos pais** with the PIN, sees "O Oiê se desconectou do seu WhatsApp", and taps **Conectar de novo**, which goes back to step 2. Messages the kid sent meanwhile are kept and go out after.

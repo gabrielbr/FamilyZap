@@ -65,7 +65,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Sticker words approved: Oiê!, Saudade, Boa noite, Te amo, Tô chegando, Obrigado (owner, 2026-11-18).
 - [x] App v0.1 built: the UI shell with sample data (2026-11-18).
 - [ ] Check v0.1 on a real tablet: install `app-debug.apk` from the CI run, with TalkBack and large text.
-- [ ] The real WhatsApp link (after the message rule test): choose the library, decision 0003.
+- [x] The real WhatsApp link: whatsmeow (decision 0003), in use since v0.8.
 - [x] Photo sending and saving on the tablet (encrypted), 2026-11-18.
 - [x] Sticker images, the quiet-hours editor, Ajuda e sobre, encrypted photo files, English (v0.2, 2026-11-18).
 - [x] Self-update and the release workflow; portrait screenshots (v0.3, 2026-11-18).
@@ -73,6 +73,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.12: test features removed (sample, simulations, rule test); contacts reload as they arrive; add by number (2026-11-19). The owner tests the real link now.
 - [x] v0.11: real voice messages, recorded and played (2026-11-19).
 - [x] v0.10: family stickers. The parent sends a sticker to their own chat; the kid keeps it and sends it as a real sticker (2026-11-19).
 - [x] v0.9: names editable in Ajustes e ajuda; the kid's messages are signed "Tito: …" on the real WhatsApp (2026-11-19).

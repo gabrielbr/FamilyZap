@@ -177,14 +177,18 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
             }
         }
     }
+    // v0.12: the parent's contacts arrive a little after linking; reload them each time Contatos opens.
+    val real = LocalRealLink.current
+    LaunchedEffect(Unit) { real?.loadContacts() }
     val all = state.wa.contacts().filter { a -> state.allowed.none { it.id == a.id } }
     var query by remember { mutableStateOf("") }
-    // A real WhatsApp has many contacts: search them (the sample has six).
-    val addable = if (all.size > app.oie.ui.setup.SEARCH_FROM) all.filter { query.isNotBlank() && it.name.contains(query, ignoreCase = true) }.take(app.oie.ui.setup.SEARCH_MAX) else all
-    if (state.realMode && state.allowed.isEmpty()) Text(tx.pickRealContacts(state.kidName.ifBlank { tx.theKid }), style = OieType.body, color = c.ink)
-    if (all.isNotEmpty()) {
-        Text(tx.add, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
-        if (all.size > app.oie.ui.setup.SEARCH_FROM) app.oie.ui.setup.Field(tx.ruleTestSearch, query, { query = it; touched() }, tx.ruleTestPickHelp)
+    // People first, then groups; a search narrows them, 30 at a time.
+    val addable = all.filter { query.isBlank() || it.name.contains(query, ignoreCase = true) }
+        .sortedWith(compareBy({ it.isGroup }, { it.name.lowercase() })).take(app.oie.ui.setup.SEARCH_MAX)
+    if (state.allowed.isEmpty()) Text(tx.pickRealContacts(state.kidName.ifBlank { tx.theKid }), style = OieType.body, color = c.ink)
+    Text(tx.add, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    if (all.size > app.oie.ui.setup.SEARCH_FROM) app.oie.ui.setup.Field(tx.search, query, { query = it; touched() }, tx.searchHelp)
+    run {
         addable.forEach { ct ->
             Row(
                 Modifier.fillMaxWidth().height(OTokens.Size.rowMin).clickable(role = Role.Button) { touched(); state.allowed.add(ct) },
@@ -198,6 +202,35 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
             }
         }
     }
+    if (state.realMode) AddByNumber(state, touched)
+}
+
+/** v0.12: someone missing from the list can be added by name and number, once WhatsApp confirms the number. */
+@Composable
+private fun AddByNumber(state: AppState, touched: () -> Unit) {
+    val c = OieTheme.colors
+    val tx = str
+    val real = LocalRealLink.current
+    var name by remember { mutableStateOf("") }
+    var number by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    Text(tx.addByNumber, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    app.oie.ui.setup.Field(tx.contactNameLabel, name, { name = it; note = null; touched() }, "")
+    app.oie.ui.setup.Field(tx.numberLabel, number, { number = it; note = null; touched() }, note ?: tx.numberHelp)
+    QuietButton(if (busy) tx.looking else tx.add, {
+        if (busy || name.isBlank() || number.count { it.isDigit() } < 10) return@QuietButton
+        busy = true
+        real?.lookUp(number) { id ->
+            busy = false
+            when {
+                id == null -> note = tx.lookUpFailed
+                id.isEmpty() -> note = tx.notOnWhatsApp
+                state.allowed.none { it.id == id } -> { state.allowed.add(Contact(id, name.trim())); name = ""; number = "" }
+                else -> { name = ""; number = "" }
+            }
+        }
+    }, icon = R.drawable.gg_ic_plus)
 }
 
 
@@ -287,34 +320,14 @@ private fun AboutAndHelp(state: AppState) {
     Text(tx.credits, style = OieType.caption, color = c.muted)
 }
 
-/** Conexão: the sample or the real WhatsApp, the rule test, and (v0.8) turning the kid's side to the real one. */
+/** Conexão (v0.12, real WhatsApp only): the status, link or link again, and unlink. */
 @Composable
 private fun Connection(state: AppState) {
     val c = OieTheme.colors
     val tx = str
     val real = LocalRealLink.current
-    val kid = state.kidName.ifBlank { tx.theKid }
     Text(tx.connection, style = OieType.title, color = c.ink)
     Text(if (state.wa.connected) tx.connectedTo(state.parentName) else tx.disconnected, style = OieType.body, color = c.ink)
-    if (state.realMode) {
-        if (!state.wa.connected) PrimaryButton(tx.reconnect, { state.route = Route.Pair })
-        TextLink(tx.ruleTestRow, { state.route = Route.RuleTest })
-        if (state.linkTest.on) TextLink(tx.unlinkReal, { real?.unlink() })
-        return
-    }
-    if (state.link.connected) {
-        val notifier = app.oie.LocalNotifier.current
-        TextLink(tx.simulateIncoming, {
-            val m = state.link.pretendIncoming(state.kidName, System.currentTimeMillis())
-            if (state.receive(m) == app.oie.logic.Inbox.Decision.NOTIFY) notifier?.message(m, state.allowed.first { it.id == m.chatId }.name)
-        })
-        TextLink(tx.simulateDrop, { state.link.pretendDropped(); state.route = Route.KidHome })
-    } else PrimaryButton(tx.reconnect, { state.route = Route.Setup(2) })
-    // The rule test with the parent's real WhatsApp, read-only (docs/flows/rule-test.md).
-    TextLink(tx.ruleTestRow, { state.route = Route.RuleTest })
-    // v0.8: once the real WhatsApp is linked (through the rule test), the parent can turn the kid's side to it.
-    if (state.linkTest.status == app.oie.data.LinkTest.Status.Connected) {
-        Text(tx.goRealBody(kid), style = OieType.body, color = c.muted, modifier = Modifier.padding(top = OTokens.Spacing.space6))
-        PrimaryButton(tx.goRealButton(kid), { real?.goReal() ?: state.goReal(); state.route = Route.Parent(0) })
-    }
+    if (!state.wa.connected) PrimaryButton(tx.linkConnect, { state.route = Route.Pair })
+    if (state.linkState.on) TextLink(tx.unlinkReal, { real?.unlink() })
 }

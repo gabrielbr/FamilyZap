@@ -116,9 +116,6 @@ class ScreensTest {
     @Test fun parentContacts() = shot("09-parent-contacts", false) { ParentArea(ready(), 0) }
     @Test fun parentQuiet() = shot("10-parent-quiet", true) { ParentArea(ready(), 1) }
     // v0.8: Conexão once the real WhatsApp is linked (offer to use it with the kid), and setup's real link step.
-    @Test fun connectionGoReal() = shot("19-connection-go-real", false) {
-        ParentArea(ready().apply { linkTest.status = app.oie.data.LinkTest.Status.Connected }, 2)
-    }
     @Test fun setupLinkReal() = shot("20-setup-link", false) { Setup(AppState(), 2, onClose = {}) }
     @Test fun conversationNotSent() = shot("21-conversation-not-sent", false) {
         Conversation(ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("k9", "vovo", true, now - 60_000, app.oie.logic.Kind.TEXT, "Vó, posso ir aí domingo?"); failed += "k9" }, "vovo")
@@ -131,20 +128,10 @@ class ScreensTest {
             offerSticker(app.oie.logic.FamilySticker("f2", "missing-2", false, false, now))
         }, "vovo", openStickers = true)
     }
-    // The rule test (docs/flows/rule-test.md): intro, the QR, and results.
-    @Test fun ruleTestIntro() = shot("16-rule-test-intro", false) { app.oie.ui.parent.RuleTestScreen(ready()) }
-    @Test fun ruleTestQr() = shot("17-rule-test-qr", true) {
-        app.oie.ui.parent.RuleTestScreen(ready().apply { linkTest.on = true; linkTest.status = app.oie.data.LinkTest.Status.Qr("2@sample-code-for-the-screenshot,abc,def,ghi") })
+    // v0.12: Conexão unlinked, the pairing QR, and Contatos with "Adicionar pelo número".
+    @Test fun connectionUnlinked() = shot("16-connection-unlinked", false) { ParentArea(ready().apply { realMode = true; link.pretendDropped() }, 2) }
+    @Test fun pairQr() = shot("17-pair-qr", true) {
+        app.oie.ui.parent.PairScreen(ready().apply { linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Qr("2@sample-code-for-the-screenshot,abc,def,ghi") })
     }
-    @Test fun ruleTestResults() = shot("18-rule-test-results", false) {
-        app.oie.ui.parent.RuleTestScreen(ready().apply {
-            val t = linkTest
-            t.on = true; t.status = app.oie.data.LinkTest.Status.Connected
-            t.chats += app.oie.logic.Contact("5511900000001@s.whatsapp.net", "Vovó")
-            t.onIncoming("a", "5511900000001@s.whatsapp.net", null, false, now - 3_600_000, app.oie.logic.Kind.TEXT, "Ana, me liga quando puder", null, "Tito")
-            t.onIncoming("b", "5511900000001@s.whatsapp.net", null, false, now - 600_000, app.oie.logic.Kind.TEXT, "Tito, como foi a prova?", null, "Tito")
-            t.onIncoming("c", "5511900000001@s.whatsapp.net", null, true, now - 300_000, app.oie.logic.Kind.TEXT, "Já chego aí", null, "Tito")
-            t.onIncoming("d", "5511999999999@s.whatsapp.net", null, false, now - 200_000, app.oie.logic.Kind.TEXT, "promo", null, "Tito")
-        })
-    }
+    @Test fun contactsAddByNumber() = shot("18-contacts-add-by-number", false) { ParentArea(ready().apply { realMode = true }, 0) }
 }

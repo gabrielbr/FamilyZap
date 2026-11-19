@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/appstate"
 	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
@@ -32,6 +33,9 @@ import (
 // MaxReconnects is how many automatic reconnects whatsmeow tries before it stops and waits for
 // the app (rule L5). Its own wait grows 2 s per try.
 const MaxReconnects = 8
+
+// ContactsGrace is how long after connecting the link waits for the phone's contacts.
+const ContactsGrace = 8 * time.Second
 
 // MinSendGap backs up the app's SendPace (rule L3): even a bug in the app can't send faster.
 const MinSendGap = 2 * time.Second
@@ -62,6 +66,8 @@ type Link struct {
 	// Media the app may still download, by message id. Bounded: the oldest go first.
 	media      map[string]whatsmeow.DownloadableMessage
 	mediaOrder []string
+	// One "contactsChanged" for a burst of contact updates.
+	contactsTimer *time.Timer
 }
 
 // MaxPendingMedia is how many received photos, voice notes and stickers stay downloadable.
@@ -255,6 +261,18 @@ func (k *Link) handle(e interface{}) {
 		// shows as online because of the tablet.
 		_ = k.c.SendPresence(context.Background(), types.PresenceUnavailable)
 		k.emit("connected", map[string]any{})
+		// Contacts arrive from the phone a little after linking. If none have come after a few
+		// seconds, ask for them once (only when not synced yet), then tell the app to reload.
+		go func() {
+			time.Sleep(ContactsGrace)
+			ctx := context.Background()
+			if all, err := k.c.Store.Contacts.GetAllContacts(ctx); err == nil && len(all) == 0 {
+				_ = k.c.FetchAppState(ctx, appstate.WAPatchCriticalUnblockLow, true, true)
+			}
+			k.contactsChanged()
+		}()
+	case *events.AppStateSyncComplete, *events.Contact, *events.PushName:
+		k.contactsChanged()
 	case *events.Disconnected:
 		k.emit("disconnected", map[string]any{})
 	case *events.StreamReplaced:
@@ -267,6 +285,55 @@ func (k *Link) handle(e interface{}) {
 		k.emit("temporaryBan", map[string]any{"code": int(v.Code), "expiresInSeconds": int64(v.Expire.Seconds())})
 	}
 	// History sync (events.HistorySync) is ignored on purpose (rule L6).
+}
+
+// contactsChanged tells the app, once per burst (contacts arrive one by one), to reload Contacts().
+func (k *Link) contactsChanged() {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	if k.contactsTimer != nil {
+		return
+	}
+	k.contactsTimer = time.AfterFunc(2*time.Second, func() {
+		k.mu.Lock()
+		k.contactsTimer = nil
+		k.mu.Unlock()
+		k.emit("contactsChanged", map[string]any{})
+	})
+}
+
+// LookUp finds a phone number on WhatsApp, for the parent to add someone missing from the list.
+// phone is digits with the country code ("5511999990000"). Returns the chat id, or "" if the
+// number isn't on WhatsApp.
+func (k *Link) LookUp(phone string) (string, error) {
+	digits := DigitsOnly(phone)
+	if len(digits) < 8 {
+		return "", errors.New("number too short")
+	}
+	res, err := k.c.IsOnWhatsApp(context.Background(), []string{"+" + digits})
+	if err != nil {
+		return "", err
+	}
+	for _, r := range res {
+		if r.IsIn {
+			if !r.PhoneNumber.IsEmpty() {
+				return r.PhoneNumber.ToNonAD().String(), nil
+			}
+			return types.NewJID(digits, types.DefaultUserServer).String(), nil
+		}
+	}
+	return "", nil
+}
+
+// DigitsOnly keeps the digits of a typed phone number ("+55 (11) 99999-0000" → "5511999990000").
+func DigitsOnly(s string) string {
+	b := make([]byte, 0, len(s))
+	for i := 0; i < len(s); i++ {
+		if s[i] >= '0' && s[i] <= '9' {
+			b = append(b, s[i])
+		}
+	}
+	return string(b)
 }
 
 func (k *Link) remember(id string, d whatsmeow.DownloadableMessage) {

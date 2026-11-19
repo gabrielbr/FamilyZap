@@ -57,5 +57,5 @@ python3 design/build.py --check \
 ```
 - A screen change re-records its screenshots on purpose: `./gradlew recordRoborazziDebug`, then look at every changed PNG in `app/src/test/screenshots/` before committing.
 - The app needs `link/oielink.aar`: build it once with `link/build-aar.sh` (Go, Android SDK and NDK r27c). A change in `link/` also runs `cd link && go test ./...` and rebuilds the AAR, and follows the rules L1–L9 in `docs/whatsapp-link.md`.
-- The kid side runs on `SampleLink` (sample data) until the parent turns it to the real WhatsApp in Conexão (`AppState.realMode`, v0.8). `RealLink` serves the read-only rule test and, once turned on, the kid's side, through `RealInbox` then `Inbox.decide`. The real link goes behind the same `WhatsAppLink` interface and must keep the product law.
-- Network use: self-update (`update/`, GitHub's public API) and, only while the parent runs the rule test, the WhatsApp link (in the background too, through `LinkService`). It never sends anything about the family. Releases follow `docs/release.md`.
+- The kid side runs on the real WhatsApp (`RealLink`, since v0.12 there is no sample in the app), through `RealInbox` then `Inbox.decide`. `SampleLink` is test data for the screenshot tests only. The real link goes behind the same `WhatsAppLink` interface and must keep the product law.
+- Network use: self-update (`update/`, GitHub's public API) and the WhatsApp link, once the parent linked it (in the background too, through `LinkService`). It never sends anything about the family. Releases follow `docs/release.md`.

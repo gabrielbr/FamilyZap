@@ -12,7 +12,6 @@ import org.json.JSONObject
 
 /**
  * The real WhatsApp link (link/, whatsmeow). It serves two things:
- *  - the rule test (docs/flows/rule-test.md), read-only;
  *  - since v0.8, once the parent turns it on (AppState.realMode), the kid's side: it sends what the
  *    kid sends, at a person's pace (SendPace, rule L3) with one retry after a reconnect (L4), and
  *    hands every incoming message to RealInbox, then Inbox.decide (product law).
@@ -29,9 +28,9 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     /** Sends that failed while disconnected: retried once on the next "connected" (L4). */
     private val retryOnConnect = java.util.concurrent.ConcurrentLinkedQueue<app.oie.logic.Message>()
 
-    override val connected: Boolean get() = test.status == LinkTest.Status.Connected
+    override val connected: Boolean get() = ls.status == LinkState.Status.Connected
     override val profileName: String? = null
-    override fun contacts(): List<Contact> = test.available.toList()
+    override fun contacts(): List<Contact> = ls.available.toList()
 
     override fun send(message: app.oie.logic.Message) {
         ours += message.id
@@ -73,12 +72,12 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     private val main = Handler(Looper.getMainLooper())
     private val io = Executors.newSingleThreadExecutor()
     private var link: oielink.Link? = null
-    private val test get() = state.linkTest
+    private val ls get() = state.linkState
 
     /** Connects (showing a QR the first time). Called when the parent starts the test and whenever the app opens while it's on. */
     fun start() {
-        if (test.status is LinkTest.Status.Banned) return // L9: never retry around a ban
-        test.status = LinkTest.Status.Connecting
+        if (ls.status is LinkState.Status.Banned) return // L9: never retry around a ban
+        ls.status = LinkState.Status.Connecting
         io.execute {
             try {
                 val l = link ?: oielink.Oielink.open(db.path, this).also { link = it }
@@ -87,13 +86,13 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 l.connect()
             } catch (e: Throwable) {
                 // Includes a tablet the library wasn't built for (an x86 emulator).
-                main.post { test.status = LinkTest.Status.Unavailable }
+                main.post { ls.status = LinkState.Status.Unavailable }
             }
         }
     }
 
     /** The parent starts the test or links for real: the link listens from now on, in the background too (LinkService). */
-    fun turnOn() { test.on = true; LinkService.start(context) }
+    fun turnOn() { ls.on = true; LinkService.start(context) }
 
     /** The parent turns the kid's side to the real WhatsApp (Conexão or setup): sending is allowed from now on. */
     fun goReal() {
@@ -103,12 +102,20 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
 
     /** After a network drop: connect again, unless the parent stopped the test or WhatsApp banned the number. */
     fun reconnectIfDropped() {
-        main.post { if (test.on && (test.status == LinkTest.Status.Disconnected || test.status == LinkTest.Status.Off)) start() }
+        main.post { if (ls.on && (ls.status == LinkState.Status.Disconnected || ls.status == LinkState.Status.Off)) start() }
+    }
+
+    /** Looks a phone number up on WhatsApp, for "Adicionar pelo número". Calls back on the main thread with the chat id, "" if it isn't on WhatsApp, or null on an error. */
+    fun lookUp(phone: String, done: (String?) -> Unit) {
+        io.execute {
+            val r = runCatching { link?.lookUp(phone) }.getOrNull()
+            main.post { done(r) }
+        }
     }
 
     fun stop() {
         io.execute { runCatching { link?.disconnect() } }
-        if (test.status !is LinkTest.Status.Banned) test.status = LinkTest.Status.Off
+        if (ls.status !is LinkState.Status.Banned) ls.status = LinkState.Status.Off
     }
 
     /** Logs out of WhatsApp and deletes the session and the test from the tablet. */
@@ -118,16 +125,16 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             link = null
             listOf(db, File(db.path + "-wal"), File(db.path + "-shm")).forEach { it.delete() }
         }
-        test.entries.mapNotNull { it.media }.forEach { Photos.forget(context, it) }
-        test.clear()
+        ls.clear()
         LinkService.stop(context)
     }
 
-    private fun loadContacts() {
+    /** Reloads the parent's contacts (Contatos calls it when it opens; the link calls it as they arrive). */
+    fun loadContacts() {
         io.execute {
             val json = runCatching { link?.contacts() }.getOrNull() ?: return@execute
             val list = JSONArray(json).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Contact(getString("id"), getString("name"), optBoolean("isGroup")) } } }
-            main.post { test.available.clear(); test.available.addAll(list) }
+            main.post { ls.available.clear(); ls.available.addAll(list) }
         }
     }
 
@@ -165,38 +172,23 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         }
     }
 
-    private fun fetch(id: String) {
-        io.execute {
-            val bytes = runCatching { link?.download(id) }.getOrNull() ?: return@execute
-            val name = Photos.keepBytes(context, bytes)
-            main.post { test.attach(id, name) }
-        }
-    }
 
     override fun onEvent(kind: String, payload: String) {
         val o = runCatching { JSONObject(payload) }.getOrDefault(JSONObject())
         main.post {
             when (kind) {
-                "qr" -> test.status = LinkTest.Status.Qr(o.optString("code"))
+                "qr" -> ls.status = LinkState.Status.Qr(o.optString("code"))
                 "paired", "connected" -> {
-                    test.status = LinkTest.Status.Connected; loadContacts()
+                    ls.status = LinkState.Status.Connected; loadContacts()
                     // L4: what failed while the link was down goes once more, and only once.
                     generateSequence { retryOnConnect.poll() }.toList().forEach { m -> io.execute { deliver(m, retried = true) } }
                 }
-                "disconnected" -> if (test.status == LinkTest.Status.Connected) test.status = LinkTest.Status.Disconnected
-                "replaced", "loggedOut" -> test.status = LinkTest.Status.LoggedOut
-                "temporaryBan" -> { test.status = LinkTest.Status.Banned(((o.optLong("expiresInSeconds") + 3599) / 3600).toInt()); LinkService.stop(context) }
-                "pairError" -> test.status = LinkTest.Status.Off
-                "message" -> {
-                    val e = test.onIncoming(
-                        o.optString("id"), o.optString("chat"), o.optString("chatAlt").ifEmpty { null }, o.optBoolean("fromMe"),
-                        o.optLong("at"), runCatching { Kind.valueOf(o.optString("kind")) }.getOrDefault(Kind.UNSUPPORTED),
-                        o.optString("text"), o.optString("replyTo").ifEmpty { null }, state.kidName, o.optInt("durationSec"),
-                    ) { gone -> gone.media?.let { Photos.forget(context, it) } }
-                    // A photo or sticker that would reach the kid is downloaded and sealed, as it would be in real use.
-                    if (e != null && e.shown && (e.kind == Kind.PHOTO || e.kind == Kind.STICKER)) fetch(e.id)
-                    if (state.realMode) receiveForKid(o)
-                }
+                "disconnected" -> if (ls.status == LinkState.Status.Connected) ls.status = LinkState.Status.Disconnected
+                "replaced", "loggedOut" -> ls.status = LinkState.Status.LoggedOut
+                "temporaryBan" -> { ls.status = LinkState.Status.Banned(((o.optLong("expiresInSeconds") + 3599) / 3600).toInt()); LinkService.stop(context) }
+                "pairError" -> ls.status = LinkState.Status.Off
+                "message" -> if (state.realMode) receiveForKid(o)
+                "contactsChanged" -> loadContacts()
             }
         }
     }

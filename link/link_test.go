@@ -175,3 +175,34 @@ func TestStickerMessageIsARealSticker(t *testing.T) {
 		t.Fatalf("incoming sticker: %+v", in)
 	}
 }
+
+func TestDigitsOnly(t *testing.T) {
+	if got := DigitsOnly("+55 (11) 99999-0000"); got != "5511999990000" {
+		t.Fatal(got)
+	}
+}
+
+func TestContactsChangedIsOncePerBurst(t *testing.T) {
+	got := make(chan string, 10)
+	k := &Link{l: listenerFunc(func(kind, _ string) { got <- kind })}
+	for i := 0; i < 5; i++ {
+		k.contactsChanged()
+	}
+	select {
+	case kind := <-got:
+		if kind != "contactsChanged" {
+			t.Fatal(kind)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("no event")
+	}
+	select {
+	case <-got:
+		t.Fatal("a burst must give one event")
+	case <-time.After(2500 * time.Millisecond):
+	}
+}
+
+type listenerFunc func(kind, payload string)
+
+func (f listenerFunc) OnEvent(kind, payload string) { f(kind, payload) }

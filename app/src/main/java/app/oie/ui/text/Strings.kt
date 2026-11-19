@@ -70,7 +70,7 @@ interface Strings {
     val leave: String; val sectionContacts: String; val sectionQuiet: String; val sectionConnection: String; val sectionHelp: String
     val connection: String
     fun connectedTo(parent: String): String
-    val disconnected: String; val simulateDrop: String; val reconnect: String
+    val disconnected: String; val reconnect: String
     fun whoCanCall(kid: String): String
     fun peopleAndGroups(people: Int, groups: Int): String
     val canTalkInQuiet: String
@@ -103,7 +103,7 @@ interface Strings {
     // Receiving (docs/flows/kid-receives-messages.md)
     val notifChannel: String; val notifVoice: String; val notifPhoto: String; val notifSticker: String
     fun quietSummary(n: Int): String
-    val deletedMessage: String; val simulateIncoming: String; val allowNotifications: String
+    val deletedMessage: String; val allowNotifications: String
     val notifLinkChannel: String; val notifLinkOn: String
     val names: String
     // Family stickers (v0.10)
@@ -111,25 +111,16 @@ interface Strings {
     val keepSticker: String; val sendFamilySticker: String; val familyStickers: String
     val micError: String
     // The real WhatsApp on the kid's side (v0.8)
-    fun goRealButton(kid: String): String
-    fun goRealBody(kid: String): String
-    val linkConnect: String; val useSample: String; val linkWaiting: String
+    val linkConnect: String; val linkWaiting: String
     val notSent: String; val tryAgain: String; val unlinkReal: String
     fun pickRealContacts(kid: String): String
 
-    // Rule test (docs/flows/rule-test.md)
-    val ruleTestRow: String; val ruleTestTitle: String
-    fun ruleTestIntro(kid: String): String
-    val ruleTestRisk: String; val ruleTestStart: String; val ruleTestConnecting: String
-    val ruleTestQrSteps: List<String>; val ruleTestQrA11y: String
-    val ruleTestPick: String; val ruleTestPickHelp: String; val ruleTestSearch: String; val ruleTestChats: String
-    fun kidSpokeNow(kid: String): String
-    val ruleTestEmpty: String; val wouldReach: String; val staysWithYou: String; val otherMessage: String
-    fun why(kid: String, why: app.oie.logic.RuleTest.Why): String
-    fun ignoredCount(n: Int): String
-    val ruleTestStop: String
+    // Linking, contacts and the ban (v0.12)
+    val linkQrA11y: String; val linkUnavailable: String
     fun bannedFor(hours: Int): String
-    val loggedOutTest: String; val ruleTestUnavailable: String
+    val search: String; val searchHelp: String
+    val addByNumber: String; val numberLabel: String; val numberHelp: String; val contactNameLabel: String
+    val notOnWhatsApp: String; val lookUpFailed: String; val looking: String
 
     // Self-update (Gabriel Design System docs/self-update.md, "Words")
     fun updateAvailable(v: String): String
@@ -210,7 +201,7 @@ object Pt : Strings {
     override val sectionConnection = "Conexão"; override val sectionHelp = "Ajustes e ajuda"; override val connection = "Conexão"
     override fun connectedTo(parent: String) = "Conectado ao WhatsApp de $parent."
     override val disconnected = "O Oiê se desconectou do seu WhatsApp."
-    override val simulateDrop = "Simular queda da conexão (teste)"; override val reconnect = "Conectar de novo"
+    override val reconnect = "Conectar de novo"
     override fun whoCanCall(kid: String) = "Quem $kid pode chamar"
     override fun peopleAndGroups(people: Int, groups: Int) =
         "$people ${if (people == 1) "pessoa" else "pessoas"}, $groups ${if (groups == 1) "grupo" else "grupos"}"
@@ -256,7 +247,7 @@ object Pt : Strings {
     override val notifChannel = "Mensagens da família"; override val notifVoice = "Mandou um áudio"
     override val notifPhoto = "Mandou uma foto"; override val notifSticker = "Mandou uma figurinha"
     override fun quietSummary(n: Int) = if (n == 1) "1 mensagem enquanto estava em silêncio" else "$n mensagens enquanto estava em silêncio"
-    override val deletedMessage = "Mensagem apagada"; override val simulateIncoming = "Simular mensagem da Vovó (teste)"
+    override val deletedMessage = "Mensagem apagada"
     override val allowNotifications = "Para avisar quando a família mandar mensagem e para gravar áudios, o Oiê vai pedir permissão para notificações e para o microfone."
     override fun updateAvailable(v: String) = "Atualização disponível · $v"
     override fun updateButton(size: String) = "Atualizar · $size"
@@ -273,34 +264,8 @@ object Pt : Strings {
     override val version = "Versão"
     override fun versionLine(v: String, code: Long) = "Oiê v$v ($code)"
     override val decimalComma = true
-    override val ruleTestRow = "Testar a regra com seu WhatsApp"; override val ruleTestTitle = "Testar a regra"
-    override fun ruleTestIntro(kid: String) = "Conecte seu WhatsApp só para ler. O Oiê mostra quais das suas mensagens chegariam para $kid e quais ficariam só com você. Nada é enviado, e o teste fica só neste tablet."
-    override val ruleTestRisk = "O WhatsApp pode limitar ou bloquear números que usam apps não oficiais. Se puder, teste com um número reserva."
-    override val ruleTestStart = "Conectar para testar"; override val ruleTestConnecting = "Conectando…"
-    override val ruleTestQrSteps = listOf("No seu celular, abra o WhatsApp.", "Toque em Configurações e depois em Dispositivos conectados.", "Toque em Conectar um dispositivo e aponte para este código.")
-    override val ruleTestQrA11y = "Código para conectar o WhatsApp"
-    override val ruleTestPick = "Escolha as conversas do teste"; override val ruleTestPickHelp = "Mensagens de outras conversas não são guardadas."
-    override val ruleTestSearch = "Buscar"; override val ruleTestChats = "Conversas no teste"
-    override fun kidSpokeNow(kid: String) = "Fingir que $kid falou agora"
-    override val ruleTestEmpty = "Nenhuma mensagem ainda. Elas aparecem aqui quando chegarem."
-    override val wouldReach = "Chegaria"; override val staysWithYou = "Fica com você"; override val otherMessage = "Outra mensagem"
-    override fun why(kid: String, why: app.oie.logic.RuleTest.Why) = when (why) {
-        app.oie.logic.RuleTest.Why.REPLY -> "responde a $kid"
-        app.oie.logic.RuleTest.Why.NAME -> "começa com o nome de $kid"
-        app.oie.logic.RuleTest.Why.WINDOW -> "até 24 h depois de $kid falar"
-        app.oie.logic.RuleTest.Why.WHOLE_GROUP -> "grupo com tudo para $kid"
-        app.oie.logic.RuleTest.Why.NOT_FOR_KID -> "não é para $kid"
-        app.oie.logic.RuleTest.Why.PARENT_OWN -> "mensagem sua"
-    }
-    override fun ignoredCount(n: Int) = if (n == 1) "1 mensagem de outras conversas não foi guardada." else "$n mensagens de outras conversas não foram guardadas."
-    override val ruleTestStop = "Desconectar e apagar o teste"
-    override fun bannedFor(hours: Int) = "O WhatsApp bloqueou este número por cerca de $hours h. O teste parou e não vai tentar de novo sozinho."
-    override val loggedOutTest = "O WhatsApp desconectou este tablet."
-    override val ruleTestUnavailable = "Este tablet não consegue usar a conexão com o WhatsApp."
     override val notifLinkChannel = "Conexão com o WhatsApp"; override val notifLinkOn = "O Oiê está conectado."
-    override fun goRealButton(kid: String) = "Usar o WhatsApp de verdade com $kid"
-    override fun goRealBody(kid: String) = "As conversas de exemplo somem e você escolhe, entre os seus contatos, quem $kid pode chamar. Daí em diante $kid manda e recebe mensagens pelo seu WhatsApp. O WhatsApp pode limitar ou bloquear o seu número."
-    override val linkConnect = "Conectar o WhatsApp"; override val useSample = "Usar exemplo por enquanto"
+    override val linkConnect = "Conectar o WhatsApp"
     override val linkWaiting = "Esperando o WhatsApp do seu celular."
     override val notSent = "Não foi"; override val tryAgain = "Tentar de novo"; override val unlinkReal = "Desconectar o WhatsApp"
     override fun pickRealContacts(kid: String) = "Escolha nos seus contatos quem $kid pode chamar."
@@ -308,6 +273,12 @@ object Pt : Strings {
     override fun newStickersFrom(parent: String) = "Novas de $parent"
     override val keepSticker = "Guardar"; override val sendFamilySticker = "Mandar figurinha da família"; override val familyStickers = "Da família"
     override val micError = "Não deu para gravar. Tente de novo."
+    override val linkQrA11y = "Código para conectar o WhatsApp"; override val linkUnavailable = "Este tablet não consegue usar a conexão com o WhatsApp."
+    override fun bannedFor(hours: Int) = "O WhatsApp bloqueou este número por cerca de $hours h. O Oiê parou e não vai tentar de novo sozinho."
+    override val search = "Buscar"; override val searchHelp = "Os seus contatos do WhatsApp chegam aos poucos depois de conectar."
+    override val addByNumber = "Adicionar pelo número"; override val numberLabel = "Número com DDD"; override val numberHelp = "Com o código do país: 55 11 99999-0000."
+    override val contactNameLabel = "Nome"; override val notOnWhatsApp = "Esse número não está no WhatsApp."
+    override val lookUpFailed = "Não deu para procurar agora. Tente de novo."; override val looking = "Procurando…"
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -375,7 +346,7 @@ object En : Strings {
     override val sectionConnection = "Connection"; override val sectionHelp = "Settings and help"; override val connection = "Connection"
     override fun connectedTo(parent: String) = "Linked to $parent's WhatsApp."
     override val disconnected = "Oiê got disconnected from your WhatsApp."
-    override val simulateDrop = "Pretend the link dropped (test)"; override val reconnect = "Link again"
+    override val reconnect = "Link again"
     override fun whoCanCall(kid: String) = "Who $kid can call"
     override fun peopleAndGroups(people: Int, groups: Int) =
         "$people ${if (people == 1) "person" else "people"}, $groups ${if (groups == 1) "group" else "groups"}"
@@ -425,7 +396,7 @@ object En : Strings {
     override val notifChannel = "Messages from family"; override val notifVoice = "Sent a voice message"
     override val notifPhoto = "Sent a photo"; override val notifSticker = "Sent a sticker"
     override fun quietSummary(n: Int) = if (n == 1) "1 message during quiet hours" else "$n messages during quiet hours"
-    override val deletedMessage = "Message deleted"; override val simulateIncoming = "Pretend Grandma sent a message (test)"
+    override val deletedMessage = "Message deleted"
     override val allowNotifications = "To tell you when family sends a message and to record voice messages, Oiê will ask for notifications and the microphone."
     override fun updateAvailable(v: String) = "Update available · $v"
     override fun updateButton(size: String) = "Update · $size"
@@ -442,34 +413,8 @@ object En : Strings {
     override val version = "Version"
     override fun versionLine(v: String, code: Long) = "Oiê v$v ($code)"
     override val decimalComma = false
-    override val ruleTestRow = "Test the rule with your WhatsApp"; override val ruleTestTitle = "Test the rule"
-    override fun ruleTestIntro(kid: String) = "Link your WhatsApp to read only. Oiê shows which of your messages would reach $kid and which would stay with you. Nothing is sent, and the test stays on this tablet."
-    override val ruleTestRisk = "WhatsApp may limit or block numbers that use unofficial apps. If you can, test with a spare number."
-    override val ruleTestStart = "Link to test"; override val ruleTestConnecting = "Linking…"
-    override val ruleTestQrSteps = listOf("On your phone, open WhatsApp.", "Tap Settings, then Linked devices.", "Tap Link a device and point at this code.")
-    override val ruleTestQrA11y = "Code to link WhatsApp"
-    override val ruleTestPick = "Choose the chats to test"; override val ruleTestPickHelp = "Messages from other chats aren't kept."
-    override val ruleTestSearch = "Search"; override val ruleTestChats = "Chats in the test"
-    override fun kidSpokeNow(kid: String) = "Pretend $kid spoke now"
-    override val ruleTestEmpty = "No messages yet. They show here as they arrive."
-    override val wouldReach = "Would reach"; override val staysWithYou = "Stays with you"; override val otherMessage = "Other message"
-    override fun why(kid: String, why: app.oie.logic.RuleTest.Why) = when (why) {
-        app.oie.logic.RuleTest.Why.REPLY -> "replies to $kid"
-        app.oie.logic.RuleTest.Why.NAME -> "starts with $kid's name"
-        app.oie.logic.RuleTest.Why.WINDOW -> "within 24 h of $kid speaking"
-        app.oie.logic.RuleTest.Why.WHOLE_GROUP -> "a group set to show everything"
-        app.oie.logic.RuleTest.Why.NOT_FOR_KID -> "not for $kid"
-        app.oie.logic.RuleTest.Why.PARENT_OWN -> "your own message"
-    }
-    override fun ignoredCount(n: Int) = if (n == 1) "1 message from other chats wasn't kept." else "$n messages from other chats weren't kept."
-    override val ruleTestStop = "Unlink and delete the test"
-    override fun bannedFor(hours: Int) = "WhatsApp blocked this number for about $hours h. The test stopped and won't try again on its own."
-    override val loggedOutTest = "WhatsApp unlinked this tablet."
-    override val ruleTestUnavailable = "This tablet can't use the WhatsApp link."
     override val notifLinkChannel = "WhatsApp link"; override val notifLinkOn = "Oiê is connected."
-    override fun goRealButton(kid: String) = "Use the real WhatsApp with $kid"
-    override fun goRealBody(kid: String) = "The sample chats go, and you choose from your contacts who $kid can talk to. From then on $kid sends and receives messages through your WhatsApp. WhatsApp may limit or block your number."
-    override val linkConnect = "Link WhatsApp"; override val useSample = "Use the sample for now"
+    override val linkConnect = "Link WhatsApp"
     override val linkWaiting = "Waiting for the WhatsApp on your phone."
     override val notSent = "Didn't go"; override val tryAgain = "Try again"; override val unlinkReal = "Unlink WhatsApp"
     override fun pickRealContacts(kid: String) = "Choose from your contacts who $kid can talk to."
@@ -477,6 +422,12 @@ object En : Strings {
     override fun newStickersFrom(parent: String) = "New from $parent"
     override val keepSticker = "Keep"; override val sendFamilySticker = "Send a family sticker"; override val familyStickers = "From family"
     override val micError = "Couldn't record. Try again."
+    override val linkQrA11y = "Code to link WhatsApp"; override val linkUnavailable = "This tablet can't use the WhatsApp link."
+    override fun bannedFor(hours: Int) = "WhatsApp blocked this number for about $hours h. Oiê stopped and won't try again on its own."
+    override val search = "Search"; override val searchHelp = "Your WhatsApp contacts arrive bit by bit after linking."
+    override val addByNumber = "Add by number"; override val numberLabel = "Phone number"; override val numberHelp = "With the country code: 55 11 99999-0000."
+    override val contactNameLabel = "Name"; override val notOnWhatsApp = "That number isn't on WhatsApp."
+    override val lookUpFailed = "Couldn't look it up now. Try again."; override val looking = "Looking…"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }
