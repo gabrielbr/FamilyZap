@@ -128,6 +128,22 @@ interface Strings {
     fun onWhatsApp(name: String): String
     fun renameHelp(waName: String): String
     fun removeNamed(name: String): String
+    // v0.21: nicknames, paused chats, and the parent's commands from WhatsApp (docs/flows/parent-commands.md).
+    fun nicknamesLabel(kid: String): String
+    fun nicknamesHelp(kid: String): String
+    val pausedLine: String; val resumeChat: String
+    fun cmdHelp(kid: String, cmd: String, here: String?): String
+    fun cmdHereReceives(chat: String, kid: String): String
+    fun cmdHerePaused(chat: String, kid: String): String
+    fun cmdHereNotIn(kid: String): String
+    fun cmdPaused(chat: String, kid: String, cmd: String): String
+    fun cmdResumed(chat: String, kid: String): String
+    fun cmdAdded(chat: String, kid: String, group: Boolean): String
+    fun cmdAlready(chat: String, kid: String): String
+    fun cmdRemoved(chat: String, kid: String): String
+    fun cmdNotIn(kid: String, cmd: String): String
+    fun cmdOwnChat(kid: String, cmd: String): String
+    fun cmdUnknown(word: String, kid: String, cmd: String): String
     val notOnWhatsApp: String; val lookUpFailed: String; val looking: String
     fun unlinkConfirm(kid: String): String
     val onlyOutsideQuiet: String
@@ -257,6 +273,7 @@ object Pt : Strings {
         "Como funciona o horário de silêncio?" to "Durante um período, $kid lê e ouve, mas não manda mensagens. Quem tem \"Pode falar no silêncio\" em Contatos continua liberado. Dá para pausar um período sem apagar, por exemplo nas férias.",
         "O Oiê se desconectou. E agora?" to "Abra Conexão e toque em Conectar de novo. As mensagens que $kid mandou enquanto isso ficam guardadas e saem depois.",
         "Como mando figurinhas para $kid?" to "No seu WhatsApp, mande a figurinha para você mesmo, na conversa com o seu próprio nome. Ela aparece para $kid em Figurinhas, em Novas de $parent, e $kid escolhe se guarda. Só as figurinhas dessa conversa chegam ao Oiê; o resto dela fica só com você. Funciona com o WhatsApp de verdade ligado.",
+        "Posso mudar algo pelo meu WhatsApp?" to "Sim. Numa conversa do seu WhatsApp, mande /$kid (ou /um apelido) e o Oiê responde na sua conversa com você mesmo, com a lista: parar, voltar, adicionar e remover. O comando vale para a conversa onde você mandou. Quem está nela vê o seu comando, mas não as respostas. Só o seu WhatsApp pode usar.",
         "Esqueci o PIN" to "Na tela do PIN, toque em Esqueci o PIN e conecte o mesmo WhatsApp de novo. Isso prova que é você. Depois crie um PIN novo.",
         "Onde ficam as mensagens e as fotos?" to "Só neste tablet, guardadas de forma protegida. Nada vai para um servidor nosso. O Oiê não tem anúncios e não acompanha o que $kid faz.",
     )
@@ -297,6 +314,29 @@ object Pt : Strings {
     override fun bannedFor(hours: Int) = "O WhatsApp bloqueou este número por cerca de $hours h. O Oiê parou e não vai tentar de novo sozinho."
     override val search = "Buscar"; override val searchHelp = "Busque pelo nome ou pelo número. Os contatos chegam aos poucos depois de conectar."
     override val addByNumber = "Adicionar pelo número"; override val numberLabel = "Número com DDD"; override val numberHelp = "Com o código do país: 55 11 99999-0000."
+    override fun nicknamesLabel(kid: String) = "Apelidos de $kid"
+    override fun nicknamesHelp(kid: String) = "Separados por vírgula. Uma mensagem que começa com qualquer um deles, como \"Oi Chico\", chega para $kid."
+    override val pausedLine = "Pausado pelo seu WhatsApp"; override val resumeChat = "Voltar a receber"
+    override fun cmdHelp(kid: String, cmd: String, here: String?) = listOfNotNull(
+        "Oiê · comandos para $kid", here,
+        "Mande na conversa que você quer mudar:",
+        "$cmd parar · pausa esta conversa para $kid",
+        "$cmd voltar · volta a mostrar esta conversa",
+        "$cmd adicionar · coloca esta conversa nos contatos de $kid",
+        "$cmd remover · tira esta conversa dos contatos",
+        "Só o seu WhatsApp pode usar os comandos. As respostas chegam só aqui.",
+    ).joinToString("\n")
+    override fun cmdHereReceives(chat: String, kid: String) = "Agora, $chat: $kid recebe as mensagens."
+    override fun cmdHerePaused(chat: String, kid: String) = "Agora, $chat: pausada para $kid."
+    override fun cmdHereNotIn(kid: String) = "Agora: esta conversa não está nos contatos de $kid."
+    override fun cmdPaused(chat: String, kid: String, cmd: String) = "Oiê · pausado: $chat não chega mais para $kid. Para voltar: $cmd voltar"
+    override fun cmdResumed(chat: String, kid: String) = "Oiê · $chat voltou para $kid."
+    override fun cmdAdded(chat: String, kid: String, group: Boolean) = "Oiê · $chat agora pode falar com $kid." + if (group) " Todos do grupo veem o que $kid manda." else ""
+    override fun cmdAlready(chat: String, kid: String) = "Oiê · $chat já pode falar com $kid."
+    override fun cmdRemoved(chat: String, kid: String) = "Oiê · $chat saiu dos contatos de $kid."
+    override fun cmdNotIn(kid: String, cmd: String) = "Oiê · esta conversa não está nos contatos de $kid. Para incluir: $cmd adicionar"
+    override fun cmdOwnChat(kid: String, cmd: String) = "Oiê · mande o comando na conversa que você quer mudar, por exemplo na conversa com a avó: $cmd parar"
+    override fun cmdUnknown(word: String, kid: String, cmd: String) = "Oiê · não entendi \"$word\".\n" + cmdHelp(kid, cmd, null)
     override fun renameHint(kid: String) = "Toque em alguém para mudar o nome que $kid vê ou para remover."
     override fun removeNamed(name: String) = "Remover $name dos contatos"
     override val changeName = "Mudar nome"; override val noNumber = "Número não disponível"; override val groupShort = "Grupo"
@@ -427,6 +467,7 @@ object En : Strings {
         "How do quiet hours work?" to "During a period, $kid can read and listen, but not send. Anyone with \"Can talk in quiet hours\" in Contacts still gets through. You can pause a period without deleting it, for example on holiday.",
         "Oiê got disconnected. What now?" to "Open Connection and tap Link again. Messages $kid sent in the meantime are kept and go out afterwards.",
         "How do I send stickers to $kid?" to "In your WhatsApp, send the sticker to yourself, in the chat with your own name. It shows for $kid under Stickers, in New from $parent, and $kid chooses whether to keep it. Only stickers from that chat reach Oiê; the rest of it stays with you. Works once the real WhatsApp is on.",
+        "Can I change things from my WhatsApp?" to "Yes. In a chat on your WhatsApp, send /$kid (or /a nickname) and Oiê answers in your chat with yourself, with the list: stop, start, add and remove. The command works on the chat you sent it in. People in that chat see your command, but not the answers. Only your WhatsApp can use them.",
         "I forgot the PIN" to "On the PIN screen, tap I forgot the PIN and link the same WhatsApp again. That proves it's you. Then create a new PIN.",
         "Where are the messages and photos kept?" to "Only on this tablet, stored securely. Nothing goes to a server of ours. Oiê has no ads and doesn't track what $kid does.",
     )
@@ -467,6 +508,29 @@ object En : Strings {
     override fun bannedFor(hours: Int) = "WhatsApp blocked this number for about $hours h. Oiê stopped and won't try again on its own."
     override val search = "Search"; override val searchHelp = "Search by name or number. Contacts arrive bit by bit after linking."
     override val addByNumber = "Add by number"; override val numberLabel = "Phone number"; override val numberHelp = "With the country code: 55 11 99999-0000."
+    override fun nicknamesLabel(kid: String) = "$kid's nicknames"
+    override fun nicknamesHelp(kid: String) = "Separated by commas. A message that starts with any of them, like \"Hi Chico\", reaches $kid."
+    override val pausedLine = "Paused from your WhatsApp"; override val resumeChat = "Show it again"
+    override fun cmdHelp(kid: String, cmd: String, here: String?) = listOfNotNull(
+        "Oiê · commands for $kid", here,
+        "Send them in the chat you want to change:",
+        "$cmd stop · pauses this chat for $kid",
+        "$cmd start · shows this chat again",
+        "$cmd add · puts this chat in $kid's contacts",
+        "$cmd remove · takes this chat out of the contacts",
+        "Only your WhatsApp can use commands. Answers come only here.",
+    ).joinToString("\n")
+    override fun cmdHereReceives(chat: String, kid: String) = "Now, $chat: $kid gets the messages."
+    override fun cmdHerePaused(chat: String, kid: String) = "Now, $chat: paused for $kid."
+    override fun cmdHereNotIn(kid: String) = "Now: this chat isn't in $kid's contacts."
+    override fun cmdPaused(chat: String, kid: String, cmd: String) = "Oiê · paused: $chat no longer reaches $kid. To undo: $cmd start"
+    override fun cmdResumed(chat: String, kid: String) = "Oiê · $chat is back for $kid."
+    override fun cmdAdded(chat: String, kid: String, group: Boolean) = "Oiê · $chat can now talk to $kid." + if (group) " Everyone in the group sees what $kid sends." else ""
+    override fun cmdAlready(chat: String, kid: String) = "Oiê · $chat can already talk to $kid."
+    override fun cmdRemoved(chat: String, kid: String) = "Oiê · $chat left $kid's contacts."
+    override fun cmdNotIn(kid: String, cmd: String) = "Oiê · this chat isn't in $kid's contacts. To add it: $cmd add"
+    override fun cmdOwnChat(kid: String, cmd: String) = "Oiê · send the command in the chat you want to change, for example in the chat with grandma: $cmd stop"
+    override fun cmdUnknown(word: String, kid: String, cmd: String) = "Oiê · I didn't understand \"$word\".\n" + cmdHelp(kid, cmd, null)
     override fun renameHint(kid: String) = "Tap someone to change the name $kid sees, or to remove them."
     override fun removeNamed(name: String) = "Remove $name from contacts"
     override val changeName = "Change name"; override val noNumber = "Number not available"; override val groupShort = "Group"

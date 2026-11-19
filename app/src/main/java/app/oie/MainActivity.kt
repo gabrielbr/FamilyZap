@@ -35,7 +35,7 @@ import app.oie.ui.setup.Setup
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 
-object BuildConfigInfo { const val VERSION = "0.20.0" }
+object BuildConfigInfo { const val VERSION = "0.21.0" }
 
 val LocalUpdater = androidx.compose.runtime.staticCompositionLocalOf<app.oie.update.Updater?> { null }
 val LocalNotifier = androidx.compose.runtime.staticCompositionLocalOf<app.oie.data.Notifier?> { null }
@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
         // A tapped notification opens that family member's chat (kid side only; never into the parent area).
         if (intent.action == app.oie.data.Notifier.ACTION_OPEN_CHAT) appState?.let { s ->
             val id = intent.getStringExtra(app.oie.data.Notifier.EXTRA_CONTACT)
-            if (s.route !is Route.Setup) s.route = if (id != null && s.allowed.any { it.id == id }) Route.Conversation(id) else Route.KidHome
+            if (s.route !is Route.Setup) s.route = if (id != null && s.reachable.any { it.id == id }) Route.Conversation(id) else Route.KidHome
         }
     }
 
