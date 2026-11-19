@@ -51,6 +51,25 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var real: WhatsAppLink? = null
     /** The link the kid's side talks through: the real one once the parent turned it on, else the sample. */
     val wa: WhatsAppLink get() = if (realMode) real ?: link else link
+    /** Stickers from the parent's own chat: new ones the kid can save, and saved ones (v0.10). */
+    val stickers = mutableStateListOf<app.oie.logic.FamilySticker>()
+
+    /** A new sticker from the parent. Returns the file names that dropped off (for the caller to delete). */
+    fun offerSticker(s: app.oie.logic.FamilySticker): List<String> {
+        if (stickers.any { it.id == s.id }) return listOf(s.media)
+        stickers.add(0, s)
+        val dropped = mutableListOf<String>()
+        while (stickers.count { !it.saved } > NEW_STICKERS_MAX) {
+            val old = stickers.last { !it.saved }; stickers.remove(old); dropped += old.media
+        }
+        return dropped
+    }
+
+    fun saveSticker(id: String) {
+        val i = stickers.indexOfFirst { it.id == id }
+        if (i >= 0) { val s = stickers.removeAt(i).copy(saved = true); stickers.add(stickers.count { !it.saved }, s) }
+    }
+
     /** Messages the kid sent that didn't go out (rule L4: one retry, then the kid is told). */
     val failed = mutableStateListOf<String>()
 
@@ -103,6 +122,11 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     fun takeQuietSummary(now: LocalDateTime = LocalDateTime.now()): Int {
         if (quietCount == 0 || quietNow(now) != null) return 0
         return quietCount.also { quietCount = 0 }
+    }
+
+    companion object {
+        /** New stickers waiting for the kid; older ones drop off. Saved ones stay. */
+        const val NEW_STICKERS_MAX = 12
     }
 
     fun finishSetup() {

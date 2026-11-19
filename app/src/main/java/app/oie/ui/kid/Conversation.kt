@@ -19,6 +19,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -81,14 +83,14 @@ val STICKERS = linkedMapOf(
 
 /** Prototype screens 03, 16–20. Flows: kid-sends-message.md, kid-receives-messages.md. */
 @Composable
-fun Conversation(state: AppState, contactId: String) {
+fun Conversation(state: AppState, contactId: String, openStickers: Boolean = false) {
     val c = OieTheme.colors
     val tx = str
     val contact = state.allowed.firstOrNull { it.id == contactId } ?: return
     val canSend = state.canSend(contact) && state.wa.connected
     var draft by remember { mutableStateOf(state.drafts[contactId] ?: "") }
     var pending by remember { mutableStateOf<Message?>(null) }
-    var stickers by remember { mutableStateOf(false) }
+    var stickers by remember { mutableStateOf(openStickers) }
     var recordingSince by remember { mutableLongStateOf(0L) }
     val context = LocalContext.current
     var choosingPhoto by remember { mutableStateOf(false) }
@@ -237,9 +239,12 @@ fun Conversation(state: AppState, contactId: String) {
                 onBack = { Photos.forget(context, name); preview = null },
             )
         }
-        if (stickers) StickerSheet(onPick = { w ->
+        if (stickers) StickerSheet(state, onPick = { w ->
             stickers = false
             queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.STICKER, w))
+        }, onPickFamily = { s ->
+            stickers = false
+            queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.STICKER, media = s.media))
         }, onClose = { stickers = false })
     }
 }
@@ -304,7 +309,7 @@ private fun Bubble(m: Message, name: String, status: String? = null) {
 }
 
 @Composable
-private fun StickerSheet(onPick: (String) -> Unit, onClose: () -> Unit) {
+private fun StickerSheet(state: AppState, onPick: (String) -> Unit, onPickFamily: (app.oie.logic.FamilySticker) -> Unit, onClose: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(onClick = onClose), contentAlignment = Alignment.BottomCenter) {
@@ -315,16 +320,51 @@ private fun StickerSheet(onPick: (String) -> Unit, onClose: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
         ) {
             Text(tx.stickers, style = OieType.title, color = c.ink)
-            Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+            val tile = OTokens.Size.contactTile + OTokens.Spacing.space6
+            val saved = state.stickers.filter { it.saved }
+            val fresh = state.stickers.filter { !it.saved }
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
                 STICKERS.forEach { (w, res) ->
                     Image(
                         painterResource(res), contentDescription = tx.sendSticker(w),
-                        modifier = Modifier.size(OTokens.Size.contactTile + OTokens.Spacing.space6).clip(RoundedCornerShape(OTokens.Radius.radiusL))
+                        modifier = Modifier.size(tile).clip(RoundedCornerShape(OTokens.Radius.radiusL))
                             .clickable(role = Role.Button) { onPick(w) },
                     )
                 }
             }
+            // Family stickers the kid saved (v0.10): tap to send, like Oiê's own.
+            if (saved.isNotEmpty()) {
+                Text(tx.familyStickers, style = OieType.label, color = c.ink)
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+                    saved.forEach { s ->
+                        FamilyStickerTile(s.media, tile, Modifier.clickable(role = Role.Button) { onPickFamily(s) }.semantics { contentDescription = tx.sendFamilySticker })
+                    }
+                }
+            }
+            // New ones from the parent's own chat: the kid chooses which to keep.
+            if (fresh.isNotEmpty()) {
+                Text(tx.newStickersFrom(state.parentName), style = OieType.label, color = c.ink)
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+                    fresh.forEach { s ->
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            FamilyStickerTile(s.media, tile)
+                            TextLink(tx.keepSticker, { state.saveSticker(s.id) })
+                        }
+                    }
+                }
+            }
         }
+    }
+}
+
+/** A family sticker on the tile Oiê's own use (page colour, large radius). Empty if the file is missing. */
+@Composable
+private fun FamilyStickerTile(media: String, side: androidx.compose.ui.unit.Dp, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val px = with(androidx.compose.ui.platform.LocalDensity.current) { side.roundToPx() }
+    val bmp = remember(media) { Photos.load(context, media, px) }
+    Box(modifier.size(side).clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(OieTheme.colors.page), contentAlignment = Alignment.Center) {
+        bmp?.let { Image(it.asImageBitmap(), contentDescription = null, modifier = Modifier.size(side - OTokens.Spacing.space4)) }
     }
 }
 

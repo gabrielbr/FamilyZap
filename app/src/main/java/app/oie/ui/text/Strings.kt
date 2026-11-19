@@ -106,6 +106,9 @@ interface Strings {
     val deletedMessage: String; val simulateIncoming: String; val allowNotifications: String
     val notifLinkChannel: String; val notifLinkOn: String
     val names: String
+    // Family stickers (v0.10)
+    fun newStickersFrom(parent: String): String
+    val keepSticker: String; val sendFamilySticker: String; val familyStickers: String
     // The real WhatsApp on the kid's side (v0.8)
     fun goRealButton(kid: String): String
     fun goRealBody(kid: String): String
@@ -241,6 +244,7 @@ object Pt : Strings {
         "Quem pode falar com $kid?" to "Só quem está em Contatos. Mensagens de qualquer outra pessoa não aparecem no tablet. Num grupo, todos do grupo veem o que $kid manda.",
         "Como funciona o horário de silêncio?" to "Durante um período, $kid lê e ouve, mas não manda mensagens. Quem tem \"Pode falar no silêncio\" em Contatos continua liberado. Dá para pausar um período sem apagar, por exemplo nas férias.",
         "O Oiê se desconectou. E agora?" to "Abra Conexão e toque em Conectar de novo. As mensagens que $kid mandou enquanto isso ficam guardadas e saem depois.",
+        "Como mando figurinhas para $kid?" to "No seu WhatsApp, mande a figurinha para você mesmo, na conversa com o seu próprio nome. Ela aparece para $kid em Figurinhas, em Novas de $parent, e $kid escolhe se guarda. Só as figurinhas dessa conversa chegam ao Oiê; o resto dela fica só com você. Funciona com o WhatsApp de verdade ligado.",
         "Esqueci o PIN" to "Na tela do PIN, toque em Esqueci o PIN e conecte o mesmo WhatsApp de novo. Isso prova que é você. Depois crie um PIN novo.",
         "Onde ficam as mensagens e as fotos?" to "Só neste tablet, guardadas de forma protegida. Nada vai para um servidor nosso. O Oiê não tem anúncios e não acompanha o que $kid faz.",
     )
@@ -300,6 +304,8 @@ object Pt : Strings {
     override val notSent = "Não foi"; override val tryAgain = "Tentar de novo"; override val unlinkReal = "Desconectar o WhatsApp"
     override fun pickRealContacts(kid: String) = "Escolha nos seus contatos quem $kid pode chamar."
     override val names = "Nomes"
+    override fun newStickersFrom(parent: String) = "Novas de $parent"
+    override val keepSticker = "Guardar"; override val sendFamilySticker = "Mandar figurinha da família"; override val familyStickers = "Da família"
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -406,6 +412,7 @@ object En : Strings {
         "Who can talk to $kid?" to "Only the people in Contacts. Messages from anyone else don't appear on the tablet. In a group, everyone in it sees what $kid sends.",
         "How do quiet hours work?" to "During a period, $kid can read and listen, but not send. Anyone with \"Can talk in quiet hours\" in Contacts still gets through. You can pause a period without deleting it, for example on holiday.",
         "Oiê got disconnected. What now?" to "Open Connection and tap Link again. Messages $kid sent in the meantime are kept and go out afterwards.",
+        "How do I send stickers to $kid?" to "In your WhatsApp, send the sticker to yourself, in the chat with your own name. It shows for $kid under Stickers, in New from $parent, and $kid chooses whether to keep it. Only stickers from that chat reach Oiê; the rest of it stays with you. Works once the real WhatsApp is on.",
         "I forgot the PIN" to "On the PIN screen, tap I forgot the PIN and link the same WhatsApp again. That proves it's you. Then create a new PIN.",
         "Where are the messages and photos kept?" to "Only on this tablet, stored securely. Nothing goes to a server of ours. Oiê has no ads and doesn't track what $kid does.",
     )
@@ -465,6 +472,8 @@ object En : Strings {
     override val notSent = "Didn't go"; override val tryAgain = "Try again"; override val unlinkReal = "Unlink WhatsApp"
     override fun pickRealContacts(kid: String) = "Choose from your contacts who $kid can talk to."
     override val names = "Names"
+    override fun newStickersFrom(parent: String) = "New from $parent"
+    override val keepSticker = "Keep"; override val sendFamilySticker = "Send a family sticker"; override val familyStickers = "From family"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

@@ -46,6 +46,8 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 | `ProtocolMessage` type `REVOKE` | "Mensagem apagada" |
 | Quoted message (`ContextInfo.StanzaID`) | the message rule's "reply to the kid" |
 | `SendMessage`, `Upload` (image, audio) | `SendTextWithID`, `SendImage`, `SendVoice` (PTT): the kid's sends, through `SendPace`, one id per message (L4) |
+| Own chat (`IsSelfChat`, by number or LID) | Only stickers are taken from it, offered to the kid (v0.10, `docs/flows/family-stickers.md`) |
+| `SendSticker` | A family sticker the kid saved, as a real WebP sticker (v0.10) |
 | `Download` | `Link.Download(id)`: a received photo, voice note or sticker, as bytes the app seals at once (`Photos.keepBytes`). The last 200 received stay downloadable. |
 | `events.Connected` / `Disconnected` / `LoggedOut` / `StreamReplaced` | Conexão state; "Peça para {nome} conectar de novo" |
 | `events.TemporaryBan` (codes 101–106) | rule L9 |
