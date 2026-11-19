@@ -35,7 +35,7 @@ import app.oie.ui.setup.Setup
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 
-object BuildConfigInfo { const val VERSION = "0.11.0" }
+object BuildConfigInfo { const val VERSION = "0.12.0" }
 
 val LocalUpdater = androidx.compose.runtime.staticCompositionLocalOf<app.oie.update.Updater?> { null }
 val LocalNotifier = androidx.compose.runtime.staticCompositionLocalOf<app.oie.data.Notifier?> { null }
@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
         updater.onForeground()
         appState?.let { notifier.quietSummary(it.takeQuietSummary()) }
         // The link listens in the background while the test is on (LinkService); make sure it runs.
-        if (appState?.linkTest?.on == true) app.oie.data.LinkService.start(this)
+        if (appState?.linkState?.on == true) app.oie.data.LinkService.start(this)
     }
 
     override fun onNewIntent(intent: android.content.Intent) {
@@ -91,18 +91,17 @@ class MainActivity : ComponentActivity() {
                             is Route.Conversation -> Conversation(state, r.contactId)
                             Route.ParentPin -> ParentPin(state)
                             is Route.Parent -> ParentArea(state, r.section)
-                            Route.RuleTest -> app.oie.ui.parent.RuleTestScreen(state)
                             Route.Pair -> app.oie.ui.parent.PairScreen(state)
                         }
                         // The update sheet shows only in the parent area: the kid isn't asked to update the app.
-                        if (state.route is Route.Parent || state.route == Route.ParentPin || state.route == Route.RuleTest || state.route == Route.Pair) app.oie.update.UpdateSheet(updater)
+                        if (state.route is Route.Parent || state.route == Route.ParentPin || state.route == Route.Pair) app.oie.update.UpdateSheet(updater)
                     }
                 }
                 // System Back always works (android.md): one step back, never trapped.
                 BackHandler(enabled = state.route !is Route.KidHome && state.route != Route.Setup(0)) {
                     state.route = when (val r = state.route) {
                         is Route.Setup -> Route.Setup(r.step - 1)
-                        Route.RuleTest, Route.Pair -> Route.Parent(2)
+                        Route.Pair -> Route.Parent(2)
                         else -> Route.KidHome
                     }
                 }

@@ -1,10 +1,14 @@
 # The WhatsApp link
 
 How Oiê connects the kid's tablet to the parent's WhatsApp (decision 0001: a linked device on the
-tablet; decision 0003: built on whatsmeow). **Status:** 🟡 the link runs the read-only rule test
-(v0.5, `docs/flows/rule-test.md`). Since v0.8 it also runs the kid's side, once the parent turns it on
+tablet; decision 0003: built on whatsmeow). **Status:** 🟡 in use on the owner's tablet. Since v0.12
+there is no sample and no rule test in the app: the link is the kid's side. (Before that, v0.5–v0.11
+had a read-only rule test, and v0.8 turned the kid's side to the real link once the parent turned it on
 (`AppState.realMode`, off by default). The kid's side then talks through `RealLink` as its
-`WhatsAppLink`; until then it stays on `SampleLink`.
+`WhatsAppLink`. `SampleLink` stays only as test data for the screenshot tests.)
+
+### Contacts (v0.12)
+The phone sends the parent's contacts a few seconds after linking. The link emits `contactsChanged` once per burst (on `AppStateSyncComplete`, `Contact` and `PushName`) and the app reloads `Contacts()`. If none have come 8 s after connecting, it asks once for the contact list (`FetchAppState(critical_unblock_low)`, only if not synced). `LookUp(phone)` checks a typed number with `IsOnWhatsApp`, for "Adicionar pelo número".
 
 ### v0.8 on the kid's side
 - **Receiving:** `RealInbox.toMessage` comes first. It drops chats that aren't allowed, the parent's own messages, and the tablet's own sends echoing back (all tested). Then comes `Inbox.decide`, then the notification. Photos, stickers and voice that are kept are downloaded and sealed.
@@ -54,7 +58,7 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 
 ## In the background (v0.7)
 The link belongs to the app process (`OieApp`), not to a screen. While it should listen (today: the
-rule test is on), `LinkService` keeps it alive as a foreground service of type `remoteMessaging`,
+link is on), `LinkService` keeps it alive as a foreground service of type `remoteMessaging`,
 with a silent, minimum-priority notification ("O Oiê está conectado.") on its own channel. It
 reconnects when the network comes back, stops on a ban, and stops when the test is deleted.
 Android may still pause the network in deep sleep (Doze); messages then arrive when the tablet wakes.
@@ -77,7 +81,7 @@ dependencies are BSD, MIT, Apache or ISC licensed, and a full list ships with th
 - whatsmeow `v0.0.0-20261116172437-19d61352436f` has no tagged releases; each update is a pinned pseudo-version. It needs Go 1.26 or newer.
 - SQLite through `modernc.org/sqlite` (pure Go) works with dialect `sqlite`, foreign keys on. A fresh store opens unpaired (`go test` in `link/`).
 - `gomobile bind` with NDK r27c builds `oielink.aar`: 13.6 MB, with `libgojni.so` at 18.8 MB per architecture before APK compression.
-- Not tried: pairing with a real phone, sending, receiving. Those need the owner's WhatsApp, and they wait for the message-rule test.
+- Pairing with a real phone works (the owner, 2026-11-19). The first real test found the contact list missing everyone but groups; fixed in v0.12.
 
 ## Before it ships
 1. The message rule is tested with real chats (STATUS.md).

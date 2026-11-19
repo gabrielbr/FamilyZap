@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.12.0
+- Your contacts now show up. WhatsApp sends them a few seconds after linking; Oiê used to look only once, too early, and found only groups. Now the list fills in as they arrive and refreshes each time you open Contatos. People come first, then groups, with a search.
+- Someone missing from the list? Use "Adicionar pelo número" in Contatos: type their name and number, and Oiê checks the number is on WhatsApp.
+- The test features are gone: the sample conversations, the "Simular…" buttons and the rule test. Oiê now works only with your real WhatsApp. If the tablet was still on the sample, its sample chats go, and Conexão shows "Conectar o WhatsApp".
+
 ## 0.11.0
 - Real voice messages. Tito holds the microphone to record and lets go to send; Oiê records in the same format as WhatsApp's own voice messages, so the family hears them as normal voice notes. Each one carries the 5-second Desfazer like any message.
 - Voice messages from the family play: tap play, tap again to stop. They are kept sealed on the tablet like photos.

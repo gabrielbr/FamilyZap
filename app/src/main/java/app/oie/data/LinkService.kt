@@ -33,7 +33,7 @@ class LinkService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (!app.state.linkTest.on) { stopSelf(); return START_NOT_STICKY }
+        if (!app.state.linkState.on) { stopSelf(); return START_NOT_STICKY }
         ServiceCompat.startForeground(
             this, NOTIFICATION_ID, notification(),
             if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING else 0,

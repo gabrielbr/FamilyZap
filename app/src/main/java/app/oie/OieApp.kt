@@ -32,6 +32,9 @@ class OieApp : Application() {
         super.onCreate()
         val store = Store(File(filesDir, "state.sealed"), KeystoreSealer())
         state = AppState().also { s -> store.read()?.let { Codec.decode(it, s) } }
+        // v0.12: no more sample. A tablet still on the sample drops its sample chats and contacts,
+        // and the parent links the real WhatsApp from Conexão.
+        if (!state.realMode) state.goReal()
         realLink = RealLink(this, state)
         state.real = realLink
         val tx = if (resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt
