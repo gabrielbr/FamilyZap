@@ -37,6 +37,8 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     val kidNicknames = mutableStateListOf<String>()
     /** The emoji before the kid's bold name on WhatsApp (v0.22): "😎*Tito*: Oi, vó". Empty = none. */
     var kidEmoji by mutableStateOf("")
+    /** The parent turned on "Bolha na tela" (v0.25). */
+    var bubbleOn by mutableStateOf(false)
     /** The kid's name first, then the nicknames. */
     fun kidNames(): List<String> = app.oie.logic.KidNames.all(kidName, kidNicknames)
     /** When this run of the app started: right after an update the link is still on its way (v0.24). */

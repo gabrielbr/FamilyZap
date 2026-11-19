@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.25.0
+- **Oiê in a bubble.** In Ajustes e ajuda › Bolha na tela, turn on "Mostrar a bolha". A round Oiê bubble floats over other apps. Tapping it opens Oiê in a smaller window, like a phone on top of the screen: the family's faces, the chats, everything. Tap outside or Back to fold it away; drag it to the X to remove it.
+- Android has to allow bubbles for Oiê. If it doesn't yet, the setting says so and "Permitir bolhas" opens the right Android screen. On Samsung tablets it also shows where Samsung keeps it (Notificações flutuantes › Bolhas).
+- Needs Android 11 or newer.
+
 ## 0.24.0
 - **Fixed: "conectar de novo" right after an update.** After an update or a restart, Oiê takes a few seconds to reconnect by itself, and it used to call that "disconnected". Now Conexão says "Conectando ao WhatsApp de Ana…" with no button, and the kid sees nothing. Only if it still isn't connected after 30 seconds does Oiê say it's disconnected. The kid can keep writing meanwhile; messages go out once it connects.
 

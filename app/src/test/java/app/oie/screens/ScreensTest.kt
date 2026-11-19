@@ -192,4 +192,12 @@ class ScreensTest {
     }
     @Test fun kidHomeReconnecting() = shot("29-kid-home-reconnecting", false) { KidHome(reconnecting()) }
     @Test fun connectionReconnecting() = shot("30-connection-reconnecting", true) { ParentArea(reconnecting(), 2) }
+
+    // v0.25: Bolha na tela, turned on (on the test device Android hasn't allowed bubbles yet).
+    @Test fun settingsBubble() = shot("31-settings-bubble", false) {
+        Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.BubbleSetting(ready().apply { bubbleOn = true }) }
+    }
+    @Test fun settingsBubbleOffDark() = shot("31-settings-bubble", true) {
+        Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.BubbleSetting(ready()) }
+    }
 }
