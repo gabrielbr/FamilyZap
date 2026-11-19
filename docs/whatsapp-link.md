@@ -13,6 +13,16 @@ had a read-only rule test, and v0.8 turned the kid's side to the real link once 
 - Photos carry width, height and a 72px JPEG preview.
 - gomobile can't bind exported functions with more than two results, so helpers like `jpegInfo` stay unexported. `build-aar.sh` fails loudly if one slips in.
 
+### The first real crash, found and fixed (v0.16)
+- **What the owner's report showed:** `paired`, then one second later a `JSONException`, because `Contacts()` returned `"null"`. Right after linking there are no contacts and no groups yet, and Go encodes a nil slice as `null`.
+- **The consequence:** the crash killed the app mid-link, and WhatsApp removed the half-linked device.
+- **A second crash:** the sticky `LinkService` was restarted by Android from the background, and `startForeground` then threw `ForegroundServiceStartNotAllowedException`, over and over.
+- **The fixes:**
+  - `encodeContacts` always gives a list (tested);
+  - `ContactsJson.parse` treats anything else as empty (tested);
+  - every background task in `RealLink` runs through `bg {}`, which reports an error instead of crashing;
+  - the service stops quietly when Android refuses, and starts again when Oiê opens.
+
 ### Exits the app can't catch (v0.15)
 `Open` points Go's crash output (`debug.SetCrashOutput`) at `whatsapp-link.db.crash`, next to the session. A fatal error ends the whole process with no Android crash, so on the next start the app moves that file into the problem report. It also reads `ActivityManager.getHistoricalProcessExitReasons` (Android 11+) for exits not reported yet.
 

@@ -34,10 +34,19 @@ class LinkService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!app.state.linkState.on) { stopSelf(); return START_NOT_STICKY }
-        ServiceCompat.startForeground(
-            this, NOTIFICATION_ID, notification(),
-            if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING else 0,
-        )
+        // Android 12+ refuses to start a foreground service from the background, as when it restarts
+        // this one after the app was closed. Then stop quietly: the link starts again the next time
+        // Oiê is opened (v0.16: this refusal crashed the app in a loop).
+        try {
+            ServiceCompat.startForeground(
+                this, NOTIFICATION_ID, notification(),
+                if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING else 0,
+            )
+        } catch (e: Exception) {
+            Diagnostics.log("service: Android didn't allow listening in the background now (${e.javaClass.simpleName}); it starts when Oiê opens")
+            stopSelf()
+            return START_NOT_STICKY
+        }
         app.realLink.start()
         if (callback == null) {
             val cm = getSystemService(ConnectivityManager::class.java)

@@ -192,26 +192,37 @@ func (k *Link) Contacts() (list string, err error) {
 		return "", ErrNotLinked
 	}
 	ctx := context.Background()
-	type entry struct {
-		ID      string `json:"id"`
-		Name    string `json:"name"`
-		IsGroup bool   `json:"isGroup"`
-	}
-	var out []entry
+	var out []contactEntry
 	all, err := k.c.Store.Contacts.GetAllContacts(ctx)
 	if err != nil {
 		return "", err
 	}
 	for jid, info := range all {
 		if name := contactName(info); name != "" {
-			out = append(out, entry{jid.ToNonAD().String(), name, false})
+			out = append(out, contactEntry{jid.ToNonAD().String(), name, false})
 		}
 	}
 	groups, err := k.c.GetJoinedGroups(ctx)
 	if err == nil {
 		for _, g := range groups {
-			out = append(out, entry{g.JID.String(), g.GroupName.Name, true})
+			out = append(out, contactEntry{g.JID.String(), g.GroupName.Name, true})
 		}
+	}
+	return encodeContacts(out)
+}
+
+type contactEntry struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	IsGroup bool   `json:"isGroup"`
+}
+
+// encodeContacts sorts by name and encodes. An empty list is "[]", never "null": right after
+// linking there are no contacts yet, and "null" crashed the app mid-link, which made WhatsApp drop
+// the tablet (v0.16).
+func encodeContacts(out []contactEntry) (string, error) {
+	if out == nil {
+		out = []contactEntry{}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	b, err := json.Marshal(out)

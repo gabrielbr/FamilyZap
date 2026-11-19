@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.16.0
+- **Fixed: Oiê closing right after linking, and WhatsApp removing the tablet.** Your problem report showed the cause. Right after you scanned the code, Oiê asked for your contacts before any had arrived. The answer was "nothing", and Oiê wasn't ready for that, so it closed in the middle of linking. WhatsApp then saw a half-finished link and dropped the tablet from Dispositivos conectados. It wasn't the photo: it happened at every new link. Now an empty contact list is just empty.
+- **Fixed: Oiê closing again and again after that.** Android tried to restart Oiê's background connection by itself, which it doesn't allow on Android 12 and later, and Oiê closed each time. Now it waits quietly until you open Oiê.
+- An error in the WhatsApp connection's background work now goes into the problem report instead of closing Oiê.
+
 ## 0.15.0
 - Oiê went back to the home screen without any message, and the tablet disappeared from WhatsApp's Dispositivos conectados, and not only when sending a photo. That kind of exit wasn't recorded. Now the problem report (Ajustes e ajuda › Problemas) also shows, the next time Oiê opens:
   - a failure inside the WhatsApp connection itself;

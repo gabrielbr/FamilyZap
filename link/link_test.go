@@ -261,3 +261,13 @@ func TestOpenSetsUpTheCrashFile(t *testing.T) {
 		t.Fatalf("the crash file must exist next to the store: %v", err)
 	}
 }
+
+func TestNoContactsIsAnEmptyListNotNull(t *testing.T) {
+	if got, _ := encodeContacts(nil); got != "[]" {
+		t.Fatalf("got %s: the app reads this as a list", got)
+	}
+	got, _ := encodeContacts([]contactEntry{{"b", "Bia", false}, {"a", "Ana", false}})
+	if got != `[{"id":"a","name":"Ana","isGroup":false},{"id":"b","name":"Bia","isGroup":false}]` {
+		t.Fatal(got)
+	}
+}
