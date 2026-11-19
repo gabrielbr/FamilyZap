@@ -29,6 +29,9 @@ had a read-only rule test, and v0.8 turned the kid's side to the real link once 
 ### "Contacts complete" (v0.17)
 The link emits `contactsSynced` when WhatsApp's contact snapshot has been applied (`AppStateSyncComplete` for `critical_unblock_low`), or after its own one-time fetch. The app's `ContactSync.state` turns that, the count of people and the time since linking into the status line.
 
+### Temporary files (v0.23)
+The session database opens with `temp_store(2)`: SQLite keeps its temporary tables in memory. Android has none of the temp folders SQLite looks for, so large writes failed with "disk I/O error (6410)" (`SQLITE_IOERR_GETTEMPPATH`); the owner's report (issue #34) showed it when WhatsApp sent the redacted phone numbers of joined groups.
+
 ### Numbers (v0.19)
 Each person in `Contacts()` carries `phone`: the digits of a phone-number id, or, for a contact WhatsApp knows only by a private id (LID), the number from the store's LID-to-phone map when it has one; empty otherwise. Groups have none. It's for the parent to check they picked the right person; the kid never sees it. Names the parent gives the kid stay on the tablet; nothing is written to WhatsApp (decision 0004).
 

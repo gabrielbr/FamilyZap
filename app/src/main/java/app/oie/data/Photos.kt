@@ -26,18 +26,42 @@ object Photos {
     fun newCameraTarget(context: Context): File = File(File(context.cacheDir, "camera").apply { mkdirs() }, "shot.jpg")
 
     /** Copies [uri] into private storage. Returns the stored file name, or null when it can't be read. */
-    fun keep(context: Context, uri: Uri): String? {
+    fun keep(context: Context, uri: Uri): String? = runCatching {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        context.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) } ?: return null
-        if (bounds.outWidth <= 0) return null
+        val first = context.contentResolver.openInputStream(uri) ?: run { Diagnostics.log("photo: can't open the picked file"); return null }
+        // With inJustDecodeBounds, decodeStream returns null by design and puts the size in [bounds].
+        // v0.23: that null was read as "can't open", so every photo was refused since v0.1 (the owner's report).
+        first.use { BitmapFactory.decodeStream(it, null, bounds) }
+        if (bounds.outWidth <= 0) { Diagnostics.log("photo: not a picture Android can read (${bounds.outMimeType ?: "unknown type"})"); return null }
         var sample = 1
         while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= MAX_SIDE) sample *= 2
         val bmp = context.contentResolver.openInputStream(uri)?.use {
             BitmapFactory.decodeStream(it, null, BitmapFactory.Options().apply { inSampleSize = sample })
-        } ?: return null
+        } ?: run { Diagnostics.log("photo: couldn't decode ${bounds.outMimeType}"); return null }
         val scale = MAX_SIDE.toFloat() / maxOf(bmp.width, bmp.height)
-        val out = if (scale < 1f) Bitmap.createScaledBitmap(bmp, (bmp.width * scale).toInt(), (bmp.height * scale).toInt(), true) else bmp
-        return store(context, out)
+        val sized = if (scale < 1f) Bitmap.createScaledBitmap(bmp, (bmp.width * scale).toInt(), (bmp.height * scale).toInt(), true) else bmp
+        // v0.23: the camera stores the turn in the file's metadata; apply it, since the metadata is dropped on re-encoding.
+        store(context, upright(sized, orientation(context, uri)))
+    }.getOrElse { Diagnostics.log("photo: failed: ${it.javaClass.simpleName}"); null }
+
+    /** The EXIF orientation of [uri], or "normal" when there's none. */
+    private fun orientation(context: Context, uri: Uri): Int = runCatching {
+        context.contentResolver.openInputStream(uri)?.use {
+            android.media.ExifInterface(it).getAttributeInt(android.media.ExifInterface.TAG_ORIENTATION, android.media.ExifInterface.ORIENTATION_NORMAL)
+        }
+    }.getOrNull() ?: android.media.ExifInterface.ORIENTATION_NORMAL
+
+    /** [bitmap] turned the way the camera held it (the common cases: quarter turns and mirror). */
+    internal fun upright(bitmap: Bitmap, orientation: Int): Bitmap {
+        val m = android.graphics.Matrix()
+        when (orientation) {
+            android.media.ExifInterface.ORIENTATION_ROTATE_90 -> m.postRotate(90f)
+            android.media.ExifInterface.ORIENTATION_ROTATE_180 -> m.postRotate(180f)
+            android.media.ExifInterface.ORIENTATION_ROTATE_270 -> m.postRotate(270f)
+            android.media.ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> m.postScale(-1f, 1f)
+            else -> return bitmap
+        }
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
     }
 
     /** Encodes [bitmap] as JPEG, seals it and stores it. Returns the file name. */

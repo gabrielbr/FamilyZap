@@ -112,6 +112,16 @@ _The owner, 2026-11-19: "the name of Tito when sent to WhatsApp should be in bol
 | 3 | Types more, or a letter | Only the first emoji is kept; a letter alone is ignored and the preview shows no emoji. |
 | 4 | Clears the field | Back to the bold name alone. |
 
+## v0.23: photos work
+_The owner's report (2026-11-19, with a photo of the screen and issue #34): every photo, from the camera or the gallery, showed "Não deu para abrir essa foto. Tente outra."_
+
+- **Cause:** a bug since v0.1. Oiê first reads only a photo's size, and Android's answer to that step is empty on purpose (the size comes back on the side). Oiê took the empty answer for "can't open", so it refused every photo. The tests used sample data, so it showed only on a real tablet.
+- **Now:**
+  - photos are accepted and scaled to at most 1600 px, as designed;
+  - a camera photo is turned upright: the camera stores the turn in the file's metadata, which Oiê drops on re-encoding (for privacy), so Oiê applies it first;
+  - when a photo really can't be read (not a picture, a format Android can't open), the same message shows, and the problem report now says why (the type, or the error), with no names and no picture.
+- **The message stays:** "Não deu para abrir essa foto. Tente outra." It's still true for a file that isn't a picture.
+
 ## Flow review (ux-user-flows §13)
 | # | Question | Result |
 |---|---|---|

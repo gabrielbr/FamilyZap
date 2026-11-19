@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.23.0
+- **Fixed: photos.** Every photo, from the camera or the gallery, said "Não deu para abrir essa foto. Tente outra." It was a mistake in Oiê since the first version: a step that only reads the photo's size gives an empty answer on purpose, and Oiê took that for a failure. Photos now go through.
+- Camera photos arrive the right way up.
+- **Fixed: WhatsApp's "disk I/O error" in the report.** The WhatsApp connection couldn't save some data on the tablet, because Android has no temporary folder where it looked. It now does that work in memory.
+- If a file really isn't a picture, the message still shows, and the problem report says why.
+
 ## 0.22.0
 - **The kid's name in bold on WhatsApp.** Messages from the tablet now start with the name in WhatsApp's bold: **Tito**: Oi, vó.
 - **An emoji before the name.** In Ajustes e ajuda › Nomes, "Emoji antes do nome" takes one emoji from the keyboard, so the family sees 😎**Tito**: Oi, vó. A line under it shows how it will look. Leave it empty for just the bold name.

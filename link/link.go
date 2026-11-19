@@ -101,7 +101,7 @@ func Open(dbPath string, l Listener) (*Link, error) {
 		_ = debug.SetCrashOutput(f, debug.CrashOptions{})
 		f.Close()
 	}
-	container, err := sqlstore.New(ctx, "sqlite", "file:"+dbPath+"?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)", &reportLog{l: l, module: "store"})
+	container, err := sqlstore.New(ctx, "sqlite", storeDSN(dbPath), &reportLog{l: l, module: "store"})
 	if err != nil {
 		return nil, err
 	}
@@ -122,6 +122,14 @@ func (k *Link) IsConnected() bool { return k.c.IsConnected() && k.c.IsLoggedIn()
 
 // alreadyUp is whatsmeow's "the websocket is already connected", which Connect treats as success.
 func alreadyUp(err error) bool { return errors.Is(err, whatsmeow.ErrAlreadyConnected) }
+
+// storeDSN opens the session database. v0.23: temp_store(2) keeps SQLite's temporary tables in
+// memory. Android has none of the temp folders SQLite looks for, so a big write (WhatsApp's
+// redacted phone numbers from joined groups) failed with "disk I/O error (6410)", which is
+// SQLITE_IOERR_GETTEMPPATH (the owner's report, issue #34).
+func storeDSN(dbPath string) string {
+	return "file:" + dbPath + "?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)&_pragma=temp_store(2)"
+}
 
 // Paired says whether the tablet is already linked to a WhatsApp account.
 func (k *Link) Paired() bool { return k.c.Store.ID != nil }
