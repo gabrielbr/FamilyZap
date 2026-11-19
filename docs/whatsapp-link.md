@@ -1,9 +1,14 @@
 # The WhatsApp link
 
 How Oiê connects the kid's tablet to the parent's WhatsApp (decision 0001: a linked device on the
-tablet; decision 0003: built on whatsmeow). **Status:** 🟡 since v0.5 the link runs in the app for
-one thing only: the read-only rule test in the parent area (`docs/flows/rule-test.md`, `RealLink`).
-The kid's side runs on `SampleLink` until the message rule is decided from that test (STATUS.md).
+tablet; decision 0003: built on whatsmeow). **Status:** 🟡 the link runs the read-only rule test
+(v0.5, `docs/flows/rule-test.md`). Since v0.8 it also runs the kid's side, once the parent turns it on
+(`AppState.realMode`, off by default). The kid's side then talks through `RealLink` as its
+`WhatsAppLink`; until then it stays on `SampleLink`.
+
+### v0.8 on the kid's side
+- **Receiving:** `RealInbox.toMessage` comes first. It drops chats that aren't allowed, the parent's own messages, and the tablet's own sends echoing back (all tested). Then comes `Inbox.decide`, then the notification. Photos, stickers and voice that are kept are downloaded and sealed.
+- **Sending:** text, photos, and stickers (as JPEG pictures) go through `SendPace`. Each send uses the message's own id. A send that fails while the link is down is retried once, on the next "connected" (L4); after that it's marked failed for the kid. Voice waits for real recording (v0.9).
 
 ## How it fits together
 ```
@@ -60,7 +65,7 @@ v0.6. Self-update picks the tablet's own (`UpdateRules.offer`).
 ## Licence
 whatsmeow is **MPL-2.0**: its own files stay MPL-2.0, and Oiê's code can stay closed. When Oiê
 ships with it, we must:
-- say in Sobre › Licenças that it includes whatsmeow under MPL-2.0;
+- say in Ajustes e ajuda › Sobre that it includes whatsmeow under MPL-2.0;
 - link to its source, github.com/tulir/whatsmeow, at the exact commit (`link/go.mod`).
 
 We don't modify whatsmeow; a change to its files would have to be published under MPL-2.0. Its
@@ -76,5 +81,5 @@ dependencies are BSD, MIT, Apache or ISC licensed, and a full list ships with th
 1. The message rule is tested with real chats (STATUS.md).
 2. `WhatsmeowLink` implements `WhatsAppLink`. Every rule above has a test, where a test is possible.
 3. ~~The release workflow builds the AAR (Go and the NDK in CI)~~ (v0.5).
-4. ~~Sobre › Licenças carries the whatsmeow notice~~ (v0.5).
+4. ~~Ajustes e ajuda › Sobre carries the whatsmeow notice~~ (v0.5).
 5. A test on a spare WhatsApp number first, never the owner's main one.

@@ -70,6 +70,12 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" > /dev/null
           export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
           link/build-aar.sh
+      - name: Robolectric's Android jars (it downloads them outside Gradle's cache)
+        if: steps.v.outputs.go == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ hashFiles('gradle/libs.versions.toml') }}
       - name: Test and build the signed release
         if: steps.v.outputs.go == 'true'
         env:

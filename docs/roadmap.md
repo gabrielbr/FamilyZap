@@ -11,6 +11,9 @@ Ideas and planned work. When something ships, move it into the docs.
 4. Test with 3–5 kids and 3–5 parents; check on a real tablet with TalkBack and large text.
 5. Decide distribution (Play or a direct APK with SHA256SUMS).
 
+## Next
+- v0.9: real voice messages. Recording on the tablet (Opus in Ogg, as WhatsApp's own voice notes) and playing received ones.
+
 ## Later
 - Calls from the tablet (not possible through the linked-device bridge; decision 0001).
 - A "for family" page on oie.app (how to start a message to the kid).

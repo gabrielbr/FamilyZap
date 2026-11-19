@@ -73,6 +73,8 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.9: names editable in Ajustes e ajuda; the kid's messages are signed "Tito: …" on the real WhatsApp (2026-11-19).
+- [x] v0.8: the kid's side can run on the real WhatsApp, once the parent turns it on in Conexão (off by default); real QR in setup (2026-11-19). Open: voice recording and playback (v0.9).
 - [x] v0.7: the link keeps listening in the background, reconnects when the network returns (2026-11-19).
 - [x] v0.6: media through the link (receive and send, tested in Go); per-architecture APKs (2026-11-19).
 - [x] v0.5: the rule test with the real WhatsApp, read-only (docs/flows/rule-test.md, 2026-11-19). Next: the owner runs it for a day or two on real chats.

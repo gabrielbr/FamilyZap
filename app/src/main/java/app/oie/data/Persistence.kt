@@ -35,6 +35,7 @@ object Codec {
         put("addRequested", s.addRequested)
         put("quietCount", s.quietCount)
         put("linked", s.link.connected)
+        put("realMode", s.realMode)
         put("lastPhotoSource", s.lastPhotoSource)
         put("allowed", JSONArray(s.allowed.map {
             JSONObject().put("id", it.id).put("name", it.name).put("group", it.isGroup)
@@ -75,6 +76,7 @@ object Codec {
         s.quietCount = o.optInt("quietCount")
         s.lastPhotoSource = o.optString("lastPhotoSource", "camera")
         if (o.optBoolean("linked")) s.link.pretendLinked()
+        s.realMode = o.optBoolean("realMode")
         s.allowed.clear()
         o.optJSONArray("allowed")?.let { a ->
             for (i in 0 until a.length()) a.getJSONObject(i).run {

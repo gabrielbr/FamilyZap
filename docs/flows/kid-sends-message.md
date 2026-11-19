@@ -63,7 +63,7 @@ flowchart TD
 | 4 | **Desfazer** | The message is removed and the recording or text goes back into the composer, so nothing is lost. |
 | 5 | Offline | The message is kept: "Vai quando a internet voltar". It goes out on its own when the connection returns. |
 | 5 | The link to WhatsApp dropped (the parent unlinked, or WhatsApp logged it out) | The message is kept: "Peça para {nome} conectar de novo." The parent reconnects from the parent area on the tablet (flow "Parent setup + link"). No tech words. |
-| 5 | WhatsApp refused it (e.g. the number is restricted) | "Não foi. Tente de novo mais tarde." **Tentar de novo**. The parent sees the real reason in their part of the app. |
+| 5 | WhatsApp refused it (e.g. the number is restricted) | "Não foi" under the message and **Tentar de novo** (v0.8). One automatic retry happens first, only after the link comes back (rule L4). The parent sees the real reason in their part of the app. |
 | any | Quiet hours start while the kid is writing | The current message can still go if it was already sent. New sends turn off, and the draft is kept for later. |
 
 ## States per step
