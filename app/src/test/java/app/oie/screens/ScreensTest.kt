@@ -115,6 +115,14 @@ class ScreensTest {
     @Test fun parentPin() = shot("08-parent-pin", true) { ParentPin(ready()) }
     @Test fun parentContacts() = shot("09-parent-contacts", false) { ParentArea(ready(), 0) }
     @Test fun parentQuiet() = shot("10-parent-quiet", true) { ParentArea(ready(), 1) }
+    // v0.8: Conexão once the real WhatsApp is linked (offer to use it with the kid), and setup's real link step.
+    @Test fun connectionGoReal() = shot("19-connection-go-real", false) {
+        ParentArea(ready().apply { linkTest.status = app.oie.data.LinkTest.Status.Connected }, 2)
+    }
+    @Test fun setupLinkReal() = shot("20-setup-link", false) { Setup(AppState(), 2, onClose = {}) }
+    @Test fun conversationNotSent() = shot("21-conversation-not-sent", false) {
+        Conversation(ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("k9", "vovo", true, now - 60_000, app.oie.logic.Kind.TEXT, "Vó, posso ir aí domingo?"); failed += "k9" }, "vovo")
+    }
     // The rule test (docs/flows/rule-test.md): intro, the QR, and results.
     @Test fun ruleTestIntro() = shot("16-rule-test-intro", false) { app.oie.ui.parent.RuleTestScreen(ready()) }
     @Test fun ruleTestQr() = shot("17-rule-test-qr", true) {

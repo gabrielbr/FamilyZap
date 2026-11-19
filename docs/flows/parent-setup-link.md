@@ -64,6 +64,10 @@ flowchart TD
 | any | Back | Returns one step; everything typed is kept. From the link step on, back never unlinks. |
 | any | The parent closes Oiê mid-setup | Reopens at the same step. The kid side isn't reachable until setup is done. |
 
+## v0.8: the real link
+- **Step 2:** "Conectar o WhatsApp" shows the QR and WhatsApp's own steps. When the phone scans it, the kid's side uses the real WhatsApp (`AppState.realMode`), and the contacts step lists the parent's real contacts, with a search when there are more than 12. **Usar exemplo por enquanto** keeps the sample, for trying Oiê out.
+- **Later:** an existing tablet on the sample turns to the real WhatsApp from Conexão. The rule test must be connected first; then "Usar o WhatsApp de verdade com {kid}", with the effect and the ban risk said above the button. The sample chats go and the parent picks real contacts. There is no switch back: "Desconectar o WhatsApp" unlinks, and "Conectar de novo" links again.
+
 ## Reconnect and forgot PIN
 - **Reconnect** (the link dropped). The kid's side says "Peça para {nome} conectar de novo." The parent opens **Área dos pais** with the PIN, sees "O Oiê se desconectou do seu WhatsApp", and taps **Conectar de novo**, which goes back to step 2. Messages the kid sent meanwhile are kept and go out after.
 - **Forgot PIN.** On the PIN screen: **Esqueci o PIN**, then relink WhatsApp (step 2) with the same number, then set a new PIN. Being able to link the same WhatsApp proves it's the parent.

@@ -105,6 +105,12 @@ interface Strings {
     fun quietSummary(n: Int): String
     val deletedMessage: String; val simulateIncoming: String; val allowNotifications: String
     val notifLinkChannel: String; val notifLinkOn: String
+    // The real WhatsApp on the kid's side (v0.8)
+    fun goRealButton(kid: String): String
+    fun goRealBody(kid: String): String
+    val linkConnect: String; val useSample: String; val linkWaiting: String
+    val notSent: String; val tryAgain: String; val unlinkReal: String
+    fun pickRealContacts(kid: String): String
 
     // Rule test (docs/flows/rule-test.md)
     val ruleTestRow: String; val ruleTestTitle: String
@@ -286,6 +292,12 @@ object Pt : Strings {
     override val loggedOutTest = "O WhatsApp desconectou este tablet."
     override val ruleTestUnavailable = "Este tablet não consegue usar a conexão com o WhatsApp."
     override val notifLinkChannel = "Conexão com o WhatsApp"; override val notifLinkOn = "O Oiê está conectado."
+    override fun goRealButton(kid: String) = "Usar o WhatsApp de verdade com $kid"
+    override fun goRealBody(kid: String) = "As conversas de exemplo somem e você escolhe, entre os seus contatos, quem $kid pode chamar. Daí em diante $kid manda e recebe mensagens pelo seu WhatsApp. O WhatsApp pode limitar ou bloquear o seu número."
+    override val linkConnect = "Conectar o WhatsApp"; override val useSample = "Usar exemplo por enquanto"
+    override val linkWaiting = "Esperando o WhatsApp do seu celular."
+    override val notSent = "Não foi"; override val tryAgain = "Tentar de novo"; override val unlinkReal = "Desconectar o WhatsApp"
+    override fun pickRealContacts(kid: String) = "Escolha nos seus contatos quem $kid pode chamar."
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -444,6 +456,12 @@ object En : Strings {
     override val loggedOutTest = "WhatsApp unlinked this tablet."
     override val ruleTestUnavailable = "This tablet can't use the WhatsApp link."
     override val notifLinkChannel = "WhatsApp link"; override val notifLinkOn = "Oiê is connected."
+    override fun goRealButton(kid: String) = "Use the real WhatsApp with $kid"
+    override fun goRealBody(kid: String) = "The sample chats go, and you choose from your contacts who $kid can talk to. From then on $kid sends and receives messages through your WhatsApp. WhatsApp may limit or block your number."
+    override val linkConnect = "Link WhatsApp"; override val useSample = "Use the sample for now"
+    override val linkWaiting = "Waiting for the WhatsApp on your phone."
+    override val notSent = "Didn't go"; override val tryAgain = "Try again"; override val unlinkReal = "Unlink WhatsApp"
+    override fun pickRealContacts(kid: String) = "Choose from your contacts who $kid can talk to."
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

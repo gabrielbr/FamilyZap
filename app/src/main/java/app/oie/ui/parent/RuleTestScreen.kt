@@ -116,6 +116,46 @@ fun RuleTestScreen(state: AppState) {
     }
 }
 
+/**
+ * Linking the real WhatsApp, shared by setup (step 2) and Conexão › Conectar de novo (v0.8): the
+ * button, then the QR and WhatsApp's own steps, then [onLinked] once the phone has scanned it.
+ */
+@Composable
+fun Pairing(state: AppState, onLinked: () -> Unit) {
+    val c = OieTheme.colors
+    val tx = str
+    val link = LocalRealLink.current
+    when (val s = state.linkTest.status) {
+        is LinkTest.Status.Qr -> {
+            tx.linkSteps.forEachIndexed { i, step -> Text("${i + 1}. $step", style = OieType.body, color = c.ink) }
+            Qr(s.code, tx.ruleTestQrA11y)
+        }
+        LinkTest.Status.Connecting -> Text(tx.linkWaiting, style = OieType.body, color = c.muted)
+        LinkTest.Status.Connected -> androidx.compose.runtime.LaunchedEffect(Unit) { onLinked() }
+        LinkTest.Status.Unavailable -> Text(tx.ruleTestUnavailable, style = OieType.body, color = c.ink)
+        is LinkTest.Status.Banned -> Text(tx.bannedFor(s.hours), style = OieType.body, color = c.ink)
+        else -> PrimaryButton(tx.linkConnect, { link?.turnOn() })
+    }
+}
+
+/** Conexão › Conectar de novo, once the kid's side is on the real WhatsApp. */
+@Composable
+fun PairScreen(state: AppState) {
+    val c = OieTheme.colors
+    val tx = str
+    Column(Modifier.fillMaxSize()) {
+        Bar {
+            QuietButton(null, { state.route = Route.Parent(2) }, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
+            Text(tx.linkConnect, style = OieType.title, color = c.ink)
+        }
+        Column(Modifier.fillMaxWidth().padding(OTokens.Spacing.space8), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+                Pairing(state) { state.route = Route.Parent(2) }
+            }
+        }
+    }
+}
+
 /** The QR, drawn module by module in the QR tokens (always ink on white, both themes). */
 @Composable
 private fun Qr(code: String, a11y: String) {

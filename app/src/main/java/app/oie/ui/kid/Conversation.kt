@@ -61,6 +61,7 @@ import app.oie.ui.common.Initial
 import app.oie.ui.common.OIcon
 import app.oie.ui.common.PrimaryButton
 import app.oie.ui.common.QuietButton
+import app.oie.ui.common.TextLink
 import app.oie.ui.text.str
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
@@ -84,7 +85,7 @@ fun Conversation(state: AppState, contactId: String) {
     val c = OieTheme.colors
     val tx = str
     val contact = state.allowed.firstOrNull { it.id == contactId } ?: return
-    val canSend = state.canSend(contact) && state.link.connected
+    val canSend = state.canSend(contact) && state.wa.connected
     var draft by remember { mutableStateOf(state.drafts[contactId] ?: "") }
     var pending by remember { mutableStateOf<Message?>(null) }
     var stickers by remember { mutableStateOf(false) }
@@ -124,7 +125,7 @@ fun Conversation(state: AppState, contactId: String) {
         val m = pending ?: return@LaunchedEffect
         delay(UNDO_MS)
         state.messages += m
-        state.link.send(m)
+        state.wa.send(m)
         pending = null
     }
 
@@ -142,9 +143,16 @@ fun Conversation(state: AppState, contactId: String) {
             ) {
                 item { Box(Modifier.height(OTokens.Spacing.space6)) }
                 if (visible.isEmpty() && pending == null) item { Text(tx.firstHi(contact.name), style = OieType.body, color = c.muted) }
-                items(visible, key = { it.id }) { m -> Bubble(m, contact.name) }
+                items(visible, key = { it.id }) { m ->
+                    val failed = m.id in state.failed
+                    Bubble(m, contact.name, status = if (failed) tx.notSent else null)
+                    // Rule L4: one automatic retry already happened; now the kid can try again.
+                    if (failed) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        TextLink(tx.tryAgain, { state.failed.remove(m.id); state.wa.send(m) })
+                    }
+                }
                 pending?.let { p -> item(key = "pending") { Bubble(p, contact.name, status = tx.sending) } }
-                visible.lastOrNull { it.fromKid }?.takeIf { pending == null && visible.last().fromKid }?.let { last ->
+                visible.lastOrNull { it.fromKid }?.takeIf { pending == null && visible.last().fromKid && it.id !in state.failed }?.let { last ->
                     item { Text(tx.sentAt(hour(tx, last.at)), style = OieType.caption, color = c.muted, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth()) }
                 }
             }
@@ -157,7 +165,7 @@ fun Conversation(state: AppState, contactId: String) {
                 if (!canSend) {
                     val q = state.quietNow()
                     Text(
-                        if (!state.link.connected) tx.askReconnect(state.parentName) else tx.quietUntilShort(q?.end?.hour ?: 0),
+                        if (!state.wa.connected) tx.askReconnect(state.parentName) else tx.quietUntilShort(q?.end?.hour ?: 0),
                         style = OieType.body, color = c.muted,
                     )
                 } else if (recordingSince > 0) {
@@ -182,7 +190,7 @@ fun Conversation(state: AppState, contactId: String) {
                         }, icon = R.drawable.gg_ic_send)
                     }
                 }
-                if (canSend && draft.isBlank()) RecordButton(
+                if (canSend && draft.isBlank() && !state.realMode) RecordButton(
                     recording = recordingSince > 0,
                     onStart = { recordingSince = state.clock() },
                     onStop = { send ->
@@ -278,10 +286,14 @@ private fun Bubble(m: Message, name: String, status: String? = null) {
             val ink = if (m.fromKid) c.onSelected else c.ink
             when (m.kind) {
                 Kind.VOICE -> { OIcon(R.drawable.gg_ic_play, tint = ink, contentDescription = tx.listenA11y(m.durationSec)); Text("0:%02d".format(m.durationSec), style = OieType.caption, color = c.muted) }
-                Kind.STICKER -> STICKERS[m.text]?.let {
+                // A sticker from family's WhatsApp arrives as an image (media); Oiê's own are drawn from their word.
+                Kind.STICKER -> if (m.media != null) PhotoThumb(m.media) else STICKERS[m.text]?.let {
                     Image(painterResource(it), contentDescription = tx.stickerA11y(m.text), modifier = Modifier.size(OTokens.Size.contactTile + OTokens.Spacing.space8))
                 } ?: Text(m.text, style = OieType.title, color = ink)
-                Kind.PHOTO -> PhotoThumb(m.media)
+                Kind.PHOTO -> Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                    PhotoThumb(m.media)
+                    if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
+                }
                 Kind.UNSUPPORTED -> Text(tx.onlyInWhatsApp(name), style = OieType.body, color = c.muted)
                 Kind.DELETED -> Text(tx.deletedMessage, style = OieType.body.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic), color = c.muted)
                 else -> Text(m.text, style = OieType.body, color = ink)

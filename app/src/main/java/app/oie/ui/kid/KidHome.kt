@@ -50,7 +50,7 @@ fun KidHome(state: AppState) {
                 QuietButton(tx.parentButton, { state.route = Route.ParentPin }, icon = R.drawable.gg_ic_gear)
             }
             when {
-                !state.link.connected -> Banner(R.drawable.gg_ic_link, tx.linkDropped(state.parentName))
+                !state.wa.connected -> Banner(R.drawable.gg_ic_link, tx.linkDropped(state.parentName))
                 quiet != null -> Banner(R.drawable.gg_ic_clock, tx.quietUntil(quiet.end.hour))
             }
             Column(

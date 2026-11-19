@@ -23,6 +23,7 @@ sealed interface Route {
     data object ParentPin : Route
     data class Parent(val section: Int) : Route // 0 contacts, 1 quiet hours, 2 connection, 3 about
     data object RuleTest : Route // Conexão › Testar a regra (docs/flows/rule-test.md)
+    data object Pair : Route // Conexão › Conectar de novo, on the real WhatsApp (v0.8)
 }
 
 /**
@@ -44,6 +45,20 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     val messages = mutableStateListOf<Message>()
     /** The rule test with the parent's real WhatsApp (docs/flows/rule-test.md). */
     val linkTest = LinkTest()
+    /** The kid's side uses the parent's real WhatsApp (v0.8). Off until the parent turns it on; there's no way back but unlinking. */
+    var realMode by mutableStateOf(false)
+    /** The real link, set by the app (OieApp); null in tests. */
+    var real: WhatsAppLink? = null
+    /** The link the kid's side talks through: the real one once the parent turned it on, else the sample. */
+    val wa: WhatsAppLink get() = if (realMode) real ?: link else link
+    /** Messages the kid sent that didn't go out (rule L4: one retry, then the kid is told). */
+    val failed = mutableStateListOf<String>()
+
+    /** Turns the kid's side to the real WhatsApp: the sample chats and contacts go; the parent picks real ones. */
+    fun goReal() {
+        realMode = true
+        allowed.clear(); messages.clear(); drafts.clear(); lastSeen.clear(); failed.clear(); quietCount = 0
+    }
     /** Unsent drafts per contact (flow: Remembers). */
     val drafts = mutableStateMapOf<String, String>()
     /** The last photo source the kid used, opened first next time (flow: Remembers). */

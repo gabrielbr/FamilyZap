@@ -1,9 +1,14 @@
 # The WhatsApp link
 
 How Oiê connects the kid's tablet to the parent's WhatsApp (decision 0001: a linked device on the
-tablet; decision 0003: built on whatsmeow). **Status:** 🟡 since v0.5 the link runs in the app for
-one thing only: the read-only rule test in the parent area (`docs/flows/rule-test.md`, `RealLink`).
-The kid's side runs on `SampleLink` until the message rule is decided from that test (STATUS.md).
+tablet; decision 0003: built on whatsmeow). **Status:** 🟡 the link runs the read-only rule test
+(v0.5, `docs/flows/rule-test.md`). Since v0.8 it also runs the kid's side, once the parent turns it on
+(`AppState.realMode`, off by default). The kid's side then talks through `RealLink` as its
+`WhatsAppLink`; until then it stays on `SampleLink`.
+
+### v0.8 on the kid's side
+- **Receiving:** `RealInbox.toMessage` comes first. It drops chats that aren't allowed, the parent's own messages, and the tablet's own sends echoing back (all tested). Then comes `Inbox.decide`, then the notification. Photos, stickers and voice that are kept are downloaded and sealed.
+- **Sending:** text, photos, and stickers (as JPEG pictures) go through `SendPace`. Each send uses the message's own id. A send that fails while the link is down is retried once, on the next "connected" (L4); after that it's marked failed for the kid. Voice waits for real recording (v0.9).
 
 ## How it fits together
 ```

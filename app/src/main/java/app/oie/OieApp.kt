@@ -33,6 +33,9 @@ class OieApp : Application() {
         val store = Store(File(filesDir, "state.sealed"), KeystoreSealer())
         state = AppState().also { s -> store.read()?.let { Codec.decode(it, s) } }
         realLink = RealLink(this, state)
+        state.real = realLink
+        val tx = if (resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt
+        realLink.notifier = app.oie.data.Notifier(this, tx)
         // Changes made with no screen open (a message arriving through LinkService) still reach
         // observers: tell the snapshot system about global writes, as Compose does when a screen is up.
         val main = Handler(Looper.getMainLooper())

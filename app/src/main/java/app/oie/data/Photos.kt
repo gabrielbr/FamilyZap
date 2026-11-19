@@ -55,6 +55,21 @@ object Photos {
         return name
     }
 
+    /** The plain bytes of a stored file, to send it through the WhatsApp link. */
+    fun openBytes(context: Context, name: String): ByteArray? =
+        File(dir(context), name).takeIf { it.exists() }?.let { runCatching { sealer.open(it.readBytes()) }.getOrNull() }
+
+    /** One of Oiê's stickers as a JPEG on white, to send it as a picture (WhatsApp stickers need another format). */
+    fun stickerJpeg(context: Context, res: Int): ByteArray {
+        val d = androidx.core.content.ContextCompat.getDrawable(context, res) ?: return ByteArray(0)
+        val side = 512
+        val bmp = Bitmap.createBitmap(side, side, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bmp)
+        canvas.drawColor(android.graphics.Color.WHITE)
+        d.setBounds(0, 0, side, side); d.draw(canvas)
+        return java.io.ByteArrayOutputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, QUALITY, it); it.toByteArray() }
+    }
+
     /** A small bitmap for the chat bubble or the preview. */
     fun load(context: Context, name: String, maxSide: Int): Bitmap? {
         val f = File(dir(context), name)

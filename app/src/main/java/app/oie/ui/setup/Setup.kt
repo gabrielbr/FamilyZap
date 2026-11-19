@@ -80,7 +80,7 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
                             QuietButton(tx.riskDecline, onClose, Modifier.height(OTokens.Size.button))
                         }
                     }
-                    2 -> LinkStep(state, back = { go(1) }, next = { state.parentName = state.link.profileName; go(3) })
+                    2 -> LinkStep(state, back = { go(1) }, next = { if (!state.realMode) state.parentName = state.link.profileName; go(3) })
                     3 -> NamesStep(state, back = { go(2) }, next = { go(4) })
                     4 -> CreatePinStep(state, next = { go(5) })
                     5 -> ContactsStep(state, next = { go(6) })
@@ -116,16 +116,13 @@ private fun LinkStep(state: AppState, back: () -> Unit, next: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     Text(tx.linkTitle, style = OieType.title, color = c.ink)
-    tx.linkSteps.forEachIndexed { i, s -> Text("${i + 1}. $s", style = OieType.body, color = c.ink) }
-    Box(
-        Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.qrGround).padding(OTokens.Spacing.space6),
-    ) {
-        Text(tx.linkPlaceholder, style = OieType.caption, color = c.qrInk)
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-        // v0.1 has no real link (SampleLink). This button is labelled as a test so it can't be mistaken for the real thing.
-        PrimaryButton(tx.linkSimulate, { state.link.pretendLinked(); next() })
+    // v0.8: the real link. Once the phone scans the QR, the kid's side uses the real WhatsApp.
+    val real = app.oie.ui.parent.LocalRealLink.current
+    app.oie.ui.parent.Pairing(state) { real?.goReal(); next() }
+    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4), verticalAlignment = Alignment.CenterVertically) {
         QuietButton(tx.back, back, Modifier.height(OTokens.Size.button))
+        // The sample stays for trying Oiê out, and is labelled as such.
+        if (state.linkTest.status != app.oie.data.LinkTest.Status.Connected) TextLink(tx.useSample, { state.link.pretendLinked(); next() })
     }
 }
 
@@ -189,9 +186,14 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     val picked = remember { mutableStateListOf<String>().apply { addAll(state.allowed.map { it.id }) } }
+    var query by remember { mutableStateOf("") }
+    val all = state.wa.contacts()
     Text(tx.canTalkTo(state.kidName), style = OieType.title, color = c.ink)
+    // A real WhatsApp has many contacts: search them (the sample has six).
+    if (all.size > SEARCH_FROM) Field(tx.ruleTestSearch, query, { query = it }, tx.pickRealContacts(state.kidName))
+    val shown = all.filter { it.id in picked || query.isBlank() || it.name.contains(query, ignoreCase = true) }.take(if (all.size > SEARCH_FROM) SEARCH_MAX else all.size)
     LazyColumn(Modifier.height(OTokens.Size.contentMax / 2)) {
-        items(state.link.contacts(), key = { it.id }) { ct ->
+        items(shown, key = { it.id }) { ct ->
             val on = ct.id in picked
             Row(
                 Modifier.fillMaxWidth().height(OTokens.Size.rowMin)
@@ -209,7 +211,7 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
     }
     Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
         PrimaryButton(tx.continueWith(picked.size), {
-            state.allowed.clear(); state.allowed.addAll(state.link.contacts().filter { it.id in picked }); next()
+            state.allowed.clear(); state.allowed.addAll(all.filter { it.id in picked }); next()
         })
         QuietButton(tx.later, next, Modifier.height(OTokens.Size.button))
     }
@@ -244,3 +246,7 @@ fun QuietList(state: AppState) {
         }
     }
 }
+
+/** Lists longer than this get a search field; it then shows at most [SEARCH_MAX] at a time. */
+const val SEARCH_FROM = 12
+const val SEARCH_MAX = 30
