@@ -46,7 +46,8 @@ flowchart TD
 | 2 | The QR expires or pairing fails | Back to the intro; tap again for a new code. |
 | any | WhatsApp blocks the number (temporary ban) | Everything stops (rule L9). "O WhatsApp bloqueou este número por cerca de N h. O teste parou e não vai tentar de novo sozinho." |
 | any | WhatsApp unlinks the tablet | "O WhatsApp desconectou este tablet." Conectar de novo starts over with a new QR. |
-| any | The app closes | The link disconnects. It reconnects the next time Oiê opens, while the test is on. |
+| any | The app closes or the tablet sleeps | The link keeps listening (v0.7), with a quiet "O Oiê está conectado." notification. Deleting the test stops it. |
+| any | The Wi-Fi drops | It connects again by itself when the network comes back. |
 | any | A tablet the library wasn't built for | "Este tablet não consegue usar a conexão com o WhatsApp." |
 
 ## Notes

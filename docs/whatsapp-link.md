@@ -26,7 +26,7 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 | L2 | **Only allowed chats.** Sends go only to contacts the parent allowed, never to the parent's own number, never to a list. | `Inbox.decide`, the allowed list; no bulk send anywhere |
 | L3 | **Human pace.** At least 2 s between sends, at most 30 in 10 minutes. The app waits rather than refuses. | `SendPace` (tested) |
 | L4 | **No duplicates.** A send is retried at most once, with the same message ID, only after a reconnect. Other errors show "Não foi" with Tentar de novo for the kid. | whatsmeow `SendRequestExtra{ID}` |
-| L5 | **Bounded reconnects.** whatsmeow reconnects on its own, waiting 2 s longer each time, and stops after 8 tries. After that, the app tries again when the network or the app comes back. | `AutoReconnectHook` |
+| L5 | **Bounded reconnects.** whatsmeow reconnects on its own, waiting 2 s longer each time, and stops after 8 tries. After that, the app tries again when the network or the app comes back. | `AutoReconnectHook`; `LinkService` network callback (v0.7) |
 | L6 | **Little history.** At pairing, ask for 1 day of history. Oiê shows nothing from before the link. | `HistorySyncConfig` limits |
 | L7 | **No fake activity.** No automatic "online", "typing" or read receipts. Presence is sent only so WhatsApp knows the name. | no `SendChatPresence`, no `MarkRead` (open question: read receipts) |
 | L8 | **The session stays on the tablet,** in the app's private no-backup storage, and is deleted when the parent unlinks. | `noBackupFilesDir`; `Unlink` deletes it |
@@ -44,6 +44,13 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 | `Download` | `Link.Download(id)`: a received photo, voice note or sticker, as bytes the app seals at once (`Photos.keepBytes`). The last 200 received stay downloadable. |
 | `events.Connected` / `Disconnected` / `LoggedOut` / `StreamReplaced` | Conexão state; "Peça para {nome} conectar de novo" |
 | `events.TemporaryBan` (codes 101–106) | rule L9 |
+
+## In the background (v0.7)
+The link belongs to the app process (`OieApp`), not to a screen. While it should listen (today: the
+rule test is on), `LinkService` keeps it alive as a foreground service of type `remoteMessaging`,
+with a silent, minimum-priority notification ("O Oiê está conectado.") on its own channel. It
+reconnects when the network comes back, stops on a ban, and stops when the test is deleted.
+Android may still pause the network in deep sleep (Doze); messages then arrive when the tablet wakes.
 
 ## Size
 The library adds about 9 MB per architecture. Since v0.6 each release has one APK per architecture

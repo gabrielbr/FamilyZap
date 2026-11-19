@@ -35,7 +35,7 @@ import app.oie.ui.setup.Setup
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 
-object BuildConfigInfo { const val VERSION = "0.6.0" }
+object BuildConfigInfo { const val VERSION = "0.7.0" }
 
 val LocalUpdater = androidx.compose.runtime.staticCompositionLocalOf<app.oie.update.Updater?> { null }
 val LocalNotifier = androidx.compose.runtime.staticCompositionLocalOf<app.oie.data.Notifier?> { null }
@@ -54,13 +54,8 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         updater.onForeground()
         appState?.let { notifier.quietSummary(it.takeQuietSummary()) }
-        // The rule test listens only while Oiê is open.
-        if (appState?.linkTest?.on == true) realLink?.start()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        realLink?.stop()
+        // The link listens in the background while the test is on (LinkService); make sure it runs.
+        if (appState?.linkTest?.on == true) app.oie.data.LinkService.start(this)
     }
 
     override fun onNewIntent(intent: android.content.Intent) {
@@ -77,15 +72,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            // Saved on the tablet only, sealed with a Keystore key (data/Persistence.kt).
-            val store = remember { Store(File(filesDir, "state.sealed"), KeystoreSealer()) }
-            val state = remember { AppState().also { s -> store.read()?.let { Codec.decode(it, s) }; appState = s } }
-            val real = remember { app.oie.data.RealLink(applicationContext, state).also { realLink = it; if (state.linkTest.on) it.start() } }
-            LaunchedEffect(state) {
-                snapshotFlow { Codec.encode(state) }.distinctUntilChanged().collectLatest { json ->
-                    withContext(Dispatchers.IO) { store.write(json) }
-                }
-            }
+            // The state and the link belong to the app process (OieApp), so the link can listen in the background.
+            val oie = application as OieApp
+            val state = remember { oie.state.also { appState = it } }
+            val real = remember { oie.realLink.also { realLink = it } }
             OieTheme {
               androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides app.oie.ui.text.stringsFor(), LocalUpdater provides updater, LocalNotifier provides notifier, app.oie.ui.parent.LocalRealLink provides real) {
                 val c = OieTheme.colors

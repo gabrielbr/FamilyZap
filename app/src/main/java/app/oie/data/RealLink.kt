@@ -39,6 +39,14 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         }
     }
 
+    /** The parent starts the test: the link listens from now on, in the background too (LinkService). */
+    fun turnOn() { test.on = true; LinkService.start(context) }
+
+    /** After a network drop: connect again, unless the parent stopped the test or WhatsApp banned the number. */
+    fun reconnectIfDropped() {
+        main.post { if (test.on && (test.status == LinkTest.Status.Disconnected || test.status == LinkTest.Status.Off)) start() }
+    }
+
     fun stop() {
         io.execute { runCatching { link?.disconnect() } }
         if (test.status !is LinkTest.Status.Banned) test.status = LinkTest.Status.Off
@@ -53,6 +61,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         }
         test.entries.mapNotNull { it.media }.forEach { Photos.forget(context, it) }
         test.clear()
+        LinkService.stop(context)
     }
 
     private fun loadContacts() {
@@ -79,7 +88,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 "paired", "connected" -> { test.status = LinkTest.Status.Connected; loadContacts() }
                 "disconnected" -> if (test.status == LinkTest.Status.Connected) test.status = LinkTest.Status.Disconnected
                 "replaced", "loggedOut" -> test.status = LinkTest.Status.LoggedOut
-                "temporaryBan" -> test.status = LinkTest.Status.Banned(((o.optLong("expiresInSeconds") + 3599) / 3600).toInt())
+                "temporaryBan" -> { test.status = LinkTest.Status.Banned(((o.optLong("expiresInSeconds") + 3599) / 3600).toInt()); LinkService.stop(context) }
                 "pairError" -> test.status = LinkTest.Status.Off
                 "message" -> {
                     val e = test.onIncoming(

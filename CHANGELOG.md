@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.7.0
+- The rule test now keeps listening when Oiê is closed or the tablet is asleep, so it can collect a whole day of messages. A quiet notification, "O Oiê está conectado.", shows while it listens. You can hide it in Android's settings, under Conexão com o WhatsApp.
+- If the Wi-Fi drops, Oiê connects again by itself when it comes back. If WhatsApp blocks the number, it stops and doesn't try again on its own.
+- Deleting the test stops the listening and the notification.
+
 ## 0.6.0
 - Smaller updates: the tablet now downloads the version made for its processor, about 21 MB instead of 40 MB. This update is still the big one; the next ones are smaller.
 - In the rule test, a photo or sticker that would reach your kid now shows in the list, the way your kid would see it. Voice messages show how long they are.
