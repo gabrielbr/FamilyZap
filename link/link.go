@@ -199,13 +199,13 @@ func (k *Link) Contacts() (list string, err error) {
 	}
 	for jid, info := range all {
 		if name := contactName(info); name != "" {
-			out = append(out, contactEntry{jid.ToNonAD().String(), name, false})
+			out = append(out, contactEntry{jid.ToNonAD().String(), name, false, k.phoneOf(ctx, jid)})
 		}
 	}
 	groups, err := k.c.GetJoinedGroups(ctx)
 	if err == nil {
 		for _, g := range groups {
-			out = append(out, contactEntry{g.JID.String(), g.GroupName.Name, true})
+			out = append(out, contactEntry{g.JID.String(), g.GroupName.Name, true, ""})
 		}
 	}
 	return encodeContacts(out)
@@ -215,6 +215,31 @@ type contactEntry struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
 	IsGroup bool   `json:"isGroup"`
+	// Phone is the number's digits with the country code, for the parent to check they picked the
+	// right person (v0.19). Empty when WhatsApp only knows the contact by a private id (LID).
+	Phone string `json:"phone,omitempty"`
+}
+
+// phoneOf is the contact's number: the user part of a phone JID, or the phone JID WhatsApp
+// mapped to a private id (LID). Empty when there's none.
+func (k *Link) phoneOf(ctx context.Context, jid types.JID) string {
+	if p := phoneDigits(jid); p != "" {
+		return p
+	}
+	if jid.Server == types.HiddenUserServer && k.c.Store.LIDs != nil {
+		if pn, err := k.c.Store.LIDs.GetPNForLID(ctx, jid); err == nil {
+			return phoneDigits(pn)
+		}
+	}
+	return ""
+}
+
+// phoneDigits is the user part of a phone-number JID ("5511987650001@s.whatsapp.net"), else "".
+func phoneDigits(jid types.JID) string {
+	if jid.Server != types.DefaultUserServer {
+		return ""
+	}
+	return DigitsOnly(jid.User)
 }
 
 // encodeContacts sorts by name and encodes. An empty list is "[]", never "null": right after

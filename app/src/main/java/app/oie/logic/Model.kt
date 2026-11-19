@@ -12,6 +12,13 @@ data class Contact(
     val quietException: Boolean = false,
     /** For a group made for the kid: show everything from it, not only what the message rule passes. */
     val showWholeGroup: Boolean = false,
+    /** The number's digits with the country code, from the WhatsApp link (v0.19). Empty if unknown or a group. */
+    val phone: String = "",
+    /**
+     * The name in the parent's WhatsApp when the parent gave the kid a different one (v0.19): [name] is
+     * "Vovó", this is "Maria Silva". Empty when they're the same. Only the parent area shows it.
+     */
+    val waName: String = "",
 )
 
 /** DELETED is WhatsApp's "delete for everyone": [Message.replyTo] names the message it removes. */

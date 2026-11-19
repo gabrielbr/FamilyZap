@@ -16,7 +16,7 @@ class ContactsJsonTest {
     }
 
     @Test fun aListReadsAndSkipsEntriesWithoutANameOrId() {
-        val list = ContactsJson.parse("""[{"id":"a@s.whatsapp.net","name":"Vovó","isGroup":false},{"id":"g@g.us","name":"Família","isGroup":true},{"id":"x"},null]""")
-        assertEquals(listOf(Contact("a@s.whatsapp.net", "Vovó"), Contact("g@g.us", "Família", isGroup = true)), list)
+        val list = ContactsJson.parse("""[{"id":"a@s.whatsapp.net","name":"Vovó","isGroup":false,"phone":"5511987650001"},{"id":"g@g.us","name":"Família","isGroup":true},{"id":"x"},null]""")
+        assertEquals(listOf(Contact("a@s.whatsapp.net", "Vovó", phone = "5511987650001"), Contact("g@g.us", "Família", isGroup = true)), list)
     }
 }

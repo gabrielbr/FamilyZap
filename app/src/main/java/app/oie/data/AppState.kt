@@ -39,6 +39,8 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var kidNoticeSeen by mutableStateOf(false)
     /** The kid asked the parent to add someone (owner, 2026-11-18). No names, no typing: just a flag. */
     var addRequested by mutableStateOf(false)
+    /** The parent opened a contact once (v0.19): the "tap someone" hint in Contatos goes (less-is-more: no permanent hints). */
+    var contactTipUsed by mutableStateOf(false)
     val allowed = mutableStateListOf<Contact>()
     val periods = mutableStateListOf<QuietPeriod>().apply { addAll(QuietHours.presets) }
     val messages = mutableStateListOf<Message>()

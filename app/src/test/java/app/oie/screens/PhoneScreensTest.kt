@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -92,4 +94,13 @@ class PhoneScreensTest {
         shot("p12-connection-crash") { ParentArea(ready().apply { realMode = true; link.pretendDropped() }, 2) }
         app.oie.data.Diagnostics.clear()
     }
+
+    // v0.19: a name for the kid, and the number for the parent, at 360dp and 1.3× text.
+    private fun renamed() = ready().apply { realMode = true; allowed[0] = allowed[0].copy(waName = "Maria Silva") }
+    @Test fun contactsRenamed() = shot("p14-contacts-renamed", bigText = true) { ParentArea(renamed(), 0) }
+    @Test fun contactEditor() = shot("p15-contact-editor", bigText = true) {
+        val s = renamed()
+        Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.ContactEditor(s.allowed[0], "Tito", s.link.contacts(), {}, {}, onRemove = {}) }
+    }
+    @Test fun setupContactsPicked() = shot("p16-setup-contacts-picked", bigText = true) { Setup(renamed().apply { realMode = false }, 5, onClose = {}) }
 }

@@ -160,10 +160,20 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
     val tx = str
     var removed by remember { mutableStateOf<Pair<Int, Contact>?>(null) }
     LaunchedEffect(removed) { if (removed != null) { delay(5_000); removed = null } }
+    // v0.19: the name the kid sees, edited in place of the list, like a quiet period.
+    var editing by remember { mutableStateOf<String?>(null) }
+    val fresh = state.wa.contacts()
+    state.allowed.indexOfFirst { it.id == editing }.takeIf { it >= 0 }?.let { i ->
+        ContactEditor(state.allowed[i], state.kidName.ifBlank { tx.theKid }, fresh,
+            onSave = { touched(); state.allowed[i] = it; editing = null }, onCancel = { editing = null },
+            onRemove = { touched(); val ct = state.allowed.removeAt(i); removed = i to ct; editing = null }, touched = touched)
+        return
+    }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f)) {
             Text(tx.whoCanCall(state.kidName), style = OieType.title, color = c.ink)
             Text(tx.peopleAndGroups(state.allowed.count { !it.isGroup }, state.allowed.count { it.isGroup }), style = OieType.caption, color = c.muted)
+            if (state.allowed.isNotEmpty() && !state.contactTipUsed) Text(tx.renameHint(state.kidName.ifBlank { tx.theKid }), style = OieType.caption, color = c.muted)
         }
     }
     if (state.addRequested) Row(
@@ -175,13 +185,21 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
         TextLink(tx.understood, { touched(); state.addRequested = false })
     }
     state.allowed.toList().forEachIndexed { i, ct ->
-        Row(Modifier.fillMaxWidth().height(OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+        Row(Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+            // v0.19: the person (avatar and lines) opens the name editor; the switch and Remover keep their own targets.
+            Row(
+                Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.changeNameA11y(ct.name)) { touched(); editing = ct.id; state.contactTipUsed = true },
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
+            ) {
             Initial(ct.name, OTokens.Size.avatar)
             // The switch is always labelled, on or off, right under the name, so it fits a phone too (v0.13 audit).
-            Column(Modifier.weight(1f)) {
+            Column(Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2)) {
                 Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                // v0.19: the number, so the parent knows it's the right person.
+                ContactLines(ct, fresh)
                 // The line says the current setting, so it's true whichever way the switch is.
                 Text(if (ct.quietException) tx.canTalkInQuiet else tx.onlyOutsideQuiet, style = OieType.caption, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            }
             }
             Switch(
                 modifier = Modifier.semantics { contentDescription = tx.canTalkInQuietA11y(ct.name) },
@@ -189,8 +207,7 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
                 onCheckedChange = { touched(); state.allowed[i] = ct.copy(quietException = it) },
                 colors = SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
             )
-            // Undo instead of confirm (flow step 6).
-            TextLink(tx.remove, { touched(); state.allowed.removeAt(i); removed = i to ct })
+            // v0.19 audit: Remover moved into the contact's editor (undo instead of confirm, flow step 6), so a phone row fits the number.
         }
     }
     removed?.let { (i, ct) ->
@@ -207,10 +224,10 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
     // v0.12: the parent's contacts arrive a little after linking; reload them each time Contatos opens.
     val real = LocalRealLink.current
     LaunchedEffect(Unit) { real?.loadContacts() }
-    val all = state.wa.contacts().filter { a -> state.allowed.none { it.id == a.id } }
+    val all = fresh.filter { a -> state.allowed.none { it.id == a.id } }
     var query by remember { mutableStateOf("") }
     // People first, then groups; a search narrows them, 30 at a time.
-    val addable = all.filter { query.isBlank() || it.name.contains(query, ignoreCase = true) }
+    val addable = all.filter { app.oie.logic.ContactNames.matches(it, query) }
         .sortedWith(compareBy({ it.isGroup }, { it.name.lowercase() })).take(app.oie.ui.setup.SEARCH_MAX)
     if (state.allowed.isEmpty()) Text(tx.pickRealContacts(state.kidName.ifBlank { tx.theKid }), style = OieType.body, color = c.ink)
     Text(tx.add, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
@@ -229,7 +246,8 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
                 // The group note under the name, so it fits a phone (v0.17 audit).
                 Column(Modifier.weight(1f)) {
                     Text(ct.name, style = OieType.label, color = c.ink)
-                    if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted)
+                    // v0.19: the number before adding, so the right Maria is picked.
+                    if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted) else ContactLines(ct, fresh)
                 }
                 OIcon(R.drawable.gg_ic_plus, contentDescription = tx.addA11y(ct.name))
             }

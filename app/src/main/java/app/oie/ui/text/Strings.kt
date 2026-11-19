@@ -120,6 +120,14 @@ interface Strings {
     fun bannedFor(hours: Int): String
     val search: String; val searchHelp: String
     val addByNumber: String; val numberLabel: String; val numberHelp: String; val contactNameLabel: String
+    // v0.19: a name for the kid, and the number for the parent.
+    fun renameHint(kid: String): String
+    val changeName: String; val noNumber: String; val groupShort: String
+    fun changeNameA11y(name: String): String
+    fun nameKidSees(kid: String): String
+    fun onWhatsApp(name: String): String
+    fun renameHelp(waName: String): String
+    fun removeNamed(name: String): String
     val notOnWhatsApp: String; val lookUpFailed: String; val looking: String
     fun unlinkConfirm(kid: String): String
     val onlyOutsideQuiet: String
@@ -245,14 +253,14 @@ object Pt : Strings {
         "O que pode acontecer com o meu WhatsApp?" to riskBody,
         "$kid vê as minhas conversas?" to "Não. O tablet mostra só o que foi mandado para $kid: respostas às mensagens de $kid, mensagens que começam com o nome de $kid, e o que chega até 24 horas depois da última mensagem de $kid. As suas outras conversas continuam só no seu WhatsApp.",
         "$kid sabe que eu vejo as mensagens?" to "Sim. Na primeira vez, o Oiê diz a $kid: \"${noticeBody(parent)}\"",
-        "Quem pode falar com $kid?" to "Só quem está em Contatos. Mensagens de qualquer outra pessoa não aparecem no tablet. Num grupo, todos do grupo veem o que $kid manda.",
+        "Quem pode falar com $kid?" to "Só quem está em Contatos. Mensagens de qualquer outra pessoa não aparecem no tablet. Num grupo, todos do grupo veem o que $kid manda. Em Contatos, toque em alguém para mudar o nome que $kid vê (Vovó, por exemplo) ou para remover. O nome muda só no Oiê, não no seu WhatsApp.",
         "Como funciona o horário de silêncio?" to "Durante um período, $kid lê e ouve, mas não manda mensagens. Quem tem \"Pode falar no silêncio\" em Contatos continua liberado. Dá para pausar um período sem apagar, por exemplo nas férias.",
         "O Oiê se desconectou. E agora?" to "Abra Conexão e toque em Conectar de novo. As mensagens que $kid mandou enquanto isso ficam guardadas e saem depois.",
         "Como mando figurinhas para $kid?" to "No seu WhatsApp, mande a figurinha para você mesmo, na conversa com o seu próprio nome. Ela aparece para $kid em Figurinhas, em Novas de $parent, e $kid escolhe se guarda. Só as figurinhas dessa conversa chegam ao Oiê; o resto dela fica só com você. Funciona com o WhatsApp de verdade ligado.",
         "Esqueci o PIN" to "Na tela do PIN, toque em Esqueci o PIN e conecte o mesmo WhatsApp de novo. Isso prova que é você. Depois crie um PIN novo.",
         "Onde ficam as mensagens e as fotos?" to "Só neste tablet, guardadas de forma protegida. Nada vai para um servidor nosso. O Oiê não tem anúncios e não acompanha o que $kid faz.",
     )
-    override fun aboutVersion(v: String) = "Oiê $v. Versão de teste: usa dados de exemplo e ainda não se conecta de verdade ao WhatsApp."
+    override fun aboutVersion(v: String) = "Oiê $v, versão de teste. Usa o seu WhatsApp de verdade."
     override val notWhatsApp = "O Oiê não é feito nem aprovado pelo WhatsApp ou pela Meta."
     override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System. Conexão com o WhatsApp feita com whatsmeow, Mozilla Public License 2.0, código em github.com/tulir/whatsmeow. QR com ZXing, Apache License 2.0."
     override val theKid = "a criança"
@@ -287,8 +295,15 @@ object Pt : Strings {
     override val micError = "Não deu para gravar. Tente de novo."
     override val linkQrA11y = "Código para conectar o WhatsApp"; override val linkUnavailable = "Este tablet não consegue usar a conexão com o WhatsApp."
     override fun bannedFor(hours: Int) = "O WhatsApp bloqueou este número por cerca de $hours h. O Oiê parou e não vai tentar de novo sozinho."
-    override val search = "Buscar"; override val searchHelp = "Os seus contatos do WhatsApp chegam aos poucos depois de conectar."
+    override val search = "Buscar"; override val searchHelp = "Busque pelo nome ou pelo número. Os contatos chegam aos poucos depois de conectar."
     override val addByNumber = "Adicionar pelo número"; override val numberLabel = "Número com DDD"; override val numberHelp = "Com o código do país: 55 11 99999-0000."
+    override fun renameHint(kid: String) = "Toque em alguém para mudar o nome que $kid vê ou para remover."
+    override fun removeNamed(name: String) = "Remover $name dos contatos"
+    override val changeName = "Mudar nome"; override val noNumber = "Número não disponível"; override val groupShort = "Grupo"
+    override fun changeNameA11y(name: String) = "Mudar o nome de $name"
+    override fun nameKidSees(kid: String) = "Nome que $kid vê"
+    override fun onWhatsApp(name: String) = "$name no WhatsApp"
+    override fun renameHelp(waName: String) = "Em branco, volta a ser $waName. No WhatsApp, nada muda."
     override val contactNameLabel = "Nome"; override val notOnWhatsApp = "Esse número não está no WhatsApp."
     override val lookUpFailed = "Não deu para procurar agora. Tente de novo."; override val looking = "Procurando…"
     override fun unlinkConfirm(kid: String) = "$kid para de receber e mandar mensagens até você conectar de novo com o código."
@@ -408,14 +423,14 @@ object En : Strings {
         "What could happen to my WhatsApp?" to riskBody,
         "Can $kid see my chats?" to "No. The tablet only shows what was sent to $kid: replies to $kid's messages, messages that start with $kid's name, and what arrives up to 24 hours after $kid's last message. Your other chats stay only in your WhatsApp.",
         "Does $kid know I can see the messages?" to "Yes. The first time, Oiê tells $kid: \"${noticeBody(parent)}\"",
-        "Who can talk to $kid?" to "Only the people in Contacts. Messages from anyone else don't appear on the tablet. In a group, everyone in it sees what $kid sends.",
+        "Who can talk to $kid?" to "Only the people in Contacts. Messages from anyone else don't appear on the tablet. In a group, everyone in it sees what $kid sends. In Contacts, tap someone to change the name $kid sees (Grandma, for example) or to remove them. The name changes only in Oiê, not in your WhatsApp.",
         "How do quiet hours work?" to "During a period, $kid can read and listen, but not send. Anyone with \"Can talk in quiet hours\" in Contacts still gets through. You can pause a period without deleting it, for example on holiday.",
         "Oiê got disconnected. What now?" to "Open Connection and tap Link again. Messages $kid sent in the meantime are kept and go out afterwards.",
         "How do I send stickers to $kid?" to "In your WhatsApp, send the sticker to yourself, in the chat with your own name. It shows for $kid under Stickers, in New from $parent, and $kid chooses whether to keep it. Only stickers from that chat reach Oiê; the rest of it stays with you. Works once the real WhatsApp is on.",
         "I forgot the PIN" to "On the PIN screen, tap I forgot the PIN and link the same WhatsApp again. That proves it's you. Then create a new PIN.",
         "Where are the messages and photos kept?" to "Only on this tablet, stored securely. Nothing goes to a server of ours. Oiê has no ads and doesn't track what $kid does.",
     )
-    override fun aboutVersion(v: String) = "Oiê $v. Test version: it uses example data and doesn't really link to WhatsApp yet."
+    override fun aboutVersion(v: String) = "Oiê $v, a test version. It uses your real WhatsApp."
     override val notWhatsApp = "Oiê isn't made or approved by WhatsApp or Meta."
     override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System. WhatsApp link built with whatsmeow, Mozilla Public License 2.0, source at github.com/tulir/whatsmeow. QR codes with ZXing, Apache License 2.0."
     override val theKid = "your child"
@@ -450,8 +465,15 @@ object En : Strings {
     override val micError = "Couldn't record. Try again."
     override val linkQrA11y = "Code to link WhatsApp"; override val linkUnavailable = "This tablet can't use the WhatsApp link."
     override fun bannedFor(hours: Int) = "WhatsApp blocked this number for about $hours h. Oiê stopped and won't try again on its own."
-    override val search = "Search"; override val searchHelp = "Your WhatsApp contacts arrive bit by bit after linking."
+    override val search = "Search"; override val searchHelp = "Search by name or number. Contacts arrive bit by bit after linking."
     override val addByNumber = "Add by number"; override val numberLabel = "Phone number"; override val numberHelp = "With the country code: 55 11 99999-0000."
+    override fun renameHint(kid: String) = "Tap someone to change the name $kid sees, or to remove them."
+    override fun removeNamed(name: String) = "Remove $name from contacts"
+    override val changeName = "Change name"; override val noNumber = "Number not available"; override val groupShort = "Group"
+    override fun changeNameA11y(name: String) = "Change the name of $name"
+    override fun nameKidSees(kid: String) = "Name $kid sees"
+    override fun onWhatsApp(name: String) = "$name on WhatsApp"
+    override fun renameHelp(waName: String) = "Left blank, it goes back to $waName. Nothing changes on WhatsApp."
     override val contactNameLabel = "Name"; override val notOnWhatsApp = "That number isn't on WhatsApp."
     override val lookUpFailed = "Couldn't look it up now. Try again."; override val looking = "Looking…"
     override fun unlinkConfirm(kid: String) = "$kid stops sending and receiving messages until you link again with the code."
