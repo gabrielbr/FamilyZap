@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.text.style.TextAlign
 import app.oie.R
 import app.oie.data.AppState
@@ -198,15 +202,24 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
     // People added by number here (v0.17), shown with the rest.
     val added = remember { mutableStateListOf<app.oie.logic.Contact>() }
     var query by remember { mutableStateOf("") }
-    val all = (added + state.wa.contacts().filter { a -> added.none { it.id == a.id } })
+    // v0.19: names the parent gave the kid here, by id; kept while picking, applied on Continue.
+    val renamed = remember { mutableStateMapOf<String, app.oie.logic.Contact>().apply { state.allowed.forEach { put(it.id, it) } } }
+    var editing by remember { mutableStateOf<String?>(null) }
+    val fresh = state.wa.contacts()
+    val all = (added + fresh.filter { a -> added.none { it.id == a.id } }).map { renamed[it.id] ?: it }
         .sortedWith(compareBy({ it.isGroup }, { it.name.lowercase() })) // people first, then groups
+    all.firstOrNull { it.id == editing }?.let { ct ->
+        app.oie.ui.parent.ContactEditor(ct, state.kidName.ifBlank { tx.theKid }, fresh,
+            onSave = { renamed[it.id] = it; editing = null }, onCancel = { editing = null })
+        return
+    }
     Text(tx.canTalkTo(state.kidName), style = OieType.title, color = c.ink)
     // v0.17: the contacts arrive a little after linking; say so, with the count, until they're all here.
     val sync = app.oie.ui.parent.contactSyncState(state)
     app.oie.ui.parent.ContactSyncLine(state, sync)
     // A real WhatsApp has many contacts: search them.
     if (all.size > SEARCH_FROM) Field(tx.search, query, { query = it }, tx.pickRealContacts(state.kidName))
-    val shown = all.filter { it.id in picked || query.isBlank() || it.name.contains(query, ignoreCase = true) }.take(if (all.size > SEARCH_FROM) SEARCH_MAX else all.size)
+    val shown = all.filter { it.id in picked || app.oie.logic.ContactNames.matches(it, query) }.take(if (all.size > SEARCH_FROM) SEARCH_MAX else all.size)
     // Plain rows (at most 30, see SEARCH_MAX) in the scrolling page, not a fixed-height box (v0.17 audit).
     Column {
         shown.forEach { ct ->
@@ -221,7 +234,11 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
                 // The group note sits under the name, so it fits a phone (v0.17 audit).
                 Column(Modifier.weight(1f)) {
                     Text(ct.name, style = OieType.label, color = c.ink)
-                    if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted)
+                    // v0.19: the number, so the parent picks the right person.
+                    if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted) else app.oie.ui.parent.ContactLines(ct, fresh)
+                    // v0.19: a picked contact can get the name the kid will see. Its own target (the row picks), under
+                    // the lines so a phone keeps the width for the name (v0.19 audit).
+                    if (on) TextLink(tx.changeName, { editing = ct.id }, Modifier.offset(x = -OTokens.Spacing.space3).semantics { contentDescription = tx.changeNameA11y(ct.name) })
                 }
                 if (on) OIcon(R.drawable.gg_ic_check, contentDescription = tx.chosen)
             }

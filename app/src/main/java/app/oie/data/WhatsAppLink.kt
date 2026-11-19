@@ -29,8 +29,9 @@ class SampleLink : WhatsAppLink {
     fun pretendDropped() { connected = false }
 
     override fun contacts(): List<Contact> = listOf(
-        Contact("vovo", "Vovó"), Contact("mae", "Mãe"), Contact("vovo2", "Vovô"),
-        Contact("bia", "Tia Bia"), Contact("primos", "Primos", isGroup = true), Contact("marina", "Vizinha Marina"),
+        Contact("vovo", "Vovó", phone = "5511987650001"), Contact("mae", "Mãe", phone = "5511987650002"),
+        Contact("vovo2", "Vovô", phone = "5511987650003"), Contact("bia", "Tia Bia", phone = "5521998760004"),
+        Contact("primos", "Primos", isGroup = true), Contact("marina", "Vizinha Marina", phone = "551134567890"),
     )
 
     val sent = mutableListOf<Message>()

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.19.0
+- **A name for your kid.** In Contatos, tap someone to change the name your kid sees: "Maria Silva" can be "Vovó". In setup, each person you pick has "Mudar nome". The name changes only in Oiê; your WhatsApp stays the same. Leave it blank to go back to the WhatsApp name.
+- **The number.** Each person in Contatos and in the lists you add from shows their number, so you can check it's the right one. A renamed person also shows their WhatsApp name. Search finds a number too.
+- To remove someone, tap them and use "Remover … dos contatos". Undo is still there.
+- About no longer says Oiê uses example data.
+
 ## 0.18.0
 - In Ajustes e ajuda › Problemas, "Enviar para o GitHub" opens a new issue in the private FamilyZap repo, with the report already filled in. You read it and tap Submit, logged in as yourself. Oiê holds no password and sends nothing on its own. "Copiar relatório" is still there.
 

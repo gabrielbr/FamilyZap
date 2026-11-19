@@ -266,8 +266,29 @@ func TestNoContactsIsAnEmptyListNotNull(t *testing.T) {
 	if got, _ := encodeContacts(nil); got != "[]" {
 		t.Fatalf("got %s: the app reads this as a list", got)
 	}
-	got, _ := encodeContacts([]contactEntry{{"b", "Bia", false}, {"a", "Ana", false}})
-	if got != `[{"id":"a","name":"Ana","isGroup":false},{"id":"b","name":"Bia","isGroup":false}]` {
+	got, _ := encodeContacts([]contactEntry{{"b", "Bia", false, ""}, {"a", "Ana", false, "5511987650001"}})
+	if got != `[{"id":"a","name":"Ana","isGroup":false,"phone":"5511987650001"},{"id":"b","name":"Bia","isGroup":false}]` {
+		t.Fatal(got)
+	}
+}
+
+func TestPhoneComesFromANumberIDOnly(t *testing.T) {
+	if got := phoneDigits(types.NewJID("5511987650001", types.DefaultUserServer)); got != "5511987650001" {
+		t.Fatal(got)
+	}
+	for _, j := range []types.JID{types.NewJID("123456789", types.HiddenUserServer), types.NewJID("120363", types.GroupServer)} {
+		if got := phoneDigits(j); got != "" {
+			t.Fatalf("%s gave %q: a private id or a group has no number", j, got)
+		}
+	}
+}
+
+func TestPhoneOfAPrivateIDWithoutAMappingIsEmpty(t *testing.T) {
+	k, err := Open(filepath.Join(t.TempDir(), "w.db"), nl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := k.phoneOf(t.Context(), types.NewJID("123456789", types.HiddenUserServer)); got != "" {
 		t.Fatal(got)
 	}
 }

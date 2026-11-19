@@ -13,7 +13,7 @@ object ContactsJson {
         return (0 until a.length()).mapNotNull { i ->
             val o = a.optJSONObject(i) ?: return@mapNotNull null
             val id = o.optString("id"); val name = o.optString("name")
-            if (id.isBlank() || name.isBlank()) null else Contact(id, name, o.optBoolean("isGroup"))
+            if (id.isBlank() || name.isBlank()) null else Contact(id, name, o.optBoolean("isGroup"), phone = o.optString("phone").filter { it.isDigit() })
         }
     }
 }

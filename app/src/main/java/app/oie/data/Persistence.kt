@@ -32,7 +32,7 @@ object Codec {
         put("kidName", s.kidName)
         put("pinHash", s.pinHash ?: JSONObject.NULL)
         put("kidNoticeSeen", s.kidNoticeSeen)
-        put("addRequested", s.addRequested)
+        put("addRequested", s.addRequested).put("contactTipUsed", s.contactTipUsed)
         put("quietCount", s.quietCount)
         put("linked", s.link.connected)
         put("realMode", s.realMode)
@@ -43,6 +43,7 @@ object Codec {
         put("allowed", JSONArray(s.allowed.map {
             JSONObject().put("id", it.id).put("name", it.name).put("group", it.isGroup)
                 .put("quietException", it.quietException).put("wholeGroup", it.showWholeGroup)
+                .put("phone", it.phone).put("waName", it.waName)
         }))
         put("periods", JSONArray(s.periods.map {
             JSONObject().put("name", it.name).put("days", JSONArray(it.days.map { d -> d.value }))
@@ -67,6 +68,7 @@ object Codec {
         s.pinHash = if (o.isNull("pinHash")) null else o.getString("pinHash")
         s.kidNoticeSeen = o.optBoolean("kidNoticeSeen")
         s.addRequested = o.optBoolean("addRequested")
+        s.contactTipUsed = o.optBoolean("contactTipUsed")
         s.quietCount = o.optInt("quietCount")
         s.lastPhotoSource = o.optString("lastPhotoSource", "camera")
         if (o.optBoolean("linked")) s.link.pretendLinked()
@@ -80,7 +82,7 @@ object Codec {
         s.allowed.clear()
         o.optJSONArray("allowed")?.let { a ->
             for (i in 0 until a.length()) a.getJSONObject(i).run {
-                s.allowed += Contact(getString("id"), getString("name"), optBoolean("group"), optBoolean("quietException"), optBoolean("wholeGroup"))
+                s.allowed += Contact(getString("id"), getString("name"), optBoolean("group"), optBoolean("quietException"), optBoolean("wholeGroup"), optString("phone"), optString("waName"))
             }
         }
         o.optJSONArray("periods")?.let { a ->

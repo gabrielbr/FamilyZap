@@ -77,6 +77,59 @@ flowchart TD
 - **Groups (owner, 2026-11-18):** allowed, with the warning that everyone in the group sees the kid's messages. A family group is a common real case.
 - **Data:** the list and the periods live on the tablet only.
 
+## v0.19: a name for the kid, and the number
+_The owner asked (2026-11-19): "my parents are saved under their own names; for my kid they're Vovô and Vovó". And: show each contact's number in the parent area, to be sure the right person was added._
+
+- **Job story:** *When I add my parents, who are saved in my WhatsApp as "Maria Silva", I want my kid to see "Vovó", so the list reads like our family. And I want to see their number, so I know I picked the right Maria.*
+- **Who sees what:**
+  - the kid sees only the name the parent chose, everywhere: home, chat, notifications;
+  - the parent sees that name, the number, and the WhatsApp name when it's different.
+- **Nothing changes in WhatsApp.** The name lives on the tablet only; the parent's phone keeps "Maria Silva".
+
+### Entries
+1. **Setup, contacts step.** Each picked person gets **Mudar nome** under their number (tapping the row picks or unpicks it, so renaming needs its own target).
+2. **Contatos.** Tapping a person or group in the allowed list opens the name editor, like a quiet period opens its editor. A line under the title says so until the parent has opened a contact once; after that, Help ("Quem pode falar com…?") says it.
+3. **Adicionar pelo número** already asks for the name: that name is the one the kid sees.
+
+### Steps (Contatos)
+| # | Screen | The parent | The system |
+|---|---|---|---|
+| 1 | Contatos | Sees each person: the name, then the number ("+55 11 98765-0001") and the WhatsApp name when it's different | Groups say "Grupo" instead of a number. |
+| 2 | Same | Taps "Maria Silva" | Opens **Mudar nome**: "Maria Silva no WhatsApp" and the number, then the field "Nome que Tito vê" with the current name. |
+| 3 | Editor | Types "Vovó", taps **Salvar** | Back to Contatos; the row reads "Vovó", then "+55 11 98765-0001", then "Maria Silva no WhatsApp". The kid's home shows Vovó at once. |
+| 3b | Editor | Clears the field and taps Salvar | Goes back to the WhatsApp name. The help line says so before saving. |
+| 3c | Editor | Taps **Cancelar** or system Back | Nothing changes. |
+| 3d | Editor | Taps **Remover Vovó dos contatos** | Back to Contatos with "Vovó saiu da lista · Desfazer" for 5 s. (v0.19 audit: Remover moved here from each row, so a phone row has room for the number. Removing is rare; adding is still one tap.) |
+
+### States
+- **The number is known** (people from the list, and people added by number): shown, grouped for reading.
+- **WhatsApp hides the number** (a contact WhatsApp only knows by a private id): "Número não disponível". The WhatsApp name is still there to check.
+- **Group:** "Grupo", no number.
+- **Not renamed:** only the number on the second line, nothing repeated.
+
+### Search
+- The search in setup and Contatos also finds a number ("98765"), and the WhatsApp name of a renamed contact.
+
+### Branches and errors
+- **Blank name:** never saved as blank; it falls back to the WhatsApp name.
+- **WhatsApp changes the contact's name later:** the kid's name stays; the parent's line updates the next time the list loads.
+- **Removed and added again:** comes back with the WhatsApp name (the undo within 5 s keeps the chosen name).
+
+### Flow review (§13), v0.19
+| # | Question | Result |
+|---|---|---|
+| 1 | Job | ✅ One actor (the parent), one job. |
+| 3 | Happy path | ✅ Contatos: tap, type, Salvar. Adding stays one tap; renaming is never forced. |
+| 4 | Branches | ✅ Blank, cancel, back, hidden number, group, renamed by WhatsApp. |
+| 5 | States | ✅ Above. |
+| 6 | Errors | ✅ Blank can't happen; the help says what blank does. |
+| 7 | Control | ✅ Cancel and Back; clearing goes back to the WhatsApp name. |
+| 9 | Memory | ✅ The WhatsApp name and number are shown in the editor, so nothing has to be remembered. |
+| 11 | Conventions | ✅ The same editor pattern as the quiet periods. |
+| 13 | Accessibility | ✅ The row's click label says "Mudar o nome de Maria Silva"; Mudar nome is a 48dp target. |
+| 14 | Ethics | ✅ The kid isn't misled about who it is: the parent picks a family name for a real family member; the number stays visible to the parent. |
+| 15 | Evidence | 🟡 Does the parent find "tap to rename" in Contatos? The hint line is there; the owner's test will say. |
+
 ## Flow review (ux-user-flows §13)
 | # | Question | Result |
 |---|---|---|

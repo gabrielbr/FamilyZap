@@ -3,6 +3,8 @@ package app.oie.ui.parent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -109,3 +111,50 @@ fun AddByNumber(open: Boolean, touched: () -> Unit = {}, onAdd: (Contact) -> Uni
         }
     }, icon = R.drawable.gg_ic_plus)
 }
+
+/** The parent's line under a contact (v0.19): the number grouped for reading, or "Número não disponível". Groups say "Grupo". */
+fun contactNumber(tx: app.oie.ui.text.Strings, ct: Contact, fresh: List<Contact>): String {
+    if (ct.isGroup) return tx.groupShort
+    return app.oie.logic.ContactNames.display(app.oie.logic.ContactNames.phoneOf(app.oie.logic.ContactNames.withNumber(ct, fresh))).ifEmpty { tx.noNumber }
+}
+
+/** The number, then "Maria Silva no WhatsApp" on its own line when the kid sees another name (v0.19 audit: one line each fits a phone). */
+@Composable
+fun ContactLines(ct: Contact, fresh: List<Contact>) {
+    val c = OieTheme.colors
+    val tx = str
+    val ell = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+    Text(contactNumber(tx, ct, fresh), style = OieType.caption, color = c.muted, maxLines = 1, overflow = ell)
+    if (ct.waName.isNotBlank()) Text(tx.onWhatsApp(ct.waName), style = OieType.caption, color = c.muted, maxLines = 2, overflow = ell)
+}
+
+/**
+ * One contact in the parent's hands: the name the kid sees (docs/flows/contacts-quiet-hours.md, v0.19). The WhatsApp
+ * name and the number are shown under the field, so nothing has to be remembered; blank goes back
+ * to the WhatsApp name. Back cancels.
+ */
+@Composable
+fun ContactEditor(ct: Contact, kid: String, fresh: List<Contact>, onSave: (Contact) -> Unit, onCancel: () -> Unit, onRemove: (() -> Unit)? = null, touched: () -> Unit = {}) {
+    val c = OieTheme.colors
+    val tx = str
+    var name by remember(ct.id) { mutableStateOf(ct.name) }
+    androidx.activity.compose.BackHandler(onBack = onCancel)
+    val wa = app.oie.logic.ContactNames.whatsAppName(ct)
+    androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+        // Who this is, before the field: the WhatsApp name and the number, each on its own line.
+        androidx.compose.foundation.layout.Column {
+            Text(tx.changeName, style = OieType.title, color = c.ink)
+            Text(tx.onWhatsApp(wa), style = OieType.body, color = c.ink)
+            Text(contactNumber(tx, ct, fresh), style = OieType.body, color = c.muted)
+        }
+        // Typing counts as a touch, so the parent area doesn't close mid-name (v0.19 audit).
+        app.oie.ui.setup.Field(tx.nameKidSees(kid), name, { name = it; touched() }, tx.renameHelp(wa))
+        app.oie.ui.setup.ButtonRow {
+            app.oie.ui.common.PrimaryButton(tx.save, { onSave(app.oie.logic.ContactNames.rename(ct, name)) })
+            QuietButton(tx.cancel, onCancel, Modifier.height(OTokens.Size.button))
+        }
+        // Contatos only (v0.19 audit): removing moved here from each row, so a phone row has room for the number. Undo stays.
+        if (onRemove != null) TextLink(tx.removeNamed(ct.name), onRemove, Modifier.padding(top = OTokens.Spacing.space4).offset(x = -OTokens.Spacing.space3))
+    }
+}
+

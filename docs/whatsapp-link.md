@@ -29,6 +29,9 @@ had a read-only rule test, and v0.8 turned the kid's side to the real link once 
 ### "Contacts complete" (v0.17)
 The link emits `contactsSynced` when WhatsApp's contact snapshot has been applied (`AppStateSyncComplete` for `critical_unblock_low`), or after its own one-time fetch. The app's `ContactSync.state` turns that, the count of people and the time since linking into the status line.
 
+### Numbers (v0.19)
+Each person in `Contacts()` carries `phone`: the digits of a phone-number id, or, for a contact WhatsApp knows only by a private id (LID), the number from the store's LID-to-phone map when it has one; empty otherwise. Groups have none. It's for the parent to check they picked the right person; the kid never sees it. Names the parent gives the kid stay on the tablet; nothing is written to WhatsApp (decision 0004).
+
 ### Contacts (v0.12)
 The phone sends the parent's contacts a few seconds after linking. The link emits `contactsChanged` once per burst (on `AppStateSyncComplete`, `Contact` and `PushName`) and the app reloads `Contacts()`. If none have come 8 s after connecting, it asks once for the contact list (`FetchAppState(critical_unblock_low)`, only if not synced). `LookUp(phone)` checks a typed number with `IsOnWhatsApp`, for "Adicionar pelo número".
 

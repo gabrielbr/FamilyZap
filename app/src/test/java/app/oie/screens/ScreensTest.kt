@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -159,4 +161,18 @@ class ScreensTest {
         app.oie.ui.parent.PairScreen(ready().apply { linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Qr("2@sample-code-for-the-screenshot,abc,def,ghi") })
     }
     @Test fun contactsAddByNumber() = shot("18-contacts-add-by-number", false) { ParentArea(ready().apply { realMode = true }, 0) }
+
+    // v0.19: a name for the kid, and the number for the parent.
+    private fun renamed() = ready().apply { allowed[0] = allowed[0].copy(waName = "Maria Silva") }
+    @Test fun contactsRenamed() = shot("23-contacts-renamed", false) { ParentArea(renamed(), 0) }
+    @Test fun contactsRenamedDark() = shot("23-contacts-renamed", true) { ParentArea(renamed(), 0) }
+    @Test fun contactEditor() = shot("24-contact-editor", false) {
+        val s = renamed()
+        Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.ContactEditor(s.allowed[0], "Tito", s.link.contacts(), {}, {}, onRemove = {}) }
+    }
+    @Test fun contactEditorDark() = shot("24-contact-editor", true) {
+        val s = renamed()
+        Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.ContactEditor(s.allowed[0], "Tito", s.link.contacts(), {}, {}, onRemove = {}) }
+    }
+    @Test fun setupContactsPicked() = shot("25-setup-contacts-picked", false) { Setup(renamed(), 5, onClose = {}) }
 }
