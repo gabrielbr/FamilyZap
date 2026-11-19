@@ -68,6 +68,18 @@ class PhoneScreensTest {
     @Test fun setupRisk() = shot("p08-setup-risk") { Setup(AppState(), 1, onClose = {}) }
     @Test fun setupNames() = shot("p09-setup-names", bigText = true) { Setup(AppState().apply { parentName = "Ana"; kidName = "Tito" }, 3, onClose = {}) }
     @Test fun stickers() = shot("p10-stickers") { Conversation(ready(), "vovo", openStickers = true) }
+    @Test fun setupContactsSyncing() = shot("p13-setup-contacts-syncing", bigText = true) {
+        Setup(ready().apply {
+            realMode = true
+            real = object : app.oie.data.WhatsAppLink {
+                override val connected = true
+                override val profileName: String? = null
+                override fun contacts() = listOf(app.oie.logic.Contact("g1@g.us", "Família", isGroup = true))
+                override fun send(message: app.oie.logic.Message) {}
+            }
+            allowed.clear(); linkState.status = app.oie.data.LinkState.Status.Connected; linkState.linkedAt = now - 5_000
+        }, 5, onClose = {})
+    }
     @Test fun problemsAfterACrash() {
         app.oie.data.Diagnostics.init(java.nio.file.Files.createTempDirectory("diag").toFile(), "Oiê test")
         app.oie.data.Diagnostics.log("send PHOTO: failed: test"); app.oie.data.Diagnostics.recordCrash(now)

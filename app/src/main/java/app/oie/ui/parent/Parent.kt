@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -214,52 +215,31 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
     if (state.allowed.isEmpty()) Text(tx.pickRealContacts(state.kidName.ifBlank { tx.theKid }), style = OieType.body, color = c.ink)
     Text(tx.add, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     // Right after linking only groups have arrived; say the people are on their way (v0.13 audit).
-    if (state.realMode && state.wa.connected && all.none { !it.isGroup }) Text(tx.contactsArriving, style = OieType.body, color = c.muted)
+    // v0.17: what the contact list is waiting for, the same line as in setup.
+    val sync = contactSyncState(state)
+    ContactSyncLine(state, sync)
     if (all.size > app.oie.ui.setup.SEARCH_FROM) app.oie.ui.setup.Field(tx.search, query, { query = it; touched() }, tx.searchHelp)
     run {
         addable.forEach { ct ->
             Row(
-                Modifier.fillMaxWidth().height(OTokens.Size.rowMin).clickable(role = Role.Button) { touched(); state.allowed.add(ct) },
+                Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button) { touched(); state.allowed.add(ct) },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
                 Initial(ct.name, OTokens.Size.avatar)
-                Text(ct.name, style = OieType.label, color = c.ink)
-                if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted)
-                Box(Modifier.weight(1f))
+                // The group note under the name, so it fits a phone (v0.17 audit).
+                Column(Modifier.weight(1f)) {
+                    Text(ct.name, style = OieType.label, color = c.ink)
+                    if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted)
+                }
                 OIcon(R.drawable.gg_ic_plus, contentDescription = tx.addA11y(ct.name))
             }
         }
     }
-    if (state.realMode) AddByNumber(state, touched)
+    if (state.realMode) AddByNumber(open = sync == app.oie.logic.ContactSync.State.SLOW || sync == app.oie.logic.ContactSync.State.EMPTY, touched = touched) { ct ->
+        if (state.allowed.none { it.id == ct.id }) state.allowed.add(ct)
+    }
 }
 
-/** v0.12: someone missing from the list can be added by name and number, once WhatsApp confirms the number. */
-@Composable
-private fun AddByNumber(state: AppState, touched: () -> Unit) {
-    val c = OieTheme.colors
-    val tx = str
-    val real = LocalRealLink.current
-    var name by remember { mutableStateOf("") }
-    var number by remember { mutableStateOf("") }
-    var note by remember { mutableStateOf<String?>(null) }
-    var busy by remember { mutableStateOf(false) }
-    Text(tx.addByNumber, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
-    app.oie.ui.setup.Field(tx.contactNameLabel, name, { name = it; note = null; touched() }, "")
-    app.oie.ui.setup.Field(tx.numberLabel, number, { number = it; note = null; touched() }, note ?: tx.numberHelp)
-    QuietButton(if (busy) tx.looking else tx.add, {
-        if (busy || name.isBlank() || number.count { it.isDigit() } < 10) return@QuietButton
-        busy = true
-        real?.lookUp(number) { id ->
-            busy = false
-            when {
-                id == null -> note = tx.lookUpFailed
-                id.isEmpty() -> note = tx.notOnWhatsApp
-                state.allowed.none { it.id == id } -> { state.allowed.add(Contact(id, name.trim())); name = ""; number = "" }
-                else -> { name = ""; number = "" }
-            }
-        }
-    }, icon = R.drawable.gg_ic_plus)
-}
 
 
 /** Quiet hours in the parent area: the periods, add/edit, delete with undo, and who can talk anyway. */

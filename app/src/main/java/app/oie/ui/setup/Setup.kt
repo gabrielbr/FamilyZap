@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -60,7 +62,12 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
             Box(Modifier.weight(1f))
             if (step in 1..6) Text(tx.stepOf(step), style = OieType.caption, color = c.muted)
         }
-        Box(Modifier.fillMaxSize().padding(OTokens.Spacing.space12), contentAlignment = Alignment.Center) {
+        // Every step scrolls, so its buttons are always reachable, at phone width and large text too (v0.17 audit).
+        Box(
+            Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState())
+                .padding(if (app.oie.ui.common.isCompact) OTokens.Spacing.space6 else OTokens.Spacing.space12),
+            contentAlignment = Alignment.Center,
+        ) {
             Column(Modifier.widthIn(max = OTokens.Size.contentMax), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
                 when (step) {
                     0 -> {
@@ -188,28 +195,41 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     val picked = remember { mutableStateListOf<String>().apply { addAll(state.allowed.map { it.id }) } }
+    // People added by number here (v0.17), shown with the rest.
+    val added = remember { mutableStateListOf<app.oie.logic.Contact>() }
     var query by remember { mutableStateOf("") }
-    val all = state.wa.contacts()
+    val all = (added + state.wa.contacts().filter { a -> added.none { it.id == a.id } })
+        .sortedWith(compareBy({ it.isGroup }, { it.name.lowercase() })) // people first, then groups
     Text(tx.canTalkTo(state.kidName), style = OieType.title, color = c.ink)
-    // A real WhatsApp has many contacts: search them (the sample has six).
+    // v0.17: the contacts arrive a little after linking; say so, with the count, until they're all here.
+    val sync = app.oie.ui.parent.contactSyncState(state)
+    app.oie.ui.parent.ContactSyncLine(state, sync)
+    // A real WhatsApp has many contacts: search them.
     if (all.size > SEARCH_FROM) Field(tx.search, query, { query = it }, tx.pickRealContacts(state.kidName))
     val shown = all.filter { it.id in picked || query.isBlank() || it.name.contains(query, ignoreCase = true) }.take(if (all.size > SEARCH_FROM) SEARCH_MAX else all.size)
-    LazyColumn(Modifier.height(OTokens.Size.contentMax / 2)) {
-        items(shown, key = { it.id }) { ct ->
+    // Plain rows (at most 30, see SEARCH_MAX) in the scrolling page, not a fixed-height box (v0.17 audit).
+    Column {
+        shown.forEach { ct ->
             val on = ct.id in picked
             Row(
-                Modifier.fillMaxWidth().height(OTokens.Size.rowMin)
+                Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)
                     .clickable(role = Role.Checkbox) { if (on) picked.remove(ct.id) else picked.add(ct.id) },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
                 Initial(ct.name, OTokens.Size.avatar)
-                Text(ct.name, style = OieType.label, color = c.ink)
-                if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted)
-                Box(Modifier.weight(1f))
-                if (on) OIcon(R.drawable.gg_ic_check, contentDescription = "Escolhido")
+                // The group note sits under the name, so it fits a phone (v0.17 audit).
+                Column(Modifier.weight(1f)) {
+                    Text(ct.name, style = OieType.label, color = c.ink)
+                    if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted)
+                }
+                if (on) OIcon(R.drawable.gg_ic_check, contentDescription = tx.chosen)
             }
         }
+    }
+    if (state.realMode) app.oie.ui.parent.AddByNumber(open = sync == app.oie.logic.ContactSync.State.SLOW || sync == app.oie.logic.ContactSync.State.EMPTY) { ct ->
+        if (added.none { it.id == ct.id }) added.add(ct)
+        if (ct.id !in picked) picked.add(ct.id)
     }
     ButtonRow {
         PrimaryButton(tx.continueWith(picked.size), {

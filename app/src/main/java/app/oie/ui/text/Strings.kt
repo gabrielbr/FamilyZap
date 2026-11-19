@@ -122,7 +122,10 @@ interface Strings {
     val addByNumber: String; val numberLabel: String; val numberHelp: String; val contactNameLabel: String
     val notOnWhatsApp: String; val lookUpFailed: String; val looking: String
     fun unlinkConfirm(kid: String): String
-    val onlyOutsideQuiet: String; val contactsArriving: String
+    val onlyOutsideQuiet: String
+    // Contacts after linking (v0.17)
+    fun contactsSyncing(n: Int): String
+    val contactsSlow: String; val contactsEmpty: String; val chosen: String
     // Problem report (docs/flows/problem-report.md, v0.14)
     val problems: String; val noProblems: String; val copyReport: String; val copied: String; val clearReport: String; val reportPrivacy: String
     fun closedByItself(day: Int, month: Int, time: String): String
@@ -287,7 +290,10 @@ object Pt : Strings {
     override val lookUpFailed = "Não deu para procurar agora. Tente de novo."; override val looking = "Procurando…"
     override fun unlinkConfirm(kid: String) = "$kid para de receber e mandar mensagens até você conectar de novo com o código."
     override val onlyOutsideQuiet = "Só fora do silêncio"
-    override val contactsArriving = "Carregando seus contatos do WhatsApp…"
+    override fun contactsSyncing(n: Int) = if (n == 0) "Trazendo seus contatos do WhatsApp…" else "Trazendo seus contatos do WhatsApp… $n até agora"
+    override val contactsSlow = "Seus contatos estão demorando para chegar. Adicione alguém pelo número, ou escolha depois em Contatos."
+    override val contactsEmpty = "Não achamos contatos no seu WhatsApp. Adicione alguém pelo número."
+    override val chosen = "Escolhido"
     override val problems = "Problemas"; override val noProblems = "Nenhum problema guardado."
     override val copyReport = "Copiar relatório"; override val copied = "Copiado"; override val clearReport = "Apagar relatório"
     override val reportPrivacy = "O relatório fica só neste tablet e não tem mensagens nem nomes. Copie e cole onde quiser mandar."
@@ -444,7 +450,10 @@ object En : Strings {
     override val lookUpFailed = "Couldn't look it up now. Try again."; override val looking = "Looking…"
     override fun unlinkConfirm(kid: String) = "$kid stops sending and receiving messages until you link again with the code."
     override val onlyOutsideQuiet = "Only outside quiet hours"
-    override val contactsArriving = "Loading your WhatsApp contacts…"
+    override fun contactsSyncing(n: Int) = if (n == 0) "Bringing in your WhatsApp contacts…" else "Bringing in your WhatsApp contacts… $n so far"
+    override val contactsSlow = "Your contacts are taking a while. Add someone by number, or choose later in Contacts."
+    override val contactsEmpty = "We didn't find contacts in your WhatsApp. Add someone by number."
+    override val chosen = "Chosen"
     override val problems = "Problems"; override val noProblems = "No problems saved."
     override val copyReport = "Copy report"; override val copied = "Copied"; override val clearReport = "Delete report"
     override val reportPrivacy = "The report stays on this tablet and holds no messages or names. Copy it and paste it wherever you want to send it."

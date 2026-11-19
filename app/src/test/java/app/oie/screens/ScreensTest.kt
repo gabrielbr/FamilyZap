@@ -135,6 +135,24 @@ class ScreensTest {
         shot("19-problems-crash", false) { ParentArea(ready(), 3) }
         app.oie.data.Diagnostics.clear()
     }
+    // v0.17: the contacts arriving after linking, in setup and in Contatos; and when they're slow.
+    private fun linking(sinceMs: Long, people: Int = 0, synced: Boolean = false) = ready().apply {
+        realMode = true
+        val list = (1..people).map { app.oie.logic.Contact("p$it@s.whatsapp.net", "Pessoa $it") } +
+            listOf(app.oie.logic.Contact("g1@g.us", "Família", isGroup = true), app.oie.logic.Contact("g2@g.us", "Escola do Tito", isGroup = true))
+        real = object : app.oie.data.WhatsAppLink {
+            override val connected = true
+            override val profileName: String? = null
+            override fun contacts() = list
+            override fun send(message: app.oie.logic.Message) {}
+        }
+        allowed.clear()
+        linkState.status = app.oie.data.LinkState.Status.Connected
+        linkState.linkedAt = now - sinceMs; linkState.contactsSynced = synced
+    }
+    @Test fun setupContactsSyncing() = shot("20b-setup-contacts-syncing", false) { Setup(linking(5_000, people = 3), 5, onClose = {}) }
+    @Test fun setupContactsSlow() = shot("20c-setup-contacts-slow", false) { Setup(linking(90_000), 5, onClose = {}) }
+    @Test fun contactsSyncingDark() = shot("20d-contacts-syncing", true) { ParentArea(linking(5_000), 0) }
     // v0.12: Conexão unlinked, the pairing QR, and Contatos with "Adicionar pelo número".
     @Test fun connectionUnlinked() = shot("16-connection-unlinked", false) { ParentArea(ready().apply { realMode = true; link.pretendDropped() }, 2) }
     @Test fun pairQr() = shot("17-pair-qr", true) {
