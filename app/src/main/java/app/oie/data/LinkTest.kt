@@ -42,12 +42,21 @@ class LinkTest {
     var ignored by mutableStateOf(0)
 
     /** One message from the link, already parsed. Matches the picked chats by either address. */
-    fun onIncoming(id: String, chat: String, chatAlt: String?, fromMe: Boolean, at: Long, kind: Kind, text: String, replyTo: String?, kidName: String) {
+    /** Returns the new entry, or null when the chat isn't in the test. Entries that fall off the end go to [dropped]. */
+    fun onIncoming(id: String, chat: String, chatAlt: String?, fromMe: Boolean, at: Long, kind: Kind, text: String, replyTo: String?, kidName: String, durationSec: Int = 0, dropped: (RuleTest.Entry) -> Unit = {}): RuleTest.Entry? {
         val picked = chats.firstOrNull { it.id == chat || it.id == chatAlt }
-        if (picked == null) { ignored++; return }
-        val m = Message(id, picked.id, false, at, kind, text, replyTo)
-        entries.add(0, RuleTest.judge(m, picked, fromMe, kidSpoke[picked.id], kidName))
-        while (entries.size > RuleTest.MAX) entries.removeAt(entries.lastIndex)
+        if (picked == null) { ignored++; return null }
+        val m = Message(id, picked.id, false, at, kind, text, replyTo, durationSec)
+        val e = RuleTest.judge(m, picked, fromMe, kidSpoke[picked.id], kidName)
+        entries.add(0, e)
+        while (entries.size > RuleTest.MAX) dropped(entries.removeAt(entries.lastIndex))
+        return e
+    }
+
+    /** Attaches a downloaded photo or sticker to its entry. */
+    fun attach(id: String, media: String) {
+        val i = entries.indexOfFirst { it.id == id }
+        if (i >= 0) entries[i] = entries[i].copy(media = media)
     }
 
     /** Everything about the test goes: the chats, the entries, the count. */

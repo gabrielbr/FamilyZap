@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.6.0
+- Smaller updates: the tablet now downloads the version made for its processor, about 21 MB instead of 40 MB. This update is still the big one; the next ones are smaller.
+- In the rule test, a photo or sticker that would reach your kid now shows in the list, the way your kid would see it. Voice messages show how long they are.
+- Behind the scenes, the WhatsApp link can now receive and send photos and voice messages, at a person's pace and never twice. Your kid's side doesn't use it yet.
+
 ## 0.5.0
 - Test the message rule with your real WhatsApp. In the parent area, open Conexão and tap Testar a regra com seu WhatsApp.
 - It links your WhatsApp to read only: nothing is sent.

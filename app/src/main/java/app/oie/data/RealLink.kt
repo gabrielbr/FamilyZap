@@ -16,7 +16,7 @@ import org.json.JSONObject
  * main thread. The session lives in the app's private no-backup storage and is deleted on Unlink
  * (rule L8).
  */
-class RealLink(context: Context, private val state: AppState) : oielink.Listener {
+class RealLink(private val context: Context, private val state: AppState) : oielink.Listener {
     private val db = File(context.noBackupFilesDir, "whatsapp-link.db")
     private val main = Handler(Looper.getMainLooper())
     private val io = Executors.newSingleThreadExecutor()
@@ -51,6 +51,7 @@ class RealLink(context: Context, private val state: AppState) : oielink.Listener
             link = null
             listOf(db, File(db.path + "-wal"), File(db.path + "-shm")).forEach { it.delete() }
         }
+        test.entries.mapNotNull { it.media }.forEach { Photos.forget(context, it) }
         test.clear()
     }
 
@@ -59,6 +60,14 @@ class RealLink(context: Context, private val state: AppState) : oielink.Listener
             val json = runCatching { link?.contacts() }.getOrNull() ?: return@execute
             val list = JSONArray(json).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Contact(getString("id"), getString("name"), optBoolean("isGroup")) } } }
             main.post { test.available.clear(); test.available.addAll(list) }
+        }
+    }
+
+    private fun fetch(id: String) {
+        io.execute {
+            val bytes = runCatching { link?.download(id) }.getOrNull() ?: return@execute
+            val name = Photos.keepBytes(context, bytes)
+            main.post { test.attach(id, name) }
         }
     }
 
@@ -72,11 +81,15 @@ class RealLink(context: Context, private val state: AppState) : oielink.Listener
                 "replaced", "loggedOut" -> test.status = LinkTest.Status.LoggedOut
                 "temporaryBan" -> test.status = LinkTest.Status.Banned(((o.optLong("expiresInSeconds") + 3599) / 3600).toInt())
                 "pairError" -> test.status = LinkTest.Status.Off
-                "message" -> test.onIncoming(
-                    o.optString("id"), o.optString("chat"), o.optString("chatAlt").ifEmpty { null }, o.optBoolean("fromMe"),
-                    o.optLong("at"), runCatching { Kind.valueOf(o.optString("kind")) }.getOrDefault(Kind.UNSUPPORTED),
-                    o.optString("text"), o.optString("replyTo").ifEmpty { null }, state.kidName,
-                )
+                "message" -> {
+                    val e = test.onIncoming(
+                        o.optString("id"), o.optString("chat"), o.optString("chatAlt").ifEmpty { null }, o.optBoolean("fromMe"),
+                        o.optLong("at"), runCatching { Kind.valueOf(o.optString("kind")) }.getOrDefault(Kind.UNSUPPORTED),
+                        o.optString("text"), o.optString("replyTo").ifEmpty { null }, state.kidName, o.optInt("durationSec"),
+                    ) { gone -> gone.media?.let { Photos.forget(context, it) } }
+                    // A photo or sticker that would reach the kid is downloaded and sealed, as it would be in real use.
+                    if (e != null && e.shown && (e.kind == Kind.PHOTO || e.kind == Kind.STICKER)) fetch(e.id)
+                }
             }
         }
     }

@@ -59,4 +59,16 @@ class UpdateRulesTest {
         assertEquals("9.5 MB", UpdateRules.size(9_480_000, decimalComma = false))
         assertEquals("12 MB", UpdateRules.size(12_400_000, decimalComma = true))
     }
+
+    @Test fun picksTheApkForThisTabletsArchitecture() {
+        val uni = UpdateRules.Asset("Oie-0.6.0.apk", "https://x/u.apk", 40)
+        val arm64 = UpdateRules.Asset("Oie_arm64-v8a_0.6.0.apk", "https://x/a64.apk", 20)
+        val arm32 = UpdateRules.Asset("Oie_armeabi-v7a_0.6.0.apk", "https://x/a32.apk", 18)
+        val sums = UpdateRules.Asset("SHA256SUMS.txt", "https://x/s", 1)
+        val r = UpdateRules.Release("v0.6.0", "", false, false, listOf(arm32, arm64, uni, sums))
+        assertEquals(arm64, UpdateRules.offer(r, "0.5.0", listOf("arm64-v8a", "armeabi-v7a", "armeabi"))?.apk)
+        assertEquals(arm32, UpdateRules.offer(r, "0.5.0", listOf("armeabi-v7a", "armeabi"))?.apk)
+        assertEquals(uni, UpdateRules.offer(r, "0.5.0", listOf("x86_64"))?.apk)
+        assertEquals(uni, UpdateRules.offer(r, "0.5.0")?.apk)
+    }
 }

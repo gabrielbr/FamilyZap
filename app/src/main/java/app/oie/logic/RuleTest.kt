@@ -21,6 +21,10 @@ object RuleTest {
         val why: Why,
         /** Only for messages that would reach the kid. */
         val text: String?,
+        val id: String = "",
+        val durationSec: Int = 0,
+        /** A photo or sticker that would reach the kid, sealed on the tablet (Photos): the file name. */
+        val media: String? = null,
     )
 
     /**
@@ -30,7 +34,7 @@ object RuleTest {
      * {kid} falou agora"), which opens the rule's 24-hour window as a real message would.
      */
     fun judge(m: Message, chat: Contact, fromParent: Boolean, kidSpokeAt: Long?, kidName: String): Entry {
-        if (fromParent) return Entry(chat.id, chat.name, m.at, m.kind, false, Why.PARENT_OWN, null)
+        if (fromParent) return Entry(chat.id, chat.name, m.at, m.kind, false, Why.PARENT_OWN, null, m.id, m.durationSec)
         val history = kidSpokeAt?.let { listOf(Message("pretend", m.chatId, true, it, Kind.TEXT)) } ?: emptyList()
         val why = when (MessageRule.reason(m, chat, history, kidName)) {
             MessageRule.Reason.REPLY -> Why.REPLY
@@ -40,6 +44,6 @@ object RuleTest {
             MessageRule.Reason.FROM_KID, null -> Why.NOT_FOR_KID
         }
         val shown = why != Why.NOT_FOR_KID
-        return Entry(chat.id, chat.name, m.at, m.kind, shown, why, if (shown) m.text else null)
+        return Entry(chat.id, chat.name, m.at, m.kind, shown, why, if (shown) m.text else null, m.id, m.durationSec)
     }
 }

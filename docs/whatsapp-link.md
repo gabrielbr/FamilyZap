@@ -40,13 +40,15 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 | `events.Message` (text, image, audio PTT, sticker) | `Inbox.decide`, then shown or dropped |
 | `ProtocolMessage` type `REVOKE` | "Mensagem apagada" |
 | Quoted message (`ContextInfo.StanzaID`) | the message rule's "reply to the kid" |
-| `SendMessage`, `Upload` (image, audio) | the kid's sends, through `SendPace` |
+| `SendMessage`, `Upload` (image, audio) | `SendTextWithID`, `SendImage`, `SendVoice` (PTT): the kid's sends, through `SendPace`, one id per message (L4) |
+| `Download` | `Link.Download(id)`: a received photo, voice note or sticker, as bytes the app seals at once (`Photos.keepBytes`). The last 200 received stay downloadable. |
 | `events.Connected` / `Disconnected` / `LoggedOut` / `StreamReplaced` | Conexão state; "Peça para {nome} conectar de novo" |
 | `events.TemporaryBan` (codes 101–106) | rule L9 |
 
 ## Size
-The library adds about 9 MB per architecture to the APK (arm64 and armv7), about 40 MB in all
-in v0.5. Splitting the APK per architecture would halve that; it's on the roadmap.
+The library adds about 9 MB per architecture. Since v0.6 each release has one APK per architecture
+(about 21 MB) plus the universal one (about 40 MB) for manual installs and for copies older than
+v0.6. Self-update picks the tablet's own (`UpdateRules.offer`).
 
 ## Licence
 whatsmeow is **MPL-2.0**: its own files stay MPL-2.0, and Oiê's code can stay closed. When Oiê

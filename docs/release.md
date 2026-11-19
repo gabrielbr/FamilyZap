@@ -21,6 +21,12 @@ Until the secrets exist, the `release` workflow only warns and skips.
 ## Building
 The app needs the WhatsApp link library: `link/build-aar.sh` builds it, with Go and the Android NDK. The workflows build it before Gradle.
 
+## Assets
+Each release has:
+- `Oie-<version>.apk`: universal, for manual installs and for copies of Oiê older than 0.6;
+- `Oie_arm64-v8a_<version>.apk` and `Oie_armeabi-v7a_<version>.apk`: one per architecture, about half the size. Self-update picks the tablet's own;
+- `SHA256SUMS.txt`, covering all of them.
+
 ## Each release
 1. In the PR, bump `versionCode` and `versionName` in `app/build.gradle.kts`, and `BuildConfigInfo.VERSION` to match.
 2. Move the CHANGELOG's notes from `## Unreleased` to a `## <version>` heading. They become the notes in the update sheet, as plain text, so write them for the parent.

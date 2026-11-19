@@ -13,8 +13,8 @@ android {
         applicationId = "app.oie" // permanent (decision 0002): never rename
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.5.0"
+        versionCode = 6
+        versionName = "0.6.0"
     }
 
     // Release signing comes only from CI secrets (docs/release.md). Without them the release build is unsigned.
@@ -25,6 +25,17 @@ android {
             storePassword = System.getenv("OIE_KEYSTORE_PASSWORD")
             keyAlias = System.getenv("OIE_KEY_ALIAS")
             keyPassword = System.getenv("OIE_KEY_PASSWORD")
+        }
+    }
+
+    // One APK per architecture (about half the size), plus the universal one that older copies of
+    // Oiê and manual installs use (docs/release.md). Only ARM: the WhatsApp link is built for ARM.
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a")
+            isUniversalApk = true
         }
     }
 

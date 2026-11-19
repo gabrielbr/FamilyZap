@@ -12,7 +12,6 @@ Ideas and planned work. When something ships, move it into the docs.
 5. Decide distribution (Play or a direct APK with SHA256SUMS).
 
 ## Later
-- Split the APK per architecture (arm64, armv7) to halve its size.
 - Calls from the tablet (not possible through the linked-device bridge; decision 0001).
 - A "for family" page on oie.app (how to start a message to the kid).
 
