@@ -38,7 +38,7 @@ Each release has:
    - tags the commit `v<version>`.
 
    A merge that doesn't bump the version releases nothing.
-4. On the tablet, the parent area offers the update at the next check, or right away from **Sobre › Procurar atualizações**.
+4. On the tablet, the parent area offers the update at the next check, or right away from **Ajustes e ajuda › Procurar atualizações**.
 
 You can also run the workflow by hand (**Actions › release › Run workflow**). It does the same check, so running it twice doesn't publish twice.
 

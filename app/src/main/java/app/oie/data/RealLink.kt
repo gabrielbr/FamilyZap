@@ -38,15 +38,18 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         io.execute { deliver(message, retried = false) }
     }
 
+    private fun signed(text: String): String = app.oie.logic.Signature.sign(state.kidName, text)
+
     private fun deliver(m: app.oie.logic.Message, retried: Boolean) {
         val wait = app.oie.logic.SendPace.waitMs(sentAt, System.currentTimeMillis())
         if (wait > 0) Thread.sleep(wait)
         val l = link
         val err: Throwable? = if (l == null) IllegalStateException("not linked") else runCatching {
             when (m.kind) {
-                Kind.TEXT -> l.sendTextWithID(m.chatId, m.text, m.replyTo ?: "", m.id)
-                Kind.PHOTO -> l.sendImage(m.chatId, m.media?.let { Photos.openBytes(context, it) } ?: error("photo missing"), "", m.id)
-                Kind.STICKER -> l.sendImage(m.chatId, Photos.stickerJpeg(context, app.oie.ui.kid.STICKERS[m.text] ?: error("sticker")), "", m.id)
+                // The kid writes from the parent's number, so the family sees who it is: "Tito: Oi, vó" (setup promises this).
+                Kind.TEXT -> l.sendTextWithID(m.chatId, signed(m.text), m.replyTo ?: "", m.id)
+                Kind.PHOTO -> l.sendImage(m.chatId, m.media?.let { Photos.openBytes(context, it) } ?: error("photo missing"), signed(""), m.id)
+                Kind.STICKER -> l.sendImage(m.chatId, Photos.stickerJpeg(context, app.oie.ui.kid.STICKERS[m.text] ?: error("sticker")), signed(""), m.id)
                 else -> error("not supported yet")
             }
             Unit

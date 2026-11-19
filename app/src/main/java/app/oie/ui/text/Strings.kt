@@ -105,6 +105,7 @@ interface Strings {
     fun quietSummary(n: Int): String
     val deletedMessage: String; val simulateIncoming: String; val allowNotifications: String
     val notifLinkChannel: String; val notifLinkOn: String
+    val names: String
     // The real WhatsApp on the kid's side (v0.8)
     fun goRealButton(kid: String): String
     fun goRealBody(kid: String): String
@@ -156,7 +157,7 @@ object Pt : Strings {
     override val linkPlaceholder = "Versão de teste: o código do WhatsApp entra aqui na próxima versão."
     override val linkSimulate = "Simular conexão (teste)"
     override val namesTitle = "Como vocês se chamam?"; override val yourName = "Seu nome"; override val kidNameLabel = "Como a família chama seu filho ou filha?"
-    override fun yourNameHelp(kid: String, parent: String) = "Do seu WhatsApp. Aparece para $kid como \"WhatsApp de $parent\"."
+    override fun yourNameHelp(kid: String, parent: String) = "Aparece para $kid como \"WhatsApp de $parent\"."
     override fun kidNameHelp(kid: String) = "Vai junto das mensagens: \"$kid: Oi, vó\"."
     override val pinCreate = "Crie um PIN de 6 números"; override val pinAgain = "Digite o PIN de novo"
     override val pinCreateHelp = "Ele abre a área dos pais neste tablet. Não use o mesmo PIN do tablet."
@@ -202,7 +203,7 @@ object Pt : Strings {
     override val parentArea = "Área dos pais"; override val enterPin = "Digite o seu PIN."
     override val tooMany = "Muitas tentativas. Espere 1 minuto."; override val wrongPin = "PIN errado. Tente de novo."; override val forgotPin = "Esqueci o PIN"
     override val leave = "Sair"; override val sectionContacts = "Contatos"; override val sectionQuiet = "Horário de silêncio"
-    override val sectionConnection = "Conexão"; override val sectionHelp = "Ajuda e sobre"; override val connection = "Conexão"
+    override val sectionConnection = "Conexão"; override val sectionHelp = "Ajustes e ajuda"; override val connection = "Conexão"
     override fun connectedTo(parent: String) = "Conectado ao WhatsApp de $parent."
     override val disconnected = "O Oiê se desconectou do seu WhatsApp."
     override val simulateDrop = "Simular queda da conexão (teste)"; override val reconnect = "Conectar de novo"
@@ -298,6 +299,7 @@ object Pt : Strings {
     override val linkWaiting = "Esperando o WhatsApp do seu celular."
     override val notSent = "Não foi"; override val tryAgain = "Tentar de novo"; override val unlinkReal = "Desconectar o WhatsApp"
     override fun pickRealContacts(kid: String) = "Escolha nos seus contatos quem $kid pode chamar."
+    override val names = "Nomes"
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -316,7 +318,7 @@ object En : Strings {
     override val linkPlaceholder = "Test version: the WhatsApp code goes here in the next version."
     override val linkSimulate = "Pretend to link (test)"
     override val namesTitle = "What are your names?"; override val yourName = "Your name"; override val kidNameLabel = "What does the family call your child?"
-    override fun yourNameHelp(kid: String, parent: String) = "From your WhatsApp. $kid sees it as \"$parent's WhatsApp\"."
+    override fun yourNameHelp(kid: String, parent: String) = "$kid sees it as \"$parent's WhatsApp\"."
     override fun kidNameHelp(kid: String) = "It goes with the messages: \"$kid: Hi, Grandma\"."
     override val pinCreate = "Create a 6-digit PIN"; override val pinAgain = "Enter the PIN again"
     override val pinCreateHelp = "It opens the parent area on this tablet. Don't use the tablet's own PIN."
@@ -362,7 +364,7 @@ object En : Strings {
     override val parentArea = "Parent area"; override val enterPin = "Enter your PIN."
     override val tooMany = "Too many tries. Wait 1 minute."; override val wrongPin = "Wrong PIN. Try again."; override val forgotPin = "I forgot the PIN"
     override val leave = "Leave"; override val sectionContacts = "Contacts"; override val sectionQuiet = "Quiet hours"
-    override val sectionConnection = "Connection"; override val sectionHelp = "Help and about"; override val connection = "Connection"
+    override val sectionConnection = "Connection"; override val sectionHelp = "Settings and help"; override val connection = "Connection"
     override fun connectedTo(parent: String) = "Linked to $parent's WhatsApp."
     override val disconnected = "Oiê got disconnected from your WhatsApp."
     override val simulateDrop = "Pretend the link dropped (test)"; override val reconnect = "Link again"
@@ -462,6 +464,7 @@ object En : Strings {
     override val linkWaiting = "Waiting for the WhatsApp on your phone."
     override val notSent = "Didn't go"; override val tryAgain = "Try again"; override val unlinkReal = "Unlink WhatsApp"
     override fun pickRealContacts(kid: String) = "Choose from your contacts who $kid can talk to."
+    override val names = "Names"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

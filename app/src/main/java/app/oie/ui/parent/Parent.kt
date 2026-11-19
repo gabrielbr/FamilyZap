@@ -257,14 +257,20 @@ private fun QuietSection(state: AppState, touched: () -> Unit) {
 }
 
 
-/** Ajuda e sobre: short answers to the questions the flows raise, the risk said again, version and licences. */
+/** Ajustes e ajuda (was Ajuda e sobre): the names (v0.9), short answers to the questions the flows raise, the risk said again, version and licences. */
 @Composable
 private fun AboutAndHelp(state: AppState) {
     val c = OieTheme.colors
     val tx = str
     var open by remember { mutableStateOf<Int?>(null) }
     val help = tx.helpItems(state.kidName.ifBlank { tx.theKid }, state.parentName)
-    Text(tx.help, style = OieType.title, color = c.ink)
+    // v0.9: the names from setup can be fixed here. A blank field keeps the last name, so nothing is ever left nameless.
+    Text(tx.names, style = OieType.title, color = c.ink)
+    var parent by remember { mutableStateOf(state.parentName) }
+    var kid by remember { mutableStateOf(state.kidName) }
+    app.oie.ui.setup.Field(tx.yourName, parent, { parent = it; if (it.isNotBlank()) state.parentName = it.trim() }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName))
+    app.oie.ui.setup.Field(tx.kidNameLabel, kid, { kid = it; if (it.isNotBlank()) state.kidName = it.trim() }, tx.kidNameHelp(state.kidName.ifBlank { tx.theKid }))
+    Text(tx.help, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     help.forEachIndexed { i, (q, a) ->
         Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { open = if (open == i) null else i }.padding(vertical = OTokens.Spacing.space3)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {

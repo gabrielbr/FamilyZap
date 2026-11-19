@@ -65,7 +65,7 @@ v0.6. Self-update picks the tablet's own (`UpdateRules.offer`).
 ## Licence
 whatsmeow is **MPL-2.0**: its own files stay MPL-2.0, and Oiê's code can stay closed. When Oiê
 ships with it, we must:
-- say in Sobre › Licenças that it includes whatsmeow under MPL-2.0;
+- say in Ajustes e ajuda › Sobre that it includes whatsmeow under MPL-2.0;
 - link to its source, github.com/tulir/whatsmeow, at the exact commit (`link/go.mod`).
 
 We don't modify whatsmeow; a change to its files would have to be published under MPL-2.0. Its
@@ -81,5 +81,5 @@ dependencies are BSD, MIT, Apache or ISC licensed, and a full list ships with th
 1. The message rule is tested with real chats (STATUS.md).
 2. `WhatsmeowLink` implements `WhatsAppLink`. Every rule above has a test, where a test is possible.
 3. ~~The release workflow builds the AAR (Go and the NDK in CI)~~ (v0.5).
-4. ~~Sobre › Licenças carries the whatsmeow notice~~ (v0.5).
+4. ~~Ajustes e ajuda › Sobre carries the whatsmeow notice~~ (v0.5).
 5. A test on a spare WhatsApp number first, never the owner's main one.

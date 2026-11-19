@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-## 0.8.0
+## 0.9.0
+- You can now change your name and Tito's name after setup. In the parent area, the last section is now called Ajustes e ajuda, and the names are at the top. An empty field keeps the last name.
+- On the real WhatsApp, Tito's messages carry his name in front ("Tito: Oi, vó"), as setup promised. The family knows it's him writing from your number. A photo or sticker carries his name as its caption.
 - Tito can now use your real WhatsApp. Turn it on in Conexão, after the rule test is connected: "Usar o WhatsApp de verdade com Tito". The sample chats go, and you pick from your contacts who Tito can talk to. Long contact lists have a search.
 - Until you turn it on, nothing changes: Tito's side keeps the sample.
 - A new setup can link your WhatsApp at step 2, with "Usar exemplo por enquanto" to keep trying the sample.
@@ -13,6 +15,7 @@
   - Family photos, stickers and voice messages arrive. Playing voice messages comes in the next version.
   - Recording voice messages comes in the next version too, so the microphone is hidden on the real WhatsApp for now.
 - If WhatsApp unlinks the tablet, Conexão shows "Conectar de novo" with a new code.
+- (0.8.0 was never released on its own: it ships inside 0.9.0.)
 
 ## 0.7.0
 - The rule test now keeps listening when Oiê is closed or the tablet is asleep, so it can collect a whole day of messages. A quiet notification, "O Oiê está conectado.", shows while it listens. You can hide it in Android's settings, under Conexão com o WhatsApp.
