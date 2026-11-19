@@ -132,8 +132,15 @@ fun ParentArea(state: AppState, section: Int) {
             ) { sectionContent() }
         }
         if (compact) Column(Modifier.fillMaxSize()) {
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(OTokens.Spacing.space2), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
-                sections.forEachIndexed { i, (label, ic) -> tab(i, label, ic, Modifier) }
+            // The open section is always in view (v0.14 audit: it could sit scrolled off the edge).
+            val tabs = androidx.compose.foundation.lazy.rememberLazyListState(initialFirstVisibleItemIndex = section)
+            LaunchedEffect(section) { tabs.animateScrollToItem(section) }
+            androidx.compose.foundation.lazy.LazyRow(
+                Modifier.fillMaxWidth(), state = tabs,
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(OTokens.Spacing.space2),
+                horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1),
+            ) {
+                items(sections.size) { i -> tab(i, sections[i].first, sections[i].second, Modifier) }
             }
             Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
             body(Modifier.fillMaxWidth())
@@ -323,8 +330,11 @@ private fun AboutAndHelp(state: AppState) {
     val tx = str
     var open by remember { mutableStateOf<Int?>(null) }
     val help = tx.helpItems(state.kidName.ifBlank { tx.theKid }, state.parentName)
+    // v0.14: after Oiê closed by itself, the report leads the section (it's what the parent needs now); otherwise it sits at the end.
+    val crashed = remember { app.oie.data.Diagnostics.lastCrashAt() != null }
+    if (crashed) Problems(first = true)
     // v0.9: the names from setup can be fixed here. A blank field keeps the last name, so nothing is ever left nameless.
-    Text(tx.names, style = OieType.title, color = c.ink)
+    Text(tx.names, style = OieType.title, color = c.ink, modifier = if (crashed) Modifier.padding(top = OTokens.Spacing.space6) else Modifier)
     var parent by remember { mutableStateOf(state.parentName) }
     var kid by remember { mutableStateOf(state.kidName) }
     app.oie.ui.setup.Field(tx.yourName, parent, { parent = it; if (it.isNotBlank()) state.parentName = it.trim() }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName))
@@ -339,6 +349,7 @@ private fun AboutAndHelp(state: AppState) {
             if (open == i) Text(a, style = OieType.body, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space2))
         }
     }
+    if (!crashed) Problems(first = false)
     Text(tx.about, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     Text(tx.aboutVersion(BuildConfigInfo.VERSION), style = OieType.body, color = c.ink)
     app.oie.LocalUpdater.current?.let { app.oie.update.UpdateAboutRows(it) }
@@ -355,16 +366,51 @@ private fun Connection(state: AppState) {
     Text(tx.connection, style = OieType.title, color = c.ink)
     Text(if (state.wa.connected) tx.connectedTo(state.parentName) else tx.disconnected, style = OieType.body, color = c.ink)
     if (!state.wa.connected) PrimaryButton(tx.linkConnect, { state.route = Route.Pair })
+    // v0.14: a parent who saw Oiê close comes here first; point to the report while there is one.
+    if (remember { app.oie.data.Diagnostics.lastCrashAt() != null }) {
+        Text(tx.crashPointer, style = OieType.body, color = c.muted, modifier = Modifier.padding(top = OTokens.Spacing.space4))
+        TextLink(tx.openReport, { state.route = Route.Parent(3) })
+    }
     // Unlinking can't be undone (it takes a new QR scan), so it asks once (v0.13 audit).
     var confirming by remember { mutableStateOf(false) }
     if (state.linkState.on) {
         if (!confirming) TextLink(tx.unlinkReal, { confirming = true })
         else {
             Text(tx.unlinkConfirm(state.kidName.ifBlank { tx.theKid }), style = OieType.body, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space4))
-            Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4), verticalAlignment = Alignment.CenterVertically) {
+            app.oie.ui.setup.ButtonRow {
                 QuietButton(tx.unlinkReal, { confirming = false; real?.unlink() })
                 TextLink(tx.cancel, { confirming = false })
             }
         }
+    }
+}
+
+/** Problemas (docs/flows/problem-report.md, v0.14): when Oiê last closed by itself, and the report to copy. */
+@Composable
+private fun Problems(first: Boolean) {
+    val c = OieTheme.colors
+    val tx = str
+    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+    var version by remember { mutableStateOf(0) } // re-reads after Apagar
+    var copied by remember { mutableStateOf(false) }
+    LaunchedEffect(copied) { if (copied) { delay(2_000); copied = false } }
+    val crashAt = remember(version) { app.oie.data.Diagnostics.lastCrashAt() }
+    val empty = remember(version) { app.oie.data.Diagnostics.isEmpty() }
+    Text(tx.problems, style = OieType.title, color = c.ink, modifier = if (first) Modifier else Modifier.padding(top = OTokens.Spacing.space6))
+    when {
+        crashAt != null -> {
+            val t = java.time.Instant.ofEpochMilli(crashAt).atZone(java.time.ZoneId.systemDefault())
+            Text(tx.closedByItself(t.dayOfMonth, t.monthValue, tx.clock(t.hour, t.minute)), style = OieType.body, color = c.ink)
+        }
+        empty -> Text(tx.noProblems, style = OieType.body, color = c.muted)
+    }
+    if (!empty) {
+        app.oie.ui.setup.ButtonRow {
+            QuietButton(if (copied) tx.copied else tx.copyReport, {
+                clipboard.setText(androidx.compose.ui.text.AnnotatedString(app.oie.data.Diagnostics.report())); copied = true
+            })
+            TextLink(tx.clearReport, { app.oie.data.Diagnostics.clear(); version++ })
+        }
+        Text(tx.reportPrivacy, style = OieType.caption, color = c.muted)
     }
 }

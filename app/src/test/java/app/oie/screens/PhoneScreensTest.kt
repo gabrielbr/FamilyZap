@@ -68,4 +68,16 @@ class PhoneScreensTest {
     @Test fun setupRisk() = shot("p08-setup-risk") { Setup(AppState(), 1, onClose = {}) }
     @Test fun setupNames() = shot("p09-setup-names", bigText = true) { Setup(AppState().apply { parentName = "Ana"; kidName = "Tito" }, 3, onClose = {}) }
     @Test fun stickers() = shot("p10-stickers") { Conversation(ready(), "vovo", openStickers = true) }
+    @Test fun problemsAfterACrash() {
+        app.oie.data.Diagnostics.init(java.nio.file.Files.createTempDirectory("diag").toFile(), "Oiê test")
+        app.oie.data.Diagnostics.log("send PHOTO: failed: test"); app.oie.data.Diagnostics.recordCrash(now)
+        shot("p11-problems-crash", bigText = true) { ParentArea(ready(), 3) }
+        app.oie.data.Diagnostics.clear()
+    }
+    @Test fun connectionAfterACrash() {
+        app.oie.data.Diagnostics.init(java.nio.file.Files.createTempDirectory("diag").toFile(), "Oiê test")
+        app.oie.data.Diagnostics.recordCrash(now)
+        shot("p12-connection-crash") { ParentArea(ready().apply { realMode = true; link.pretendDropped() }, 2) }
+        app.oie.data.Diagnostics.clear()
+    }
 }

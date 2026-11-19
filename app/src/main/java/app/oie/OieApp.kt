@@ -30,6 +30,11 @@ class OieApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // The problem report and the crash catcher come first, so they see everything after (v0.14).
+        app.oie.data.Diagnostics.init(
+            noBackupFilesDir,
+            "Oiê ${BuildConfigInfo.VERSION} · Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT}) · ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL} · ${android.os.Build.SUPPORTED_ABIS.firstOrNull()}",
+        )
         val store = Store(File(filesDir, "state.sealed"), KeystoreSealer())
         state = AppState().also { s -> store.read()?.let { Codec.decode(it, s) } }
         // v0.12: no more sample. A tablet still on the sample drops its sample chats and contacts,

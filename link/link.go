@@ -11,9 +11,14 @@
 package oielink
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"image"
+	"image/jpeg"
+	"runtime/debug"
 	"sort"
 	"sync"
 	"time"
@@ -85,7 +90,7 @@ func init() {
 // Open opens (or creates) the session store at dbPath, in the app's private storage (rule L8).
 func Open(dbPath string, l Listener) (*Link, error) {
 	ctx := context.Background()
-	container, err := sqlstore.New(ctx, "sqlite", "file:"+dbPath+"?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)", waLog.Noop)
+	container, err := sqlstore.New(ctx, "sqlite", "file:"+dbPath+"?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)", &reportLog{l: l, module: "store"})
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +98,7 @@ func Open(dbPath string, l Listener) (*Link, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := whatsmeow.NewClient(dev, waLog.Noop)
+	c := whatsmeow.NewClient(dev, &reportLog{l: l, module: "client"})
 	// L5: bounded reconnects; after that the app reconnects when the network or the app comes back.
 	c.AutoReconnectHook = func(error) bool { return c.AutoReconnectErrors < MaxReconnects }
 	k := &Link{c: c, l: l}
@@ -110,7 +115,8 @@ func (k *Link) SetReadOnly(on bool) { k.mu.Lock(); k.readOnly = on; k.mu.Unlock(
 
 // Connect connects. When the tablet isn't linked yet, it emits "qr" events for the parent to scan
 // in WhatsApp › Linked devices, then "paired" or "pairError".
-func (k *Link) Connect() error {
+func (k *Link) Connect() (err error) {
+	defer k.guard("Connect", &err)
 	if k.isStopped() {
 		return ErrStopped
 	}
@@ -146,7 +152,8 @@ func (k *Link) Connect() error {
 
 // PairWithCode is the "Usar código" option: it returns the 8-character code the parent types in
 // WhatsApp › Linked devices › Link with phone number. Call after Connect.
-func (k *Link) PairWithCode(phone string) (string, error) {
+func (k *Link) PairWithCode(phone string) (code string, err error) {
+	defer k.guard("PairWithCode", &err)
 	return k.c.PairPhone(context.Background(), phone, true, whatsmeow.PairClientChrome, "Chrome (Linux)")
 }
 
@@ -154,7 +161,8 @@ func (k *Link) PairWithCode(phone string) (string, error) {
 func (k *Link) Disconnect() { k.c.Disconnect() }
 
 // Unlink logs out and deletes the session from the tablet (rule L8).
-func (k *Link) Unlink() error {
+func (k *Link) Unlink() (err error) {
+	defer k.guard("Unlink", &err)
 	ctx := context.Background()
 	if k.Paired() {
 		if err := k.c.Logout(ctx); err != nil {
@@ -167,7 +175,8 @@ func (k *Link) Unlink() error {
 
 // Contacts returns the parent's WhatsApp contacts and groups as JSON, for the parent to choose
 // from: [{"id","name","isGroup"}], sorted by name. It never goes to the kid's screens.
-func (k *Link) Contacts() (string, error) {
+func (k *Link) Contacts() (list string, err error) {
+	defer k.guard("Contacts", &err)
 	if !k.Paired() {
 		return "", ErrNotLinked
 	}
@@ -206,7 +215,8 @@ func (k *Link) SendText(chat, text, quotedID string) (string, error) {
 }
 
 // SendTextWithID sends with a given id, so a retry after a reconnect can't make a duplicate.
-func (k *Link) SendTextWithID(chat, text, quotedID, id string) (string, error) {
+func (k *Link) SendTextWithID(chat, text, quotedID, id string) (sent string, err error) {
+	defer k.guard("SendText", &err)
 	to, err := k.target(chat)
 	if err != nil {
 		return "", err
@@ -264,6 +274,7 @@ func (k *Link) handle(e interface{}) {
 		// Contacts arrive from the phone a little after linking. If none have come after a few
 		// seconds, ask for them once (only when not synced yet), then tell the app to reload.
 		go func() {
+			defer k.guard("contacts", nil)
 			time.Sleep(ContactsGrace)
 			ctx := context.Background()
 			if all, err := k.c.Store.Contacts.GetAllContacts(ctx); err == nil && len(all) == 0 {
@@ -287,6 +298,42 @@ func (k *Link) handle(e interface{}) {
 	// History sync (events.HistorySync) is ignored on purpose (rule L6).
 }
 
+// guard turns a panic in this package or in whatsmeow into an error, so it can never close the app,
+// and reports it with its stack for the problem report (v0.14).
+func (k *Link) guard(where string, err *error) {
+	if r := recover(); r != nil {
+		stack := string(debug.Stack())
+		if len(stack) > 3000 {
+			stack = stack[:3000]
+		}
+		k.emit("log", map[string]any{"level": "panic", "msg": fmt.Sprintf("%s: %v\n%s", where, r, stack)})
+		if err != nil {
+			*err = fmt.Errorf("internal error in %s: %v", where, r)
+		}
+	}
+}
+
+// reportLog hands whatsmeow's warnings and errors to the app's problem report. Debug and info are dropped.
+type reportLog struct {
+	l      Listener
+	module string
+}
+
+func (r *reportLog) send(level, format string, args ...any) {
+	if r.l == nil {
+		return
+	}
+	b, _ := json.Marshal(map[string]any{"level": level, "msg": r.module + ": " + fmt.Sprintf(format, args...)})
+	r.l.OnEvent("log", string(b))
+}
+func (r *reportLog) Warnf(msg string, args ...any)  { r.send("warn", msg, args...) }
+func (r *reportLog) Errorf(msg string, args ...any) { r.send("error", msg, args...) }
+func (r *reportLog) Infof(string, ...any)           {}
+func (r *reportLog) Debugf(string, ...any)          {}
+func (r *reportLog) Sub(module string) waLog.Logger {
+	return &reportLog{l: r.l, module: r.module + "/" + module}
+}
+
 // contactsChanged tells the app, once per burst (contacts arrive one by one), to reload Contacts().
 func (k *Link) contactsChanged() {
 	k.mu.Lock()
@@ -305,7 +352,8 @@ func (k *Link) contactsChanged() {
 // LookUp finds a phone number on WhatsApp, for the parent to add someone missing from the list.
 // phone is digits with the country code ("5511999990000"). Returns the chat id, or "" if the
 // number isn't on WhatsApp.
-func (k *Link) LookUp(phone string) (string, error) {
+func (k *Link) LookUp(phone string) (found string, err error) {
+	defer k.guard("LookUp", &err)
 	digits := DigitsOnly(phone)
 	if len(digits) < 8 {
 		return "", errors.New("number too short")
@@ -354,7 +402,8 @@ func (k *Link) remember(id string, d whatsmeow.DownloadableMessage) {
 
 // Download returns the decrypted bytes of a received photo, voice note or sticker. The app seals
 // them before they touch the disk. It works for messages received since the link opened.
-func (k *Link) Download(id string) ([]byte, error) {
+func (k *Link) Download(id string) (data []byte, err error) {
+	defer k.guard("Download", &err)
 	k.mu.Lock()
 	d := k.media[id]
 	k.mu.Unlock()
@@ -366,14 +415,24 @@ func (k *Link) Download(id string) ([]byte, error) {
 
 // SendImage sends a JPEG photo (the app has already re-encoded it, so it carries no location).
 // Same rules as SendTextWithID: read-only, pace, ban, never to the parent's own number, one id.
-func (k *Link) SendImage(chat string, jpeg []byte, caption, id string) (string, error) {
+func (k *Link) SendImage(chat string, jpeg []byte, caption, id string) (sent string, err error) {
+	defer k.guard("SendImage", &err)
+	w, h, thumb := jpegInfo(jpeg)
 	return k.sendMedia(chat, id, func(up whatsmeow.UploadResponse) *waE2E.Message {
-		return ImageMessage(up, caption)
+		m := ImageMessage(up, caption)
+		if w > 0 {
+			m.ImageMessage.Width, m.ImageMessage.Height = proto.Uint32(uint32(w)), proto.Uint32(uint32(h))
+		}
+		if len(thumb) > 0 {
+			m.ImageMessage.JPEGThumbnail = thumb
+		}
+		return m
 	}, jpeg, whatsmeow.MediaImage)
 }
 
 // SendVoice sends a voice note. mimetype is "audio/ogg; codecs=opus" for WhatsApp's own voice notes.
-func (k *Link) SendVoice(chat string, audio []byte, seconds int, mimetype, id string) (string, error) {
+func (k *Link) SendVoice(chat string, audio []byte, seconds int, mimetype, id string) (sent string, err error) {
+	defer k.guard("SendVoice", &err)
 	return k.sendMedia(chat, id, func(up whatsmeow.UploadResponse) *waE2E.Message {
 		return VoiceMessage(up, seconds, mimetype)
 	}, audio, whatsmeow.MediaAudio)
@@ -417,7 +476,8 @@ func IsSelfChat(chat, own, ownLID types.JID) bool {
 }
 
 // SendSticker sends a WebP sticker as a real WhatsApp sticker. Same rules as every send.
-func (k *Link) SendSticker(chat string, webp []byte, animated bool, id string) (string, error) {
+func (k *Link) SendSticker(chat string, webp []byte, animated bool, id string) (sent string, err error) {
+	defer k.guard("SendSticker", &err)
 	return k.sendMedia(chat, id, func(up whatsmeow.UploadResponse) *waE2E.Message {
 		return StickerMessage(up, animated)
 	}, webp, whatsmeow.MediaImage)
@@ -430,6 +490,34 @@ func StickerMessage(up whatsmeow.UploadResponse, animated bool) *waE2E.Message {
 		FileEncSHA256: up.FileEncSHA256, FileSHA256: up.FileSHA256, FileLength: proto.Uint64(up.FileLength),
 		Mimetype: proto.String("image/webp"), Width: proto.Uint32(512), Height: proto.Uint32(512), IsAnimated: proto.Bool(animated),
 	}}
+}
+
+// jpegInfo reads a photo's size and makes the small preview WhatsApp's own apps attach (at most
+// 72 px on the long side). Zeroes and nil when the bytes aren't a JPEG it can read.
+func jpegInfo(data []byte) (width, height int, thumb []byte) {
+	img, err := jpeg.Decode(bytes.NewReader(data))
+	if err != nil {
+		return 0, 0, nil
+	}
+	b := img.Bounds()
+	width, height = b.Dx(), b.Dy()
+	tw, th := 72, 72
+	if width >= height {
+		th = max(1, height*72/width)
+	} else {
+		tw = max(1, width*72/height)
+	}
+	small := image.NewRGBA(image.Rect(0, 0, tw, th))
+	for y := 0; y < th; y++ {
+		for x := 0; x < tw; x++ {
+			small.Set(x, y, img.At(b.Min.X+x*width/tw, b.Min.Y+y*height/th))
+		}
+	}
+	var out bytes.Buffer
+	if jpeg.Encode(&out, small, &jpeg.Options{Quality: 60}) == nil {
+		thumb = out.Bytes()
+	}
+	return width, height, thumb
 }
 
 // ImageMessage builds the message for an uploaded photo.

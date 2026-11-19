@@ -63,6 +63,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             Unit
         }.exceptionOrNull()
         sentAt += System.currentTimeMillis()
+        Diagnostics.log("send ${m.kind}${if (retried) " (retry)" else ""}: ${err?.let { "failed: ${it.message}" } ?: "ok"}")
         while (sentAt.size > app.oie.logic.SendPace.MAX_IN_WINDOW * 2) sentAt.removeAt(0)
         if (err == null) { main.post { state.failed.remove(m.id) }; return }
         val wasDown = !connected || l == null
@@ -77,16 +78,26 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     /** Connects (showing a QR the first time). Called when the parent starts the test and whenever the app opens while it's on. */
     fun start() {
         if (ls.status is LinkState.Status.Banned) return // L9: never retry around a ban
+        // v0.14: after WhatsApp logged the tablet out, the old connection is spent; start a fresh one (a new QR).
+        val fresh = ls.status == LinkState.Status.LoggedOut
         ls.status = LinkState.Status.Connecting
         io.execute {
+            if (fresh) { runCatching { link?.disconnect() }; link = null; Diagnostics.log("link: starting fresh after a logout") }
+            val l = try {
+                link ?: oielink.Oielink.open(db.path, this).also { link = it }
+            } catch (e: Throwable) {
+                // The library can't run here (a tablet it wasn't built for, such as an x86 emulator).
+                Diagnostics.log("link: can't open: ${e.javaClass.simpleName}: ${e.message}")
+                main.post { ls.status = LinkState.Status.Unavailable }
+                return@execute
+            }
             try {
-                val l = link ?: oielink.Oielink.open(db.path, this).also { link = it }
-                // Read-only for the rule test; sending only once the parent turned the kid's side to the real WhatsApp.
                 l.setReadOnly(!state.realMode)
                 l.connect()
             } catch (e: Throwable) {
-                // Includes a tablet the library wasn't built for (an x86 emulator).
-                main.post { ls.status = LinkState.Status.Unavailable }
+                // No network, or WhatsApp refused: say disconnected, and LinkService tries again when the network returns.
+                Diagnostics.log("link: connect failed: ${e.message}")
+                main.post { ls.status = LinkState.Status.Disconnected }
             }
         }
     }
@@ -175,6 +186,12 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
 
     override fun onEvent(kind: String, payload: String) {
         val o = runCatching { JSONObject(payload) }.getOrDefault(JSONObject())
+        // The problem report: the library's warnings, errors and panics, and every change of the link's state.
+        when (kind) {
+            "log" -> { Diagnostics.log("wa ${o.optString("level")}: ${o.optString("msg")}"); return }
+            "message", "qr", "contactsChanged" -> {}
+            else -> Diagnostics.log("link: $kind ${o.toString().takeIf { it != "{}" } ?: ""}")
+        }
         main.post {
             when (kind) {
                 "qr" -> ls.status = LinkState.Status.Qr(o.optString("code"))

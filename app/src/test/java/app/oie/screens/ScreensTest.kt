@@ -128,6 +128,13 @@ class ScreensTest {
             offerSticker(app.oie.logic.FamilySticker("f2", "missing-2", false, false, now))
         }, "vovo", openStickers = true)
     }
+    // v0.14: Ajustes e ajuda after Oiê closed by itself: the report leads the section.
+    @Test fun problemsAfterACrash() {
+        app.oie.data.Diagnostics.init(java.nio.file.Files.createTempDirectory("diag").toFile(), "Oiê test")
+        app.oie.data.Diagnostics.log("send PHOTO: failed: test"); app.oie.data.Diagnostics.recordCrash(now)
+        shot("19-problems-crash", false) { ParentArea(ready(), 3) }
+        app.oie.data.Diagnostics.clear()
+    }
     // v0.12: Conexão unlinked, the pairing QR, and Contatos with "Adicionar pelo número".
     @Test fun connectionUnlinked() = shot("16-connection-unlinked", false) { ParentArea(ready().apply { realMode = true; link.pretendDropped() }, 2) }
     @Test fun pairQr() = shot("17-pair-qr", true) {

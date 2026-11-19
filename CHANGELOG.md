@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.14.0
+- Sending a photo closed Oiê and logged the tablet out of WhatsApp. This version finds out why, and makes sure it can't happen the same way:
+  - **Problem report:** Ajustes e ajuda › Problemas keeps a report on the tablet of what the link did, its errors, and any time Oiê closed by itself. "Copiar relatório" copies it, so you can paste it here. It has no messages or names, phone numbers are masked, and Oiê never sends it anywhere. After a crash, the report comes first in Ajustes e ajuda, and Conexão points to it.
+  - **The WhatsApp connection can no longer close Oiê:** an error inside it now becomes "Não foi" on the message instead.
+  - **Linking again after WhatsApp logs the tablet out** works straight away. Before, it needed Oiê to be closed first.
+  - **Photos are sent the way WhatsApp's own apps send them,** with their size and a small preview.
+- On a phone, the parent area's tab row keeps the open section in view.
+
 ## 0.13.0
 - A full design check of every screen, and its fixes:
   - **Works on a phone:** Tito's chat and the parent area used tablet-wide margins and broke at phone width. Phones now get narrow margins, and the parent area's sections become tabs on top.

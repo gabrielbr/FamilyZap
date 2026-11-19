@@ -7,6 +7,12 @@ had a read-only rule test, and v0.8 turned the kid's side to the real link once 
 (`AppState.realMode`, off by default). The kid's side then talks through `RealLink` as its
 `WhatsAppLink`. `SampleLink` stays only as test data for the screenshot tests.)
 
+### Problems and crashes (v0.14)
+- Every exported `Link` method recovers a panic into an error (`guard`). Panics and the library's warnings and errors reach the app as `log` events, and go into the problem report (`Diagnostics`, `docs/flows/problem-report.md`).
+- After a `LoggedOut`, the app drops the spent `Link`, and the next start opens a fresh one, with a new device and a new QR.
+- Photos carry width, height and a 72px JPEG preview.
+- gomobile can't bind exported functions with more than two results, so helpers like `jpegInfo` stay unexported. `build-aar.sh` fails loudly if one slips in.
+
 ### Contacts (v0.12)
 The phone sends the parent's contacts a few seconds after linking. The link emits `contactsChanged` once per burst (on `AppStateSyncComplete`, `Contact` and `PushName`) and the app reloads `Contacts()`. If none have come 8 s after connecting, it asks once for the contact list (`FetchAppState(critical_unblock_low)`, only if not synced). `LookUp(phone)` checks a typed number with `IsOnWhatsApp`, for "Adicionar pelo número".
 
