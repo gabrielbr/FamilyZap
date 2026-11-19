@@ -25,4 +25,10 @@ class DiagnosticsTest {
         Diagnostics.clear()
         assertTrue(Diagnostics.isEmpty())
     }
+
+    @Test fun exitReasonsHaveNames() {
+        assertEquals("CRASH_NATIVE", Diagnostics.exitReason(5))
+        assertEquals("LOW_MEMORY", Diagnostics.exitReason(3))
+        assertEquals("UNKNOWN(99)", Diagnostics.exitReason(99))
+    }
 }

@@ -35,6 +35,8 @@ class OieApp : Application() {
             noBackupFilesDir,
             "Oiê ${BuildConfigInfo.VERSION} · Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT}) · ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL} · ${android.os.Build.SUPPORTED_ABIS.firstOrNull()}",
         )
+        // What ended Oiê last time, if it wasn't an ordinary crash (v0.15).
+        app.oie.data.Diagnostics.collectPreviousExits(this, File(noBackupFilesDir, "whatsapp-link.db" + oielink.Oielink.CrashSuffix))
         val store = Store(File(filesDir, "state.sealed"), KeystoreSealer())
         state = AppState().also { s -> store.read()?.let { Codec.decode(it, s) } }
         // v0.12: no more sample. A tablet still on the sample drops its sample chats and contacts,

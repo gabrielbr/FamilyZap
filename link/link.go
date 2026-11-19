@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	"os"
 	"runtime/debug"
 	"sort"
 	"sync"
@@ -34,6 +35,9 @@ import (
 	"google.golang.org/protobuf/proto"
 	_ "modernc.org/sqlite"
 )
+
+// CrashSuffix names the file, next to the session store, where Go writes a fatal error.
+const CrashSuffix = ".crash"
 
 // MaxReconnects is how many automatic reconnects whatsmeow tries before it stops and waits for
 // the app (rule L5). Its own wait grows 2 s per try.
@@ -90,6 +94,13 @@ func init() {
 // Open opens (or creates) the session store at dbPath, in the app's private storage (rule L8).
 func Open(dbPath string, l Listener) (*Link, error) {
 	ctx := context.Background()
+	// v0.15: a Go fatal error (or a panic no guard caught) ends the whole app without an Android
+	// crash. Go writes what happened to this file too, and the app adds it to the problem report
+	// the next time it opens (docs/flows/problem-report.md).
+	if f, err := os.OpenFile(dbPath+CrashSuffix, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600); err == nil {
+		_ = debug.SetCrashOutput(f, debug.CrashOptions{})
+		f.Close()
+	}
 	container, err := sqlstore.New(ctx, "sqlite", "file:"+dbPath+"?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)", &reportLog{l: l, module: "store"})
 	if err != nil {
 		return nil, err

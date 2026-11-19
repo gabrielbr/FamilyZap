@@ -73,6 +73,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.15: the report also catches Go fatal errors and Android exit reasons (2026-11-19). The owner's report decides the real fix for the logouts.
 - [x] v0.14: problem report (on the tablet, copied by the parent); crash safety in the link; re-link after a logout fixed; photos sent with size and preview (2026-11-19). Waiting for the owner's next photo test and report.
 - [x] v0.13: full design audit of every screen with the four skills (16/20 native audit, was 12/20); phone width fixed; phone and large-text screenshots added (2026-11-19).
 - [x] v0.12: test features removed (sample, simulations, rule test); contacts reload as they arrive; add by number (2026-11-19). The owner tests the real link now.

@@ -49,6 +49,45 @@ object Diagnostics {
 
     fun recordCrash(at: Long) { crashFile?.writeText(at.toString()) }
 
+    /**
+     * v0.15: what ended Oiê last time, when it wasn't an ordinary crash:
+     *  - a Go fatal error from the WhatsApp library, which Go wrote to [goCrash];
+     *  - Android's own record of why the app's process ended (low memory, killed, a native crash),
+     *    for each exit newer than the last one already reported.
+     * Called once when the app starts.
+     */
+    fun collectPreviousExits(context: android.content.Context, goCrash: File) {
+        runCatching {
+            if (goCrash.exists() && goCrash.length() > 0) {
+                log("GO CRASH (WhatsApp library): " + goCrash.readText().take(6000))
+                recordCrash(goCrash.lastModified())
+            }
+            goCrash.delete()
+        }
+        if (android.os.Build.VERSION.SDK_INT < 30) return
+        runCatching {
+            val seenFile = File(file?.parentFile, "last-exit-seen.txt")
+            val seen = seenFile.takeIf { it.exists() }?.readText()?.trim()?.toLongOrNull() ?: 0L
+            val am = context.getSystemService(android.app.ActivityManager::class.java)
+            val exits = am.getHistoricalProcessExitReasons(context.packageName, 0, 10).filter { it.timestamp > seen }.sortedBy { it.timestamp }
+            for (e in exits) {
+                log("exit: ${exitReason(e.reason)} · ${e.description ?: ""} · importance ${e.importance} · ${e.pss / 1024} MB")
+                if (e.reason in CRASH_REASONS) recordCrash(e.timestamp)
+            }
+            exits.maxOfOrNull { it.timestamp }?.let { seenFile.writeText(it.toString()) }
+        }
+    }
+
+    /** Exits that mean Oiê closed by itself, rather than the person or the system closing it normally. */
+    private val CRASH_REASONS = setOf(4, 5, 6, 3) // CRASH, CRASH_NATIVE, ANR, LOW_MEMORY
+
+    fun exitReason(code: Int): String = when (code) {
+        1 -> "EXIT_SELF"; 2 -> "SIGNALED"; 3 -> "LOW_MEMORY"; 4 -> "CRASH"; 5 -> "CRASH_NATIVE"; 6 -> "ANR"
+        7 -> "INITIALIZATION_FAILURE"; 8 -> "PERMISSION_CHANGE"; 9 -> "EXCESSIVE_RESOURCE_USAGE"; 10 -> "USER_REQUESTED"
+        11 -> "USER_STOPPED"; 12 -> "DEPENDENCY_DIED"; 13 -> "OTHER"; 14 -> "FREEZER"; 15 -> "PACKAGE_STATE_CHANGE"; 16 -> "PACKAGE_UPDATED"
+        else -> "UNKNOWN($code)"
+    }
+
     /** When Oiê last closed by itself, or null. */
     fun lastCrashAt(): Long? = crashFile?.takeIf { it.exists() }?.readText()?.trim()?.toLongOrNull()
 
