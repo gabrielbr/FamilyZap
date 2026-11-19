@@ -1,9 +1,9 @@
 # The WhatsApp link
 
 How Oiê connects the kid's tablet to the parent's WhatsApp (decision 0001: a linked device on the
-tablet; decision 0003: built on whatsmeow). **Status:** 🟡 the library builds for Android and its
-rules are written down. It isn't wired into the app: the app runs on `SampleLink` until the message
-rule is tested with real family chats (STATUS.md).
+tablet; decision 0003: built on whatsmeow). **Status:** 🟡 since v0.5 the link runs in the app for
+one thing only: the read-only rule test in the parent area (`docs/flows/rule-test.md`, `RealLink`).
+The kid's side runs on `SampleLink` until the message rule is decided from that test (STATUS.md).
 
 ## How it fits together
 ```
@@ -29,7 +29,7 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 | L5 | **Bounded reconnects.** whatsmeow reconnects on its own, waiting 2 s longer each time, and stops after 8 tries. After that, the app tries again when the network or the app comes back. | `AutoReconnectHook` |
 | L6 | **Little history.** At pairing, ask for 1 day of history. Oiê shows nothing from before the link. | `HistorySyncConfig` limits |
 | L7 | **No fake activity.** No automatic "online", "typing" or read receipts. Presence is sent only so WhatsApp knows the name. | no `SendChatPresence`, no `MarkRead` (open question: read receipts) |
-| L8 | **The session stays on the tablet,** in private storage, and is deleted when the parent unlinks. | app storage; `Logout` on unlink |
+| L8 | **The session stays on the tablet,** in the app's private no-backup storage, and is deleted when the parent unlinks. | `noBackupFilesDir`; `Unlink` deletes it |
 | L9 | **A ban stops everything.** On `TemporaryBan` or `LoggedOut`, stop sending. Tell the parent in plain words, in the parent area. Never retry around it. | `events.TemporaryBan`, `events.LoggedOut` |
 
 ## Mapping whatsmeow to Oiê
@@ -43,6 +43,10 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 | `SendMessage`, `Upload` (image, audio) | the kid's sends, through `SendPace` |
 | `events.Connected` / `Disconnected` / `LoggedOut` / `StreamReplaced` | Conexão state; "Peça para {nome} conectar de novo" |
 | `events.TemporaryBan` (codes 101–106) | rule L9 |
+
+## Size
+The library adds about 9 MB per architecture to the APK (arm64 and armv7), about 40 MB in all
+in v0.5. Splitting the APK per architecture would halve that; it's on the roadmap.
 
 ## Licence
 whatsmeow is **MPL-2.0**: its own files stay MPL-2.0, and Oiê's code can stay closed. When Oiê
@@ -62,6 +66,6 @@ dependencies are BSD, MIT, Apache or ISC licensed, and a full list ships with th
 ## Before it ships
 1. The message rule is tested with real chats (STATUS.md).
 2. `WhatsmeowLink` implements `WhatsAppLink`. Every rule above has a test, where a test is possible.
-3. The release workflow builds the AAR (Go and the NDK in CI).
-4. Sobre › Licenças carries the whatsmeow notice.
+3. ~~The release workflow builds the AAR (Go and the NDK in CI)~~ (v0.5).
+4. ~~Sobre › Licenças carries the whatsmeow notice~~ (v0.5).
 5. A test on a spare WhatsApp number first, never the owner's main one.

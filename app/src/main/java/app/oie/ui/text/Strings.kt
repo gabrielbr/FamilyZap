@@ -105,6 +105,20 @@ interface Strings {
     fun quietSummary(n: Int): String
     val deletedMessage: String; val simulateIncoming: String; val allowNotifications: String
 
+    // Rule test (docs/flows/rule-test.md)
+    val ruleTestRow: String; val ruleTestTitle: String
+    fun ruleTestIntro(kid: String): String
+    val ruleTestRisk: String; val ruleTestStart: String; val ruleTestConnecting: String
+    val ruleTestQrSteps: List<String>; val ruleTestQrA11y: String
+    val ruleTestPick: String; val ruleTestPickHelp: String; val ruleTestSearch: String; val ruleTestChats: String
+    fun kidSpokeNow(kid: String): String
+    val ruleTestEmpty: String; val wouldReach: String; val staysWithYou: String; val otherMessage: String
+    fun why(kid: String, why: app.oie.logic.RuleTest.Why): String
+    fun ignoredCount(n: Int): String
+    val ruleTestStop: String
+    fun bannedFor(hours: Int): String
+    val loggedOutTest: String; val ruleTestUnavailable: String
+
     // Self-update (Gabriel Design System docs/self-update.md, "Words")
     fun updateAvailable(v: String): String
     fun updateButton(size: String): String
@@ -224,7 +238,7 @@ object Pt : Strings {
     )
     override fun aboutVersion(v: String) = "Oiê $v. Versão de teste: usa dados de exemplo e ainda não se conecta de verdade ao WhatsApp."
     override val notWhatsApp = "O Oiê não é feito nem aprovado pelo WhatsApp ou pela Meta."
-    override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System."
+    override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System. Conexão com o WhatsApp feita com whatsmeow, Mozilla Public License 2.0, código em github.com/tulir/whatsmeow. QR com ZXing, Apache License 2.0."
     override val theKid = "a criança"
     override val notifChannel = "Mensagens da família"; override val notifVoice = "Mandou um áudio"
     override val notifPhoto = "Mandou uma foto"; override val notifSticker = "Mandou uma figurinha"
@@ -246,6 +260,30 @@ object Pt : Strings {
     override val version = "Versão"
     override fun versionLine(v: String, code: Long) = "Oiê v$v ($code)"
     override val decimalComma = true
+    override val ruleTestRow = "Testar a regra com seu WhatsApp"; override val ruleTestTitle = "Testar a regra"
+    override fun ruleTestIntro(kid: String) = "Conecte seu WhatsApp só para ler. O Oiê mostra quais das suas mensagens chegariam para $kid e quais ficariam só com você. Nada é enviado, e o teste fica só neste tablet."
+    override val ruleTestRisk = "O WhatsApp pode limitar ou bloquear números que usam apps não oficiais. Se puder, teste com um número reserva."
+    override val ruleTestStart = "Conectar para testar"; override val ruleTestConnecting = "Conectando…"
+    override val ruleTestQrSteps = listOf("No seu celular, abra o WhatsApp.", "Toque em Configurações e depois em Dispositivos conectados.", "Toque em Conectar um dispositivo e aponte para este código.")
+    override val ruleTestQrA11y = "Código para conectar o WhatsApp"
+    override val ruleTestPick = "Escolha as conversas do teste"; override val ruleTestPickHelp = "Mensagens de outras conversas não são guardadas."
+    override val ruleTestSearch = "Buscar"; override val ruleTestChats = "Conversas no teste"
+    override fun kidSpokeNow(kid: String) = "Fingir que $kid falou agora"
+    override val ruleTestEmpty = "Nenhuma mensagem ainda. Elas aparecem aqui quando chegarem."
+    override val wouldReach = "Chegaria"; override val staysWithYou = "Fica com você"; override val otherMessage = "Outra mensagem"
+    override fun why(kid: String, why: app.oie.logic.RuleTest.Why) = when (why) {
+        app.oie.logic.RuleTest.Why.REPLY -> "responde a $kid"
+        app.oie.logic.RuleTest.Why.NAME -> "começa com o nome de $kid"
+        app.oie.logic.RuleTest.Why.WINDOW -> "até 24 h depois de $kid falar"
+        app.oie.logic.RuleTest.Why.WHOLE_GROUP -> "grupo com tudo para $kid"
+        app.oie.logic.RuleTest.Why.NOT_FOR_KID -> "não é para $kid"
+        app.oie.logic.RuleTest.Why.PARENT_OWN -> "mensagem sua"
+    }
+    override fun ignoredCount(n: Int) = if (n == 1) "1 mensagem de outras conversas não foi guardada." else "$n mensagens de outras conversas não foram guardadas."
+    override val ruleTestStop = "Desconectar e apagar o teste"
+    override fun bannedFor(hours: Int) = "O WhatsApp bloqueou este número por cerca de $hours h. O teste parou e não vai tentar de novo sozinho."
+    override val loggedOutTest = "O WhatsApp desconectou este tablet."
+    override val ruleTestUnavailable = "Este tablet não consegue usar a conexão com o WhatsApp."
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -357,7 +395,7 @@ object En : Strings {
     )
     override fun aboutVersion(v: String) = "Oiê $v. Test version: it uses example data and doesn't really link to WhatsApp yet."
     override val notWhatsApp = "Oiê isn't made or approved by WhatsApp or Meta."
-    override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System."
+    override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System. WhatsApp link built with whatsmeow, Mozilla Public License 2.0, source at github.com/tulir/whatsmeow. QR codes with ZXing, Apache License 2.0."
     override val theKid = "your child"
     override val notifChannel = "Messages from family"; override val notifVoice = "Sent a voice message"
     override val notifPhoto = "Sent a photo"; override val notifSticker = "Sent a sticker"
@@ -379,6 +417,30 @@ object En : Strings {
     override val version = "Version"
     override fun versionLine(v: String, code: Long) = "Oiê v$v ($code)"
     override val decimalComma = false
+    override val ruleTestRow = "Test the rule with your WhatsApp"; override val ruleTestTitle = "Test the rule"
+    override fun ruleTestIntro(kid: String) = "Link your WhatsApp to read only. Oiê shows which of your messages would reach $kid and which would stay with you. Nothing is sent, and the test stays on this tablet."
+    override val ruleTestRisk = "WhatsApp may limit or block numbers that use unofficial apps. If you can, test with a spare number."
+    override val ruleTestStart = "Link to test"; override val ruleTestConnecting = "Linking…"
+    override val ruleTestQrSteps = listOf("On your phone, open WhatsApp.", "Tap Settings, then Linked devices.", "Tap Link a device and point at this code.")
+    override val ruleTestQrA11y = "Code to link WhatsApp"
+    override val ruleTestPick = "Choose the chats to test"; override val ruleTestPickHelp = "Messages from other chats aren't kept."
+    override val ruleTestSearch = "Search"; override val ruleTestChats = "Chats in the test"
+    override fun kidSpokeNow(kid: String) = "Pretend $kid spoke now"
+    override val ruleTestEmpty = "No messages yet. They show here as they arrive."
+    override val wouldReach = "Would reach"; override val staysWithYou = "Stays with you"; override val otherMessage = "Other message"
+    override fun why(kid: String, why: app.oie.logic.RuleTest.Why) = when (why) {
+        app.oie.logic.RuleTest.Why.REPLY -> "replies to $kid"
+        app.oie.logic.RuleTest.Why.NAME -> "starts with $kid's name"
+        app.oie.logic.RuleTest.Why.WINDOW -> "within 24 h of $kid speaking"
+        app.oie.logic.RuleTest.Why.WHOLE_GROUP -> "a group set to show everything"
+        app.oie.logic.RuleTest.Why.NOT_FOR_KID -> "not for $kid"
+        app.oie.logic.RuleTest.Why.PARENT_OWN -> "your own message"
+    }
+    override fun ignoredCount(n: Int) = if (n == 1) "1 message from other chats wasn't kept." else "$n messages from other chats weren't kept."
+    override val ruleTestStop = "Unlink and delete the test"
+    override fun bannedFor(hours: Int) = "WhatsApp blocked this number for about $hours h. The test stopped and won't try again on its own."
+    override val loggedOutTest = "WhatsApp unlinked this tablet."
+    override val ruleTestUnavailable = "This tablet can't use the WhatsApp link."
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

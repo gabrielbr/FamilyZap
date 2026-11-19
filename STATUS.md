@@ -73,5 +73,6 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.5: the rule test with the real WhatsApp, read-only (docs/flows/rule-test.md, 2026-11-19). Next: the owner runs it for a day or two on real chats.
 - [x] The WhatsApp link: whatsmeow chosen (decision 0003), Android build tried, rules L1–L9 written (2026-11-18). Waiting on the message-rule test.
 - [x] Releases publish themselves when a version bump is merged to `main` (2026-11-18). Waiting on the owner's one-time setup in `docs/release.md`.

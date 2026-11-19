@@ -115,4 +115,20 @@ class ScreensTest {
     @Test fun parentPin() = shot("08-parent-pin", true) { ParentPin(ready()) }
     @Test fun parentContacts() = shot("09-parent-contacts", false) { ParentArea(ready(), 0) }
     @Test fun parentQuiet() = shot("10-parent-quiet", true) { ParentArea(ready(), 1) }
+    // The rule test (docs/flows/rule-test.md): intro, the QR, and results.
+    @Test fun ruleTestIntro() = shot("16-rule-test-intro", false) { app.oie.ui.parent.RuleTestScreen(ready()) }
+    @Test fun ruleTestQr() = shot("17-rule-test-qr", true) {
+        app.oie.ui.parent.RuleTestScreen(ready().apply { linkTest.on = true; linkTest.status = app.oie.data.LinkTest.Status.Qr("2@sample-code-for-the-screenshot,abc,def,ghi") })
+    }
+    @Test fun ruleTestResults() = shot("18-rule-test-results", false) {
+        app.oie.ui.parent.RuleTestScreen(ready().apply {
+            val t = linkTest
+            t.on = true; t.status = app.oie.data.LinkTest.Status.Connected
+            t.chats += app.oie.logic.Contact("5511900000001@s.whatsapp.net", "Vovó")
+            t.onIncoming("a", "5511900000001@s.whatsapp.net", null, false, now - 3_600_000, app.oie.logic.Kind.TEXT, "Ana, me liga quando puder", null, "Tito")
+            t.onIncoming("b", "5511900000001@s.whatsapp.net", null, false, now - 600_000, app.oie.logic.Kind.TEXT, "Tito, como foi a prova?", null, "Tito")
+            t.onIncoming("c", "5511900000001@s.whatsapp.net", null, true, now - 300_000, app.oie.logic.Kind.TEXT, "Já chego aí", null, "Tito")
+            t.onIncoming("d", "5511999999999@s.whatsapp.net", null, false, now - 200_000, app.oie.logic.Kind.TEXT, "promo", null, "Tito")
+        })
+    }
 }

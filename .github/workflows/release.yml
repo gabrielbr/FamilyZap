@@ -59,6 +59,17 @@ jobs:
         run: |
           echo "$OIE_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/oie.jks"
           echo "OIE_KEYSTORE_FILE=$RUNNER_TEMP/oie.jks" >> "$GITHUB_ENV"
+      - uses: actions/setup-go@v5
+        if: steps.v.outputs.go == 'true'
+        with:
+          go-version-file: link/go.mod
+          cache-dependency-path: link/go.sum
+      - name: The WhatsApp link library (link/, gomobile)
+        if: steps.v.outputs.go == 'true'
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" > /dev/null
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
+          link/build-aar.sh
       - name: Test and build the signed release
         if: steps.v.outputs.go == 'true'
         env:

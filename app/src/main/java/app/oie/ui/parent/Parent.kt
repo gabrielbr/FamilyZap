@@ -135,6 +135,8 @@ fun ParentArea(state: AppState, section: Int) {
                             TextLink(tx.simulateDrop, { state.link.pretendDropped(); state.route = Route.KidHome })
                         }
                         else PrimaryButton(tx.reconnect, { state.route = Route.Setup(2) })
+                        // The rule test with the parent's real WhatsApp, read-only (docs/flows/rule-test.md).
+                        TextLink(tx.ruleTestRow, { state.route = Route.RuleTest })
                     }
                     else -> AboutAndHelp(state)
                 }

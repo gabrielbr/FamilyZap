@@ -51,6 +51,15 @@ object Codec {
         }))
         put("drafts", JSONObject(s.drafts.toMap()))
         put("lastSeen", JSONObject(s.lastSeen.toMap()))
+        put("ruleTest", s.linkTest.let { t ->
+            JSONObject().put("on", t.on).put("ignored", t.ignored)
+                .put("chats", JSONArray(t.chats.map { JSONObject().put("id", it.id).put("name", it.name).put("group", it.isGroup) }))
+                .put("kidSpoke", JSONObject(t.kidSpoke.toMap()))
+                .put("entries", JSONArray(t.entries.map {
+                    JSONObject().put("chat", it.chatId).put("name", it.chatName).put("at", it.at).put("kind", it.kind.name)
+                        .put("shown", it.shown).put("why", it.why.name).put("text", it.text ?: JSONObject.NULL)
+                }))
+        })
     }.toString()
 
     /** Restores into [s]. Unknown or newer versions are ignored rather than half-read. */
@@ -90,6 +99,21 @@ object Codec {
         }
         s.drafts.clear(); o.optJSONObject("drafts")?.let { d -> d.keys().forEach { k -> s.drafts[k] = d.getString(k) } }
         s.lastSeen.clear(); o.optJSONObject("lastSeen")?.let { d -> d.keys().forEach { k -> s.lastSeen[k] = d.getLong(k) } }
+        s.linkTest.clear()
+        o.optJSONObject("ruleTest")?.let { r ->
+            val t = s.linkTest
+            t.on = r.optBoolean("on"); t.ignored = r.optInt("ignored")
+            r.optJSONArray("chats")?.let { a -> for (i in 0 until a.length()) a.getJSONObject(i).run { t.chats += Contact(getString("id"), getString("name"), optBoolean("group")) } }
+            r.optJSONObject("kidSpoke")?.let { d -> d.keys().forEach { k -> t.kidSpoke[k] = d.getLong(k) } }
+            r.optJSONArray("entries")?.let { a ->
+                for (i in 0 until a.length()) a.getJSONObject(i).run {
+                    t.entries += app.oie.logic.RuleTest.Entry(
+                        getString("chat"), getString("name"), getLong("at"), Kind.valueOf(getString("kind")), getBoolean("shown"),
+                        app.oie.logic.RuleTest.Why.valueOf(getString("why")), if (isNull("text")) null else getString("text"),
+                    )
+                }
+            }
+        }
         val step = o.optInt("step", -1)
         s.route = if (step in 0..7) Route.Setup(step) else Route.KidHome
     }
