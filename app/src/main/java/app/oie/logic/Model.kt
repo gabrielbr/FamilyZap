@@ -21,6 +21,12 @@ data class Contact(
     val waName: String = "",
     /** Paused from the parent's WhatsApp ("/Tito parar", v0.21): nothing reaches the kid, and it leaves the kid's home. */
     val paused: Boolean = false,
+    /** The WhatsApp profile picture, sealed on the tablet (v0.26): the file name, or "" for the letter circle. */
+    val photo: String = "",
+    /** WhatsApp's id for that picture, to ask only "did it change?". */
+    val photoId: String = "",
+    /** When the picture was last checked (epoch ms; 0 = never). */
+    val photoAt: Long = 0,
 )
 
 /** DELETED is WhatsApp's "delete for everyone": [Message.replyTo] names the message it removes. */

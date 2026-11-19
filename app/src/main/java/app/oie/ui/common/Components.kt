@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -107,6 +108,25 @@ fun Initial(name: String, size: Dp, modifier: Modifier = Modifier) {
             color = c.onSelected, textAlign = TextAlign.Center,
         )
     }
+}
+
+/**
+ * A contact's face (v0.26): their WhatsApp profile picture when Oiê has it, round, the same size as
+ * the letter circle; otherwise the letter circle. Decorative: the name is always next to it.
+ */
+@Composable
+fun Avatar(contact: app.oie.logic.Contact, size: Dp, modifier: Modifier = Modifier) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val picture = androidx.compose.runtime.remember(contact.photo) {
+        if (contact.photo.isEmpty()) null else runCatching {
+            app.oie.data.Photos.openBytes(context, contact.photo)?.let { android.graphics.BitmapFactory.decodeByteArray(it, 0, it.size) }?.asImageBitmap()
+        }.getOrNull()
+    }
+    if (picture == null) Initial(contact.name, size, modifier)
+    else androidx.compose.foundation.Image(
+        picture, contentDescription = null, contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+        modifier = modifier.size(size).clip(CircleShape).background(OieTheme.colors.selected),
+    )
 }
 
 /** The top bar: 56dp, a hairline under it (README §6). */

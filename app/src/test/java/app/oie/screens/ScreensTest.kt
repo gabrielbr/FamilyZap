@@ -200,4 +200,26 @@ class ScreensTest {
     @Test fun settingsBubbleOffDark() = shot("31-settings-bubble", true) {
         Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.BubbleSetting(ready()) }
     }
+
+    // v0.26: WhatsApp profile pictures where Oiê has them; the letter circle for the rest.
+    private fun withPictures() = ready().apply {
+        kidNoticeSeen = true
+        app.oie.data.Photos.sealer = PassThrough
+        val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.app.Application>()
+        fun picture(top: Int, bottom: Int): String {
+            val b = android.graphics.Bitmap.createBitmap(160, 160, android.graphics.Bitmap.Config.ARGB_8888)
+            android.graphics.Canvas(b).apply {
+                drawColor(top)
+                drawCircle(80f, 66f, 30f, android.graphics.Paint().apply { color = bottom; isAntiAlias = true })
+                drawCircle(80f, 170f, 62f, android.graphics.Paint().apply { color = bottom; isAntiAlias = true })
+            }
+            return app.oie.data.Photos.store(context, b)
+        }
+        allowed[0] = allowed[0].copy(photo = picture(0xFF8FB8C9.toInt(), 0xFF3E5A66.toInt()))
+        allowed[2] = allowed[2].copy(photo = picture(0xFFE3C7A1.toInt(), 0xFF6B4E2E.toInt()))
+    }
+    @Test fun kidHomePictures() = shot("32-kid-home-pictures", false) { KidHome(withPictures()) }
+    @Test fun kidHomePicturesDark() = shot("32-kid-home-pictures", true) { KidHome(withPictures()) }
+    @Test fun conversationPicture() = shot("33-conversation-picture", false) { Conversation(withPictures(), "vovo") }
+    @Test fun contactsPictures() = shot("34-contacts-pictures", false) { ParentArea(withPictures(), 0) }
 }

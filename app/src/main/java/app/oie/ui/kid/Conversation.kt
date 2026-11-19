@@ -143,7 +143,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
         Column(Modifier.fillMaxSize()) {
             Bar {
                 QuietButton(null, { state.drafts[contactId] = draft; state.route = Route.KidHome }, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
-                Initial(contact.name, OTokens.Size.avatar)
+                app.oie.ui.common.Avatar(contact, OTokens.Size.avatar)
                 Text(contact.name, style = OieType.title, color = c.ink)
             }
             val list = rememberLazyListState()

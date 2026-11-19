@@ -73,8 +73,8 @@ object Photos {
     }
 
     /** Seals and stores bytes received through the WhatsApp link (a photo, a sticker, a voice note) as they are. */
-    fun keepBytes(context: Context, bytes: ByteArray): String {
-        val name = UUID.randomUUID().toString() + ".sealed"
+    fun keepBytes(context: Context, bytes: ByteArray, prefix: String = ""): String {
+        val name = prefix + UUID.randomUUID().toString() + ".sealed"
         File(dir(context), name).writeBytes(sealer.seal(bytes))
         return name
     }
@@ -108,4 +108,12 @@ object Photos {
 
     /** Removes a stored photo (when the kid undoes a send). */
     fun forget(context: Context, name: String) { File(dir(context), name).delete() }
+
+    /** Contacts' profile pictures are stored with this prefix (v0.26). */
+    const val AVATAR = "avatar-"
+
+    /** Deletes stored profile pictures no contact uses any more (a removed contact, a replaced picture). */
+    fun forgetAvatarsExcept(context: Context, keep: Set<String>) {
+        dir(context).listFiles()?.filter { it.name.startsWith(AVATAR) && it.name !in keep }?.forEach { it.delete() }
+    }
 }

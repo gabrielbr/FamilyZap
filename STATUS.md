@@ -73,6 +73,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.26: allowed contacts' WhatsApp profile pictures, checked at most daily, sealed on the tablet (2026-11-19).
 - [x] v0.25: Oiê in an Android bubble: a small window over other apps, turned on in Ajustes e ajuda (2026-11-19). Open: the owner's device test.
 - [x] v0.24: "Conectando…" for the first 30 s after an update or a drop, instead of a false "desconectado" (2026-11-19).
 - [x] v0.23: photos work (refused since v0.1 by a size-check mistake) and come upright; WhatsApp's storage no longer fails for want of a temp folder (issue #34, 2026-11-19).

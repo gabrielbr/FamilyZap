@@ -339,3 +339,29 @@ func TestTheStoreKeepsTemporaryTablesInMemory(t *testing.T) {
 		t.Fatalf("temp_store = %d: on Android SQLite finds no temp folder (issue #34)", mode)
 	}
 }
+
+func TestPictureNeedsALinkedTablet(t *testing.T) {
+	k, err := Open(filepath.Join(t.TempDir(), "p.db"), nl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := k.Picture("5511987650001@s.whatsapp.net", ""); !errors.Is(err, ErrNotLinked) {
+		t.Fatalf("got %v", err)
+	}
+}
+
+func TestPictureAnswers(t *testing.T) {
+	for _, c := range []struct {
+		state, id string
+		jpeg      []byte
+		want      string
+	}{
+		{"none", "x", nil, `{"state":"none"}`},
+		{"same", "123", nil, `{"id":"123","state":"same"}`},
+		{"new", "124", []byte{0xff, 0xd8}, `{"id":"124","jpeg":"/9g=","state":"new"}`},
+	} {
+		if got, _ := encodePicture(c.state, c.id, c.jpeg); got != c.want {
+			t.Errorf("%s: got %s", c.state, got)
+		}
+	}
+}
