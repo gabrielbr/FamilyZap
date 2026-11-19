@@ -56,6 +56,21 @@ This rule needs testing. The trade-off is privacy for the parent's own chats aga
 ## v0.11: playing voice
 A voice message plays on tap and stops on a second tap. Only one plays at a time. It plays from a temporary copy of the sealed file, deleted when it ends.
 
+## v0.27: moving pictures (animated stickers, videos, GIFs)
+_The owner, 2026-11-19: "animated stickers are not being animated", and "make sure the chat supports video attachments and animated GIFs."_
+
+| Arrives | In the chat | Tap |
+|---|---|---|
+| **Animated sticker** | Moves in a loop, like in WhatsApp (in the chat and in the sticker sheet) | — |
+| **GIF** (WhatsApp sends them as short silent videos) | Plays in a loop, silent, in the bubble, with a small "GIF" label | Opens it big |
+| **Video** | Its first frame, a ▶ and the length ("0:42") | Opens a full-screen player with sound: ▶/❚❚, the time, and Back to return |
+| **Video over 64 MB** | "Vídeo grande: só abre no WhatsApp de Ana" (not downloaded to the tablet) | — |
+
+- **"Remove animations" (Android setting) is on:** stickers and GIFs stay still on their first frame; a GIF plays when tapped. Videos only play when tapped, always.
+- **Notifications:** "Mandou um vídeo", "Mandou um GIF".
+- **Storage:** videos and GIFs are sealed on the tablet like photos.
+- **The message rule doesn't change:** a video counts like any other message (reply, name in the caption, 24 h).
+
 ## Branches
 | At step | If | Then |
 |---|---|---|

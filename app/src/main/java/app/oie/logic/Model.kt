@@ -29,8 +29,8 @@ data class Contact(
     val photoAt: Long = 0,
 )
 
-/** DELETED is WhatsApp's "delete for everyone": [Message.replyTo] names the message it removes. */
-enum class Kind { TEXT, VOICE, PHOTO, STICKER, UNSUPPORTED, DELETED }
+/** DELETED is WhatsApp's "delete for everyone": [Message.replyTo] names the message it removes. VIDEO and GIF since v0.27 (a GIF is a short silent video). */
+enum class Kind { TEXT, VOICE, PHOTO, STICKER, UNSUPPORTED, DELETED, VIDEO, GIF }
 
 /** One message in a chat with an allowed contact, as the WhatsApp link reports it. */
 data class Message(
@@ -46,6 +46,8 @@ data class Message(
     val durationSec: Int = 0,
     /** A photo kept in the app's private storage on the tablet (data/Photos.kt): the file name only. */
     val media: String? = null,
+    /** The file's size in bytes as WhatsApp said (v0.27): a video over the limit isn't downloaded. */
+    val size: Long = 0,
 )
 
 /** One quiet-hours period (docs/flows/contacts-quiet-hours.md). End before start means overnight. */

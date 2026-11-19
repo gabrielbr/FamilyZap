@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.27.0
+- **Animated stickers move**, in the chat and in the sticker sheet.
+- **Videos.** A video from family shows its first picture, a ▶ and its length. Tap to watch it big, with sound, with Tocar/Pausar. Videos over 64 MB stay in WhatsApp; the chat says so.
+- **GIFs** play in a silent loop in the chat, like in WhatsApp. Tap to see them big.
+- With Android's "Remover animações" on, stickers and GIFs stay still.
+- Sending videos and GIFs comes next.
+
 ## 0.26.0
 - **Profile pictures.** Each allowed contact and group now shows their WhatsApp profile picture instead of the letter: on the kid's home, in the chat, and in Contatos. Someone with no picture, or who hides it, keeps the letter.
 - Only the contacts you allowed are looked up, at most once a day each, and the pictures are kept sealed on the tablet.

@@ -56,7 +56,7 @@ object Codec {
         put("messages", JSONArray(s.messages.map {
             JSONObject().put("id", it.id).put("chat", it.chatId).put("kid", it.fromKid).put("at", it.at)
                 .put("kind", it.kind.name).put("text", it.text).put("replyTo", it.replyTo ?: JSONObject.NULL)
-                .put("dur", it.durationSec).put("media", it.media ?: JSONObject.NULL)
+                .put("dur", it.durationSec).put("media", it.media ?: JSONObject.NULL).put("size", it.size)
         }))
         put("drafts", JSONObject(s.drafts.toMap()))
         put("lastSeen", JSONObject(s.lastSeen.toMap()))
@@ -106,7 +106,7 @@ object Codec {
                 s.messages += Message(
                     getString("id"), getString("chat"), getBoolean("kid"), getLong("at"), Kind.valueOf(getString("kind")),
                     optString("text"), if (isNull("replyTo")) null else getString("replyTo"), optInt("dur"),
-                    if (isNull("media")) null else getString("media"),
+                    if (isNull("media")) null else getString("media"), optLong("size"),
                 )
             }
         }

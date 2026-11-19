@@ -69,6 +69,8 @@ func TestToIncomingKinds(t *testing.T) {
 		{"voice", &waE2E.Message{AudioMessage: &waE2E.AudioMessage{Seconds: proto.Uint32(7), PTT: proto.Bool(true)}}, Incoming{Kind: "VOICE", DurationSec: 7}},
 		{"sticker", &waE2E.Message{StickerMessage: &waE2E.StickerMessage{}}, Incoming{Kind: "STICKER"}},
 		{"deleted", &waE2E.Message{ProtocolMessage: &waE2E.ProtocolMessage{Type: waE2E.ProtocolMessage_REVOKE.Enum(), Key: &waCommon.MessageKey{ID: proto.String("m9")}}}, Incoming{Kind: "DELETED", ReplyTo: "m9"}},
+		{"video", &waE2E.Message{VideoMessage: &waE2E.VideoMessage{Caption: proto.String("Tito, olha"), Seconds: proto.Uint32(42)}}, Incoming{Kind: "VIDEO", Text: "Tito, olha", DurationSec: 42}},
+		{"gif", &waE2E.Message{VideoMessage: &waE2E.VideoMessage{GifPlayback: proto.Bool(true), Seconds: proto.Uint32(3)}}, Incoming{Kind: "GIF", DurationSec: 3}},
 		{"location", &waE2E.Message{LocationMessage: &waE2E.LocationMessage{}}, Incoming{Kind: "UNSUPPORTED"}},
 	}
 	for _, c := range cases {
@@ -363,5 +365,13 @@ func TestPictureAnswers(t *testing.T) {
 		if got, _ := encodePicture(c.state, c.id, c.jpeg); got != c.want {
 			t.Errorf("%s: got %s", c.state, got)
 		}
+	}
+}
+
+func TestVideoCarriesItsSize(t *testing.T) {
+	m := &waE2E.Message{VideoMessage: &waE2E.VideoMessage{FileLength: proto.Uint64(70 << 20)}}
+	got, _ := ToIncoming(info("v1", false), m)
+	if got.Size != 70<<20 || downloadable(m) == nil {
+		t.Fatalf("got %+v", got)
 	}
 }

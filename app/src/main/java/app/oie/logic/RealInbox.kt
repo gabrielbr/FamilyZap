@@ -10,11 +10,11 @@ package app.oie.logic
 object RealInbox {
     fun toMessage(
         id: String, chat: String, chatAlt: String?, fromMe: Boolean, ours: Set<String>, allowed: List<Contact>,
-        at: Long, kind: Kind, text: String, replyTo: String?, durationSec: Int,
+        at: Long, kind: Kind, text: String, replyTo: String?, durationSec: Int, size: Long = 0,
     ): Message? {
         val contact = allowed.firstOrNull { it.id == chat || (chatAlt != null && it.id == chatAlt) } ?: return null
         if (fromMe) return null
         if (id in ours) return null
-        return Message(id, contact.id, false, at, kind, text, replyTo, durationSec)
+        return Message(id, contact.id, false, at, kind, text, replyTo, durationSec, size = size)
     }
 }

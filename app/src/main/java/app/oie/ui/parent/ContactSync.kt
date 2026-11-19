@@ -64,20 +64,13 @@ fun ContactSyncLine(state: AppState, sync: ContactSync.State) {
     }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
         // The spinner only moves when animations are on (AGENTS.md: honour "Remove animations").
-        if (sync == ContactSync.State.SYNCING && animationsOn()) {
+        if (sync == ContactSync.State.SYNCING && app.oie.ui.common.animationsOn()) {
             CircularProgressIndicator(Modifier.size(ICON), color = c.ink, trackColor = c.line, strokeWidth = OTokens.Size.hairline * 2)
         }
         Text(text, style = OieType.body, color = if (sync == ContactSync.State.SYNCING) c.muted else c.ink, modifier = Modifier.weight(1f))
     }
 }
 
-@Composable
-private fun animationsOn(): Boolean {
-    val context = LocalContext.current
-    return remember {
-        runCatching { android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) }.getOrDefault(1f) != 0f
-    }
-}
 
 /**
  * Someone missing from the list, added by name and number once WhatsApp confirms the number

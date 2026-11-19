@@ -120,4 +120,13 @@ class PhoneScreensTest {
         Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.BubbleSetting(ready().apply { bubbleOn = true }) }
     }
     @Test fun kidHomeInTheBubble() = shot("p20-kid-home-bubble", bigText = true) { KidHome(ready()) }
+
+    // v0.27: videos and a GIF in the chat on a phone, at 1.3× text.
+    @Test fun conversationVideos() = shot("p22-conversation-videos", bigText = true) {
+        Conversation(ready().apply {
+            messages += app.oie.logic.Message("v1", "vovo", false, now - 15 * 60 * 1000, app.oie.logic.Kind.VIDEO, "Tito, olha o gato", durationSec = 42)
+            messages += app.oie.logic.Message("v2", "vovo", false, now - 12 * 60 * 1000, app.oie.logic.Kind.VIDEO, durationSec = 300, size = 90L * 1024 * 1024)
+            messages += app.oie.logic.Message("g1", "vovo", false, now - 10 * 60 * 1000, app.oie.logic.Kind.GIF, durationSec = 3)
+        }, "vovo")
+    }
 }
