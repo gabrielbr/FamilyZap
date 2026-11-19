@@ -300,11 +300,21 @@ func (k *Link) handle(e interface{}) {
 			time.Sleep(ContactsGrace)
 			ctx := context.Background()
 			if all, err := k.c.Store.Contacts.GetAllContacts(ctx); err == nil && len(all) == 0 {
-				_ = k.c.FetchAppState(ctx, appstate.WAPatchCriticalUnblockLow, true, true)
+				if k.c.FetchAppState(ctx, appstate.WAPatchCriticalUnblockLow, true, true) == nil {
+					k.emit("contactsSynced", map[string]any{})
+				}
+			} else if err == nil {
+				k.emit("contactsSynced", map[string]any{}) // already here from before
 			}
 			k.contactsChanged()
 		}()
-	case *events.AppStateSyncComplete, *events.Contact, *events.PushName:
+	case *events.AppStateSyncComplete:
+		// The contact list snapshot is in: the app stops saying "bringing your contacts" (v0.17).
+		if v.Name == appstate.WAPatchCriticalUnblockLow {
+			k.emit("contactsSynced", map[string]any{})
+		}
+		k.contactsChanged()
+	case *events.Contact, *events.PushName:
 		k.contactsChanged()
 	case *events.Disconnected:
 		k.emit("disconnected", map[string]any{})

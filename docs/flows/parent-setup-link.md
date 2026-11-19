@@ -64,6 +64,39 @@ flowchart TD
 | any | Back | Returns one step; everything typed is kept. From the link step on, back never unlinks. |
 | any | The parent closes Oiê mid-setup | Reopens at the same step. The kid side isn't reachable until setup is done. |
 
+## v0.17: bringing in the contacts
+_Designed with `ux-user-flows` on 2026-11-19 from the owner's request: "after connecting, we allow the user to already add who the child can talk to. It currently only lists groups. Maybe after connecting we should have a sync view, or status, to grab all this info from WhatsApp."_
+
+- **The problem:** WhatsApp sends the parent's contacts to a new linked device in a snapshot, seconds to a minute after linking. Groups come from a separate, immediate call. So the contacts step (step 5) could show only groups, with nothing saying more was coming. That failed heuristic 1 (visibility of system status).
+- **The design:** the contacts list says what it's waiting for, and fills in live.
+
+```mermaid
+flowchart TD
+  linked([Step 2: phone scanned the QR]) --> names[Steps 3–4: names, PIN<br/>contacts arrive meanwhile]
+  names --> step5{Step 5: people arrived?}
+  step5 -- yes --> list[List: people first, then groups, with search]
+  step5 -- not yet, under 1 min --> syncing[Trazendo seus contatos do WhatsApp…<br/>N até agora · list fills in live]
+  syncing -- WhatsApp says the list is complete --> list
+  syncing -- 1 min, still none --> slow[Seus contatos estão demorando…<br/>Adicionar pelo número · or choose later]
+  step5 -- complete, but no people --> empty[Não achamos contatos no seu WhatsApp<br/>Adicionar pelo número]
+  list --> next([Continuar com N / Depois])
+  slow --> next
+  empty --> next
+```
+
+| State | When | What the parent sees |
+|---|---|---|
+| **Syncing** | Linked, WhatsApp hasn't said the contact list is complete, under 1 minute | A line with a small spinner, or no spinner when animations are off: "Trazendo seus contatos do WhatsApp… 128 até agora". The list below grows as they come. |
+| **Ready** | People have arrived | The list, people first, then groups. The search shows when there are more than 12. |
+| **Slow** | 1 minute, and still no people | "Seus contatos estão demorando para chegar. Adicione alguém pelo número, ou escolha depois em Contatos." The add-by-number form is right there. |
+| **Empty** | WhatsApp said the list is complete, but it has no people | "Não achamos contatos no seu WhatsApp. Adicione alguém pelo número." |
+| **Offline** | The link dropped | Nothing new: what has arrived stays; "Conectar de novo" is in Conexão. |
+
+- **Same in the parent area:** Contatos uses the same line, replacing v0.13's "Carregando seus contatos…".
+- **Signal:** the link reports "contacts complete" when WhatsApp's contact snapshot has been applied (`AppStateSyncComplete` for the contact list), or after its own one-time fetch. The 1-minute "slow" is only the fallback.
+- **Control:** the parent never waits on a spinner. They can type a name in the search, add by number, or tap Depois at any moment.
+- **Motion:** the spinner honours "Remove animations"; then it's just the words and the count.
+
 ## v0.9: changing the names
 Both names from setup step 3 can be changed later in Parent area › **Ajustes e ajuda** (formerly "Ajuda e sobre"). A blank field keeps the last name. The kid's name drives the message rule ("Tito, …") and signs the kid's messages ("Tito: Oi, vó"), so a change takes effect at once for both.
 

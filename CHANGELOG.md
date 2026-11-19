@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.17.0
+- After you link, WhatsApp takes a few seconds to a minute to send your contacts. Groups come straight away, so the list used to show only groups. Now setup and Contatos say "Trazendo seus contatos do WhatsApp… N até agora", and the list fills in as they arrive, people first.
+- If it takes more than a minute, Oiê says so and opens "Adicionar pelo número". If your WhatsApp has no contacts, it says that. You can always continue and choose later.
+- Setup scrolls on small screens, so its buttons are always reachable. A group's "todos do grupo veem as mensagens" sits under its name.
+
 ## 0.16.0
 - **Fixed: Oiê closing right after linking, and WhatsApp removing the tablet.** Your problem report showed the cause. Right after you scanned the code, Oiê asked for your contacts before any had arrived. The answer was "nothing", and Oiê wasn't ready for that, so it closed in the middle of linking. WhatsApp then saw a half-finished link and dropped the tablet from Dispositivos conectados. It wasn't the photo: it happened at every new link. Now an empty contact list is just empty.
 - **Fixed: Oiê closing again and again after that.** Android tried to restart Oiê's background connection by itself, which it doesn't allow on Android 12 and later, and Oiê closed each time. Now it waits quietly until you open Oiê.

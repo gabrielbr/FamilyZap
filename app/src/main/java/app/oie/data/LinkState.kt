@@ -25,6 +25,10 @@ class LinkState {
     var status: Status by mutableStateOf(Status.Off)
     /** The parent's WhatsApp contacts and groups, to choose from. Not saved: reloaded from the link. */
     val available = mutableStateListOf<Contact>()
+    /** WhatsApp said the contact list is complete (v0.17). */
+    var contactsSynced by mutableStateOf(false)
+    /** When the link connected in this run of the app (0 = not yet), to tell "still coming" from "slow". */
+    var linkedAt by mutableStateOf(0L)
 
-    fun clear() { on = false; status = Status.Off; available.clear() }
+    fun clear() { on = false; status = Status.Off; available.clear(); contactsSynced = false; linkedAt = 0L }
 }

@@ -202,6 +202,9 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             when (kind) {
                 "qr" -> ls.status = LinkState.Status.Qr(o.optString("code"))
                 "paired", "connected" -> {
+                    // A fresh pairing starts the contact list from nothing (v0.17).
+                    if (kind == "paired") { ls.contactsSynced = false; ls.linkedAt = state.clock() }
+                    else if (ls.linkedAt == 0L) ls.linkedAt = state.clock()
                     ls.status = LinkState.Status.Connected; loadContacts()
                     // L4: what failed while the link was down goes once more, and only once.
                     generateSequence { retryOnConnect.poll() }.toList().forEach { m -> bg { deliver(m, retried = true) } }
@@ -212,6 +215,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 "pairError" -> ls.status = LinkState.Status.Off
                 "message" -> if (state.realMode) receiveForKid(o)
                 "contactsChanged" -> loadContacts()
+                "contactsSynced" -> { ls.contactsSynced = true; loadContacts() }
             }
         }
     }
