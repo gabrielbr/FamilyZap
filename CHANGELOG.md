@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.30.0
+- **The kid can write to you, the parent whose WhatsApp Oiê uses.** In Contatos, "Criar conversa com Tito" creates a group with only you in your WhatsApp, named "Tito". You appear on the kid's screen with your name and picture. What he sends you shows in that group, and what you write there reaches him.
+- WhatsApp doesn't notify you of these messages, because they come from your own account. Pin the group at the top to see them.
+- If WhatsApp doesn't accept a group with one person, the kid writes in your "Mensagem para você" instead. There, only your replies to his messages, and messages starting with his name, reach him; your notes stay yours.
+
 ## 0.29.0
 - **A bubble for each chat.** With "Bolha na tela" on, a chat gets its own bubble, with the person's picture, when a message reaches the kid or the kid writes. Two people, two bubbles. Tapping one opens only that chat in a small window, with the keyboard already up to answer. Back folds it away.
 - The Oiê bubble stays, for everyone else.

@@ -28,7 +28,7 @@ class PersistenceTest {
     private fun filled() = AppState().apply {
         parentName = "Ana"; kidName = "Tito"; setPin("402817"); kidNoticeSeen = true; lastPhotoSource = "gallery"
         link.pretendLinked()
-        allowed.addAll(link.contacts().take(2)); allowed[0] = allowed[0].copy(quietException = true, phone = "5511987650001", waName = "Maria Silva", paused = true, photo = "avatar-x.sealed", photoId = "7", photoAt = 42)
+        allowed.addAll(link.contacts().take(2)); allowed[0] = allowed[0].copy(quietException = true, phone = "5511987650001", waName = "Maria Silva", paused = true, photo = "avatar-x.sealed", photoId = "7", photoAt = 42, parentLine = true)
         periods[0] = periods[0].copy(on = true)
         messages += Message("p1", allowed[0].id, true, 1000L, Kind.PHOTO, media = "a.jpg")
         drafts[allowed[1].id] = "Oi m"

@@ -73,6 +73,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.30: the kid can write to the parent who owns the WhatsApp, through a one-person group (fallback: the parent's own chat), decision 0007 (2026-11-19). Open: the owner's test that WhatsApp accepts the group.
 - [x] v0.29: a bubble per active chat, opening only that chat with the keyboard up; roomier composer on narrow screens (2026-11-19).
 - [x] v0.28: the kid sends videos (up to 3 min, shrunk to 720p with Media3, decision 0006) and GIF files from the gallery (2026-11-19). Open: the owner's device test.
 - [x] v0.27: animated stickers move; videos and GIFs from family play in the chat (2026-11-19). Next: sending them (v0.28).

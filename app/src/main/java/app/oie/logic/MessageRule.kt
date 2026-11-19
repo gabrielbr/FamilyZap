@@ -33,6 +33,14 @@ object MessageRule {
         if (message.fromKid) return Reason.FROM_KID
         if (chat.isGroup && chat.showWholeGroup) return Reason.WHOLE_GROUP
         val kidMessages = history.filter { it.fromKid && it.chatId == message.chatId && it.at <= message.at }
+        // v0.30 (decision 0007): the line to the parent who owns the WhatsApp. In its own group, all of it
+        // is for the kid. In the parent's "Mensagem para você" (the fallback), their notes stay private:
+        // only replies to the kid and messages that start with the kid's name.
+        if (chat.parentLine) {
+            if (chat.isGroup) return Reason.WHOLE_GROUP
+            if (message.replyTo != null && kidMessages.any { it.id == message.replyTo }) return Reason.REPLY
+            return if (addressed(message.text, names)) Reason.NAME else null
+        }
         if (message.replyTo != null && kidMessages.any { it.id == message.replyTo }) return Reason.REPLY
         if (addressed(message.text, names)) return Reason.NAME
         val lastKid = kidMessages.maxOfOrNull { it.at } ?: return null

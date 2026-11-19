@@ -80,6 +80,9 @@ type Link struct {
 	mediaOrder []string
 	// One "contactsChanged" for a burst of contact updates.
 	contactsTimer *time.Timer
+	// parentLine is the chat where the kid writes to the parent who owns this WhatsApp (v0.30): a
+	// one-person group, or the parent's own chat when WhatsApp refused the group.
+	parentLine string
 }
 
 // MaxPendingMedia is how many received photos, voice notes and stickers stay downloadable.
@@ -557,7 +560,13 @@ func (k *Link) target(chat string) (types.JID, error) {
 		return to, err
 	}
 	if own := k.c.Store.ID; own != nil && to.User == own.User && to.Server == types.DefaultUserServer {
-		return to, errors.New("never to the parent's own number")
+		// Rule L2, decision 0007: the parent's own chat only when the parent made it the line to the kid.
+		k.mu.Lock()
+		line := k.parentLine
+		k.mu.Unlock()
+		if line != to.ToNonAD().String() {
+			return to, errors.New("never to the parent's own number")
+		}
 	}
 	return to, nil
 }
@@ -636,6 +645,36 @@ func encodePicture(state, id string, jpeg []byte) (string, error) {
 	}
 	b, err := json.Marshal(out)
 	return string(b), err
+}
+
+// OwnChat is the parent's own chat ("Mensagem para você"), by phone number; "" if not linked.
+func (k *Link) OwnChat() string {
+	if own := k.c.Store.ID; own != nil {
+		return own.ToNonAD().String()
+	}
+	return ""
+}
+
+// SetParentLine tells the link which chat is the line between the kid and the parent who owns the
+// WhatsApp (v0.30, decision 0007). Only then may the parent's own chat receive the kid's messages.
+func (k *Link) SetParentLine(chat string) { k.mu.Lock(); k.parentLine = chat; k.mu.Unlock() }
+
+// CreateParentLine creates a WhatsApp group with only the parent, named after the kid, for the kid to
+// write to the parent (v0.30). Called only when the parent taps "Criar conversa com …". Returns the
+// group's id; an error means WhatsApp refused it, and the app falls back to the parent's own chat.
+func (k *Link) CreateParentLine(name string) (group string, err error) {
+	defer k.guard("CreateParentLine", &err)
+	if !k.Paired() {
+		return "", ErrNotLinked
+	}
+	if err := k.maySend(); err != nil {
+		return "", err
+	}
+	info, err := k.c.CreateGroup(context.Background(), whatsmeow.ReqCreateGroup{Name: name})
+	if err != nil {
+		return "", err
+	}
+	return info.JID.String(), nil
 }
 
 // IsSelfChat says whether chat is the parent's own chat, by phone number or by LID.

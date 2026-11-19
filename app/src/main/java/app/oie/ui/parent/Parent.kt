@@ -172,10 +172,11 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
         Column(Modifier.weight(1f)) {
             Text(tx.whoCanCall(state.kidName), style = OieType.title, color = c.ink)
-            Text(tx.peopleAndGroups(state.allowed.count { !it.isGroup }, state.allowed.count { it.isGroup }), style = OieType.caption, color = c.muted)
+            Text(tx.peopleAndGroups(state.allowed.count { !it.isGroup || it.parentLine }, state.allowed.count { it.isGroup && !it.parentLine }), style = OieType.caption, color = c.muted)
             if (state.allowed.isNotEmpty() && !state.contactTipUsed) Text(tx.renameHint(state.kidName.ifBlank { tx.theKid }), style = OieType.caption, color = c.muted)
         }
     }
+    if (state.realMode && state.allowed.none { it.parentLine }) ParentLineCard(state, touched)
     if (state.addRequested) Row(
         Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space3).clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.selected)
             .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
@@ -196,7 +197,7 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
             Column(Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2)) {
                 Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 // v0.19: the number, so the parent knows it's the right person.
-                ContactLines(ct, fresh)
+                ContactLines(ct, fresh, state.kidName)
                 // The line says the current setting, so it's true whichever way the switch is.
                 // v0.21: a chat paused from the parent's WhatsApp says so, in ink, instead of the quiet-hours line.
                 if (ct.paused) Text(tx.pausedLine, style = OieType.caption, color = c.ink, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -498,5 +499,37 @@ internal fun BubbleSetting(state: AppState) {
         }
         app.oie.logic.BubblePolicy.State.ON -> Text(tx.bubbleOnLine, style = OieType.caption, color = c.muted)
         else -> {}
+    }
+}
+
+/**
+ * "Você (Ana)": the line between the kid and the parent who owns the WhatsApp (docs/flows/parent-line.md,
+ * v0.30, decision 0007). Says what it creates and WhatsApp's notification limit before the one tap.
+ */
+@Composable
+private fun ParentLineCard(state: AppState, touched: () -> Unit) {
+    val c = OieTheme.colors
+    val tx = str
+    val real = LocalRealLink.current
+    val kid = state.kidName.ifBlank { tx.theKid }
+    var creating by remember { mutableStateOf(false) }
+    var note by remember { mutableStateOf<String?>(null) }
+    Column(
+        Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space3).clip(RoundedCornerShape(OTokens.Radius.radiusM))
+            .background(c.surface).padding(OTokens.Spacing.space4),
+        verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
+    ) {
+        Text(tx.parentLineTitle(state.parentName.ifBlank { tx.theKid }), style = OieType.label, color = c.ink)
+        Text(tx.parentLineBody(kid), style = OieType.body, color = c.ink)
+        Text(tx.parentLineNoNotify, style = OieType.caption, color = c.muted)
+        note?.let { Text(it, style = OieType.body, color = c.ink) }
+        QuietButton(if (creating) tx.parentLineCreating else tx.parentLineCreate(kid), {
+            if (creating) return@QuietButton
+            touched(); creating = true
+            real?.createParentLine { group ->
+                creating = false
+                note = when (group) { null -> tx.parentLineNotNow; false -> tx.parentLineFallback(kid); true -> null }
+            } ?: run { creating = false; note = tx.parentLineNotNow }
+        }, Modifier.padding(top = OTokens.Spacing.space2), icon = R.drawable.gg_ic_plus)
     }
 }

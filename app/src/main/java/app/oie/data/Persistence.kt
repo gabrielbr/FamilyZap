@@ -47,7 +47,7 @@ object Codec {
             JSONObject().put("id", it.id).put("name", it.name).put("group", it.isGroup)
                 .put("quietException", it.quietException).put("wholeGroup", it.showWholeGroup)
                 .put("phone", it.phone).put("waName", it.waName).put("paused", it.paused)
-                .put("photo", it.photo).put("photoId", it.photoId).put("photoAt", it.photoAt)
+                .put("photo", it.photo).put("photoId", it.photoId).put("photoAt", it.photoAt).put("parentLine", it.parentLine)
         }))
         put("periods", JSONArray(s.periods.map {
             JSONObject().put("name", it.name).put("days", JSONArray(it.days.map { d -> d.value }))
@@ -90,7 +90,7 @@ object Codec {
         o.optJSONArray("allowed")?.let { a ->
             for (i in 0 until a.length()) a.getJSONObject(i).run {
                 s.allowed += Contact(getString("id"), getString("name"), optBoolean("group"), optBoolean("quietException"), optBoolean("wholeGroup"), optString("phone"), optString("waName"), optBoolean("paused"),
-                    optString("photo"), optString("photoId"), optLong("photoAt"))
+                    optString("photo"), optString("photoId"), optLong("photoAt"), optBoolean("parentLine"))
             }
         }
         o.optJSONArray("periods")?.let { a ->

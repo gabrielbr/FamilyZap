@@ -13,8 +13,10 @@ object RealInbox {
         at: Long, kind: Kind, text: String, replyTo: String?, durationSec: Int, size: Long = 0,
     ): Message? {
         val contact = allowed.firstOrNull { it.id == chat || (chatAlt != null && it.id == chatAlt) } ?: return null
-        if (fromMe) return null
         if (id in ours) return null
+        // v0.30: on the line to the parent who owns the WhatsApp, the parent writes "from me" (it's their
+        // account); that's the parent talking to the kid. Anywhere else, the parent's own writing stays private.
+        if (fromMe && !contact.parentLine) return null
         return Message(id, contact.id, false, at, kind, text, replyTo, durationSec, size = size)
     }
 }
