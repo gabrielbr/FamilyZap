@@ -88,6 +88,8 @@ with a silent, minimum-priority notification ("O Oiê está conectado.") on its 
 reconnects when the network comes back, stops on a ban, and stops when the test is deleted.
 Android may still pause the network in deep sleep (Doze); messages then arrive when the tablet wakes.
 
+**v0.20:** `start()` runs on every return to the screen. It now asks `IsConnected()` first (`LinkStart.decide`) and leaves an up connection alone; `Connect()` treats whatsmeow's `ErrAlreadyConnected` as success and emits `connected`. Before, that error showed "disconnected" over a working link. `KeepAliveTimeout` and `KeepAliveRestored` go into the problem report; whatsmeow itself reconnects after 3 minutes of missed keep-alives.
+
 ## Size
 The library adds about 9 MB per architecture. Since v0.6 each release has one APK per architecture
 (about 21 MB) plus the universal one (about 40 MB) for manual installs and for copies older than

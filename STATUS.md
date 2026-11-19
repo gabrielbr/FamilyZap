@@ -73,6 +73,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.20: the false "desconectado" fixed: coming back to Oiê no longer breaks the status of a working link (2026-11-19).
 - [x] v0.19: the parent names each contact for the kid ("Vovó"), and sees each contact's number in Contatos and setup (decision 0004, 2026-11-19).
 - [x] v0.18: "Enviar para o GitHub" opens a filled-in issue in the private FamilyZap repo; the owner submits it (2026-11-19).
 - [x] v0.17: contacts status after linking (syncing, slow, empty), live list, people first; setup scrolls (2026-11-19).

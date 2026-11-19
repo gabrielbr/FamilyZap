@@ -117,6 +117,12 @@ func Open(dbPath string, l Listener) (*Link, error) {
 	return k, nil
 }
 
+// IsConnected says whether the connection to WhatsApp is up and logged in right now (v0.20).
+func (k *Link) IsConnected() bool { return k.c.IsConnected() && k.c.IsLoggedIn() }
+
+// alreadyUp is whatsmeow's "the websocket is already connected", which Connect treats as success.
+func alreadyUp(err error) bool { return errors.Is(err, whatsmeow.ErrAlreadyConnected) }
+
 // Paired says whether the tablet is already linked to a WhatsApp account.
 func (k *Link) Paired() bool { return k.c.Store.ID != nil }
 
@@ -133,7 +139,15 @@ func (k *Link) Connect() (err error) {
 	}
 	ctx := context.Background()
 	if k.Paired() {
-		return k.c.Connect()
+		// v0.20: Oiê asks to connect every time it comes back to the screen. When the connection is
+		// already up, whatsmeow says "already connected"; that's not a failure (the owner saw the
+		// tablet say "disconnected" while WhatsApp showed it connected). Say "connected" instead.
+		if err := k.c.Connect(); err != nil && !alreadyUp(err) {
+			return err
+		} else if err != nil && k.c.IsLoggedIn() {
+			k.emit("connected", map[string]any{"already": true})
+		}
+		return nil
 	}
 	qr, err := k.c.GetQRChannel(ctx)
 	if err != nil {
@@ -343,6 +357,11 @@ func (k *Link) handle(e interface{}) {
 		k.contactsChanged()
 	case *events.Disconnected:
 		k.emit("disconnected", map[string]any{})
+	case *events.KeepAliveTimeout:
+		// v0.20: for the problem report. whatsmeow reconnects by itself after 3 minutes of these.
+		k.emit("keepAliveTimeout", map[string]any{"errors": v.ErrorCount})
+	case *events.KeepAliveRestored:
+		k.emit("keepAliveRestored", map[string]any{})
 	case *events.StreamReplaced:
 		k.emit("replaced", map[string]any{})
 	case *events.LoggedOut:

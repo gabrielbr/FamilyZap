@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.20.0
+- **Fixed: the tablet said "desconectado" while WhatsApp showed it connected.** Each time Oiê came back to the screen, it asked to connect again. When it was already connected, that answer was taken for an error, and Oiê showed "disconnected" over a working link. Now Oiê checks first and leaves a working link alone. If the screen was wrong, it corrects itself when Oiê opens.
+- Turning the tablet or coming back to Oiê while the QR is on screen no longer restarts the linking.
+- WhatsApp's list of connected devices shows every linked device, even one that is asleep. The tablet's own status is the one that says whether messages are flowing now. Real drops still show, and Oiê reconnects by itself.
+
 ## 0.19.0
 - **A name for your kid.** In Contatos, tap someone to change the name your kid sees: "Maria Silva" can be "Vovó". In setup, each person you pick has "Mudar nome". The name changes only in Oiê; your WhatsApp stays the same. Leave it blank to go back to the WhatsApp name.
 - **The number.** Each person in Contatos and in the lists you add from shows their number, so you can check it's the right one. A renamed person also shows their WhatsApp name. Search finds a number too.

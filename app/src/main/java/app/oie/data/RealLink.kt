@@ -85,9 +85,13 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     /** Connects (showing a QR the first time). Called when the parent starts the test and whenever the app opens while it's on. */
     fun start() {
         if (ls.status is LinkState.Status.Banned) return // L9: never retry around a ban
+        // v0.20: a QR on screen is a link in progress; coming back to the app (or turning the tablet) must not restart it.
+        if (ls.status is LinkState.Status.Qr && link != null) return
         // v0.14: after WhatsApp logged the tablet out, the old connection is spent; start a fresh one (a new QR).
         val fresh = ls.status == LinkState.Status.LoggedOut
-        ls.status = LinkState.Status.Connecting
+        val shown = ls.status == LinkState.Status.Connected
+        // v0.20: keep "connected" on screen while checking; only a real reconnect shows "connecting".
+        if (!shown) ls.status = LinkState.Status.Connecting
         bg {
             if (fresh) { runCatching { link?.disconnect() }; link = null; Diagnostics.log("link: starting fresh after a logout") }
             val l = try {
@@ -97,6 +101,18 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 Diagnostics.log("link: can't open: ${e.javaClass.simpleName}: ${e.message}")
                 main.post { ls.status = LinkState.Status.Unavailable }
                 return@bg
+            }
+            // v0.20: an up connection is left alone. Asking it to connect again answered "already
+            // connected", which read as a failure: the tablet said "disconnected" while WhatsApp showed it connected.
+            when (app.oie.logic.LinkStart.decide(banned = false, connectedShown = shown, socketUp = !fresh && runCatching { l.isConnected }.getOrDefault(false))) {
+                app.oie.logic.LinkStart.Do.NOTHING -> { runCatching { l.setReadOnly(!state.realMode) }; return@bg }
+                app.oie.logic.LinkStart.Do.MARK_CONNECTED -> {
+                    runCatching { l.setReadOnly(!state.realMode) }
+                    Diagnostics.log("link: already connected")
+                    main.post { if (ls.status == LinkState.Status.Connecting || ls.status == LinkState.Status.Disconnected) ls.status = LinkState.Status.Connected; loadContacts() }
+                    return@bg
+                }
+                app.oie.logic.LinkStart.Do.CONNECT -> {}
             }
             try {
                 l.setReadOnly(!state.realMode)

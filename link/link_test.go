@@ -2,6 +2,8 @@ package oielink
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"image"
 	"image/jpeg"
 	"os"
@@ -290,5 +292,24 @@ func TestPhoneOfAPrivateIDWithoutAMappingIsEmpty(t *testing.T) {
 	}
 	if got := k.phoneOf(t.Context(), types.NewJID("123456789", types.HiddenUserServer)); got != "" {
 		t.Fatal(got)
+	}
+}
+
+func TestAlreadyConnectedIsNotAFailure(t *testing.T) {
+	if !alreadyUp(whatsmeow.ErrAlreadyConnected) || !alreadyUp(fmt.Errorf("connect: %w", whatsmeow.ErrAlreadyConnected)) {
+		t.Fatal("already connected must count as connected")
+	}
+	if alreadyUp(errors.New("dial tcp: no route to host")) || alreadyUp(nil) {
+		t.Fatal("a real failure is a failure")
+	}
+}
+
+func TestFreshLinkIsNotConnected(t *testing.T) {
+	k, err := Open(filepath.Join(t.TempDir(), "c.db"), nl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if k.IsConnected() {
+		t.Fatal("nothing connected yet")
 	}
 }
