@@ -29,6 +29,8 @@ class LinkState {
     var contactsSynced by mutableStateOf(false)
     /** When the link connected in this run of the app (0 = not yet), to tell "still coming" from "slow". */
     var linkedAt by mutableStateOf(0L)
+    /** When the link last stopped being up: an attempt started, or it dropped (v0.24, for LinkView's grace). */
+    var downSince by mutableStateOf(0L)
 
-    fun clear() { on = false; status = Status.Off; available.clear(); contactsSynced = false; linkedAt = 0L }
+    fun clear() { on = false; status = Status.Off; available.clear(); contactsSynced = false; linkedAt = 0L; downSince = 0L }
 }

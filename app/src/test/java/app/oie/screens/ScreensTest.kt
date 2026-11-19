@@ -184,4 +184,12 @@ class ScreensTest {
 
     // v0.22: the emoji before the kid's bold name, and its preview.
     @Test fun settingsSignatureDark() = shot("28-settings-signature", true) { ParentArea(ready().apply { kidEmoji = "😎" }, 3) }
+
+    // v0.24: right after an update the link is on its way: no "desconectado", no Connect button.
+    private fun reconnecting() = ready().apply {
+        kidNoticeSeen = true; realMode = true; link.pretendDropped()
+        linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Connecting
+    }
+    @Test fun kidHomeReconnecting() = shot("29-kid-home-reconnecting", false) { KidHome(reconnecting()) }
+    @Test fun connectionReconnecting() = shot("30-connection-reconnecting", true) { ParentArea(reconnecting(), 2) }
 }

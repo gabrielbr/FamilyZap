@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 0.24.0
+- **Fixed: "conectar de novo" right after an update.** After an update or a restart, Oiê takes a few seconds to reconnect by itself, and it used to call that "disconnected". Now Conexão says "Conectando ao WhatsApp de Ana…" with no button, and the kid sees nothing. Only if it still isn't connected after 30 seconds does Oiê say it's disconnected. The kid can keep writing meanwhile; messages go out once it connects.
+
 ## 0.23.0
 - **Fixed: photos.** Every photo, from the camera or the gallery, said "Não deu para abrir essa foto. Tente outra." It was a mistake in Oiê since the first version: a step that only reads the photo's size gives an empty answer on purpose, and Oiê took that for a failure. Photos now go through.
 - Camera photos arrive the right way up.

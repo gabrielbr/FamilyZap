@@ -73,6 +73,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.24: "Conectando…" for the first 30 s after an update or a drop, instead of a false "desconectado" (2026-11-19).
 - [x] v0.23: photos work (refused since v0.1 by a size-check mistake) and come upright; WhatsApp's storage no longer fails for want of a temp folder (issue #34, 2026-11-19).
 - [x] v0.22: the kid's name goes out in WhatsApp bold, after an emoji the parent can choose (2026-11-19).
 - [x] v0.21: "Oi Tito" counts; the kid's nicknames; commands from the parent's WhatsApp ("/Tito parar"), answered in the parent's own chat (decision 0005, 2026-11-19).

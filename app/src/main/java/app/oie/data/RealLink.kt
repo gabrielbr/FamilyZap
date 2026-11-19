@@ -91,7 +91,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         val fresh = ls.status == LinkState.Status.LoggedOut
         val shown = ls.status == LinkState.Status.Connected
         // v0.20: keep "connected" on screen while checking; only a real reconnect shows "connecting".
-        if (!shown) ls.status = LinkState.Status.Connecting
+        if (!shown) { ls.status = LinkState.Status.Connecting; if (ls.downSince == 0L) ls.downSince = state.clock() }
         bg {
             if (fresh) { runCatching { link?.disconnect() }; link = null; Diagnostics.log("link: starting fresh after a logout") }
             val l = try {
@@ -288,11 +288,11 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                     // A fresh pairing starts the contact list from nothing (v0.17).
                     if (kind == "paired") { ls.contactsSynced = false; ls.linkedAt = state.clock() }
                     else if (ls.linkedAt == 0L) ls.linkedAt = state.clock()
-                    ls.status = LinkState.Status.Connected; loadContacts()
+                    ls.status = LinkState.Status.Connected; ls.downSince = 0L; loadContacts()
                     // L4: what failed while the link was down goes once more, and only once.
                     generateSequence { retryOnConnect.poll() }.toList().forEach { m -> bg { deliver(m, retried = true) } }
                 }
-                "disconnected" -> if (ls.status == LinkState.Status.Connected) ls.status = LinkState.Status.Disconnected
+                "disconnected" -> if (ls.status == LinkState.Status.Connected) { ls.status = LinkState.Status.Disconnected; ls.downSince = state.clock() }
                 "replaced", "loggedOut" -> ls.status = LinkState.Status.LoggedOut
                 "temporaryBan" -> { ls.status = LinkState.Status.Banned(((o.optLong("expiresInSeconds") + 3599) / 3600).toInt()); LinkService.stop(context) }
                 "pairError" -> ls.status = LinkState.Status.Off

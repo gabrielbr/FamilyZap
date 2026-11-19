@@ -70,6 +70,7 @@ interface Strings {
     val leave: String; val sectionContacts: String; val sectionQuiet: String; val sectionConnection: String; val sectionHelp: String
     val connection: String
     fun connectedTo(parent: String): String
+    fun connectingTo(parent: String): String
     val disconnected: String; val reconnect: String
     fun whoCanCall(kid: String): String
     fun peopleAndGroups(people: Int, groups: Int): String
@@ -238,6 +239,7 @@ object Pt : Strings {
     override val leave = "Sair"; override val sectionContacts = "Contatos"; override val sectionQuiet = "Horário de silêncio"
     override val sectionConnection = "Conexão"; override val sectionHelp = "Ajustes e ajuda"; override val connection = "Conexão"
     override fun connectedTo(parent: String) = "Conectado ao WhatsApp de $parent."
+    override fun connectingTo(parent: String) = "Conectando ao WhatsApp de $parent…"
     override val disconnected = "O Oiê se desconectou do seu WhatsApp."
     override val reconnect = "Conectar de novo"
     override fun whoCanCall(kid: String) = "Quem $kid pode chamar"
@@ -430,6 +432,7 @@ object En : Strings {
     override val leave = "Leave"; override val sectionContacts = "Contacts"; override val sectionQuiet = "Quiet hours"
     override val sectionConnection = "Connection"; override val sectionHelp = "Settings and help"; override val connection = "Connection"
     override fun connectedTo(parent: String) = "Linked to $parent's WhatsApp."
+    override fun connectingTo(parent: String) = "Connecting to $parent's WhatsApp…"
     override val disconnected = "Oiê got disconnected from your WhatsApp."
     override val reconnect = "Link again"
     override fun whoCanCall(kid: String) = "Who $kid can call"

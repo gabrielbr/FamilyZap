@@ -372,8 +372,14 @@ private fun Connection(state: AppState) {
     val tx = str
     val real = LocalRealLink.current
     Text(tx.connection, style = OieType.title, color = c.ink)
-    Text(if (state.wa.connected) tx.connectedTo(state.parentName) else tx.disconnected, style = OieType.body, color = c.ink)
-    if (!state.wa.connected) PrimaryButton(tx.linkConnect, { state.route = Route.Pair })
+    // v0.24: "Conectando…" while the link comes back by itself, with no button to press for nothing.
+    val link = app.oie.ui.common.linkShown(state)
+    Text(when (link) {
+        app.oie.logic.LinkView.Shown.CONNECTED -> tx.connectedTo(state.parentName)
+        app.oie.logic.LinkView.Shown.CONNECTING -> tx.connectingTo(state.parentName)
+        app.oie.logic.LinkView.Shown.DOWN -> tx.disconnected
+    }, style = OieType.body, color = c.ink)
+    if (link == app.oie.logic.LinkView.Shown.DOWN) PrimaryButton(tx.linkConnect, { state.route = Route.Pair })
     // v0.14: a parent who saw Oiê close comes here first; point to the report while there is one.
     if (remember { app.oie.data.Diagnostics.lastCrashAt() != null }) {
         Text(tx.crashPointer, style = OieType.body, color = c.muted, modifier = Modifier.padding(top = OTokens.Spacing.space4))
