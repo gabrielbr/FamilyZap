@@ -113,6 +113,24 @@ Both names from setup step 3 can be changed later in Parent area › **Ajustes e
 - **Forgot PIN.** On the PIN screen: **Esqueci o PIN**, then relink WhatsApp (step 2) with the same number, then set a new PIN. Being able to link the same WhatsApp proves it's the parent.
 - **Unlink** (parent area): **Desconectar do WhatsApp** is destructive and can't be undone from the tablet. It is the one place with a confirm: "O {criança} não vai conseguir mandar nem receber mensagens até você conectar de novo." **Desconectar** (stop fill) / **Cancelar**.
 
+## v0.20: "desconectado" on the tablet, "conectado" on the phone
+_The owner's report (2026-11-19): the link works and the contacts arrive, but after a while the tablet says it's disconnected, while WhatsApp still shows the tablet as connected._
+
+- **Cause:** every time Oiê comes back to the screen (or the tablet is turned), it asked the link to connect. When the connection was already up, WhatsApp's library answered "already connected", and Oiê took that for a failure: it showed "disconnected" over a working connection.
+- **Now:**
+  - Oiê first asks the link whether it's up. If it is, nothing changes, and "connected" never flickers to "connecting".
+  - If the screen said "disconnected" but the link is up, it says "connected" again.
+  - Only a link that is really down is reconnected.
+  - A QR on screen is never restarted by coming back to the app or turning the tablet.
+- **What WhatsApp's list means:** "Dispositivos conectados" on the phone lists every *linked* device, even one that's offline right now (for example a tablet asleep). The tablet's own status is the one that says whether messages are flowing now.
+- **Still true:** when the tablet sleeps deeply, Android can pause the network; the link reconnects when the tablet wakes, the network returns, or Oiê opens. A drop and each reconnect go into the problem report, now with WhatsApp's "keep-alive" misses too, so a real drop can be told from a false one.
+
+| State on the tablet | Link really | Before v0.20 | Now |
+|---|---|---|---|
+| Conectado | up | sometimes turned to "desconectado" on return | stays "conectado" |
+| Desconectado | up | stayed wrong until a restart | turns "conectado" when Oiê opens |
+| Conectado or desconectado | down | reconnected | reconnects ("conectando", then "conectado") |
+
 ## States per step
 | Step | Empty | Loading | Error | Success | Offline |
 |---|---|---|---|---|---|
