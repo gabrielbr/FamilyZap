@@ -122,6 +122,32 @@ _The owner's report (2026-11-19, with a photo of the screen and issue #34): ever
   - when a photo really can't be read (not a picture, a format Android can't open), the same message shows, and the problem report now says why (the type, or the error), with no names and no picture.
 - **The message stays:** "Não deu para abrir essa foto. Tente outra." It's still true for a file that isn't a picture.
 
+## v0.28: sending videos and GIFs
+_The owner, 2026-11-19: the kid can send videos up to **3 minutes** (from the gallery or recorded with the camera), and **GIF files** from the gallery. Big videos are shrunk with Google's Media3 library (Apache 2.0, decision 0006)._
+
+| # | Screen | The kid | The system |
+|---|---|---|---|
+| 1 | Chat | Taps the camera button | The sheet "Foto ou vídeo": **Tirar foto**, **Gravar vídeo**, **Galeria** (the last one used comes first). |
+| 2a | Camera app | Records a video | Android's camera, limited to 3 minutes. |
+| 2b | Gallery | Picks a photo, a video or a GIF | Android's own picker, photos and videos. |
+| 3 | "Vídeo para Vovó" | Waits a moment | "Preparando o vídeo…" with a bar: the video is shrunk to 720p on the tablet (or a GIF turned into WhatsApp's GIF form). Then its first frame and length, **Trocar** and **Enviar** (coral). |
+| 4 | Same | Taps Enviar | Back to the chat with the 5-second undo, as for photos. It goes out signed **Tito**. |
+
+### Limits and errors (said in words, never only by colour)
+| If | Then |
+|---|---|
+| The video is longer than 3 minutes | "Esse vídeo tem mais de 3 minutos. Escolha um mais curto." It's not prepared. |
+| Even shrunk, it's over 64 MB | "Esse vídeo ficou grande demais. Escolha um mais curto." |
+| Android can't read the file | The photo message's twin: "Não deu para abrir esse vídeo. Tente outro." The report says why. |
+| The kid backs out while preparing | The work stops and nothing is kept. |
+
+### How a GIF goes
+WhatsApp shows a GIF as a short silent video that loops. Oiê turns the GIF file into that form on the tablet (no GIF search service: nothing about the kid leaves the tablet), and it arrives in the family's WhatsApp as a GIF.
+
+### Notes
+- **Storage:** the prepared file is sealed on the tablet like photos; the camera's temporary file is deleted.
+- **Quiet hours, the allowed list, the pace (L3) and one retry (L4)** apply as for every send.
+
 ## Flow review (ux-user-flows §13)
 | # | Question | Result |
 |---|---|---|

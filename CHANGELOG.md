@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.28.0
+- **The kid can send videos**, up to 3 minutes: the camera button now offers "Tirar foto", "Gravar vídeo" and "Galeria". Oiê shrinks the video to 720p on the tablet ("Preparando o vídeo…"), shows it, and sends it with Enviar. A video longer than 3 minutes gets "Escolha um mais curto".
+- **The kid can send GIFs** saved on the tablet (from Galeria). Oiê turns them into WhatsApp's GIF form, so they loop in the family's WhatsApp. There's no GIF search: nothing about the kid leaves the tablet.
+- Videos are prepared with Google's Media3 (Apache License 2.0), credited in Sobre.
+
 ## 0.27.0
 - **Animated stickers move**, in the chat and in the sticker sheet.
 - **Videos.** A video from family shows its first picture, a ▶ and its length. Tap to watch it big, with sound, with Tocar/Pausar. Videos over 64 MB stay in WhatsApp; the chat says so.

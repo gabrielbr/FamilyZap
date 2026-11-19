@@ -233,4 +233,15 @@ class ScreensTest {
     @Test fun conversationVideos() = shot("35-conversation-videos", false) { Conversation(withVideos(), "vovo") }
     @Test fun conversationVideosDark() = shot("35-conversation-videos", true) { Conversation(withVideos(), "vovo") }
     @Test fun videoScreen() = shot("36-video-screen", false) { app.oie.ui.kid.VideoScreen(null, gif = false, from = "Vovó", onBack = {}) }
+
+    // v0.28: sending videos and GIFs.
+    private val anyUri = android.net.Uri.parse("content://test/clip")
+    @Test fun photoOrVideoSheet() = shot("37-photo-or-video-sheet", false) { app.oie.ui.kid.PhotoSourceSheet("camera", {}, {}) }
+    @Test fun videoPreparing() = shot("38-video-preparing", false) { app.oie.ui.kid.VideoPreview(app.oie.ui.kid.VideoDraft(anyUri, gif = false, progress = 0.4f), "Vovó", {}, {}, {}) }
+    @Test fun videoTooLong() = shot("38-video-too-long", true) {
+        app.oie.ui.kid.VideoPreview(app.oie.ui.kid.VideoDraft(anyUri, gif = false, problem = app.oie.data.VideoPrep.Why.TOO_LONG), "Vovó", {}, {}, {})
+    }
+    @Test fun videoReady() = shot("38-video-ready", false) {
+        app.oie.ui.kid.VideoPreview(app.oie.ui.kid.VideoDraft(anyUri, gif = false, progress = 1f, ready = app.oie.data.VideoPrep.Result.Ready("missing.sealed", 42, gif = false)), "Vovó", {}, {}, {})
+    }
 }

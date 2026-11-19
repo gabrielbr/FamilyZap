@@ -105,8 +105,13 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
     var micError by remember { mutableStateOf(false) }
     /** The video or GIF open full screen (v0.27). */
     var watching by remember { mutableStateOf<Message?>(null) }
+    /** A video or GIF being prepared to send (v0.28); its preview shows over the chat. */
+    var videoDraft by remember { mutableStateOf<VideoDraft?>(null) }
     fun received(uri: Uri?) {
         if (uri == null) return // the kid backed out of the picker: nothing changes
+        // v0.28: a video or a GIF from the gallery or the camera goes to the video preview.
+        val type = runCatching { context.contentResolver.getType(uri) }.getOrNull().orEmpty()
+        if (type.startsWith("video/") || type == "image/gif") { photoError = false; videoDraft = VideoDraft(uri, gif = type == "image/gif"); return }
         val kept = Photos.keep(context, uri)
         photoError = kept == null
         preview?.let { Photos.forget(context, it) } // Trocar: the old pick is dropped
@@ -114,19 +119,30 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
     }
     val askMic = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { received(it) }
+    // v0.28: the camera app records a video, at most 3 minutes; it's shrunk before sending.
+    var clipUri by remember { mutableStateOf<Uri?>(null) }
+    val recorder = rememberLauncherForActivityResult(object : ActivityResultContracts.CaptureVideo() {
+        override fun createIntent(context: android.content.Context, input: Uri) =
+            super.createIntent(context, input).putExtra(android.provider.MediaStore.EXTRA_DURATION_LIMIT, (app.oie.logic.VideoRules.MAX_MS / 1000).toInt())
+    }) { ok -> if (ok) clipUri?.let { videoDraft = VideoDraft(it, gif = false) } }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> if (ok) received(cameraUri) }
     fun open(source: String) {
         choosingPhoto = false
         state.lastPhotoSource = source
-        if (source == "camera") {
+        if (source == "video") {
+            val uri = runCatching { FileProvider.getUriForFile(context, context.packageName + ".photos", Photos.newVideoTarget(context)) }.getOrNull()
+            if (uri == null) { photoError = true; return }
+            clipUri = uri
+            recorder.launch(uri)
+        } else if (source == "camera") {
             // The camera app writes into one temporary file shared through the FileProvider; made only when needed.
             val uri = runCatching { FileProvider.getUriForFile(context, context.packageName + ".photos", Photos.newCameraTarget(context)) }.getOrNull()
             if (uri == null) { photoError = true; return }
             cameraUri = uri
             camera.launch(uri)
         } else {
-            gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
         }
     }
     val visible = state.visible(contactId)
@@ -261,6 +277,24 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
             )
         }
         watching?.let { m -> VideoScreen(m.media, gif = m.kind == Kind.GIF, from = contact.name, onBack = { watching = null }) }
+        videoDraft?.let { d ->
+            LaunchedEffect(d.uri) {
+                val r = app.oie.data.VideoPrep.prepare(context, d.uri) { p -> videoDraft = videoDraft?.copy(progress = p) }
+                videoDraft = when (r) {
+                    is app.oie.data.VideoPrep.Result.Ready -> videoDraft?.copy(ready = r, progress = 1f)
+                    is app.oie.data.VideoPrep.Result.Problem -> videoDraft?.copy(problem = r.why)
+                }
+            }
+            VideoPreview(d, contact.name,
+                onSwap = { d.ready?.let { Photos.forget(context, it.media) }; videoDraft = null; choosingPhoto = true },
+                onSend = {
+                    val r = d.ready ?: return@VideoPreview
+                    videoDraft = null
+                    queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), if (r.gif) Kind.GIF else Kind.VIDEO, media = r.media, durationSec = r.seconds))
+                },
+                onBack = { d.ready?.let { Photos.forget(context, it.media) }; videoDraft = null },
+            )
+        }
         if (stickers) StickerSheet(state, onPick = { w ->
             stickers = false
             queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.STICKER, w))
@@ -417,10 +451,11 @@ private fun hour(tx: app.oie.ui.text.Strings, at: Long): String {
 
 /** "Câmera" or "Galeria", the last one used first (flow: Remembers). */
 @Composable
-private fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: () -> Unit) {
+internal fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
-    val options = listOf("camera" to tx.camera, "gallery" to tx.gallery).sortedBy { if (it.first == first) 0 else 1 }
+    // v0.28: a photo, a video, or the gallery (photos, videos and GIFs); the last one used first.
+    val options = listOf("camera" to tx.takePhoto, "video" to tx.recordVideo, "gallery" to tx.gallery).sortedBy { if (it.first == first) 0 else 1 }
     Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(onClick = onClose), contentAlignment = Alignment.BottomCenter) {
         Column(
             Modifier.widthIn(max = OTokens.Size.contentMax)
@@ -428,10 +463,10 @@ private fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: (
                 .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
         ) {
-            Text(tx.photo, style = OieType.title, color = c.ink)
-            Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+            Text(tx.photoOrVideo, style = OieType.title, color = c.ink)
+            app.oie.ui.setup.ButtonRow {
                 options.forEach { (key, label) ->
-                    QuietButton(label, { onPick(key) }, Modifier.height(OTokens.Size.button), icon = if (key == "camera") R.drawable.gg_ic_camera else R.drawable.gg_ic_image)
+                    QuietButton(label, { onPick(key) }, Modifier.height(OTokens.Size.button), icon = if (key == "gallery") R.drawable.gg_ic_image else R.drawable.gg_ic_camera)
                 }
             }
         }

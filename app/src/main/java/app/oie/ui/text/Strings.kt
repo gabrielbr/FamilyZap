@@ -108,6 +108,11 @@ interface Strings {
     fun playVideoA11y(seconds: Int): String
     fun videoTooBig(parent: String): String
     val pause: String; val play: String
+    // v0.28: sending videos and GIFs.
+    val photoOrVideo: String; val takePhoto: String; val recordVideo: String
+    fun videoFor(to: String): String
+    fun gifFor(to: String): String
+    val preparingVideo: String; val videoTooLong: String; val videoTooBigToSend: String; val videoError: String
     fun quietSummary(n: Int): String
     val deletedMessage: String; val allowNotifications: String
     val notifLinkChannel: String; val notifLinkOn: String
@@ -292,7 +297,7 @@ object Pt : Strings {
     )
     override fun aboutVersion(v: String) = "Oiê $v, versão de teste. Usa o seu WhatsApp de verdade."
     override val notWhatsApp = "O Oiê não é feito nem aprovado pelo WhatsApp ou pela Meta."
-    override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System. Conexão com o WhatsApp feita com whatsmeow, Mozilla Public License 2.0, código em github.com/tulir/whatsmeow. QR com ZXing, Apache License 2.0."
+    override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System. Conexão com o WhatsApp feita com whatsmeow, Mozilla Public License 2.0, código em github.com/tulir/whatsmeow. QR com ZXing, Apache License 2.0. Vídeos preparados com Media3, Apache License 2.0."
     override val theKid = "a criança"
     override val notifChannel = "Mensagens da família"; override val notifVoice = "Mandou um áudio"
     override val notifPhoto = "Mandou uma foto"; override val notifSticker = "Mandou uma figurinha"
@@ -300,6 +305,13 @@ object Pt : Strings {
     override fun playVideoA11y(seconds: Int) = "Ver o vídeo, %d:%02d".format(seconds / 60, seconds % 60)
     override fun videoTooBig(parent: String) = "Vídeo grande: só abre no WhatsApp de $parent."
     override val pause = "Pausar"; override val play = "Tocar"
+    override val photoOrVideo = "Foto ou vídeo"; override val takePhoto = "Tirar foto"; override val recordVideo = "Gravar vídeo"
+    override fun videoFor(to: String) = "Vídeo para $to"
+    override fun gifFor(to: String) = "GIF para $to"
+    override val preparingVideo = "Preparando o vídeo…"
+    override val videoTooLong = "Esse vídeo tem mais de 3 minutos. Escolha um mais curto."
+    override val videoTooBigToSend = "Esse vídeo ficou grande demais. Escolha um mais curto."
+    override val videoError = "Não deu para abrir esse vídeo. Tente outro."
     override fun quietSummary(n: Int) = if (n == 1) "1 mensagem enquanto estava em silêncio" else "$n mensagens enquanto estava em silêncio"
     override val deletedMessage = "Mensagem apagada"
     override val allowNotifications = "Para avisar quando a família mandar mensagem e para gravar áudios, o Oiê vai pedir permissão para notificações e para o microfone."
@@ -502,7 +514,7 @@ object En : Strings {
     )
     override fun aboutVersion(v: String) = "Oiê $v, a test version. It uses your real WhatsApp."
     override val notWhatsApp = "Oiê isn't made or approved by WhatsApp or Meta."
-    override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System. WhatsApp link built with whatsmeow, Mozilla Public License 2.0, source at github.com/tulir/whatsmeow. QR codes with ZXing, Apache License 2.0."
+    override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System. WhatsApp link built with whatsmeow, Mozilla Public License 2.0, source at github.com/tulir/whatsmeow. QR codes with ZXing, Apache License 2.0. Videos prepared with Media3, Apache License 2.0."
     override val theKid = "your child"
     override val notifChannel = "Messages from family"; override val notifVoice = "Sent a voice message"
     override val notifPhoto = "Sent a photo"; override val notifSticker = "Sent a sticker"
@@ -510,6 +522,13 @@ object En : Strings {
     override fun playVideoA11y(seconds: Int) = "Watch the video, %d:%02d".format(seconds / 60, seconds % 60)
     override fun videoTooBig(parent: String) = "Big video: it only opens in $parent's WhatsApp."
     override val pause = "Pause"; override val play = "Play"
+    override val photoOrVideo = "Photo or video"; override val takePhoto = "Take a photo"; override val recordVideo = "Record a video"
+    override fun videoFor(to: String) = "Video for $to"
+    override fun gifFor(to: String) = "GIF for $to"
+    override val preparingVideo = "Getting the video ready…"
+    override val videoTooLong = "That video is longer than 3 minutes. Pick a shorter one."
+    override val videoTooBigToSend = "That video came out too big. Pick a shorter one."
+    override val videoError = "That video couldn't be opened. Try another."
     override fun quietSummary(n: Int) = if (n == 1) "1 message during quiet hours" else "$n messages during quiet hours"
     override val deletedMessage = "Message deleted"
     override val allowNotifications = "To tell you when family sends a message and to record voice messages, Oiê will ask for notifications and the microphone."
