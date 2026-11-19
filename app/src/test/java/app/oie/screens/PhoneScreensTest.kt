@@ -129,4 +129,10 @@ class PhoneScreensTest {
             messages += app.oie.logic.Message("g1", "vovo", false, now - 10 * 60 * 1000, app.oie.logic.Kind.GIF, durationSec = 3)
         }, "vovo")
     }
+
+    // v0.28: the photo-or-video sheet and a video's preview on a phone, at 1.3× text.
+    @Test fun photoOrVideoSheet() = shot("p23-photo-or-video-sheet", bigText = true) { app.oie.ui.kid.PhotoSourceSheet("camera", {}, {}) }
+    @Test fun videoTooLong() = shot("p24-video-too-long", bigText = true) {
+        app.oie.ui.kid.VideoPreview(app.oie.ui.kid.VideoDraft(android.net.Uri.parse("content://test/clip"), gif = false, problem = app.oie.data.VideoPrep.Why.TOO_LONG), "Vovó", {}, {}, {})
+    }
 }

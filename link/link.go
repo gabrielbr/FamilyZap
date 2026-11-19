@@ -517,6 +517,15 @@ func (k *Link) SendImage(chat string, jpeg []byte, caption, id string) (sent str
 	}, jpeg, whatsmeow.MediaImage)
 }
 
+// SendVideo sends an MP4 the app prepared (720p at most, v0.28), or a GIF in WhatsApp's form when gif
+// is true. Same rules as every send: allowed chats only, the pace, read-only off.
+func (k *Link) SendVideo(chat string, mp4 []byte, seconds, width, height int, thumb []byte, gif bool, caption, id string) (sent string, err error) {
+	defer k.guard("SendVideo", &err)
+	return k.sendMedia(chat, id, func(up whatsmeow.UploadResponse) *waE2E.Message {
+		return VideoMessage(up, seconds, width, height, thumb, gif, caption)
+	}, mp4, whatsmeow.MediaVideo)
+}
+
 // SendVoice sends a voice note. mimetype is "audio/ogg; codecs=opus" for WhatsApp's own voice notes.
 func (k *Link) SendVoice(chat string, audio []byte, seconds int, mimetype, id string) (sent string, err error) {
 	defer k.guard("SendVoice", &err)
@@ -694,6 +703,29 @@ func ImageMessage(up whatsmeow.UploadResponse, caption string) *waE2E.Message {
 		m.Caption = proto.String(caption)
 	}
 	return &waE2E.Message{ImageMessage: m}
+}
+
+// VideoMessage builds the message for an uploaded MP4 (v0.28). gif sends it as WhatsApp's GIF: it
+// loops, silent, labelled GIF. thumb is a small JPEG for the preview before it downloads.
+func VideoMessage(up whatsmeow.UploadResponse, seconds, width, height int, thumb []byte, gif bool, caption string) *waE2E.Message {
+	m := &waE2E.VideoMessage{
+		URL: proto.String(up.URL), DirectPath: proto.String(up.DirectPath), MediaKey: up.MediaKey,
+		FileEncSHA256: up.FileEncSHA256, FileSHA256: up.FileSHA256, FileLength: proto.Uint64(up.FileLength),
+		Mimetype: proto.String("video/mp4"), Seconds: proto.Uint32(uint32(seconds)),
+	}
+	if width > 0 && height > 0 {
+		m.Width, m.Height = proto.Uint32(uint32(width)), proto.Uint32(uint32(height))
+	}
+	if len(thumb) > 0 {
+		m.JPEGThumbnail = thumb
+	}
+	if gif {
+		m.GifPlayback = proto.Bool(true)
+	}
+	if caption != "" {
+		m.Caption = proto.String(caption)
+	}
+	return &waE2E.Message{VideoMessage: m}
 }
 
 // VoiceMessage builds the message for an uploaded voice note (PTT: shown as a voice message).

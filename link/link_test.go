@@ -133,6 +133,13 @@ func TestMediaMessagesCarryTheUpload(t *testing.T) {
 	if img.GetDirectPath() != "/d" || img.GetFileLength() != 42 || img.GetMimetype() != "image/jpeg" || img.GetCaption() != "olha" {
 		t.Fatalf("image: %+v", img)
 	}
+	vid := VideoMessage(up, 42, 1280, 720, []byte{9}, false, "*Tito*").GetVideoMessage()
+	if vid.GetMimetype() != "video/mp4" || vid.GetSeconds() != 42 || vid.GetWidth() != 1280 || vid.GetGifPlayback() || len(vid.GetJPEGThumbnail()) != 1 || vid.GetCaption() != "*Tito*" {
+		t.Fatalf("video: %+v", vid)
+	}
+	if !VideoMessage(up, 3, 0, 0, nil, true, "").GetVideoMessage().GetGifPlayback() {
+		t.Fatal("a GIF goes with GifPlayback, so it loops in WhatsApp")
+	}
 	v := VoiceMessage(up, 7, "audio/ogg; codecs=opus").GetAudioMessage()
 	if !v.GetPTT() || v.GetSeconds() != 7 || v.GetMimetype() != "audio/ogg; codecs=opus" {
 		t.Fatalf("voice: %+v", v)

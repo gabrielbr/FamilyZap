@@ -25,6 +25,9 @@ object Photos {
     /** A file the camera app can write into, shared through the FileProvider (res/xml/file_paths.xml). */
     fun newCameraTarget(context: Context): File = File(File(context.cacheDir, "camera").apply { mkdirs() }, "shot.jpg")
 
+    /** The file the camera app records a video into (v0.28), shared the same way; replaced each time. */
+    fun newVideoTarget(context: Context): File = File(File(context.cacheDir, "camera").apply { mkdirs() }, "clip.mp4").apply { delete() }
+
     /** Copies [uri] into private storage. Returns the stored file name, or null when it can't be read. */
     fun keep(context: Context, uri: Uri): String? = runCatching {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }

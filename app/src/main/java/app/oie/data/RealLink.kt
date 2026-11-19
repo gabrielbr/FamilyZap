@@ -61,6 +61,13 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 } else {
                     l.sendImage(m.chatId, Photos.stickerJpeg(context, app.oie.ui.kid.STICKERS[m.text] ?: error("sticker")), signed(""), m.id)
                 }
+                // v0.28: a video prepared on the tablet (720p at most), or a GIF in WhatsApp's form.
+                Kind.VIDEO, Kind.GIF -> {
+                    val bytes = m.media?.let { Photos.openBytes(context, it) } ?: error("video missing")
+                    val meta = VideoPrep.meta(bytes)
+                    l.sendVideo(m.chatId, bytes, m.durationSec.toLong(), meta.width.toLong(), meta.height.toLong(), meta.thumb,
+                        m.kind == Kind.GIF, signed(""), m.id)
+                }
                 Kind.VOICE -> {
                     val bytes = m.media?.let { Photos.openBytes(context, it) } ?: error("voice missing")
                     l.sendVoice(m.chatId, bytes, m.durationSec.toLong(), Voice.mimetype(bytes), m.id)

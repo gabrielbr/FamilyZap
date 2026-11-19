@@ -2,7 +2,7 @@ package app.oie.ui.kid
 
 import android.graphics.ImageDecoder
 import android.graphics.drawable.AnimatedImageDrawable
-import android.media.MediaDataSource
+import app.oie.data.BytesSource
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.os.Build
@@ -75,17 +75,6 @@ private fun rememberBytes(media: String?): ByteArray? {
     return bytes
 }
 
-/** Bytes in memory as a source for MediaPlayer and MediaMetadataRetriever. */
-private class BytesSource(private val b: ByteArray) : MediaDataSource() {
-    override fun readAt(position: Long, buffer: ByteArray, offset: Int, size: Int): Int {
-        if (position >= b.size) return -1
-        val n = minOf(size.toLong(), b.size - position).toInt()
-        System.arraycopy(b, position.toInt(), buffer, offset, n)
-        return n
-    }
-    override fun getSize(): Long = b.size.toLong()
-    override fun close() {}
-}
 
 /**
  * A sticker or picture that moves when its file is animated (an animated WebP, a GIF), in a loop.
@@ -279,6 +268,71 @@ fun VideoScreen(media: String?, gif: Boolean, from: String, onBack: () -> Unit) 
                 QuietButton(if (playing) tx.pause else tx.play, { playing = !playing }, Modifier.height(OTokens.Size.button),
                     icon = if (playing) R.drawable.gg_ic_pause else R.drawable.gg_ic_play)
                 Text("${clockOf(position / 1000)} / ${clockOf(length / 1000)}", style = OieType.body, color = c.muted)
+            }
+        }
+    }
+}
+
+/** A video or GIF the kid picked or recorded, while it's prepared and previewed (v0.28). */
+data class VideoDraft(
+    val uri: android.net.Uri,
+    val gif: Boolean,
+    val progress: Float = 0f,
+    val ready: app.oie.data.VideoPrep.Result.Ready? = null,
+    val problem: app.oie.data.VideoPrep.Why? = null,
+)
+
+/**
+ * "Vídeo para Vovó": while it's prepared, "Preparando o vídeo…" with a bar; then its first frame and
+ * length with Trocar and Enviar (the one coral action). A problem is said in words, with Trocar.
+ * Back drops it (docs/flows/kid-sends-message.md, v0.28).
+ */
+@Composable
+fun VideoPreview(draft: VideoDraft, to: String, onSwap: () -> Unit, onSend: () -> Unit, onBack: () -> Unit) {
+    val c = OieTheme.colors
+    val tx = str
+    // v0.28 audit: the ▶ on the preview plays it, so the kid can watch before sending.
+    var watch by remember(draft.ready) { mutableStateOf(false) }
+    draft.ready?.let { r -> if (watch) { VideoScreen(r.media, r.gif, to, onBack = { watch = false }); return } }
+    androidx.activity.compose.BackHandler(onBack = onBack)
+    Column(Modifier.fillMaxSize().background(c.page)) {
+        Bar {
+            QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
+            Text(if (draft.gif) tx.gifFor(to) else tx.videoFor(to), style = OieType.title, color = c.ink)
+        }
+        Column(
+            Modifier.fillMaxSize().padding(OTokens.Spacing.space6),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6, Alignment.CenterVertically),
+        ) {
+            val ready = draft.ready
+            val problem = draft.problem
+            when {
+                problem != null -> {
+                    Text(
+                        when (problem) {
+                            app.oie.data.VideoPrep.Why.TOO_LONG -> tx.videoTooLong
+                            app.oie.data.VideoPrep.Why.TOO_BIG -> tx.videoTooBigToSend
+                            app.oie.data.VideoPrep.Why.UNREADABLE -> tx.videoError
+                        },
+                        style = OieType.body, color = c.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                    QuietButton(tx.swap, onSwap, Modifier.height(OTokens.Size.button))
+                }
+                ready != null -> {
+                    if (ready.gif) GifBubble(ready.media) { watch = true } else VideoBubble(ready.media, ready.seconds, tooBig = false, parent = "") { watch = true }
+                    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+                        QuietButton(tx.swap, onSwap, Modifier.height(OTokens.Size.button))
+                        app.oie.ui.common.PrimaryButton(tx.send, onSend, icon = R.drawable.gg_ic_send)
+                    }
+                }
+                else -> {
+                    Text(tx.preparingVideo, style = OieType.body, color = c.muted)
+                    // The bar: ink filling a hairline track, at the column's width.
+                    Box(Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().height(OTokens.Spacing.space1).clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.line)) {
+                        Box(Modifier.fillMaxWidth(draft.progress.coerceIn(0f, 1f)).height(OTokens.Spacing.space1).background(c.ink))
+                    }
+                }
             }
         }
     }
