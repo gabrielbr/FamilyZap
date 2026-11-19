@@ -153,3 +153,25 @@ func TestOwnNumberRefused(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestSelfChatByNumberOrLID(t *testing.T) {
+	own := types.NewJID("5511900000000", types.DefaultUserServer)
+	lid := types.NewJID("12345", types.HiddenUserServer)
+	if !IsSelfChat(types.NewJID("5511900000000", types.DefaultUserServer), own, lid) || !IsSelfChat(types.NewJID("12345", types.HiddenUserServer), own, lid) {
+		t.Fatal("the parent's own chat must be recognised by number and by LID")
+	}
+	if IsSelfChat(types.NewJID("5511900000001", types.DefaultUserServer), own, lid) || IsSelfChat(types.NewJID("5511900000000", types.GroupServer), own, lid) {
+		t.Fatal("other chats and groups are not the self chat")
+	}
+}
+
+func TestStickerMessageIsARealSticker(t *testing.T) {
+	s := StickerMessage(whatsmeow.UploadResponse{DirectPath: "/d", FileLength: 9}, true).GetStickerMessage()
+	if s.GetMimetype() != "image/webp" || !s.GetIsAnimated() || s.GetWidth() != 512 || s.GetDirectPath() != "/d" {
+		t.Fatalf("sticker: %+v", s)
+	}
+	in, ok := ToIncoming(info("s1", true), &waE2E.Message{StickerMessage: &waE2E.StickerMessage{IsAnimated: proto.Bool(true)}})
+	if !ok || in.Kind != "STICKER" || !in.Animated {
+		t.Fatalf("incoming sticker: %+v", in)
+	}
+}

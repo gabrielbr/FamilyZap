@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.10.0
+- Send stickers to Tito from your own WhatsApp: send a sticker to yourself, in the chat with your own name. It shows for Tito under Figurinhas, in "Novas de Ana", and Tito taps Guardar to keep it. Saved ones sit in "Da família", next to Oiê's six, and go out as real WhatsApp stickers.
+- Only stickers from your own chat reach Oiê. Nothing else from it is read.
+- Works once the real WhatsApp is on. Ajustes e ajuda explains it in "Como mando figurinhas para Tito?".
+
 ## 0.9.0
 - You can now change your name and Tito's name after setup. In the parent area, the last section is now called Ajustes e ajuda, and the names are at the top. An empty field keeps the last name.
 - On the real WhatsApp, Tito's messages carry his name in front ("Tito: Oi, vó"), as setup promised. The family knows it's him writing from your number. A photo or sticker carries his name as its caption.

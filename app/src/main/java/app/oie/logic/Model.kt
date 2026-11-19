@@ -41,3 +41,16 @@ data class QuietPeriod(
     val end: LocalTime,
     val on: Boolean = true,
 )
+
+/**
+ * A sticker the parent sent to their own WhatsApp chat (v0.10). It's offered to the kid as new;
+ * once the kid saves it, it joins the kid's stickers and goes out as a real WhatsApp sticker.
+ */
+data class FamilySticker(
+    val id: String,
+    /** The sealed WebP on the tablet (data/Photos.kt): the file name. */
+    val media: String,
+    val animated: Boolean,
+    val saved: Boolean,
+    val at: Long,
+)

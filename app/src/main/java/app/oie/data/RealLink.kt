@@ -49,7 +49,12 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 // The kid writes from the parent's number, so the family sees who it is: "Tito: Oi, vó" (setup promises this).
                 Kind.TEXT -> l.sendTextWithID(m.chatId, signed(m.text), m.replyTo ?: "", m.id)
                 Kind.PHOTO -> l.sendImage(m.chatId, m.media?.let { Photos.openBytes(context, it) } ?: error("photo missing"), signed(""), m.id)
-                Kind.STICKER -> l.sendImage(m.chatId, Photos.stickerJpeg(context, app.oie.ui.kid.STICKERS[m.text] ?: error("sticker")), signed(""), m.id)
+                // A family sticker the kid saved goes as a real WhatsApp sticker; Oiê's own go as pictures.
+                Kind.STICKER -> if (m.media != null) {
+                    l.sendSticker(m.chatId, Photos.openBytes(context, m.media) ?: error("sticker missing"), state.stickers.any { it.media == m.media && it.animated }, m.id)
+                } else {
+                    l.sendImage(m.chatId, Photos.stickerJpeg(context, app.oie.ui.kid.STICKERS[m.text] ?: error("sticker")), signed(""), m.id)
+                }
                 else -> error("not supported yet")
             }
             Unit
@@ -125,6 +130,12 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     /** The kid's side: RealInbox first (allowed chats only, never the parent's own), then Inbox.decide. */
     private fun receiveForKid(o: JSONObject) {
         val kind = runCatching { Kind.valueOf(o.optString("kind")) }.getOrDefault(Kind.UNSUPPORTED)
+        // v0.10: a sticker the parent sends to their own chat is offered to the kid. Only stickers:
+        // nothing else from that chat is read into Oiê.
+        if (o.optBoolean("selfChat")) {
+            if (kind == Kind.STICKER) offerSticker(o.optString("id"), o.optBoolean("animated"), o.optLong("at"))
+            return
+        }
         val m = app.oie.logic.RealInbox.toMessage(
             o.optString("id"), o.optString("chat"), o.optString("chatAlt").ifEmpty { null }, o.optBoolean("fromMe"), ours,
             state.allowed, o.optLong("at"), kind, o.optString("text"), o.optString("replyTo").ifEmpty { null }, o.optInt("durationSec"),
@@ -139,6 +150,14 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 val i = state.messages.indexOfFirst { it.id == m.id }
                 if (i >= 0) state.messages[i] = state.messages[i].copy(media = name) else Photos.forget(context, name)
             }
+        }
+    }
+
+    private fun offerSticker(id: String, animated: Boolean, at: Long) {
+        io.execute {
+            val bytes = runCatching { link?.download(id) }.getOrNull() ?: return@execute
+            val name = Photos.keepBytes(context, bytes)
+            main.post { state.offerSticker(app.oie.logic.FamilySticker(id, name, animated, saved = false, at = at)).forEach { Photos.forget(context, it) } }
         }
     }
 

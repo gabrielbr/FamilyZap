@@ -123,6 +123,14 @@ class ScreensTest {
     @Test fun conversationNotSent() = shot("21-conversation-not-sent", false) {
         Conversation(ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("k9", "vovo", true, now - 60_000, app.oie.logic.Kind.TEXT, "Vó, posso ir aí domingo?"); failed += "k9" }, "vovo")
     }
+    // v0.10: the sticker sheet with a saved family sticker and a new one to keep (no images on the JVM: the slots show empty).
+    @Test fun stickerSheetFamily() = shot("22-stickers-family", false) {
+        Conversation(ready().apply {
+            kidNoticeSeen = true
+            offerSticker(app.oie.logic.FamilySticker("f1", "missing-1", false, false, now)); saveSticker("f1")
+            offerSticker(app.oie.logic.FamilySticker("f2", "missing-2", false, false, now))
+        }, "vovo", openStickers = true)
+    }
     // The rule test (docs/flows/rule-test.md): intro, the QR, and results.
     @Test fun ruleTestIntro() = shot("16-rule-test-intro", false) { app.oie.ui.parent.RuleTestScreen(ready()) }
     @Test fun ruleTestQr() = shot("17-rule-test-qr", true) {

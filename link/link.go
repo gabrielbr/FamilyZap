@@ -242,6 +242,9 @@ func (k *Link) handle(e interface{}) {
 	switch v := e.(type) {
 	case *events.Message:
 		if in, ok := ToIncoming(v.Info, v.Message); ok {
+			if own := k.c.Store.ID; own != nil {
+				in.SelfChat = IsSelfChat(v.Info.Chat, *own, k.c.Store.LID)
+			}
 			if d := downloadable(v.Message); d != nil {
 				k.remember(in.ID, d)
 			}
@@ -337,6 +340,31 @@ func (k *Link) target(chat string) (types.JID, error) {
 	return to, nil
 }
 
+// IsSelfChat says whether chat is the parent's own chat, by phone number or by LID.
+func IsSelfChat(chat, own, ownLID types.JID) bool {
+	c := chat.ToNonAD()
+	if c.Server == types.DefaultUserServer && c.User == own.User {
+		return true
+	}
+	return !ownLID.IsEmpty() && c.Server == types.HiddenUserServer && c.User == ownLID.User
+}
+
+// SendSticker sends a WebP sticker as a real WhatsApp sticker. Same rules as every send.
+func (k *Link) SendSticker(chat string, webp []byte, animated bool, id string) (string, error) {
+	return k.sendMedia(chat, id, func(up whatsmeow.UploadResponse) *waE2E.Message {
+		return StickerMessage(up, animated)
+	}, webp, whatsmeow.MediaImage)
+}
+
+// StickerMessage builds the message for an uploaded sticker (512 x 512 WebP, as WhatsApp's own).
+func StickerMessage(up whatsmeow.UploadResponse, animated bool) *waE2E.Message {
+	return &waE2E.Message{StickerMessage: &waE2E.StickerMessage{
+		URL: proto.String(up.URL), DirectPath: proto.String(up.DirectPath), MediaKey: up.MediaKey,
+		FileEncSHA256: up.FileEncSHA256, FileSHA256: up.FileSHA256, FileLength: proto.Uint64(up.FileLength),
+		Mimetype: proto.String("image/webp"), Width: proto.Uint32(512), Height: proto.Uint32(512), IsAnimated: proto.Bool(animated),
+	}}
+}
+
 // ImageMessage builds the message for an uploaded photo.
 func ImageMessage(up whatsmeow.UploadResponse, caption string) *waE2E.Message {
 	m := &waE2E.ImageMessage{
@@ -395,12 +423,17 @@ type Incoming struct {
 	Sender  string `json:"sender"`
 	// FromMe means sent by the parent's account: from the tablet (the kid) or from the parent's
 	// own phone. The app tells them apart by the ids it sent; the parent's own are dropped.
-	FromMe      bool   `json:"fromMe"`
+	FromMe bool `json:"fromMe"`
+	// SelfChat is the parent's chat with themselves ("Message yourself"). The app takes only
+	// stickers from it, for the kid to save (v0.10); nothing else from it is ever kept.
+	SelfChat    bool   `json:"selfChat,omitempty"`
 	At          int64  `json:"at"`
 	Kind        string `json:"kind"`
 	Text        string `json:"text,omitempty"`
 	ReplyTo     string `json:"replyTo,omitempty"`
 	DurationSec int    `json:"durationSec,omitempty"`
+	// Animated is for stickers, so a saved one goes out the same way.
+	Animated bool `json:"animated,omitempty"`
 }
 
 // ToIncoming translates a whatsmeow message for the app. ok is false for what the app never needs
@@ -444,7 +477,7 @@ func ToIncoming(info types.MessageInfo, m *waE2E.Message) (Incoming, bool) {
 		in.Kind, in.DurationSec, ctx = "VOICE", int(a.GetSeconds()), a.GetContextInfo()
 	case m.GetStickerMessage() != nil:
 		s := m.GetStickerMessage()
-		in.Kind, ctx = "STICKER", s.GetContextInfo()
+		in.Kind, ctx, in.Animated = "STICKER", s.GetContextInfo(), s.GetIsAnimated()
 	case m.GetReactionMessage() != nil, m.GetEditedMessage() != nil, keysOnly(m):
 		return Incoming{}, false
 	default:
