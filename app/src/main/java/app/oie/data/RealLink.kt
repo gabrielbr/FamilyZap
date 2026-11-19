@@ -183,12 +183,13 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         }
         val m = app.oie.logic.RealInbox.toMessage(
             o.optString("id"), o.optString("chat"), o.optString("chatAlt").ifEmpty { null }, o.optBoolean("fromMe"), ours,
-            state.allowed, o.optLong("at"), kind, o.optString("text"), o.optString("replyTo").ifEmpty { null }, o.optInt("durationSec"),
+            state.allowed, o.optLong("at"), kind, o.optString("text"), o.optString("replyTo").ifEmpty { null }, o.optInt("durationSec"), o.optLong("size"),
         ) ?: return
         val d = state.receive(m)
         if (d == app.oie.logic.Inbox.Decision.NOTIFY) state.allowed.firstOrNull { it.id == m.chatId }?.let { notifier?.message(m, it.name) }
         val kept = d == app.oie.logic.Inbox.Decision.NOTIFY || d == app.oie.logic.Inbox.Decision.QUIET
-        if (kept && (kind == Kind.PHOTO || kind == Kind.STICKER || kind == Kind.VOICE)) bg {
+        // v0.27: videos and GIFs too; a video over the limit stays in WhatsApp (the chat says so).
+        if (kept && app.oie.logic.Moving.download(kind, o.optLong("size"))) bg {
             val bytes = runCatching { link?.download(m.id) }.getOrNull() ?: return@bg
             val name = Photos.keepBytes(context, bytes)
             main.post {

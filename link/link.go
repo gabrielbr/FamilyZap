@@ -713,6 +713,8 @@ func downloadable(m *waE2E.Message) whatsmeow.DownloadableMessage {
 		return m.GetAudioMessage()
 	case m.GetStickerMessage() != nil:
 		return m.GetStickerMessage()
+	case m.GetVideoMessage() != nil:
+		return m.GetVideoMessage()
 	}
 	return nil
 }
@@ -752,6 +754,8 @@ type Incoming struct {
 	DurationSec int    `json:"durationSec,omitempty"`
 	// Animated is for stickers, so a saved one goes out the same way.
 	Animated bool `json:"animated,omitempty"`
+	// Size is the media's size in bytes (v0.27): the app doesn't download a video over its limit.
+	Size int64 `json:"size,omitempty"`
 }
 
 // ToIncoming translates a whatsmeow message for the app. ok is false for what the app never needs
@@ -796,6 +800,13 @@ func ToIncoming(info types.MessageInfo, m *waE2E.Message) (Incoming, bool) {
 	case m.GetStickerMessage() != nil:
 		s := m.GetStickerMessage()
 		in.Kind, ctx, in.Animated = "STICKER", s.GetContextInfo(), s.GetIsAnimated()
+	case m.GetVideoMessage() != nil:
+		// v0.27: WhatsApp sends a GIF as a short silent video with GifPlayback set.
+		v := m.GetVideoMessage()
+		in.Kind, in.Text, in.DurationSec, in.Size, ctx = "VIDEO", v.GetCaption(), int(v.GetSeconds()), int64(v.GetFileLength()), v.GetContextInfo()
+		if v.GetGifPlayback() {
+			in.Kind = "GIF"
+		}
 	case m.GetReactionMessage() != nil, m.GetEditedMessage() != nil, keysOnly(m):
 		return Incoming{}, false
 	default:

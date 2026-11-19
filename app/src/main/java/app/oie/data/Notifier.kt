@@ -48,6 +48,7 @@ class Notifier(private val context: Context, private val tx: Strings) {
         if (!allowed()) return
         val body = when (m.kind) {
             Kind.VOICE -> tx.notifVoice; Kind.PHOTO -> tx.notifPhoto; Kind.STICKER -> tx.notifSticker
+            Kind.VIDEO -> tx.notifVideo; Kind.GIF -> tx.notifGif
             Kind.UNSUPPORTED -> tx.onlyInWhatsApp(from); else -> m.text
         }
         NotificationManagerCompat.from(context).notify(

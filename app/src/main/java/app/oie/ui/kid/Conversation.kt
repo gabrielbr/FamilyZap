@@ -103,6 +103,8 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
     var preview by remember { mutableStateOf<String?>(null) }
     var photoError by remember { mutableStateOf(false) }
     var micError by remember { mutableStateOf(false) }
+    /** The video or GIF open full screen (v0.27). */
+    var watching by remember { mutableStateOf<Message?>(null) }
     fun received(uri: Uri?) {
         if (uri == null) return // the kid backed out of the picker: nothing changes
         val kept = Photos.keep(context, uri)
@@ -155,7 +157,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                 if (visible.isEmpty() && pending == null) item { Text(tx.firstHi(contact.name), style = OieType.body, color = c.muted) }
                 items(visible, key = { it.id }) { m ->
                     val failed = m.id in state.failed
-                    Bubble(m, contact.name, status = if (failed) tx.notSent else null)
+                    Bubble(m, contact.name, status = if (failed) tx.notSent else null, parent = state.parentName) { watching = it }
                     // Rule L4: one automatic retry already happened; now the kid can try again.
                     if (failed) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextLink(tx.tryAgain, { state.failed.remove(m.id); state.wa.send(m) })
@@ -258,6 +260,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                 onBack = { Photos.forget(context, name); preview = null },
             )
         }
+        watching?.let { m -> VideoScreen(m.media, gif = m.kind == Kind.GIF, from = contact.name, onBack = { watching = null }) }
         if (stickers) StickerSheet(state, onPick = { w ->
             stickers = false
             queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.STICKER, w))
@@ -294,7 +297,7 @@ private fun RecordButton(recording: Boolean, onStart: () -> Unit, onStop: (send:
 }
 
 @Composable
-private fun Bubble(m: Message, name: String, status: String? = null) {
+private fun Bubble(m: Message, name: String, status: String? = null, parent: String = "", onWatch: (Message) -> Unit = {}) {
     val c = OieTheme.colors
     val tx = str
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (m.fromKid) Arrangement.End else Arrangement.Start) {
@@ -321,11 +324,21 @@ private fun Bubble(m: Message, name: String, status: String? = null) {
                     Text("%d:%02d".format(m.durationSec / 60, m.durationSec % 60), style = OieType.caption, color = c.muted)
                 }
                 // A sticker from family's WhatsApp arrives as an image (media); Oiê's own are drawn from their word.
-                Kind.STICKER -> if (m.media != null) PhotoThumb(m.media) else STICKERS[m.text]?.let {
+                // v0.27: an animated sticker moves (MovingImage), unless "Remove animations" is on.
+                Kind.STICKER -> if (m.media != null) MovingImage(m.media, OTokens.Size.contactTile + OTokens.Spacing.space8, tx.notifSticker) else STICKERS[m.text]?.let {
                     Image(painterResource(it), contentDescription = tx.stickerA11y(m.text), modifier = Modifier.size(OTokens.Size.contactTile + OTokens.Spacing.space8))
                 } ?: Text(m.text, style = OieType.title, color = ink)
                 Kind.PHOTO -> Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                     PhotoThumb(m.media)
+                    if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
+                }
+                // v0.27: videos (tap to watch) and GIFs (a silent loop).
+                Kind.VIDEO -> Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                    VideoBubble(m.media, m.durationSec, tooBig = !app.oie.logic.Moving.download(m.kind, m.size), parent = parent) { onWatch(m) }
+                    if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
+                }
+                Kind.GIF -> Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                    GifBubble(m.media) { onWatch(m) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
                 Kind.UNSUPPORTED -> Text(tx.onlyInWhatsApp(name), style = OieType.body, color = c.muted)
@@ -390,10 +403,9 @@ private fun StickerSheet(state: AppState, onPick: (String) -> Unit, onPickFamily
 @Composable
 private fun FamilyStickerTile(media: String, side: androidx.compose.ui.unit.Dp, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val px = with(androidx.compose.ui.platform.LocalDensity.current) { side.roundToPx() }
-    val bmp = remember(media) { Photos.load(context, media, px) }
+    // v0.27: an animated family sticker moves in the sheet too.
     Box(modifier.size(side).clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(OieTheme.colors.page), contentAlignment = Alignment.Center) {
-        bmp?.let { Image(it.asImageBitmap(), contentDescription = null, modifier = Modifier.size(side - OTokens.Spacing.space4)) }
+        MovingImage(media, side - OTokens.Spacing.space4, contentDescription = null)
     }
 }
 

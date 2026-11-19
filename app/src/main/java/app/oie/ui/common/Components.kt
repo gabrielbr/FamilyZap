@@ -172,3 +172,12 @@ fun linkShown(state: app.oie.data.AppState): app.oie.logic.LinkView.Shown {
     @Suppress("UNUSED_VARIABLE") val read = tick.intValue // re-read the clock when the grace ends
     return state.linkShown()
 }
+
+/** False when the system's "Remove animations" is on (AGENTS.md: things appear instead of moving). */
+@Composable
+fun animationsOn(): Boolean {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    return androidx.compose.runtime.remember {
+        runCatching { android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) }.getOrDefault(1f) != 0f
+    }
+}

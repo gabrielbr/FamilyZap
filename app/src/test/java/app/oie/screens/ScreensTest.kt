@@ -222,4 +222,15 @@ class ScreensTest {
     @Test fun kidHomePicturesDark() = shot("32-kid-home-pictures", true) { KidHome(withPictures()) }
     @Test fun conversationPicture() = shot("33-conversation-picture", false) { Conversation(withPictures(), "vovo") }
     @Test fun contactsPictures() = shot("34-contacts-pictures", false) { ParentArea(withPictures(), 0) }
+
+    // v0.27: a video (not downloaded yet in the test), a video too big to keep, and a GIF.
+    private fun withVideos() = ready().apply {
+        kidNoticeSeen = true
+        messages += app.oie.logic.Message("v1", "vovo", false, now - 15 * 60 * 1000, app.oie.logic.Kind.VIDEO, "Tito, olha o gato", durationSec = 42)
+        messages += app.oie.logic.Message("v2", "vovo", false, now - 12 * 60 * 1000, app.oie.logic.Kind.VIDEO, durationSec = 300, size = 90L * 1024 * 1024)
+        messages += app.oie.logic.Message("g1", "vovo", false, now - 10 * 60 * 1000, app.oie.logic.Kind.GIF, durationSec = 3)
+    }
+    @Test fun conversationVideos() = shot("35-conversation-videos", false) { Conversation(withVideos(), "vovo") }
+    @Test fun conversationVideosDark() = shot("35-conversation-videos", true) { Conversation(withVideos(), "vovo") }
+    @Test fun videoScreen() = shot("36-video-screen", false) { app.oie.ui.kid.VideoScreen(null, gif = false, from = "Vovó", onBack = {}) }
 }

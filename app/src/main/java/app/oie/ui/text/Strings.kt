@@ -103,6 +103,11 @@ interface Strings {
     val theKid: String
     // Receiving (docs/flows/kid-receives-messages.md)
     val notifChannel: String; val notifVoice: String; val notifPhoto: String; val notifSticker: String
+    // v0.27: videos and GIFs.
+    val notifVideo: String; val notifGif: String; val video: String; val gifLabel: String
+    fun playVideoA11y(seconds: Int): String
+    fun videoTooBig(parent: String): String
+    val pause: String; val play: String
     fun quietSummary(n: Int): String
     val deletedMessage: String; val allowNotifications: String
     val notifLinkChannel: String; val notifLinkOn: String
@@ -291,6 +296,10 @@ object Pt : Strings {
     override val theKid = "a criança"
     override val notifChannel = "Mensagens da família"; override val notifVoice = "Mandou um áudio"
     override val notifPhoto = "Mandou uma foto"; override val notifSticker = "Mandou uma figurinha"
+    override val notifVideo = "Mandou um vídeo"; override val notifGif = "Mandou um GIF"; override val video = "Vídeo"; override val gifLabel = "GIF"
+    override fun playVideoA11y(seconds: Int) = "Ver o vídeo, %d:%02d".format(seconds / 60, seconds % 60)
+    override fun videoTooBig(parent: String) = "Vídeo grande: só abre no WhatsApp de $parent."
+    override val pause = "Pausar"; override val play = "Tocar"
     override fun quietSummary(n: Int) = if (n == 1) "1 mensagem enquanto estava em silêncio" else "$n mensagens enquanto estava em silêncio"
     override val deletedMessage = "Mensagem apagada"
     override val allowNotifications = "Para avisar quando a família mandar mensagem e para gravar áudios, o Oiê vai pedir permissão para notificações e para o microfone."
@@ -497,6 +506,10 @@ object En : Strings {
     override val theKid = "your child"
     override val notifChannel = "Messages from family"; override val notifVoice = "Sent a voice message"
     override val notifPhoto = "Sent a photo"; override val notifSticker = "Sent a sticker"
+    override val notifVideo = "Sent a video"; override val notifGif = "Sent a GIF"; override val video = "Video"; override val gifLabel = "GIF"
+    override fun playVideoA11y(seconds: Int) = "Watch the video, %d:%02d".format(seconds / 60, seconds % 60)
+    override fun videoTooBig(parent: String) = "Big video: it only opens in $parent's WhatsApp."
+    override val pause = "Pause"; override val play = "Play"
     override fun quietSummary(n: Int) = if (n == 1) "1 message during quiet hours" else "$n messages during quiet hours"
     override val deletedMessage = "Message deleted"
     override val allowNotifications = "To tell you when family sends a message and to record voice messages, Oiê will ask for notifications and the microphone."
