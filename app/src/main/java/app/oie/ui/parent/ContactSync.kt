@@ -113,10 +113,12 @@ fun contactNumber(tx: app.oie.ui.text.Strings, ct: Contact, fresh: List<Contact>
 
 /** The number, then "Maria Silva no WhatsApp" on its own line when the kid sees another name (v0.19 audit: one line each fits a phone). */
 @Composable
-fun ContactLines(ct: Contact, fresh: List<Contact>) {
+fun ContactLines(ct: Contact, fresh: List<Contact>, kid: String = "") {
     val c = OieTheme.colors
     val tx = str
     val ell = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+    // v0.30: the line to the parent says where it lives in the parent's WhatsApp.
+    if (ct.parentLine) { Text(if (ct.isGroup) tx.parentLineInGroup(kid) else tx.parentLineInOwnChat, style = OieType.caption, color = c.muted, maxLines = 2, overflow = ell); return }
     Text(contactNumber(tx, ct, fresh), style = OieType.caption, color = c.muted, maxLines = 1, overflow = ell)
     if (ct.waName.isNotBlank()) Text(tx.onWhatsApp(ct.waName), style = OieType.caption, color = c.muted, maxLines = 2, overflow = ell)
 }

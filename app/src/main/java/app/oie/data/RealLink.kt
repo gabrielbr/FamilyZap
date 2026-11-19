@@ -188,7 +188,10 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         // nothing else from that chat is read into Oiê.
         if (o.optBoolean("selfChat")) {
             if (kind == Kind.STICKER) offerSticker(o.optString("id"), o.optBoolean("animated"), o.optLong("at"))
-            return
+            // v0.30: when the parent's own chat is the line to the kid (WhatsApp refused the group), it goes on
+            // through the usual gate, where only replies and the kid's name pass. Otherwise nothing else is read.
+            val chat = o.optString("chat"); val alt = o.optString("chatAlt")
+            if (state.allowed.none { it.parentLine && (it.id == chat || it.id == alt) }) return
         }
         val m = app.oie.logic.RealInbox.toMessage(
             o.optString("id"), o.optString("chat"), o.optString("chatAlt").ifEmpty { null }, o.optBoolean("fromMe"), ours,
@@ -205,6 +208,33 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             main.post {
                 val i = state.messages.indexOfFirst { it.id == m.id }
                 if (i >= 0) state.messages[i] = state.messages[i].copy(media = name) else Photos.forget(context, name)
+            }
+        }
+    }
+
+    /**
+     * The parent tapped "Criar conversa com Tito" (v0.30, decision 0007): a WhatsApp group with only the
+     * parent, named after the kid, added to the kid's contacts as the parent. If WhatsApp refuses it, the
+     * parent's own chat becomes the line. [done] gets true for the group, false for the fallback, null
+     * when it couldn't be done (not linked or connected).
+     */
+    fun createParentLine(done: (Boolean?) -> Unit) {
+        val kid = state.kidName.ifBlank { "Oiê" }
+        bg {
+            val l = link
+            if (l == null || ls.status != LinkState.Status.Connected) { main.post { done(null) }; return@bg }
+            val group = runCatching { l.createParentLine(kid) }
+                .onFailure { Diagnostics.log("parent line: the group was refused (${it.message})") }.getOrNull()
+            val own = runCatching { l.ownChat() }.getOrDefault("")
+            val id = group?.takeIf { it.isNotEmpty() } ?: own.takeIf { it.isNotEmpty() }
+            if (id == null) { main.post { done(null) }; return@bg }
+            runCatching { l.setParentLine(id) }
+            Diagnostics.log("parent line: ${if (group != null) "group" else "own chat"}")
+            main.post {
+                state.allowed.removeAll { it.parentLine }
+                state.allowed.add(0, app.oie.logic.Contact(id, state.parentName.ifBlank { kid }, isGroup = group != null, parentLine = true))
+                refreshPhotos()
+                done(group != null)
             }
         }
     }
@@ -227,7 +257,9 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             pictures.execute {
                 var changed = 0
                 for (c in due) {
-                    val a = app.oie.logic.ProfilePicture.parse(runCatching { link?.picture(c.id, c.photoId) }.getOrNull()) ?: continue
+                    // The line to the parent (v0.30) shows the parent's own picture, not the group's.
+                    val whose = if (c.parentLine) link?.ownChat()?.takeIf { it.isNotEmpty() } ?: c.id else c.id
+                    val a = app.oie.logic.ProfilePicture.parse(runCatching { link?.picture(whose, c.photoId) }.getOrNull()) ?: continue
                     val stored = a.jpeg?.let { runCatching { Photos.keepBytes(context, it, Photos.AVATAR) }.getOrNull() }
                     if (a.state != app.oie.logic.ProfilePicture.State.SAME) changed++
                     main.post {
@@ -337,6 +369,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                     if (kind == "paired") { ls.contactsSynced = false; ls.linkedAt = state.clock() }
                     else if (ls.linkedAt == 0L) ls.linkedAt = state.clock()
                     ls.status = LinkState.Status.Connected; ls.downSince = 0L; loadContacts(); refreshPhotos()
+                    // v0.30: the link must know the line to the parent, so it may write to the parent's own chat if that's the line.
+                    state.allowed.firstOrNull { it.parentLine }?.let { line -> bg { runCatching { link?.setParentLine(line.id) } } }
                     // L4: what failed while the link was down goes once more, and only once.
                     generateSequence { retryOnConnect.poll() }.toList().forEach { m -> bg { deliver(m, retried = true) } }
                 }

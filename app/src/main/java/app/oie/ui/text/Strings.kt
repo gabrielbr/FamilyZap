@@ -111,6 +111,14 @@ interface Strings {
     // v0.28: sending videos and GIFs.
     val photoOrVideo: String; val takePhoto: String; val recordVideo: String
     val writeShort: String
+    // v0.30: the line to the parent who owns the WhatsApp (decision 0007).
+    fun parentLineTitle(parent: String): String
+    fun parentLineCreate(kid: String): String
+    fun parentLineBody(kid: String): String
+    val parentLineNoNotify: String; val parentLineCreating: String; val parentLineNotNow: String
+    fun parentLineFallback(kid: String): String
+    fun parentLineInGroup(kid: String): String
+    val parentLineInOwnChat: String
     fun videoFor(to: String): String
     fun gifFor(to: String): String
     val preparingVideo: String; val videoTooLong: String; val videoTooBigToSend: String; val videoError: String
@@ -307,6 +315,15 @@ object Pt : Strings {
     override fun videoTooBig(parent: String) = "Vídeo grande: só abre no WhatsApp de $parent."
     override val pause = "Pausar"; override val play = "Tocar"
     override val writeShort = "Escreva"
+    override fun parentLineTitle(parent: String) = "Você ($parent)"
+    override fun parentLineCreate(kid: String) = "Criar conversa com $kid"
+    override fun parentLineBody(kid: String) = "Cria no seu WhatsApp um grupo só seu chamado \"$kid\". O que $kid mandar para você aparece lá, e o que você escrever lá chega para $kid."
+    override val parentLineNoNotify = "O WhatsApp não avisa você dessas mensagens, porque saem da sua própria conta. Fixe a conversa no topo para ver quando chegam."
+    override val parentLineCreating = "Criando…"
+    override val parentLineNotNow = "Conecte o WhatsApp para criar a conversa."
+    override fun parentLineFallback(kid: String) = "O WhatsApp não aceitou o grupo. $kid vai escrever na sua Mensagem para você; para responder, deslize a mensagem dele ou comece com o nome dele."
+    override fun parentLineInGroup(kid: String) = "Grupo \"$kid\" no seu WhatsApp"
+    override val parentLineInOwnChat = "Sua Mensagem para você no WhatsApp"
     override val photoOrVideo = "Foto ou vídeo"; override val takePhoto = "Tirar foto"; override val recordVideo = "Gravar vídeo"
     override fun videoFor(to: String) = "Vídeo para $to"
     override fun gifFor(to: String) = "GIF para $to"
@@ -525,6 +542,15 @@ object En : Strings {
     override fun videoTooBig(parent: String) = "Big video: it only opens in $parent's WhatsApp."
     override val pause = "Pause"; override val play = "Play"
     override val writeShort = "Write"
+    override fun parentLineTitle(parent: String) = "You ($parent)"
+    override fun parentLineCreate(kid: String) = "Create a chat with $kid"
+    override fun parentLineBody(kid: String) = "Creates a group with only you in your WhatsApp, called \"$kid\". What $kid sends you shows there, and what you write there reaches $kid."
+    override val parentLineNoNotify = "WhatsApp won't notify you of these messages, because they come from your own account. Pin the chat at the top to see when they arrive."
+    override val parentLineCreating = "Creating…"
+    override val parentLineNotNow = "Link WhatsApp to create the chat."
+    override fun parentLineFallback(kid: String) = "WhatsApp didn't accept the group. $kid will write in your Message yourself chat; to answer, swipe to reply to his message or start with his name."
+    override fun parentLineInGroup(kid: String) = "Group \"$kid\" in your WhatsApp"
+    override val parentLineInOwnChat = "Your Message yourself chat in WhatsApp"
     override val photoOrVideo = "Photo or video"; override val takePhoto = "Take a photo"; override val recordVideo = "Record a video"
     override fun videoFor(to: String) = "Video for $to"
     override fun gifFor(to: String) = "GIF for $to"

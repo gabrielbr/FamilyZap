@@ -27,6 +27,11 @@ data class Contact(
     val photoId: String = "",
     /** When the picture was last checked (epoch ms; 0 = never). */
     val photoAt: Long = 0,
+    /**
+     * The line to the parent who owns this WhatsApp (v0.30, decision 0007): a one-person group (isGroup),
+     * or the parent's own chat when WhatsApp refused the group.
+     */
+    val parentLine: Boolean = false,
 )
 
 /** DELETED is WhatsApp's "delete for everyone": [Message.replyTo] names the message it removes. VIDEO and GIF since v0.27 (a GIF is a short silent video). */

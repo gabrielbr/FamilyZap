@@ -244,4 +244,11 @@ class ScreensTest {
     @Test fun videoReady() = shot("38-video-ready", false) {
         app.oie.ui.kid.VideoPreview(app.oie.ui.kid.VideoDraft(anyUri, gif = false, progress = 1f, ready = app.oie.data.VideoPrep.Result.Ready("missing.sealed", 42, gif = false)), "Vovó", {}, {}, {})
     }
+
+    // v0.30: the line to the parent who owns the WhatsApp: the card before, the contact after.
+    @Test fun contactsParentLineCard() = shot("39-contacts-parent-line", false) { ParentArea(ready().apply { realMode = true }, 0) }
+    @Test fun contactsParentLineCardDark() = shot("39-contacts-parent-line", true) { ParentArea(ready().apply { realMode = true }, 0) }
+    @Test fun contactsWithParentLine() = shot("40-contacts-with-line", false) {
+        ParentArea(ready().apply { realMode = true; allowed.add(0, app.oie.logic.Contact("1203630@g.us", "Ana", isGroup = true, parentLine = true)) }, 0)
+    }
 }

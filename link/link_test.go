@@ -382,3 +382,29 @@ func TestVideoCarriesItsSize(t *testing.T) {
 		t.Fatalf("got %+v", got)
 	}
 }
+
+func TestOwnChatOnlyWhenItIsTheParentLine(t *testing.T) {
+	k, err := Open(filepath.Join(t.TempDir(), "o.db"), nl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if k.OwnChat() != "" {
+		t.Fatal("not linked: no own chat")
+	}
+	if _, err := k.CreateParentLine("Tito"); !errors.Is(err, ErrNotLinked) {
+		t.Fatalf("got %v", err)
+	}
+	own := types.NewJID("5511900000000", types.DefaultUserServer)
+	k.c.Store.ID = &own
+	if _, err := k.target(own.String()); err == nil {
+		t.Fatal("rule L2: never to the parent's own number")
+	}
+	k.SetParentLine(own.String())
+	if _, err := k.target(own.String()); err != nil {
+		t.Fatalf("the parent made their own chat the line: %v", err)
+	}
+	if k.OwnChat() != own.String() {
+		t.Fatal(k.OwnChat())
+	}
+	k.c.Store.ID = nil
+}
