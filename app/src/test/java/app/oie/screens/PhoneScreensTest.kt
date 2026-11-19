@@ -107,4 +107,11 @@ class PhoneScreensTest {
     // v0.21: nicknames in Ajustes e ajuda, and a paused chat, at 1.3× text.
     @Test fun settingsNicknames() = shot("p17-settings-nicknames", bigText = true) { ParentArea(ready().apply { kidNicknames += listOf("Titinho", "Ti") }, 3) }
     @Test fun contactsPaused() = shot("p18-contacts-paused", bigText = true) { ParentArea(ready().apply { realMode = true; allowed[1] = allowed[1].copy(paused = true) }, 0) }
+
+    // v0.22: the emoji field and the preview at 1.3× text, scrolled to them.
+    @Test fun settingsSignature() = shot("p19-settings-signature", bigText = true) {
+        androidx.compose.foundation.layout.Column(Modifier.padding(OTokens.Spacing.space4)) {
+            app.oie.ui.setup.Field("Emoji antes do nome", "😎", {}, "Opcional. Escolha um no teclado.")
+        }
+    }
 }

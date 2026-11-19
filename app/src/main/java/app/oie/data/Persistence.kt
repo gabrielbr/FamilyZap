@@ -31,6 +31,7 @@ object Codec {
         put("parentName", s.parentName)
         put("kidName", s.kidName)
         put("kidNicknames", JSONArray(s.kidNicknames.toList()))
+        put("kidEmoji", s.kidEmoji)
         put("pinHash", s.pinHash ?: JSONObject.NULL)
         put("kidNoticeSeen", s.kidNoticeSeen)
         put("addRequested", s.addRequested).put("contactTipUsed", s.contactTipUsed)
@@ -66,6 +67,7 @@ object Codec {
         if (o.optInt("v") != VERSION) return
         s.parentName = o.optString("parentName")
         s.kidName = o.optString("kidName")
+        s.kidEmoji = app.oie.logic.Signature.emojiOf(o.optString("kidEmoji"))
         s.kidNicknames.clear(); o.optJSONArray("kidNicknames")?.let { a -> for (i in 0 until a.length()) s.kidNicknames += a.getString(i) }
         s.pinHash = if (o.isNull("pinHash")) null else o.getString("pinHash")
         s.kidNoticeSeen = o.optBoolean("kidNoticeSeen")

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.22.0
+- **The kid's name in bold on WhatsApp.** Messages from the tablet now start with the name in WhatsApp's bold: **Tito**: Oi, vó.
+- **An emoji before the name.** In Ajustes e ajuda › Nomes, "Emoji antes do nome" takes one emoji from the keyboard, so the family sees 😎**Tito**: Oi, vó. A line under it shows how it will look. Leave it empty for just the bold name.
+
 ## 0.21.0
 - **"Oi Tito" counts.** A message that starts with a short greeting and then the kid's name now reaches the kid: "Oi Tito", "Bom dia, Tito", "E aí Tito", "Olá Tito". The name in the middle of a sentence still doesn't.
 - **Nicknames.** In Ajustes e ajuda › Nomes, "Apelidos" takes as many names as the family uses ("Tito, Chico, Fran"). Any of them works, with or without a greeting. The kid's messages still go out with the main name.

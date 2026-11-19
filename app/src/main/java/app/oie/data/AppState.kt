@@ -35,6 +35,8 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var kidName by mutableStateOf("")
     /** The kid's nicknames (v0.21): any of them, or [kidName], starts a message for the kid and works in commands. */
     val kidNicknames = mutableStateListOf<String>()
+    /** The emoji before the kid's bold name on WhatsApp (v0.22): "😎*Tito*: Oi, vó". Empty = none. */
+    var kidEmoji by mutableStateOf("")
     /** The kid's name first, then the nicknames. */
     fun kidNames(): List<String> = app.oie.logic.KidNames.all(kidName, kidNicknames)
     /** The contacts on the kid's side: the allowed ones the parent hasn't paused from their WhatsApp (v0.21). */

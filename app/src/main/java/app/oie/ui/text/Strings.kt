@@ -131,6 +131,8 @@ interface Strings {
     // v0.21: nicknames, paused chats, and the parent's commands from WhatsApp (docs/flows/parent-commands.md).
     fun nicknamesLabel(kid: String): String
     fun nicknamesHelp(kid: String): String
+    // v0.22: the emoji before the bold name.
+    val emojiLabel: String; val emojiHelp: String; val looksLikeOnWhatsApp: String; val sampleMessage: String
     val pausedLine: String; val resumeChat: String
     fun cmdHelp(kid: String, cmd: String, here: String?): String
     fun cmdHereReceives(chat: String, kid: String): String
@@ -189,7 +191,7 @@ object Pt : Strings {
     override val linkSimulate = "Simular conexão (teste)"
     override val namesTitle = "Como vocês se chamam?"; override val yourName = "Seu nome"; override val kidNameLabel = "Como a família chama seu filho ou filha?"
     override fun yourNameHelp(kid: String, parent: String) = "Aparece para $kid como \"WhatsApp de $parent\"."
-    override fun kidNameHelp(kid: String) = "Vai junto das mensagens: \"$kid: Oi, vó\"."
+    override fun kidNameHelp(kid: String) = "Vai em negrito no começo das mensagens de $kid."
     override val pinCreate = "Crie um PIN de 6 números"; override val pinAgain = "Digite o PIN de novo"
     override val pinCreateHelp = "Ele abre a área dos pais neste tablet. Não use o mesmo PIN do tablet."
     override val pinEasy = "Esse PIN é fácil de adivinhar. Escolha outro."; override val pinMismatch = "Os PINs não são iguais. Digite de novo."
@@ -314,6 +316,8 @@ object Pt : Strings {
     override fun bannedFor(hours: Int) = "O WhatsApp bloqueou este número por cerca de $hours h. O Oiê parou e não vai tentar de novo sozinho."
     override val search = "Buscar"; override val searchHelp = "Busque pelo nome ou pelo número. Os contatos chegam aos poucos depois de conectar."
     override val addByNumber = "Adicionar pelo número"; override val numberLabel = "Número com DDD"; override val numberHelp = "Com o código do país: 55 11 99999-0000."
+    override val emojiLabel = "Emoji antes do nome"; override val emojiHelp = "Opcional. Escolha um no teclado."
+    override val looksLikeOnWhatsApp = "Fica assim no WhatsApp:"; override val sampleMessage = "Oi, vó"
     override fun nicknamesLabel(kid: String) = "Apelidos de $kid"
     override fun nicknamesHelp(kid: String) = "Separados por vírgula. Uma mensagem que começa com qualquer um deles, como \"Oi Chico\", chega para $kid."
     override val pausedLine = "Pausado pelo seu WhatsApp"; override val resumeChat = "Voltar a receber"
@@ -379,7 +383,7 @@ object En : Strings {
     override val linkSimulate = "Pretend to link (test)"
     override val namesTitle = "What are your names?"; override val yourName = "Your name"; override val kidNameLabel = "What does the family call your child?"
     override fun yourNameHelp(kid: String, parent: String) = "$kid sees it as \"$parent's WhatsApp\"."
-    override fun kidNameHelp(kid: String) = "It goes with the messages: \"$kid: Hi, Grandma\"."
+    override fun kidNameHelp(kid: String) = "It goes in bold at the start of $kid's messages."
     override val pinCreate = "Create a 6-digit PIN"; override val pinAgain = "Enter the PIN again"
     override val pinCreateHelp = "It opens the parent area on this tablet. Don't use the tablet's own PIN."
     override val pinEasy = "That PIN is easy to guess. Choose another."; override val pinMismatch = "The PINs don't match. Enter it again."
@@ -508,6 +512,8 @@ object En : Strings {
     override fun bannedFor(hours: Int) = "WhatsApp blocked this number for about $hours h. Oiê stopped and won't try again on its own."
     override val search = "Search"; override val searchHelp = "Search by name or number. Contacts arrive bit by bit after linking."
     override val addByNumber = "Add by number"; override val numberLabel = "Phone number"; override val numberHelp = "With the country code: 55 11 99999-0000."
+    override val emojiLabel = "Emoji before the name"; override val emojiHelp = "Optional. Pick one on the keyboard."
+    override val looksLikeOnWhatsApp = "On WhatsApp it looks like this:"; override val sampleMessage = "Hi, Grandma"
     override fun nicknamesLabel(kid: String) = "$kid's nicknames"
     override fun nicknamesHelp(kid: String) = "Separated by commas. A message that starts with any of them, like \"Hi Chico\", reaches $kid."
     override val pausedLine = "Paused from your WhatsApp"; override val resumeChat = "Show it again"
