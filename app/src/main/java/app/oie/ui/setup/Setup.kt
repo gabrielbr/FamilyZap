@@ -75,7 +75,7 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
                             tx.riskBody,
                             style = OieType.body, color = c.ink,
                         )
-                        Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+                        ButtonRow {
                             PrimaryButton(tx.riskAccept, { go(2) })
                             QuietButton(tx.riskDecline, onClose, Modifier.height(OTokens.Size.button))
                         }
@@ -123,7 +123,7 @@ private fun LinkStep(state: AppState, back: () -> Unit, next: () -> Unit) {
     // v0.8: the real link. Once the phone scans the QR, the kid's side uses the real WhatsApp.
     val real = app.oie.ui.parent.LocalRealLink.current
     app.oie.ui.parent.Pairing(state) { real?.goReal() ?: state.goReal(); next() }
-    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4), verticalAlignment = Alignment.CenterVertically) {
+    ButtonRow {
         QuietButton(tx.back, back, Modifier.height(OTokens.Size.button))
     }
 }
@@ -135,7 +135,7 @@ private fun NamesStep(state: AppState, back: () -> Unit, next: () -> Unit) {
     Text(tx.namesTitle, style = OieType.title, color = c.ink)
     Field(tx.yourName, state.parentName, { state.parentName = it }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName))
     Field(tx.kidNameLabel, state.kidName, { state.kidName = it }, tx.kidNameHelp(state.kidName.ifBlank { "Tito" }))
-    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+    ButtonRow {
         PrimaryButton(tx.cont, next, enabled = state.kidName.isNotBlank() && state.parentName.isNotBlank())
         QuietButton(tx.back, back, Modifier.height(OTokens.Size.button))
     }
@@ -211,7 +211,7 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
             }
         }
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+    ButtonRow {
         PrimaryButton(tx.continueWith(picked.size), {
             state.allowed.clear(); state.allowed.addAll(all.filter { it.id in picked }); next()
         })
@@ -226,7 +226,7 @@ private fun QuietStep(state: AppState, next: () -> Unit) {
     Text(tx.quietTitle, style = OieType.title, color = c.ink)
     Text(tx.quietSetupBody(state.kidName), style = OieType.body, color = c.muted)
     QuietList(state)
-    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+    ButtonRow {
         PrimaryButton(tx.cont, next)
         QuietButton(tx.skip, next, Modifier.height(OTokens.Size.button))
     }
@@ -252,3 +252,13 @@ fun QuietList(state: AppState) {
 /** Lists longer than this get a search field; it then shows at most [SEARCH_MAX] at a time. */
 const val SEARCH_FROM = 12
 const val SEARCH_MAX = 30
+
+/** Buttons side by side, wrapping to the next line on a narrow screen instead of squeezing (v0.13 audit). */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+fun ButtonRow(content: @Composable () -> Unit) {
+    androidx.compose.foundation.layout.FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
+        verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
+    ) { content() }
+}

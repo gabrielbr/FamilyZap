@@ -55,6 +55,7 @@ The audit goes in `audits/YYYY-MM-DD-<version>-<topic>.md`. Fix P0 and P1 before
 python3 design/build.py --check \
   && ./gradlew testDebugUnitTest verifyRoborazziDebug lintDebug assembleDebug
 ```
+- Screenshots cover the tablet (landscape and portrait, light and dark) and, since v0.13, a 360dp phone and 1.3× text (`PhoneScreensTest`). A layout change looks at both.
 - A screen change re-records its screenshots on purpose: `./gradlew recordRoborazziDebug`, then look at every changed PNG in `app/src/test/screenshots/` before committing.
 - The app needs `link/oielink.aar`: build it once with `link/build-aar.sh` (Go, Android SDK and NDK r27c). A change in `link/` also runs `cd link && go test ./...` and rebuilds the AAR, and follows the rules L1–L9 in `docs/whatsapp-link.md`.
 - The kid side runs on the real WhatsApp (`RealLink`, since v0.12 there is no sample in the app), through `RealInbox` then `Inbox.decide`. `SampleLink` is test data for the screenshot tests only. The real link goes behind the same `WhatsAppLink` interface and must keep the product law.

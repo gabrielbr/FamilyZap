@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -100,37 +101,51 @@ fun ParentArea(state: AppState, section: Int) {
             Box(Modifier.weight(1f))
             QuietButton(tx.leave, { state.route = Route.KidHome }, icon = R.drawable.gg_ic_close)
         }
-        Row(Modifier.fillMaxSize()) {
+        val sectionContent: @Composable () -> Unit = {
+            when (section) {
+                0 -> Contacts(state) { lastTouch = System.currentTimeMillis() }
+                1 -> QuietSection(state) { lastTouch = System.currentTimeMillis() }
+                2 -> Connection(state)
+                else -> AboutAndHelp(state)
+            }
+        }
+        val sections = listOf(tx.sectionContacts to R.drawable.gg_ic_people, tx.sectionQuiet to R.drawable.gg_ic_clock, tx.sectionConnection to R.drawable.gg_ic_link, tx.sectionHelp to R.drawable.gg_ic_info)
+        @Composable
+        fun tab(i: Int, label: String, ic: Int, modifier: Modifier) {
+            val on = i == section
+            Row(
+                modifier.height(OTokens.Size.rowMin).clip(RoundedCornerShape(OTokens.Radius.radiusS))
+                    .background(if (on) c.selected else c.page)
+                    .clickable(role = Role.Tab) { lastTouch = System.currentTimeMillis(); state.route = Route.Parent(i) }
+                    .padding(horizontal = OTokens.Spacing.space4),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
+            ) { OIcon(ic, tint = if (on) c.onSelected else c.ink); Text(label, style = OieType.label, color = if (on) c.onSelected else c.ink, maxLines = 1) }
+        }
+        val compact = app.oie.ui.common.isCompact
+        // A tablet: sections on the left, the section on the right. A phone (v0.13 audit): the sections in a
+        // scrolling row on top, the section below, full width.
+        val body: @Composable (Modifier) -> Unit = { m ->
+            Column(
+                m.verticalScroll(rememberScrollState())
+                    .padding(horizontal = if (compact) OTokens.Spacing.space4 else OTokens.Spacing.space12, vertical = if (compact) OTokens.Spacing.space6 else OTokens.Spacing.space8),
+                verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
+            ) { sectionContent() }
+        }
+        if (compact) Column(Modifier.fillMaxSize()) {
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(OTokens.Spacing.space2), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
+                sections.forEachIndexed { i, (label, ic) -> tab(i, label, ic, Modifier) }
+            }
+            Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
+            body(Modifier.fillMaxWidth())
+        } else Row(Modifier.fillMaxSize()) {
             Column(Modifier.width(OTokens.Size.contentMax / 2).fillMaxHeight().padding(OTokens.Spacing.space4), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
-                listOf(tx.sectionContacts to R.drawable.gg_ic_people, tx.sectionQuiet to R.drawable.gg_ic_clock, tx.sectionConnection to R.drawable.gg_ic_link, tx.sectionHelp to R.drawable.gg_ic_info)
-                    .forEachIndexed { i, (label, ic) ->
-                        val on = i == section
-                        Row(
-                            Modifier.fillMaxWidth().height(OTokens.Size.rowMin).clip(RoundedCornerShape(OTokens.Radius.radiusS))
-                                .background(if (on) c.selected else c.page)
-                                .clickable(role = Role.Tab) { lastTouch = System.currentTimeMillis(); state.route = Route.Parent(i) }
-                                .padding(horizontal = OTokens.Spacing.space4),
-                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
-                        ) { OIcon(ic, tint = if (on) c.onSelected else c.ink); Text(label, style = OieType.label, color = if (on) c.onSelected else c.ink) }
-                    }
+                sections.forEachIndexed { i, (label, ic) -> tab(i, label, ic, Modifier.fillMaxWidth()) }
             }
             Box(Modifier.width(OTokens.Size.hairline).fillMaxHeight().background(c.line))
-            Column(
-                Modifier.widthIn(max = OTokens.Size.contentMax * 3 / 2).verticalScroll(rememberScrollState())
-                    .padding(horizontal = OTokens.Spacing.space12, vertical = OTokens.Spacing.space8),
-                verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
-            ) {
-                when (section) {
-                    0 -> Contacts(state) { lastTouch = System.currentTimeMillis() }
-                    1 -> QuietSection(state) { lastTouch = System.currentTimeMillis() }
-                    2 -> Connection(state)
-                    else -> AboutAndHelp(state)
-                }
-            }
+            body(Modifier.widthIn(max = OTokens.Size.contentMax * 3 / 2))
         }
     }
 }
-
 @Composable
 private fun Contacts(state: AppState, touched: () -> Unit) {
     val c = OieTheme.colors
@@ -154,8 +169,12 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
     state.allowed.toList().forEachIndexed { i, ct ->
         Row(Modifier.fillMaxWidth().height(OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
             Initial(ct.name, OTokens.Size.avatar)
-            Text(ct.name, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
-            if (ct.quietException) Text(tx.canTalkInQuiet, style = OieType.caption, color = c.muted)
+            // The switch is always labelled, on or off, right under the name, so it fits a phone too (v0.13 audit).
+            Column(Modifier.weight(1f)) {
+                Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                // The line says the current setting, so it's true whichever way the switch is.
+                Text(if (ct.quietException) tx.canTalkInQuiet else tx.onlyOutsideQuiet, style = OieType.caption, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            }
             Switch(
                 modifier = Modifier.semantics { contentDescription = tx.canTalkInQuietA11y(ct.name) },
                 checked = ct.quietException,
@@ -187,6 +206,8 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
         .sortedWith(compareBy({ it.isGroup }, { it.name.lowercase() })).take(app.oie.ui.setup.SEARCH_MAX)
     if (state.allowed.isEmpty()) Text(tx.pickRealContacts(state.kidName.ifBlank { tx.theKid }), style = OieType.body, color = c.ink)
     Text(tx.add, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    // Right after linking only groups have arrived; say the people are on their way (v0.13 audit).
+    if (state.realMode && state.wa.connected && all.none { !it.isGroup }) Text(tx.contactsArriving, style = OieType.body, color = c.muted)
     if (all.size > app.oie.ui.setup.SEARCH_FROM) app.oie.ui.setup.Field(tx.search, query, { query = it; touched() }, tx.searchHelp)
     run {
         addable.forEach { ct ->
@@ -252,11 +273,16 @@ private fun QuietSection(state: AppState, touched: () -> Unit) {
         )
         return
     }
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-        Column(Modifier.weight(1f)) {
-            Text(tx.quietTitle, style = OieType.title, color = c.ink)
-            Text(tx.quietParentBody(state.kidName), style = OieType.caption, color = c.muted)
-        }
+    // The title and its button side by side on a tablet; stacked on a phone, so the title doesn't wrap (v0.13 audit).
+    val header: @Composable () -> Unit = {
+        Text(tx.quietTitle, style = OieType.title, color = c.ink)
+        Text(tx.quietParentBody(state.kidName), style = OieType.caption, color = c.muted)
+    }
+    if (app.oie.ui.common.isCompact) {
+        header()
+        PrimaryButton(tx.addPeriod, { touched(); editing = -1 }, icon = R.drawable.gg_ic_plus, modifier = Modifier.padding(top = OTokens.Spacing.space2))
+    } else Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+        Column(Modifier.weight(1f)) { header() }
         PrimaryButton(tx.addPeriod, { touched(); editing = -1 }, icon = R.drawable.gg_ic_plus)
     }
     if (state.periods.isEmpty()) Text(tx.noQuiet(state.kidName), style = OieType.body, color = c.muted)
@@ -329,5 +355,16 @@ private fun Connection(state: AppState) {
     Text(tx.connection, style = OieType.title, color = c.ink)
     Text(if (state.wa.connected) tx.connectedTo(state.parentName) else tx.disconnected, style = OieType.body, color = c.ink)
     if (!state.wa.connected) PrimaryButton(tx.linkConnect, { state.route = Route.Pair })
-    if (state.linkState.on) TextLink(tx.unlinkReal, { real?.unlink() })
+    // Unlinking can't be undone (it takes a new QR scan), so it asks once (v0.13 audit).
+    var confirming by remember { mutableStateOf(false) }
+    if (state.linkState.on) {
+        if (!confirming) TextLink(tx.unlinkReal, { confirming = true })
+        else {
+            Text(tx.unlinkConfirm(state.kidName.ifBlank { tx.theKid }), style = OieType.body, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space4))
+            Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4), verticalAlignment = Alignment.CenterVertically) {
+                QuietButton(tx.unlinkReal, { confirming = false; real?.unlink() })
+                TextLink(tx.cancel, { confirming = false })
+            }
+        }
+    }
 }

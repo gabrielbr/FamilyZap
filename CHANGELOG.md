@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.13.0
+- A full design check of every screen, and its fixes:
+  - **Works on a phone:** Tito's chat and the parent area used tablet-wide margins and broke at phone width. Phones now get narrow margins, and the parent area's sections become tabs on top.
+  - **Setup buttons** wrap to the next line on a narrow screen instead of squeezing.
+  - **In Contatos,** each person's line now says the quiet-hours setting in words ("Só fora do silêncio" or "Pode falar no silêncio"), next to the switch.
+  - "Desconectar o WhatsApp" now asks once, because getting back takes a new code.
+  - Right after linking, Contatos says "Carregando seus contatos do WhatsApp…" while your contacts arrive.
+  - Message times no longer wrap.
+- The full report is in `audits/2026-11-19-v0.13-full-audit.md`.
+
 ## 0.12.0
 - Your contacts now show up. WhatsApp sends them a few seconds after linking; Oiê used to look only once, too early, and found only groups. Now the list fills in as they arrive and refreshes each time you open Contatos. People come first, then groups, with a search.
 - Someone missing from the list? Use "Adicionar pelo número" in Contatos: type their name and number, and Oiê checks the number is on WhatsApp.

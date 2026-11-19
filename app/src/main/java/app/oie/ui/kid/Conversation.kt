@@ -142,7 +142,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
             }
             val list = rememberLazyListState()
             LazyColumn(
-                Modifier.weight(1f).fillMaxWidth().padding(horizontal = OTokens.Spacing.space16),
+                Modifier.weight(1f).fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin),
                 state = list, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
             ) {
                 item { Box(Modifier.height(OTokens.Spacing.space6)) }
@@ -162,7 +162,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
             }
             Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = OTokens.Spacing.space16, vertical = OTokens.Spacing.space4),
+                Modifier.fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space4),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
             ) {
@@ -324,9 +324,9 @@ private fun Bubble(m: Message, name: String, status: String? = null) {
                 }
                 Kind.UNSUPPORTED -> Text(tx.onlyInWhatsApp(name), style = OieType.body, color = c.muted)
                 Kind.DELETED -> Text(tx.deletedMessage, style = OieType.body.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic), color = c.muted)
-                else -> Text(m.text, style = OieType.body, color = ink)
+                else -> Text(m.text, style = OieType.body, color = ink, modifier = Modifier.weight(1f, fill = false))
             }
-            Text(status ?: hour(tx, m.at), style = OieType.caption, color = c.muted)
+            Text(status ?: hour(tx, m.at), style = OieType.caption, color = c.muted, maxLines = 1, softWrap = false)
         }
     }
 }

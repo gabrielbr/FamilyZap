@@ -30,6 +30,14 @@ import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 import app.oie.ui.theme.OieType
 
+/** Narrow screens (a phone, under 600dp): smaller margins, wrapping button rows, stacked parent area (v0.13 audit). */
+val isCompact: Boolean
+    @Composable get() = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp < 600
+
+/** The side margin of a screen: 64dp on the tablet, 16dp on a phone. */
+val sideMargin: Dp
+    @Composable get() = if (isCompact) OTokens.Spacing.space4 else OTokens.Spacing.space16
+
 /** The one coral action on a screen (README §10: main button). */
 @Composable
 fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, icon: Int? = null) {
@@ -76,7 +84,7 @@ fun TextLink(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
         modifier.defaultMinSize(minHeight = OTokens.Spacing.space12).clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = OTokens.Spacing.space3),
         contentAlignment = Alignment.Center,
-    ) { Text(text, style = OieType.label.copy(textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline), color = OieTheme.colors.ink) }
+    ) { Text(text, style = OieType.label.copy(textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline), color = OieTheme.colors.ink, maxLines = 1, softWrap = false) }
 }
 
 /** A core line icon (design/core/icons), tinted ink by default. */
@@ -119,7 +127,7 @@ fun Bar(content: @Composable RowScope.() -> Unit) {
 fun Banner(icon: Int, text: String) {
     val c = OieTheme.colors
     Row(
-        Modifier.fillMaxWidth().background(c.surface).padding(horizontal = OTokens.Spacing.space16, vertical = OTokens.Spacing.space3),
+        Modifier.fillMaxWidth().background(c.surface).padding(horizontal = sideMargin, vertical = OTokens.Spacing.space3),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
     ) {
