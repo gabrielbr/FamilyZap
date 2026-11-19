@@ -7,6 +7,8 @@
     <!-- Notifications when family sends a message (docs/flows/kid-receives-messages.md); asked for at the end of setup. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Voice messages the kid records (data/Voice.kt, v0.11); asked for at the end of setup, with the parent. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- The WhatsApp link listening with the screen off (data/LinkService.kt, v0.7): a foreground service
          with a quiet notification, and the network state to reconnect when the Wi-Fi comes back. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />

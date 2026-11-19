@@ -47,6 +47,9 @@ This rule needs testing. The trade-off is privacy for the parent's own chats aga
 | 3c | **Sticker / text** | Reads | Shown inline. Stickers from the family's WhatsApp are shown as received. |
 | 4 | **Reply** | Uses the composer | Flow "Kid sends a message". |
 
+## v0.11: playing voice
+A voice message plays on tap and stops on a second tap. Only one plays at a time. It plays from a temporary copy of the sealed file, deleted when it ends.
+
 ## Branches
 | At step | If | Then |
 |---|---|---|

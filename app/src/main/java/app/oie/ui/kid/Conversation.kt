@@ -96,6 +96,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
     var choosingPhoto by remember { mutableStateOf(false) }
     var preview by remember { mutableStateOf<String?>(null) }
     var photoError by remember { mutableStateOf(false) }
+    var micError by remember { mutableStateOf(false) }
     fun received(uri: Uri?) {
         if (uri == null) return // the kid backed out of the picker: nothing changes
         val kept = Photos.keep(context, uri)
@@ -103,6 +104,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
         preview?.let { Photos.forget(context, it) } // Trocar: the old pick is dropped
         preview = kept
     }
+    val askMic = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { received(it) }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok -> if (ok) received(cameraUri) }
@@ -192,14 +194,20 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                         }, icon = R.drawable.gg_ic_send)
                     }
                 }
-                if (canSend && draft.isBlank() && !state.realMode) RecordButton(
+                if (canSend && draft.isBlank()) RecordButton(
                     recording = recordingSince > 0,
-                    onStart = { recordingSince = state.clock() },
+                    onStart = {
+                        // v0.11: a real recording. Without the microphone permission, ask for it (the parent was asked at setup).
+                        if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                            if (app.oie.data.Voice.start(context)) { micError = false; recordingSince = state.clock() } else micError = true
+                        } else askMic.launch(android.Manifest.permission.RECORD_AUDIO)
+                    },
                     onStop = { send ->
                         val secs = ((state.clock() - recordingSince) / 1000).toInt()
                         recordingSince = 0
                         // Under 1 s is a slip, not a message (flow branch 3a).
-                        if (send && secs >= 1) queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.VOICE, durationSec = secs))
+                        val media = app.oie.data.Voice.stop(context, keep = send && secs >= 1)
+                        if (media != null) queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.VOICE, durationSec = secs, media = media))
                     },
                 )
             }
@@ -224,6 +232,11 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
             }
         }
         if (choosingPhoto) PhotoSourceSheet(first = state.lastPhotoSource, onPick = ::open, onClose = { choosingPhoto = false })
+        if (micError) Text(
+            tx.micError, style = OieType.body, color = c.coralText,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = OTokens.Size.header + OTokens.Spacing.space4)
+                .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.coralSoft).padding(OTokens.Spacing.space3),
+        )
         if (photoError) Text(
             tx.photoError, style = OieType.body, color = c.coralText,
             modifier = Modifier.align(Alignment.TopCenter).padding(top = OTokens.Size.header + OTokens.Spacing.space4)
@@ -290,7 +303,17 @@ private fun Bubble(m: Message, name: String, status: String? = null) {
         ) {
             val ink = if (m.fromKid) c.onSelected else c.ink
             when (m.kind) {
-                Kind.VOICE -> { OIcon(R.drawable.gg_ic_play, tint = ink, contentDescription = tx.listenA11y(m.durationSec)); Text("0:%02d".format(m.durationSec), style = OieType.caption, color = c.muted) }
+                Kind.VOICE -> {
+                    // v0.11: plays the real recording when there is one; tap again to stop.
+                    val context = LocalContext.current
+                    val on = app.oie.data.Voice.playing == m.id
+                    Box(
+                        Modifier.size(OTokens.Spacing.space12).clip(androidx.compose.foundation.shape.CircleShape)
+                            .clickable(enabled = m.media != null, role = Role.Button) { m.media?.let { app.oie.data.Voice.toggle(context, m.id, it) } },
+                        contentAlignment = Alignment.Center,
+                    ) { OIcon(if (on) R.drawable.gg_ic_pause else R.drawable.gg_ic_play, tint = ink, contentDescription = tx.listenA11y(m.durationSec)) }
+                    Text("%d:%02d".format(m.durationSec / 60, m.durationSec % 60), style = OieType.caption, color = c.muted)
+                }
                 // A sticker from family's WhatsApp arrives as an image (media); Oiê's own are drawn from their word.
                 Kind.STICKER -> if (m.media != null) PhotoThumb(m.media) else STICKERS[m.text]?.let {
                     Image(painterResource(it), contentDescription = tx.stickerA11y(m.text), modifier = Modifier.size(OTokens.Size.contactTile + OTokens.Spacing.space8))

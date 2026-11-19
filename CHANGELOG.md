@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.11.0
+- Real voice messages. Tito holds the microphone to record and lets go to send; Oiê records in the same format as WhatsApp's own voice messages, so the family hears them as normal voice notes. Each one carries the 5-second Desfazer like any message.
+- Voice messages from the family play: tap play, tap again to stop. They are kept sealed on the tablet like photos.
+- At the end of setup, Oiê now asks for the microphone together with notifications, while you're there. On a tablet that's already set up, the first time Tito records, Android asks.
+- The microphone is back on the real WhatsApp.
+
 ## 0.10.0
 - Send stickers to Tito from your own WhatsApp: send a sticker to yourself, in the chat with your own name. It shows for Tito under Figurinhas, in "Novas de Ana", and Tito taps Guardar to keep it. Saved ones sit in "Da família", next to Oiê's six, and go out as real WhatsApp stickers.
 - Only stickers from your own chat reach Oiê. Nothing else from it is read.
