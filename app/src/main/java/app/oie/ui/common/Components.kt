@@ -25,6 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import app.oie.ui.theme.OTokens
@@ -41,10 +43,12 @@ val sideMargin: Dp
 
 /** The one coral action on a screen (README §10: main button). */
 @Composable
-fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, icon: Int? = null) {
+fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, icon: Int? = null, iconOnly: Boolean = false) {
     val c = OieTheme.colors
     Row(
         modifier
+            // v0.29: icon only on a narrow screen (the chat's Enviar); the word stays for TalkBack.
+            .then(if (iconOnly && icon != null) Modifier.semantics { contentDescription = text } else Modifier)
             .height(OTokens.Size.button)
             .clip(RoundedCornerShape(OTokens.Radius.radiusS))
             .background(if (enabled) c.mint else c.line)
@@ -54,7 +58,7 @@ fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2, Alignment.CenterHorizontally),
     ) {
         if (icon != null) OIcon(icon, tint = c.onMint)
-        Text(text, style = OieType.label, color = if (enabled) c.onMint else c.muted)
+        if (!iconOnly || icon == null) Text(text, style = OieType.label, color = if (enabled) c.onMint else c.muted)
     }
 }
 

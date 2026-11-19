@@ -44,18 +44,39 @@ class Notifier(private val context: Context, private val tx: Strings) {
     )
 
     @android.annotation.SuppressLint("MissingPermission") // checked in allowed()
-    fun message(m: Message, from: String) {
+    fun message(m: Message, from: String) = message(m, app.oie.logic.Contact(m.chatId, from), bubble = false)
+
+    /**
+     * One notification per family member. [bubble] (v0.29, "Bolha na tela" on): it's also that chat's
+     * bubble, which opens only that chat.
+     */
+    fun message(m: Message, from: app.oie.logic.Contact, bubble: Boolean) {
         if (!allowed()) return
-        val body = when (m.kind) {
-            Kind.VOICE -> tx.notifVoice; Kind.PHOTO -> tx.notifPhoto; Kind.STICKER -> tx.notifSticker
-            Kind.VIDEO -> tx.notifVideo; Kind.GIF -> tx.notifGif
-            Kind.UNSUPPORTED -> tx.onlyInWhatsApp(from); else -> m.text
-        }
-        NotificationManagerCompat.from(context).notify(
-            m.chatId.hashCode(),
-            NotificationCompat.Builder(context, channel).setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle(from).setContentText(body).setAutoCancel(true).setContentIntent(open(m.chatId)).build(),
-        )
+        val b = NotificationCompat.Builder(context, channel).setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(from.name).setContentText(body(m, from.name)).setAutoCancel(true).setContentIntent(open(m.chatId))
+        if (bubble) Bubble.decorate(context, b, from, body(m, from.name), m.at, silent = false)
+        post(m.chatId.hashCode(), b)
+    }
+
+    /** The kid wrote to [to]: keep that chat's bubble on screen, silently (v0.29). */
+    fun keepChatBubble(m: Message, to: app.oie.logic.Contact) {
+        if (!allowed() || !Bubble.supported()) return
+        val b = NotificationCompat.Builder(context, channel).setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(to.name).setContentText(body(m, to.name)).setContentIntent(open(m.chatId))
+        Bubble.decorate(context, b, to, body(m, to.name), m.at, silent = true)
+        post(m.chatId.hashCode(), b)
+    }
+
+    private fun body(m: Message, from: String): String = when (m.kind) {
+        Kind.VOICE -> tx.notifVoice; Kind.PHOTO -> tx.notifPhoto; Kind.STICKER -> tx.notifSticker
+        Kind.VIDEO -> tx.notifVideo; Kind.GIF -> tx.notifGif
+        Kind.UNSUPPORTED -> tx.onlyInWhatsApp(from); else -> m.text
+    }
+
+    @android.annotation.SuppressLint("MissingPermission") // checked in allowed()
+    private fun post(id: Int, b: NotificationCompat.Builder) {
+        runCatching { NotificationManagerCompat.from(context).notify(id, b.build()) }
+            .onFailure { Diagnostics.log("notify: failed (${it.javaClass.simpleName})") }
     }
 
     @android.annotation.SuppressLint("MissingPermission")

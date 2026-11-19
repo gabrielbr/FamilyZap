@@ -45,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInput
@@ -83,12 +84,12 @@ val STICKERS = linkedMapOf(
 
 /** Prototype screens 03, 16–20. Flows: kid-sends-message.md, kid-receives-messages.md. */
 @Composable
-fun Conversation(state: AppState, contactId: String, openStickers: Boolean = false) {
+fun Conversation(state: AppState, contactId: String, openStickers: Boolean = false, inBubble: Boolean = false, onLeave: (() -> Unit)? = null) {
     val c = OieTheme.colors
     val tx = str
     // v0.21: paused or removed while open (a command from the parent's WhatsApp): back to the home screen.
     val contact = state.reachable.firstOrNull { it.id == contactId } ?: run {
-        androidx.compose.runtime.LaunchedEffect(contactId) { state.route = app.oie.data.Route.KidHome }
+        androidx.compose.runtime.LaunchedEffect(contactId) { if (onLeave != null) onLeave() else state.route = app.oie.data.Route.KidHome }
         return
     }
     // v0.24: while the link reconnects the kid can still write; messages wait and go out on connect (L4).
@@ -160,7 +161,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             Bar {
-                QuietButton(null, { state.drafts[contactId] = draft; state.route = Route.KidHome }, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
+                QuietButton(null, { state.drafts[contactId] = draft; if (onLeave != null) onLeave() else state.route = Route.KidHome }, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
                 app.oie.ui.common.Avatar(contact, OTokens.Size.avatar)
                 Text(contact.name, style = OieType.title, color = c.ink)
             }
@@ -200,11 +201,19 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                     Text(tx.recording, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
                     Text(tx.releaseToSend, style = OieType.bodySmall, color = c.muted)
                 } else {
-                    QuietButton(null, { choosingPhoto = true }, icon = R.drawable.gg_ic_camera, contentDescription = tx.photoButton)
-                    QuietButton(null, { stickers = true }, icon = R.drawable.gg_ic_sticker, contentDescription = tx.stickerButton)
+                    // v0.29 audit: on a narrow screen (a phone, a bubble) the camera and stickers step aside while the
+                    // kid types, so the field has room; they come back when it's empty.
+                    val compact = app.oie.ui.common.isCompact
+                    if (!compact || draft.isBlank()) {
+                        QuietButton(null, { choosingPhoto = true }, icon = R.drawable.gg_ic_camera, contentDescription = tx.photoButton)
+                        QuietButton(null, { stickers = true }, icon = R.drawable.gg_ic_sticker, contentDescription = tx.stickerButton)
+                    }
+                    // v0.29: in a chat's bubble the field is focused at once, so the keyboard comes up to answer.
+                    val focus = remember { androidx.compose.ui.focus.FocusRequester() }
+                    if (inBubble) LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
                     OutlinedTextField(
-                        draft, { draft = it; state.drafts[contactId] = it }, Modifier.weight(1f),
-                        placeholder = { Text(tx.writeTo(contact.name), style = OieType.body, color = c.muted) },
+                        draft, { draft = it; state.drafts[contactId] = it }, Modifier.weight(1f).focusRequester(focus),
+                        placeholder = { Text(if (compact) tx.writeShort else tx.writeTo(contact.name), style = OieType.body, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         textStyle = OieType.body,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = c.ink, unfocusedTextColor = c.ink, focusedContainerColor = c.surface,
@@ -215,7 +224,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                         PrimaryButton(tx.send, {
                             queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.TEXT, draft.trim()))
                             draft = ""; state.drafts.remove(contactId)
-                        }, icon = R.drawable.gg_ic_send)
+                        }, icon = R.drawable.gg_ic_send, iconOnly = compact)
                     }
                 }
                 if (canSend && draft.isBlank()) RecordButton(

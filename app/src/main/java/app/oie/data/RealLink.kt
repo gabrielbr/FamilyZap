@@ -41,6 +41,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
 
     override fun send(message: app.oie.logic.Message) {
         ours += message.id
+        // v0.29: the chat the kid just wrote to keeps (or gets) its bubble, silently.
+        if (state.bubbleOn) main.post { state.reachable.firstOrNull { it.id == message.chatId }?.let { notifier?.keepChatBubble(message, it) } }
         bg { deliver(message, retried = false) }
     }
 
@@ -193,7 +195,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             state.allowed, o.optLong("at"), kind, o.optString("text"), o.optString("replyTo").ifEmpty { null }, o.optInt("durationSec"), o.optLong("size"),
         ) ?: return
         val d = state.receive(m)
-        if (d == app.oie.logic.Inbox.Decision.NOTIFY) state.allowed.firstOrNull { it.id == m.chatId }?.let { notifier?.message(m, it.name) }
+        // v0.29: with "Bolha na tela" on, the notification is also that chat's bubble.
+        if (d == app.oie.logic.Inbox.Decision.NOTIFY) state.allowed.firstOrNull { it.id == m.chatId }?.let { notifier?.message(m, it, state.bubbleOn) }
         val kept = d == app.oie.logic.Inbox.Decision.NOTIFY || d == app.oie.logic.Inbox.Decision.QUIET
         // v0.27: videos and GIFs too; a video over the limit stays in WhatsApp (the chat says so).
         if (kept && app.oie.logic.Moving.download(kind, o.optLong("size"))) bg {
