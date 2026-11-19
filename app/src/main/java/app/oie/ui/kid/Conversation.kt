@@ -86,7 +86,11 @@ val STICKERS = linkedMapOf(
 fun Conversation(state: AppState, contactId: String, openStickers: Boolean = false) {
     val c = OieTheme.colors
     val tx = str
-    val contact = state.allowed.firstOrNull { it.id == contactId } ?: return
+    // v0.21: paused or removed while open (a command from the parent's WhatsApp): back to the home screen.
+    val contact = state.reachable.firstOrNull { it.id == contactId } ?: run {
+        androidx.compose.runtime.LaunchedEffect(contactId) { state.route = app.oie.data.Route.KidHome }
+        return
+    }
     val canSend = state.canSend(contact) && state.wa.connected
     var draft by remember { mutableStateOf(state.drafts[contactId] ?: "") }
     var pending by remember { mutableStateOf<Message?>(null) }

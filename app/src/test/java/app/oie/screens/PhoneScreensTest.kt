@@ -103,4 +103,8 @@ class PhoneScreensTest {
         Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.ContactEditor(s.allowed[0], "Tito", s.link.contacts(), {}, {}, onRemove = {}) }
     }
     @Test fun setupContactsPicked() = shot("p16-setup-contacts-picked", bigText = true) { Setup(renamed().apply { realMode = false }, 5, onClose = {}) }
+
+    // v0.21: nicknames in Ajustes e ajuda, and a paused chat, at 1.3× text.
+    @Test fun settingsNicknames() = shot("p17-settings-nicknames", bigText = true) { ParentArea(ready().apply { kidNicknames += listOf("Titinho", "Ti") }, 3) }
+    @Test fun contactsPaused() = shot("p18-contacts-paused", bigText = true) { ParentArea(ready().apply { realMode = true; allowed[1] = allowed[1].copy(paused = true) }, 0) }
 }

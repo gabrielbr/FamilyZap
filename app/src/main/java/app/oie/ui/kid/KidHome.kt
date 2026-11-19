@@ -58,7 +58,8 @@ fun KidHome(state: AppState) {
                 verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
             ) {
                 Text(tx.hello(state.kidName), style = OieType.display, color = c.ink)
-                if (state.allowed.isEmpty()) {
+                // v0.21: a chat the parent paused from their WhatsApp leaves the kid's home until resumed.
+                if (state.reachable.isEmpty()) {
                     // Empty: the kid can't fix it, so no button; the line says who can.
                     Text(tx.nobodyYet(state.parentName), style = OieType.body, color = c.muted)
                     if (state.addRequested) Text(tx.askedToAdd(state.parentName), style = OieType.body, color = c.ink)
@@ -70,7 +71,7 @@ fun KidHome(state: AppState) {
                         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space8),
                         verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6),
                     ) {
-                        state.allowed.forEach { ct ->
+                        state.reachable.forEach { ct ->
                             val unread = state.unread(ct.id)
                             val label = ct.name + if (unread > 0) ", " + tx.newCount(unread) else ""
                             Column(

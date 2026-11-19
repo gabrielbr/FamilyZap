@@ -144,6 +144,7 @@ fun ContactEditor(ct: Contact, kid: String, fresh: List<Contact>, onSave: (Conta
         // Who this is, before the field: the WhatsApp name and the number, each on its own line.
         androidx.compose.foundation.layout.Column {
             Text(tx.changeName, style = OieType.title, color = c.ink)
+            if (ct.paused) Text(tx.pausedLine, style = OieType.body, color = c.ink)
             Text(tx.onWhatsApp(wa), style = OieType.body, color = c.ink)
             Text(contactNumber(tx, ct, fresh), style = OieType.body, color = c.muted)
         }
@@ -153,6 +154,8 @@ fun ContactEditor(ct: Contact, kid: String, fresh: List<Contact>, onSave: (Conta
             app.oie.ui.common.PrimaryButton(tx.save, { onSave(app.oie.logic.ContactNames.rename(ct, name)) })
             QuietButton(tx.cancel, onCancel, Modifier.height(OTokens.Size.button))
         }
+        // v0.21: a chat paused from the parent's WhatsApp can be resumed here too.
+        if (ct.paused && onRemove != null) QuietButton(tx.resumeChat, { onSave(app.oie.logic.ContactNames.rename(ct, name).copy(paused = false)) }, Modifier.height(OTokens.Size.button))
         // Contatos only (v0.19 audit): removing moved here from each row, so a phone row has room for the number. Undo stays.
         if (onRemove != null) TextLink(tx.removeNamed(ct.name), onRemove, Modifier.padding(top = OTokens.Spacing.space4).offset(x = -OTokens.Spacing.space3))
     }

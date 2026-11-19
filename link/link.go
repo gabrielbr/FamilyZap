@@ -542,6 +542,24 @@ func (k *Link) target(chat string) (types.JID, error) {
 	return to, nil
 }
 
+// SendSelfNote sends Oiê's answer to a parent's command ("/Tito parar") to the parent's own chat
+// ("Mensagem para você"), so nobody else sees it (v0.21, the owner's choice). It's the only thing
+// ever sent there (rule L2): the kid can never write to that chat. Same pace and read-only rules as
+// every send.
+func (k *Link) SendSelfNote(text string) (sent string, err error) {
+	defer k.guard("SendSelfNote", &err)
+	own := k.c.Store.ID
+	if own == nil {
+		return "", ErrNotLinked
+	}
+	if err := k.maySend(); err != nil {
+		return "", err
+	}
+	id := k.c.GenerateMessageID()
+	_, err = k.c.SendMessage(context.Background(), own.ToNonAD(), &waE2E.Message{Conversation: proto.String(text)}, whatsmeow.SendRequestExtra{ID: id})
+	return string(id), err
+}
+
 // IsSelfChat says whether chat is the parent's own chat, by phone number or by LID.
 func IsSelfChat(chat, own, ownLID types.JID) bool {
 	c := chat.ToNonAD()

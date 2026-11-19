@@ -19,6 +19,8 @@ data class Contact(
      * "Vovó", this is "Maria Silva". Empty when they're the same. Only the parent area shows it.
      */
     val waName: String = "",
+    /** Paused from the parent's WhatsApp ("/Tito parar", v0.21): nothing reaches the kid, and it leaves the kid's home. */
+    val paused: Boolean = false,
 )
 
 /** DELETED is WhatsApp's "delete for everyone": [Message.replyTo] names the message it removes. */

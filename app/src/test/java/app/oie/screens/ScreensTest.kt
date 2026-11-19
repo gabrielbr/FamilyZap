@@ -175,4 +175,10 @@ class ScreensTest {
         Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.ContactEditor(s.allowed[0], "Tito", s.link.contacts(), {}, {}, onRemove = {}) }
     }
     @Test fun setupContactsPicked() = shot("25-setup-contacts-picked", false) { Setup(renamed(), 5, onClose = {}) }
+
+    // v0.21: nicknames, and a chat paused from the parent's WhatsApp.
+    private fun paused() = ready().apply { allowed[1] = allowed[1].copy(paused = true); kidNicknames += listOf("Titinho", "Ti") }
+    @Test fun contactsPaused() = shot("26-contacts-paused", false) { ParentArea(paused(), 0) }
+    @Test fun contactsPausedDark() = shot("26-contacts-paused", true) { ParentArea(paused(), 0) }
+    @Test fun kidHomeWithAPausedChat() = shot("27-kid-home-paused", false) { KidHome(paused().apply { kidNoticeSeen = true }) }
 }

@@ -58,6 +58,7 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 |---|---|---|
 | L1 | **Honest device name.** The parent sees "Oiê" in WhatsApp's Linked devices. | `store.SetOSInfo("Oiê", …)` |
 | L2 | **Only allowed chats.** Sends go only to contacts the parent allowed, never to the parent's own number, never to a list. | `Inbox.decide`, the allowed list; no bulk send anywhere |
+| L2 (v0.21) | **The parent's own chat gets only Oiê's answers to the parent's commands** ("/Tito parar"), never anything from the kid (decision 0005). | `SendSelfNote`; `ParentCommand` reads commands only from the parent's own account |
 | L3 | **Human pace.** At least 2 s between sends, at most 30 in 10 minutes. The app waits rather than refuses. | `SendPace` (tested) |
 | L4 | **No duplicates.** A send is retried at most once, with the same message ID, only after a reconnect. Other errors show "Não foi" with Tentar de novo for the kid. | whatsmeow `SendRequestExtra{ID}` |
 | L5 | **Bounded reconnects.** whatsmeow reconnects on its own, waiting 2 s longer each time, and stops after 8 tries. After that, the app tries again when the network or the app comes back. | `AutoReconnectHook`; `LinkService` network callback (v0.7) |

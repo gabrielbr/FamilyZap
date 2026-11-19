@@ -33,6 +33,12 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var route: Route by mutableStateOf(Route.Setup(0))
     var parentName by mutableStateOf("")
     var kidName by mutableStateOf("")
+    /** The kid's nicknames (v0.21): any of them, or [kidName], starts a message for the kid and works in commands. */
+    val kidNicknames = mutableStateListOf<String>()
+    /** The kid's name first, then the nicknames. */
+    fun kidNames(): List<String> = app.oie.logic.KidNames.all(kidName, kidNicknames)
+    /** The contacts on the kid's side: the allowed ones the parent hasn't paused from their WhatsApp (v0.21). */
+    val reachable: List<Contact> get() = allowed.filter { !it.paused }
     /** SHA-256 of the PIN, never the PIN itself. */
     internal var pinHash: String? = null
     val pinGuard = Pin.Guard()
@@ -94,7 +100,7 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     fun visible(contactId: String): List<Message> {
         val chat = allowed.firstOrNull { it.id == contactId } ?: return emptyList()
         val history = messages.filter { it.chatId == contactId }.sortedBy { it.at }
-        return history.filter { MessageRule.isForKid(it, chat, history, kidName) }
+        return history.filter { MessageRule.isForKid(it, chat, history, kidNames()) }
     }
 
     fun unread(contactId: String): Int = visible(contactId).count { !it.fromKid && it.at > lastSeen.getOrDefault(contactId, 0L) }
@@ -106,7 +112,7 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     /** Every message from the WhatsApp link comes in here (logic/Inbox.kt decides). Returns what happened. */
     fun receive(m: Message, now: LocalDateTime = LocalDateTime.now()): app.oie.logic.Inbox.Decision {
         val history = messages.filter { it.chatId == m.chatId }
-        val d = app.oie.logic.Inbox.decide(m, allowed, history, kidName, periods, now)
+        val d = app.oie.logic.Inbox.decide(m, allowed, history, kidNames(), periods, now)
         when (d) {
             app.oie.logic.Inbox.Decision.DROP -> {}
             app.oie.logic.Inbox.Decision.DELETE -> {

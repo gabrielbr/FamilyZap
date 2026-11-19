@@ -198,7 +198,9 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
                 // v0.19: the number, so the parent knows it's the right person.
                 ContactLines(ct, fresh)
                 // The line says the current setting, so it's true whichever way the switch is.
-                Text(if (ct.quietException) tx.canTalkInQuiet else tx.onlyOutsideQuiet, style = OieType.caption, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                // v0.21: a chat paused from the parent's WhatsApp says so, in ink, instead of the quiet-hours line.
+                if (ct.paused) Text(tx.pausedLine, style = OieType.caption, color = c.ink, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                else Text(if (ct.quietException) tx.canTalkInQuiet else tx.onlyOutsideQuiet, style = OieType.caption, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
             }
             Switch(
@@ -337,6 +339,11 @@ private fun AboutAndHelp(state: AppState) {
     var kid by remember { mutableStateOf(state.kidName) }
     app.oie.ui.setup.Field(tx.yourName, parent, { parent = it; if (it.isNotBlank()) state.parentName = it.trim() }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName))
     app.oie.ui.setup.Field(tx.kidNameLabel, kid, { kid = it; if (it.isNotBlank()) state.kidName = it.trim() }, tx.kidNameHelp(state.kidName.ifBlank { tx.theKid }))
+    // v0.21: as many names as the family uses ("Tito, Chico, Fran"); any of them reaches the kid and works in commands.
+    var nicks by remember { mutableStateOf(state.kidNicknames.joinToString(", ")) }
+    app.oie.ui.setup.Field(tx.nicknamesLabel(state.kidName.ifBlank { tx.theKid }), nicks, {
+        nicks = it; state.kidNicknames.clear(); state.kidNicknames.addAll(app.oie.logic.KidNames.parse(it))
+    }, tx.nicknamesHelp(state.kidName.ifBlank { tx.theKid }))
     Text(tx.help, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     help.forEachIndexed { i, (q, a) ->
         Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { open = if (open == i) null else i }.padding(vertical = OTokens.Spacing.space3)) {

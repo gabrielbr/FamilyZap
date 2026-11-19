@@ -313,3 +313,13 @@ func TestFreshLinkIsNotConnected(t *testing.T) {
 		t.Fatal("nothing connected yet")
 	}
 }
+
+func TestSelfNoteNeedsALinkedTablet(t *testing.T) {
+	k, err := Open(filepath.Join(t.TempDir(), "n.db"), nl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := k.SendSelfNote("Oiê: ok"); !errors.Is(err, ErrNotLinked) {
+		t.Fatalf("got %v", err)
+	}
+}

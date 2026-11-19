@@ -174,6 +174,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     /** The kid's side: RealInbox first (allowed chats only, never the parent's own), then Inbox.decide. */
     private fun receiveForKid(o: JSONObject) {
         val kind = runCatching { Kind.valueOf(o.optString("kind")) }.getOrDefault(Kind.UNSUPPORTED)
+        if (kind == Kind.TEXT && command(o)) return
         // v0.10: a sticker the parent sends to their own chat is offered to the kid. Only stickers:
         // nothing else from that chat is read into Oiê.
         if (o.optBoolean("selfChat")) {
@@ -194,6 +195,72 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 val i = state.messages.indexOfFirst { it.id == m.id }
                 if (i >= 0) state.messages[i] = state.messages[i].copy(media = name) else Photos.forget(context, name)
             }
+        }
+    }
+
+    /** Command ids already acted on, so a redelivery doesn't answer twice. */
+    private val commandsDone = java.util.LinkedHashSet<String>()
+
+    /**
+     * A command from the parent's own WhatsApp ("/Tito parar", docs/flows/parent-commands.md, v0.21).
+     * Only "from me": anyone else's "/Tito" is an ordinary message. Acts on the chat it was typed in;
+     * the answer goes to the parent's own chat. Returns true when the message was a command (never
+     * stored, never shown to the kid).
+     */
+    private fun command(o: JSONObject): Boolean {
+        if (!o.optBoolean("fromMe")) return false
+        val id = o.optString("id")
+        if (id in ours) return false
+        val p = app.oie.logic.ParentCommand.parse(o.optString("text"), state.kidNames()) ?: return false
+        if (!commandsDone.add(id)) return true
+        while (commandsDone.size > 100) commandsDone.remove(commandsDone.first())
+        if (!app.oie.logic.ParentCommand.fresh(o.optLong("at"), state.clock())) { Diagnostics.log("command: too old, ignored"); return true }
+        val chat = o.optString("chat"); val alt = o.optString("chatAlt").ifEmpty { null }
+        val ids = listOfNotNull(chat, alt)
+        // The chat as a new contact (for "adicionar"): from the WhatsApp list when it's there, else its number.
+        val known = state.wa.contacts().firstOrNull { it.id in ids }
+        val pn = ids.firstOrNull { it.endsWith("@s.whatsapp.net") }
+        val candidate = known ?: app.oie.logic.Contact(
+            pn ?: chat, app.oie.logic.ContactNames.display(pn?.substringBefore('@') ?: "").ifEmpty { chat.substringBefore('@') },
+            isGroup = chat.endsWith("@g.us"),
+        )
+        val r = app.oie.logic.ParentCommand.apply(p.action, ids, o.optBoolean("selfChat"), candidate, state.allowed.toList())
+        if (r.allowed != state.allowed.toList()) { state.allowed.clear(); state.allowed.addAll(r.allowed) }
+        Diagnostics.log("command: ${p.action.name.lowercase()} → ${r.outcome.name.lowercase()}")
+        val tx = if (context.resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt
+        val kid = state.kidName.ifBlank { p.name }
+        val cmd = "/" + p.name
+        val name = (r.contact ?: candidate).name
+        val here = when {
+            o.optBoolean("selfChat") -> null
+            r.contact == null -> tx.cmdHereNotIn(kid)
+            r.contact.paused -> tx.cmdHerePaused(name, kid)
+            else -> tx.cmdHereReceives(name, kid)
+        }
+        val answer = when (r.outcome) {
+            app.oie.logic.ParentCommand.Outcome.HELP -> tx.cmdHelp(kid, cmd, here)
+            app.oie.logic.ParentCommand.Outcome.UNKNOWN -> tx.cmdUnknown(p.word, kid, cmd)
+            app.oie.logic.ParentCommand.Outcome.PAUSED -> tx.cmdPaused(name, kid, cmd)
+            app.oie.logic.ParentCommand.Outcome.RESUMED -> tx.cmdResumed(name, kid)
+            app.oie.logic.ParentCommand.Outcome.ADDED -> tx.cmdAdded(name, kid, candidate.isGroup)
+            app.oie.logic.ParentCommand.Outcome.ALREADY_IN -> tx.cmdAlready(name, kid)
+            app.oie.logic.ParentCommand.Outcome.REMOVED -> tx.cmdRemoved(name, kid)
+            app.oie.logic.ParentCommand.Outcome.NOT_IN_LIST -> tx.cmdNotIn(kid, cmd)
+            app.oie.logic.ParentCommand.Outcome.OWN_CHAT -> tx.cmdOwnChat(kid, cmd)
+        }
+        noteToSelf(answer)
+        return true
+    }
+
+    /** Oiê's answer in the parent's own chat, at a person's pace like every send (rules L2, L3). */
+    private fun noteToSelf(text: String) {
+        bg {
+            val wait = app.oie.logic.SendPace.waitMs(sentAt, System.currentTimeMillis())
+            if (wait > 0) Thread.sleep(wait)
+            val r = runCatching { link?.sendSelfNote(text) }
+            r.getOrNull()?.let { ours += it }
+            sentAt += System.currentTimeMillis()
+            Diagnostics.log("send answer: ${r.exceptionOrNull()?.let { "failed: ${it.message}" } ?: "ok"}")
         }
     }
 

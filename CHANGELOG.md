@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.21.0
+- **"Oi Tito" counts.** A message that starts with a short greeting and then the kid's name now reaches the kid: "Oi Tito", "Bom dia, Tito", "E aí Tito", "Olá Tito". The name in the middle of a sentence still doesn't.
+- **Nicknames.** In Ajustes e ajuda › Nomes, "Apelidos" takes as many names as the family uses ("Tito, Chico, Fran"). Any of them works, with or without a greeting. The kid's messages still go out with the main name.
+- **Commands from your WhatsApp.** In any chat on your phone, send "/Tito" (or any of the kid's names). Oiê answers in your chat with yourself, with the list:
+  - "/Tito parar" pauses that chat: nothing from it reaches the kid, and it leaves the kid's home;
+  - "/Tito voltar" brings it back;
+  - "/Tito adicionar" adds that chat to the kid's contacts;
+  - "/Tito remover" takes it out.
+- Only your own WhatsApp can use commands. People in the chat see your command, but not Oiê's answers. A paused chat shows "Pausado pelo seu WhatsApp" in Contatos, and you can resume it there too.
+
 ## 0.20.0
 - **Fixed: the tablet said "desconectado" while WhatsApp showed it connected.** Each time Oiê came back to the screen, it asked to connect again. When it was already connected, that answer was taken for an error, and Oiê showed "disconnected" over a working link. Now Oiê checks first and leaves a working link alone. If the screen was wrong, it corrects itself when Oiê opens.
 - Turning the tablet or coming back to Oiê while the QR is on screen no longer restarts the linking.

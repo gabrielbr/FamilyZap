@@ -30,6 +30,7 @@ object Codec {
         put("step", (s.route as? Route.Setup)?.step ?: -1)
         put("parentName", s.parentName)
         put("kidName", s.kidName)
+        put("kidNicknames", JSONArray(s.kidNicknames.toList()))
         put("pinHash", s.pinHash ?: JSONObject.NULL)
         put("kidNoticeSeen", s.kidNoticeSeen)
         put("addRequested", s.addRequested).put("contactTipUsed", s.contactTipUsed)
@@ -43,7 +44,7 @@ object Codec {
         put("allowed", JSONArray(s.allowed.map {
             JSONObject().put("id", it.id).put("name", it.name).put("group", it.isGroup)
                 .put("quietException", it.quietException).put("wholeGroup", it.showWholeGroup)
-                .put("phone", it.phone).put("waName", it.waName)
+                .put("phone", it.phone).put("waName", it.waName).put("paused", it.paused)
         }))
         put("periods", JSONArray(s.periods.map {
             JSONObject().put("name", it.name).put("days", JSONArray(it.days.map { d -> d.value }))
@@ -65,6 +66,7 @@ object Codec {
         if (o.optInt("v") != VERSION) return
         s.parentName = o.optString("parentName")
         s.kidName = o.optString("kidName")
+        s.kidNicknames.clear(); o.optJSONArray("kidNicknames")?.let { a -> for (i in 0 until a.length()) s.kidNicknames += a.getString(i) }
         s.pinHash = if (o.isNull("pinHash")) null else o.getString("pinHash")
         s.kidNoticeSeen = o.optBoolean("kidNoticeSeen")
         s.addRequested = o.optBoolean("addRequested")
@@ -82,7 +84,7 @@ object Codec {
         s.allowed.clear()
         o.optJSONArray("allowed")?.let { a ->
             for (i in 0 until a.length()) a.getJSONObject(i).run {
-                s.allowed += Contact(getString("id"), getString("name"), optBoolean("group"), optBoolean("quietException"), optBoolean("wholeGroup"), optString("phone"), optString("waName"))
+                s.allowed += Contact(getString("id"), getString("name"), optBoolean("group"), optBoolean("quietException"), optBoolean("wholeGroup"), optString("phone"), optString("waName"), optBoolean("paused"))
             }
         }
         o.optJSONArray("periods")?.let { a ->
