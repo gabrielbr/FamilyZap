@@ -38,6 +38,19 @@ Every new or changed screen, flow, page or asset is designed with, and audited a
 
 The audit goes in `audits/YYYY-MM-DD-<version>-<topic>.md`. Fix P0 and P1 before merging. Never claim a skill was used without loading it.
 
+**Never rush (the owner's standing instruction, 2026-11-19).** No change is done quickly or partly. Every change, however small, goes through the whole process, in this order:
+1. **Design.** Write or update the flow (`docs/flows/`) with ux-user-flows before building.
+2. **Develop.** Build it, with tests for the logic.
+3. **Audit.** Run all four skills, loaded and read:
+   - look at every changed screen in the tablet and phone screenshots (`ScreensTest`, `PhoneScreensTest`), light and dark, normal and large text;
+   - score the result;
+   - write the audit file.
+4. **Fix.** Fix every P0 and P1, re-record the screenshots and look at them again.
+5. **Docs.** Update README, CHANGELOG, STATUS, the flow, the roadmap and the decisions.
+6. **Ship.** Run the full check, open the PR, merge when green, release.
+
+A fix found during the audit goes through the same steps.
+
 ## How changes go in
 - Work on a branch and open a PR. **Always merge it yourself (squash) once the work is finished and verified**: checks green, reviews resolved, no open P0/P1. Don't leave PRs waiting (the owner's standing instruction, 2026-11-18). Then release.
 - **Docs on every change.** A change without its docs isn't done. Update: README, CHANGELOG (plain words), `docs/<feature>.md`, `docs/roadmap.md`, `docs/decisions/`.
