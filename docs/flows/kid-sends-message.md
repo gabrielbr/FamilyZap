@@ -49,7 +49,7 @@ flowchart TD
 | 3c | **Photo** | Taps the photo button, picks **Câmera** or **Galeria**, then **Enviar** | Asks for the camera or photos permission the first time, with a reason in plain words. Shows a big preview with **Enviar** and **Trocar**. |
 | 3d | **Sticker** | Taps the sticker button, taps a sticker | Opens the Oiê set as a sheet. One tap sends. |
 | 4 | **Sending** | Can tap **Desfazer** within 5 s | The message shows in the chat as "Enviando…", with a **Desfazer** snackbar for 5 s. Nothing leaves the tablet until the 5 s are up. |
-| 5 | **Sent** | — | Goes out through the parent's WhatsApp. "Enviada · 16h32" shows under the **latest** sent message only (less-is-more: a state is said once). The family sees it from the parent's number, tagged with the kid's name, e.g. "Tito: Saudade, vó". |
+| 5 | **Sent** | — | Goes out through the parent's WhatsApp. "Enviada · 16h32" shows under the **latest** sent message only (less-is-more: a state is said once). The family sees it from the parent's number, tagged with the kid's name, e.g. "Tito: Saudade, vó" (since v0.22: in bold, after the emoji the parent chose: "😎 **Tito**: Saudade, vó"). |
 
 ## v0.11: real voice
 Recording is real: Opus in Ogg on Android 10 and newer (WhatsApp's own voice-note format), AAC before that. The recording is sealed the moment it stops and goes out as a WhatsApp voice note (PTT). The microphone permission is asked at the end of setup, with the parent, or at the first recording on an older setup. If recording can't start: "Não deu para gravar. Tente de novo."
@@ -92,6 +92,25 @@ Recording is real: Opus in Ogg on Android 10 and newer (WhatsApp's own voice-not
 - **Data:** messages go out from the tablet through the parent's WhatsApp link. Nothing is stored on our servers.
 - **Product law:** the kid can only reach allowed contacts. No search, no new numbers, no forwarding to people outside the list.
 - **Open:** the Oiê sticker set still has to be drawn (Stage 5 assets); the 2-minute limit for voice messages is an assumption to test.
+
+## v0.22: the name in bold, with an emoji
+_The owner, 2026-11-19: "the name of Tito when sent to WhatsApp should be in bold, and the parent could choose an emoji, so readability would be better", e.g. `😎*Tito*: (message)`._
+
+- **What the family sees:** WhatsApp's own bold: `*Tito*` shows as **Tito**. With an emoji: 😎**Tito**: Saudade, vó. A photo's or sticker's caption is the name alone, the same way (😎**Tito**).
+- **Where the parent chooses:** Ajustes e ajuda › Nomes › **Emoji antes do nome**, a field that takes one emoji from the keyboard. It's optional; empty means just the bold name.
+- **What it shows:** a line under the field, "Fica assim no WhatsApp:", with a sample message rendered the way WhatsApp will show it. So the parent sees the result without sending anything.
+- **Rules:**
+  - only one emoji is kept (the first); letters and numbers aren't an emoji and are ignored;
+  - a star (*) in the kid's name is dropped, so the bold can't break;
+  - the emoji is the parent's content, sent to WhatsApp. Oiê's own interface still uses no emoji: the field shows what the parent typed, nothing more.
+- **Nothing else changes:** the message rule reads the family's replies, not the kid's signature. The kid's screen shows the kid's own messages without the signature, as before.
+
+| # | The parent | The system |
+|---|---|---|
+| 1 | Opens Ajustes e ajuda › Nomes | Sees "Emoji antes do nome" (empty) and "Fica assim no WhatsApp: **Tito**: Oi, vó". |
+| 2 | Taps the field, picks 😎 on the keyboard | The preview shows 😎**Tito**: Oi, vó at once; saved. |
+| 3 | Types more, or a letter | Only the first emoji is kept; a letter alone is ignored and the preview shows no emoji. |
+| 4 | Clears the field | Back to the bold name alone. |
 
 ## Flow review (ux-user-flows §13)
 | # | Question | Result |

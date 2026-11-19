@@ -44,7 +44,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         bg { deliver(message, retried = false) }
     }
 
-    private fun signed(text: String): String = app.oie.logic.Signature.sign(state.kidName, text)
+    private fun signed(text: String): String = app.oie.logic.Signature.sign(state.kidName, text, state.kidEmoji)
 
     private fun deliver(m: app.oie.logic.Message, retried: Boolean) {
         val wait = app.oie.logic.SendPace.waitMs(sentAt, System.currentTimeMillis())

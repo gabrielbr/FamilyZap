@@ -344,6 +344,9 @@ private fun AboutAndHelp(state: AppState) {
     app.oie.ui.setup.Field(tx.nicknamesLabel(state.kidName.ifBlank { tx.theKid }), nicks, {
         nicks = it; state.kidNicknames.clear(); state.kidNicknames.addAll(app.oie.logic.KidNames.parse(it))
     }, tx.nicknamesHelp(state.kidName.ifBlank { tx.theKid }))
+    // v0.22: the kid's name goes out in WhatsApp's bold, after an emoji the parent may choose; the line below shows the result.
+    app.oie.ui.setup.Field(tx.emojiLabel, state.kidEmoji, { state.kidEmoji = app.oie.logic.Signature.emojiOf(it) }, tx.emojiHelp)
+    SignaturePreview(state.kidName.ifBlank { tx.theKid }, state.kidEmoji)
     Text(tx.help, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     help.forEachIndexed { i, (q, a) ->
         Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { open = if (open == i) null else i }.padding(vertical = OTokens.Spacing.space3)) {
@@ -426,4 +429,21 @@ private fun Problems(first: Boolean) {
         }
         Text(tx.reportPrivacy, style = OieType.caption, color = c.muted)
     }
+}
+
+/** "Fica assim no WhatsApp:" and a sample message, with the name in bold as WhatsApp shows it (v0.22). */
+@Composable
+private fun SignaturePreview(kid: String, emoji: String) {
+    val c = OieTheme.colors
+    val tx = str
+    Text(tx.looksLikeOnWhatsApp, style = OieType.caption, color = c.muted)
+    Text(
+        androidx.compose.ui.text.buildAnnotatedString {
+            append(emoji)
+            pushStyle(androidx.compose.ui.text.SpanStyle(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)); append(kid.replace("*", "").trim()); pop()
+            append(": " + tx.sampleMessage)
+        },
+        style = OieType.body, color = c.ink,
+        modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.surface).padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
+    )
 }

@@ -181,4 +181,7 @@ class ScreensTest {
     @Test fun contactsPaused() = shot("26-contacts-paused", false) { ParentArea(paused(), 0) }
     @Test fun contactsPausedDark() = shot("26-contacts-paused", true) { ParentArea(paused(), 0) }
     @Test fun kidHomeWithAPausedChat() = shot("27-kid-home-paused", false) { KidHome(paused().apply { kidNoticeSeen = true }) }
+
+    // v0.22: the emoji before the kid's bold name, and its preview.
+    @Test fun settingsSignatureDark() = shot("28-settings-signature", true) { ParentArea(ready().apply { kidEmoji = "😎" }, 3) }
 }
