@@ -85,7 +85,7 @@ fun KidHome(state: AppState) {
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
                             ) {
-                                Initial(ct.name, OTokens.Size.contactTile)
+                                app.oie.ui.common.Avatar(ct, OTokens.Size.contactTile)
                                 Text(ct.name, style = OieType.label, color = c.ink)
                                 if (unread > 0) Text(
                                     tx.newCount(unread), style = OieType.caption, color = c.page,

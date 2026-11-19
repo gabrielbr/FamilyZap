@@ -130,6 +130,28 @@ _The owner asked (2026-11-19): "my parents are saved under their own names; for 
 | 14 | Ethics | ✅ The kid isn't misled about who it is: the parent picks a family name for a real family member; the number stays visible to the parent. |
 | 15 | Evidence | 🟡 Does the parent find "tap to rename" in Contatos? The hint line is there; the owner's test will say. |
 
+## v0.26: profile pictures
+_The owner, 2026-11-19: "the contacts don't bring all their information, for example the profile picture."_
+
+- **What:** each allowed person or group shows their WhatsApp profile picture instead of the letter circle:
+  - on the kid's home (the big faces);
+  - in the chat's header;
+  - in Contatos and setup.
+- **Whose:** only contacts the parent allowed. Oiê never looks up anyone else's picture.
+- **No picture:** when a contact has none, or hides it from the parent's number (WhatsApp's own privacy setting), the letter circle stays. Nothing says why: it's their choice.
+- **When:**
+  - the picture is checked when the link connects and when someone is added;
+  - each contact at most once a day, one at a time;
+  - it asks only "did it change?", using WhatsApp's picture id, so an unchanged picture isn't downloaded again.
+- **What's kept:** the small preview size (the one WhatsApp uses in chat lists), sealed on the tablet like photos (AES-GCM, Android Keystore). A removed contact's picture is deleted the next time pictures are checked.
+- **Product law:** pictures come from WhatsApp's own servers to the tablet, through the parent's link; nothing goes to Oiê's servers (there are none).
+
+| State | Shows |
+|---|---|
+| Picture known | The picture, round, the same size as the circle |
+| None, hidden, or not loaded yet | The letter circle, as before |
+| The contact changes their picture | The new one, within a day |
+
 ## Flow review (ux-user-flows §13)
 | # | Question | Result |
 |---|---|---|

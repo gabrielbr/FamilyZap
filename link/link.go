@@ -13,11 +13,14 @@ package oielink
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"image"
 	"image/jpeg"
+	"io"
+	"net/http"
 	"os"
 	"runtime/debug"
 	"sort"
@@ -566,6 +569,64 @@ func (k *Link) SendSelfNote(text string) (sent string, err error) {
 	id := k.c.GenerateMessageID()
 	_, err = k.c.SendMessage(context.Background(), own.ToNonAD(), &waE2E.Message{Conversation: proto.String(text)}, whatsmeow.SendRequestExtra{ID: id})
 	return string(id), err
+}
+
+// PictureMaxBytes caps a profile picture download (a preview is a few KB).
+const PictureMaxBytes = 1 << 20
+
+// Picture is an allowed contact's WhatsApp profile picture, preview size (v0.26). knownID is the
+// picture id the app already has, so an unchanged picture isn't downloaded again. Returns JSON:
+// {"state":"same"} | {"state":"none"} (no picture, or hidden from the parent's number) |
+// {"state":"new","id":"…","jpeg":"base64"}. The app asks only for contacts the parent allowed.
+func (k *Link) Picture(chat, knownID string) (out string, err error) {
+	defer k.guard("Picture", &err)
+	if !k.Paired() {
+		return "", ErrNotLinked
+	}
+	jid, err := types.ParseJID(chat)
+	if err != nil {
+		return "", err
+	}
+	info, err := k.c.GetProfilePictureInfo(context.Background(), jid, &whatsmeow.GetProfilePictureParams{Preview: true, ExistingID: knownID})
+	switch {
+	case errors.Is(err, whatsmeow.ErrProfilePictureNotSet), errors.Is(err, whatsmeow.ErrProfilePictureUnauthorized):
+		return encodePicture("none", "", nil)
+	case err != nil:
+		return "", err
+	case info == nil || info.URL == "":
+		return encodePicture("same", knownID, nil)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, info.URL, nil)
+	if err != nil {
+		return "", err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("picture: http %d", resp.StatusCode)
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, PictureMaxBytes))
+	if err != nil {
+		return "", err
+	}
+	return encodePicture("new", info.ID, body)
+}
+
+func encodePicture(state, id string, jpeg []byte) (string, error) {
+	out := map[string]string{"state": state}
+	if id != "" && state != "none" {
+		out["id"] = id
+	}
+	if len(jpeg) > 0 {
+		out["jpeg"] = base64.StdEncoding.EncodeToString(jpeg)
+	}
+	b, err := json.Marshal(out)
+	return string(b), err
 }
 
 // IsSelfChat says whether chat is the parent's own chat, by phone number or by LID.

@@ -198,6 +198,43 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         }
     }
 
+    /** Profile pictures are fetched on their own thread, so a check never delays a message (v0.26). */
+    private val pictures = Executors.newSingleThreadExecutor()
+    @Volatile private var checkingPictures = false
+
+    /**
+     * Checks the allowed contacts' WhatsApp profile pictures that are due (at most once a day each,
+     * one at a time), keeps new ones sealed on the tablet, and deletes pictures no contact uses
+     * (docs/flows/contacts-quiet-hours.md, v0.26). Only allowed contacts are ever looked up.
+     */
+    fun refreshPhotos() {
+        main.post {
+            if (checkingPictures || link == null || !state.realMode) return@post
+            val due = state.allowed.filter { app.oie.logic.ProfilePicture.due(it, state.clock()) }
+            if (due.isEmpty()) return@post
+            checkingPictures = true
+            pictures.execute {
+                var changed = 0
+                for (c in due) {
+                    val a = app.oie.logic.ProfilePicture.parse(runCatching { link?.picture(c.id, c.photoId) }.getOrNull()) ?: continue
+                    val stored = a.jpeg?.let { runCatching { Photos.keepBytes(context, it, Photos.AVATAR) }.getOrNull() }
+                    if (a.state != app.oie.logic.ProfilePicture.State.SAME) changed++
+                    main.post {
+                        val i = state.allowed.indexOfFirst { it.id == c.id }
+                        if (i < 0) stored?.let { Photos.forget(context, it) }
+                        else state.allowed[i] = app.oie.logic.ProfilePicture.apply(state.allowed[i], a, stored, state.clock())
+                    }
+                    Thread.sleep(PICTURE_GAP_MS)
+                }
+                Diagnostics.log("pictures: checked ${due.size}, changed $changed")
+                main.post {
+                    checkingPictures = false
+                    Photos.forgetAvatarsExcept(context, state.allowed.map { it.photo }.filter { it.isNotEmpty() }.toSet())
+                }
+            }
+        }
+    }
+
     /** Command ids already acted on, so a redelivery doesn't answer twice. */
     private val commandsDone = java.util.LinkedHashSet<String>()
 
@@ -225,7 +262,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             isGroup = chat.endsWith("@g.us"),
         )
         val r = app.oie.logic.ParentCommand.apply(p.action, ids, o.optBoolean("selfChat"), candidate, state.allowed.toList())
-        if (r.allowed != state.allowed.toList()) { state.allowed.clear(); state.allowed.addAll(r.allowed) }
+        if (r.allowed != state.allowed.toList()) { state.allowed.clear(); state.allowed.addAll(r.allowed); refreshPhotos() }
         Diagnostics.log("command: ${p.action.name.lowercase()} → ${r.outcome.name.lowercase()}")
         val tx = if (context.resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt
         val kid = state.kidName.ifBlank { p.name }
@@ -288,7 +325,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                     // A fresh pairing starts the contact list from nothing (v0.17).
                     if (kind == "paired") { ls.contactsSynced = false; ls.linkedAt = state.clock() }
                     else if (ls.linkedAt == 0L) ls.linkedAt = state.clock()
-                    ls.status = LinkState.Status.Connected; ls.downSince = 0L; loadContacts()
+                    ls.status = LinkState.Status.Connected; ls.downSince = 0L; loadContacts(); refreshPhotos()
                     // L4: what failed while the link was down goes once more, and only once.
                     generateSequence { retryOnConnect.poll() }.toList().forEach { m -> bg { deliver(m, retried = true) } }
                 }
@@ -301,5 +338,10 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 "contactsSynced" -> { ls.contactsSynced = true; loadContacts() }
             }
         }
+    }
+
+    private companion object {
+        /** A pause between two picture checks, so they never come in a burst (rule L3's spirit). */
+        const val PICTURE_GAP_MS = 1_000L
     }
 }

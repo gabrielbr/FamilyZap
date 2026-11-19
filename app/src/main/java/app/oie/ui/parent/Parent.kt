@@ -191,7 +191,7 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
                 Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.changeNameA11y(ct.name)) { touched(); editing = ct.id; state.contactTipUsed = true },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
-            Initial(ct.name, OTokens.Size.avatar)
+            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar)
             // The switch is always labelled, on or off, right under the name, so it fits a phone too (v0.13 audit).
             Column(Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2)) {
                 Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -226,6 +226,8 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
     // v0.12: the parent's contacts arrive a little after linking; reload them each time Contatos opens.
     val real = LocalRealLink.current
     LaunchedEffect(Unit) { real?.loadContacts() }
+    // v0.26: someone just added gets their picture now, not tomorrow (each contact at most once a day).
+    LaunchedEffect(state.allowed.size) { real?.refreshPhotos() }
     val all = fresh.filter { a -> state.allowed.none { it.id == a.id } }
     var query by remember { mutableStateOf("") }
     // People first, then groups; a search narrows them, 30 at a time.

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.26.0
+- **Profile pictures.** Each allowed contact and group now shows their WhatsApp profile picture instead of the letter: on the kid's home, in the chat, and in Contatos. Someone with no picture, or who hides it, keeps the letter.
+- Only the contacts you allowed are looked up, at most once a day each, and the pictures are kept sealed on the tablet.
+
 ## 0.25.0
 - **Oiê in a bubble.** In Ajustes e ajuda › Bolha na tela, turn on "Mostrar a bolha". A round Oiê bubble floats over other apps. Tapping it opens Oiê in a smaller window, like a phone on top of the screen: the family's faces, the chats, everything. Tap outside or Back to fold it away; drag it to the X to remove it.
 - Android has to allow bubbles for Oiê. If it doesn't yet, the setting says so and "Permitir bolhas" opens the right Android screen. On Samsung tablets it also shows where Samsung keeps it (Notificações flutuantes › Bolhas).

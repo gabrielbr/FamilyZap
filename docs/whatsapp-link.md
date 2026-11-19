@@ -29,6 +29,9 @@ had a read-only rule test, and v0.8 turned the kid's side to the real link once 
 ### "Contacts complete" (v0.17)
 The link emits `contactsSynced` when WhatsApp's contact snapshot has been applied (`AppStateSyncComplete` for `critical_unblock_low`), or after its own one-time fetch. The app's `ContactSync.state` turns that, the count of people and the time since linking into the status line.
 
+### Profile pictures (v0.26)
+`Picture(chat, knownID)` asks WhatsApp for an allowed contact's picture (preview size), passing the id the app has, so an unchanged picture isn't downloaded. It's called for allowed contacts only, at most once a day each and one per second, on its own thread. "Not set" and "hidden from you" both read as no picture.
+
 ### Temporary files (v0.23)
 The session database opens with `temp_store(2)`: SQLite keeps its temporary tables in memory. Android has none of the temp folders SQLite looks for, so large writes failed with "disk I/O error (6410)" (`SQLITE_IOERR_GETTEMPPATH`); the owner's report (issue #34) showed it when WhatsApp sent the redacted phone numbers of joined groups.
 

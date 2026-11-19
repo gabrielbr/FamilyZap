@@ -230,7 +230,7 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
-                Initial(ct.name, OTokens.Size.avatar)
+                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar)
                 // The group note sits under the name, so it fits a phone (v0.17 audit).
                 Column(Modifier.weight(1f)) {
                     Text(ct.name, style = OieType.label, color = c.ink)
