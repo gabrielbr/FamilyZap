@@ -32,6 +32,24 @@ _Designed with `ux-user-flows` on 2026-11-19 (v0.14), after the owner's first re
 | 3 | Elsewhere | Pastes it where they choose | Nothing is sent by Oiê. |
 | 4 | Same | Taps **Apagar relatório** (only when there is one) | Clears it at once; nothing personal is lost, so there's no confirmation. |
 
+## v0.18: Enviar para o GitHub
+_The owner asked (2026-11-19) whether the report could go to GitHub directly, as an issue. Decided with the owner: issues go to the **private** FamilyZap repo, where only they can file and read them._
+
+- **How:** the button opens GitHub's own "new issue" page in the browser, with the title and the report filled in. The parent reads it there and taps **Submit new issue**, logged in as themselves.
+- **Why this way, and not a direct upload:**
+  - Oiê holds no GitHub token: a token inside an app can be pulled out by anyone who has the app;
+  - nothing leaves the tablet unless the parent sends it (product law);
+  - the parent sees exactly what goes before it goes.
+- **Size:** a web address has a length limit. If the report doesn't fit, the newest lines are kept and the issue says that the full report can still be copied on the tablet.
+- **Title:** "Relatório do tablet · Oiê {version} · {date}", plus "fechou sozinho" when there was a crash.
+- **Who can use it:** the owner, logged in to GitHub with access to the repo. Anyone else would see GitHub's "not found" page, and Copiar is still there for them.
+
+| # | The parent | The system |
+|---|---|---|
+| 1 | Taps **Enviar para o GitHub** in Problemas | Opens the browser on the new-issue page, filled in. |
+| 2 | Reads it and taps Submit new issue | GitHub files the issue. Oiê isn't involved. |
+| 3 | Comes back to Oiê | Nothing changed. Apagar relatório stays for when the problem is solved. |
+
 ## States
 - **Empty:** "Nenhum problema guardado." There's nothing to copy or clear.
 - **With lines but no crash:** Copiar and Apagar are shown, with no crash line.

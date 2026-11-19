@@ -386,6 +386,14 @@ private fun Problems(first: Boolean) {
     }
     if (!empty) {
         app.oie.ui.setup.ButtonRow {
+            // v0.18: GitHub's own new-issue page, filled in; the parent submits it as themselves.
+            val context = androidx.compose.ui.platform.LocalContext.current
+            QuietButton(tx.sendToGitHub, {
+                val stamp = java.time.LocalDateTime.now()
+                val title = tx.issueTitle(app.oie.BuildConfigInfo.VERSION, stamp.dayOfMonth, stamp.monthValue, crashAt != null)
+                val url = app.oie.logic.IssueLink.build(title, app.oie.data.Diagnostics.header(), app.oie.data.Diagnostics.lines(), tx::reportCut)
+                runCatching { context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))) }
+            })
             QuietButton(if (copied) tx.copied else tx.copyReport, {
                 clipboard.setText(androidx.compose.ui.text.AnnotatedString(app.oie.data.Diagnostics.report())); copied = true
             })
