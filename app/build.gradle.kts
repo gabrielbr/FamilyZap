@@ -13,8 +13,8 @@ android {
         applicationId = "app.oie" // permanent (decision 0002): never rename
         minSdk = 26
         targetSdk = 35
-        versionCode = 28
-        versionName = "0.28.0"
+        versionCode = 29
+        versionName = "0.29.0"
     }
 
     // Release signing comes only from CI secrets (docs/release.md). Without them the release build is unsigned.

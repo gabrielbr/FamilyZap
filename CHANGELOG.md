@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.29.0
+- **A bubble for each chat.** With "Bolha na tela" on, a chat gets its own bubble, with the person's picture, when a message reaches the kid or the kid writes. Two people, two bubbles. Tapping one opens only that chat in a small window, with the keyboard already up to answer. Back folds it away.
+- The Oiê bubble stays, for everyone else.
+- On a phone-size screen (and in the bubbles), the camera and stickers step aside while the kid types, so the text has room; they come back when the field is empty.
+
 ## 0.28.0
 - **The kid can send videos**, up to 3 minutes: the camera button now offers "Tirar foto", "Gravar vídeo" and "Galeria". Oiê shrinks the video to 720p on the tablet ("Preparando o vídeo…"), shows it, and sends it with Enviar. A video longer than 3 minutes gets "Escolha um mais curto".
 - **The kid can send GIFs** saved on the tablet (from Galeria). Oiê turns them into WhatsApp's GIF form, so they loop in the family's WhatsApp. There's no GIF search: nothing about the kid leaves the tablet.

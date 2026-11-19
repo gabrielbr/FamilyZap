@@ -110,6 +110,7 @@ interface Strings {
     val pause: String; val play: String
     // v0.28: sending videos and GIFs.
     val photoOrVideo: String; val takePhoto: String; val recordVideo: String
+    val writeShort: String
     fun videoFor(to: String): String
     fun gifFor(to: String): String
     val preparingVideo: String; val videoTooLong: String; val videoTooBigToSend: String; val videoError: String
@@ -305,6 +306,7 @@ object Pt : Strings {
     override fun playVideoA11y(seconds: Int) = "Ver o vídeo, %d:%02d".format(seconds / 60, seconds % 60)
     override fun videoTooBig(parent: String) = "Vídeo grande: só abre no WhatsApp de $parent."
     override val pause = "Pausar"; override val play = "Tocar"
+    override val writeShort = "Escreva"
     override val photoOrVideo = "Foto ou vídeo"; override val takePhoto = "Tirar foto"; override val recordVideo = "Gravar vídeo"
     override fun videoFor(to: String) = "Vídeo para $to"
     override fun gifFor(to: String) = "GIF para $to"
@@ -344,7 +346,7 @@ object Pt : Strings {
     override val search = "Buscar"; override val searchHelp = "Busque pelo nome ou pelo número. Os contatos chegam aos poucos depois de conectar."
     override val addByNumber = "Adicionar pelo número"; override val numberLabel = "Número com DDD"; override val numberHelp = "Com o código do país: 55 11 99999-0000."
     override val bubbleTitle = "Bolha na tela"
-    override val bubbleBody = "O Oiê fica numa bolha por cima dos outros apps. Tocar na bolha abre o Oiê numa janela menor."
+    override val bubbleBody = "O Oiê fica numa bolha por cima dos outros apps, e cada conversa ativa ganha a sua. Tocar numa bolha abre uma janela menor."
     override val bubbleSwitch = "Mostrar a bolha"
     override val bubbleOnLine = "A bolha está na tela. Para tirar, arraste até o X ou desligue aqui."
     override val bubbleNeedsPermission = "O Android ainda não deixa o Oiê mostrar bolhas."
@@ -522,6 +524,7 @@ object En : Strings {
     override fun playVideoA11y(seconds: Int) = "Watch the video, %d:%02d".format(seconds / 60, seconds % 60)
     override fun videoTooBig(parent: String) = "Big video: it only opens in $parent's WhatsApp."
     override val pause = "Pause"; override val play = "Play"
+    override val writeShort = "Write"
     override val photoOrVideo = "Photo or video"; override val takePhoto = "Take a photo"; override val recordVideo = "Record a video"
     override fun videoFor(to: String) = "Video for $to"
     override fun gifFor(to: String) = "GIF for $to"
@@ -561,7 +564,7 @@ object En : Strings {
     override val search = "Search"; override val searchHelp = "Search by name or number. Contacts arrive bit by bit after linking."
     override val addByNumber = "Add by number"; override val numberLabel = "Phone number"; override val numberHelp = "With the country code: 55 11 99999-0000."
     override val bubbleTitle = "Bubble on screen"
-    override val bubbleBody = "Oiê stays in a bubble on top of other apps. Tapping the bubble opens Oiê in a smaller window."
+    override val bubbleBody = "Oiê stays in a bubble on top of other apps, and each active chat gets its own. Tapping a bubble opens a smaller window."
     override val bubbleSwitch = "Show the bubble"
     override val bubbleOnLine = "The bubble is on screen. To remove it, drag it to the X or turn it off here."
     override val bubbleNeedsPermission = "Android doesn't let Oiê show bubbles yet."

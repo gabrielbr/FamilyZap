@@ -135,4 +135,10 @@ class PhoneScreensTest {
     @Test fun videoTooLong() = shot("p24-video-too-long", bigText = true) {
         app.oie.ui.kid.VideoPreview(app.oie.ui.kid.VideoDraft(android.net.Uri.parse("content://test/clip"), gif = false, problem = app.oie.data.VideoPrep.Why.TOO_LONG), "Vovó", {}, {}, {})
     }
+
+    // v0.29: a chat's bubble window: only that chat, the field focused (the keyboard comes up on a device).
+    @Test fun chatBubble() = shot("p25-chat-bubble", bigText = true) { Conversation(ready(), "vovo", inBubble = true, onLeave = {}) }
+    @Test fun chatBubbleTyping() = shot("p26-chat-bubble-typing", bigText = true) {
+        Conversation(ready().apply { drafts["vovo"] = "Oi vó, tudo bem? Domingo eu vou" }, "vovo", inBubble = true, onLeave = {})
+    }
 }

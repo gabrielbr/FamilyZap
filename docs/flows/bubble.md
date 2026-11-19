@@ -30,6 +30,28 @@ _Designed with `ux-user-flows` on 2026-11-19 (v0.25), from the owner's request: 
 - **Quiet and silent:** the bubble's own notification makes no sound and is hidden behind the bubble (Android's "suppress notification"). Messages still arrive as before.
 - **Product law:** the bubble shows only what the full app shows: the allowed contacts and the parent area behind the PIN.
 
+## v0.29: a bubble for each active chat
+_The owner, 2026-11-19: "bubbles for each of the chats that are active. If the kid is talking with two people, there are two bubbles. Tapping one opens just that chat, with the text field focused, so the keyboard comes up."_
+
+- **Which chats:** while "Bolha na tela" is on, a chat gets its own bubble when a message reaches the kid or the kid sends one. That's Android's own conversation bubble, the way messaging apps do it. Each shows the person's picture (or their letter), and two active chats mean two bubbles. The general Oiê bubble stays, for reaching everyone else.
+- **Tapping a chat's bubble:**
+  - opens only that chat, in the small window: its messages, the camera, stickers and the microphone;
+  - the text field is already focused and the keyboard is up, to answer straight away;
+  - Back, or the arrow, folds the window back into the bubble;
+  - there's no way from it to the other chats or to the parent area (that's the Oiê bubble's job).
+- **A new message** in a chat with a bubble shows on the bubble (Android's dot) and in the notification shade as before.
+- **The kid's own send** keeps that chat's bubble on screen, silently (no notification for one's own message).
+- **A paused or removed chat** loses its bubble the next time Oiê opens, and the window closes if it's open.
+- **Quiet hours:** the chat's window says so in place of the field, as in the full app; the keyboard doesn't come up.
+- **Limits:** Android shows a handful of bubbles at once and may group them; that's the system's choice.
+
+| # | Who | Does | The system |
+|---|---|---|---|
+| 1 | Vovó | Writes "Tito, oi" | A notification and Vovó's bubble (her picture). |
+| 2 | The kid | Taps Vovó's bubble | Vovó's chat in the small window, the keyboard up. |
+| 3 | The kid | Types, sends | Sent as from the full app; 5-second undo. |
+| 4 | The kid | Back | The window folds; the bubble stays. |
+
 ## Flow review (ux-user-flows §13)
 | # | Question | Result |
 |---|---|---|

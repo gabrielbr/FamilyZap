@@ -41,7 +41,7 @@ import app.oie.ui.theme.OieTheme
  */
 class BubbleActivity : MainActivity()
 
-object BuildConfigInfo { const val VERSION = "0.28.0" }
+object BuildConfigInfo { const val VERSION = "0.29.0" }
 
 val LocalUpdater = androidx.compose.runtime.staticCompositionLocalOf<app.oie.update.Updater?> { null }
 val LocalNotifier = androidx.compose.runtime.staticCompositionLocalOf<app.oie.data.Notifier?> { null }
@@ -65,6 +65,8 @@ open class MainActivity : ComponentActivity() {
         // v0.25: the bubble comes back each time Oiê opens, while the parent keeps it on (it may have been dismissed).
         // Not from inside the bubble's own window: re-posting there would disturb the open window.
         if (this !is BubbleActivity && (application as OieApp).state.bubbleOn) app.oie.data.Bubble.show(this, tx)
+        // v0.29: chats paused or removed meanwhile lose their bubbles.
+        app.oie.data.Bubble.prune(this, (application as OieApp).state.reachable.map { it.id }.toSet())
     }
 
     override fun onNewIntent(intent: android.content.Intent) {
@@ -88,11 +90,18 @@ open class MainActivity : ComponentActivity() {
             OieTheme {
               androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides app.oie.ui.text.stringsFor(), LocalUpdater provides updater, LocalNotifier provides notifier, app.oie.ui.parent.LocalRealLink provides real) {
                 val c = OieTheme.colors
+                val bubbleChat = remember { if (this@MainActivity is BubbleActivity) intent.getStringExtra(app.oie.data.Bubble.EXTRA_CHAT) else null }
                 // The 4dp frame round every screen (the core rule), in coral.
                 Box(
                     Modifier.fillMaxSize().background(c.page).windowInsetsPadding(WindowInsets.safeDrawing)
                         .border(OTokens.Size.frame, c.frameLine),
                 ) {
+                    // v0.29: a chat's bubble shows only that chat, whatever the full app is showing.
+                    if (bubbleChat != null) {
+                        Conversation(state, bubbleChat, inBubble = true, onLeave = { finish() })
+                        BackHandler { finish() }
+                        return@Box
+                    }
                     Box(Modifier.fillMaxSize()) {
                         when (val r = state.route) {
                             is Route.Setup -> Setup(state, r.step, onClose = { finish() })
@@ -107,7 +116,7 @@ open class MainActivity : ComponentActivity() {
                     }
                 }
                 // System Back always works (android.md): one step back, never trapped.
-                BackHandler(enabled = state.route !is Route.KidHome && state.route != Route.Setup(0)) {
+                BackHandler(enabled = bubbleChat == null && state.route !is Route.KidHome && state.route != Route.Setup(0)) {
                     state.route = when (val r = state.route) {
                         is Route.Setup -> Route.Setup(r.step - 1)
                         Route.Pair -> Route.Parent(2)
