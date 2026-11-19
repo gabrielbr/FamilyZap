@@ -132,6 +132,10 @@ interface Strings {
     // v0.21: nicknames, paused chats, and the parent's commands from WhatsApp (docs/flows/parent-commands.md).
     fun nicknamesLabel(kid: String): String
     fun nicknamesHelp(kid: String): String
+    // v0.25: Oiê in a bubble (docs/flows/bubble.md).
+    val bubbleTitle: String; val bubbleBody: String; val bubbleSwitch: String; val bubbleOnLine: String
+    val bubbleNeedsPermission: String; val bubbleSamsung: String; val bubbleNeedsNotifications: String
+    val bubbleUnsupported: String; val bubbleAllow: String; val bubbleChannel: String; val bubbleText: String
     // v0.22: the emoji before the bold name.
     val emojiLabel: String; val emojiHelp: String; val looksLikeOnWhatsApp: String; val sampleMessage: String
     val pausedLine: String; val resumeChat: String
@@ -318,6 +322,15 @@ object Pt : Strings {
     override fun bannedFor(hours: Int) = "O WhatsApp bloqueou este número por cerca de $hours h. O Oiê parou e não vai tentar de novo sozinho."
     override val search = "Buscar"; override val searchHelp = "Busque pelo nome ou pelo número. Os contatos chegam aos poucos depois de conectar."
     override val addByNumber = "Adicionar pelo número"; override val numberLabel = "Número com DDD"; override val numberHelp = "Com o código do país: 55 11 99999-0000."
+    override val bubbleTitle = "Bolha na tela"
+    override val bubbleBody = "O Oiê fica numa bolha por cima dos outros apps. Tocar na bolha abre o Oiê numa janela menor."
+    override val bubbleSwitch = "Mostrar a bolha"
+    override val bubbleOnLine = "A bolha está na tela. Para tirar, arraste até o X ou desligue aqui."
+    override val bubbleNeedsPermission = "O Android ainda não deixa o Oiê mostrar bolhas."
+    override val bubbleSamsung = "Em tablets Samsung: Configurações › Notificações › Configurações avançadas › Notificações flutuantes › Bolhas."
+    override val bubbleNeedsNotifications = "Ative as notificações do Oiê para ver a bolha."
+    override val bubbleUnsupported = "Este tablet não tem bolhas (precisa do Android 11 ou mais novo)."
+    override val bubbleAllow = "Permitir bolhas"; override val bubbleChannel = "Bolha do Oiê"; override val bubbleText = "Toque para falar com a família"
     override val emojiLabel = "Emoji antes do nome"; override val emojiHelp = "Opcional. Escolha um no teclado."
     override val looksLikeOnWhatsApp = "Fica assim no WhatsApp:"; override val sampleMessage = "Oi, vó"
     override fun nicknamesLabel(kid: String) = "Apelidos de $kid"
@@ -515,6 +528,15 @@ object En : Strings {
     override fun bannedFor(hours: Int) = "WhatsApp blocked this number for about $hours h. Oiê stopped and won't try again on its own."
     override val search = "Search"; override val searchHelp = "Search by name or number. Contacts arrive bit by bit after linking."
     override val addByNumber = "Add by number"; override val numberLabel = "Phone number"; override val numberHelp = "With the country code: 55 11 99999-0000."
+    override val bubbleTitle = "Bubble on screen"
+    override val bubbleBody = "Oiê stays in a bubble on top of other apps. Tapping the bubble opens Oiê in a smaller window."
+    override val bubbleSwitch = "Show the bubble"
+    override val bubbleOnLine = "The bubble is on screen. To remove it, drag it to the X or turn it off here."
+    override val bubbleNeedsPermission = "Android doesn't let Oiê show bubbles yet."
+    override val bubbleSamsung = "On Samsung tablets: Settings › Notifications › Advanced settings › Floating notifications › Bubbles."
+    override val bubbleNeedsNotifications = "Turn on Oiê's notifications to see the bubble."
+    override val bubbleUnsupported = "This tablet has no bubbles (it needs Android 11 or newer)."
+    override val bubbleAllow = "Allow bubbles"; override val bubbleChannel = "Oiê bubble"; override val bubbleText = "Tap to talk to the family"
     override val emojiLabel = "Emoji before the name"; override val emojiHelp = "Optional. Pick one on the keyboard."
     override val looksLikeOnWhatsApp = "On WhatsApp it looks like this:"; override val sampleMessage = "Hi, Grandma"
     override fun nicknamesLabel(kid: String) = "$kid's nicknames"

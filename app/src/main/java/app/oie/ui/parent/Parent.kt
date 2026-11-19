@@ -347,6 +347,7 @@ private fun AboutAndHelp(state: AppState) {
     // v0.22: the kid's name goes out in WhatsApp's bold, after an emoji the parent may choose; the line below shows the result.
     app.oie.ui.setup.Field(tx.emojiLabel, state.kidEmoji, { state.kidEmoji = app.oie.logic.Signature.emojiOf(it) }, tx.emojiHelp)
     SignaturePreview(state.kidName.ifBlank { tx.theKid }, state.kidEmoji)
+    BubbleSetting(state)
     Text(tx.help, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     help.forEachIndexed { i, (q, a) ->
         Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { open = if (open == i) null else i }.padding(vertical = OTokens.Spacing.space3)) {
@@ -452,4 +453,48 @@ private fun SignaturePreview(kid: String, emoji: String) {
         style = OieType.body, color = c.ink,
         modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.surface).padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
     )
+}
+
+/**
+ * Bolha na tela (docs/flows/bubble.md, v0.25): the switch, and what Android still needs before the
+ * bubble can show. Re-read each time Oiê comes back from Android's settings.
+ */
+@Composable
+internal fun BubbleSetting(state: AppState) {
+    val c = OieTheme.colors
+    val tx = str
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var resumed by remember { mutableStateOf(0) }
+    val owner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(owner) {
+        val o = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_RESUME) resumed++ }
+        owner.lifecycle.addObserver(o)
+        onDispose { owner.lifecycle.removeObserver(o) }
+    }
+    val notifications = remember(resumed, state.bubbleOn) { app.oie.data.Bubble.notificationsAllowed(context) }
+    val allowed = remember(resumed, state.bubbleOn) { app.oie.data.Bubble.allowed(context) }
+    val shown = app.oie.logic.BubblePolicy.state(android.os.Build.VERSION.SDK_INT, state.bubbleOn, notifications, allowed)
+    Text(tx.bubbleTitle, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    Text(tx.bubbleBody, style = OieType.caption, color = c.muted)
+    if (shown == app.oie.logic.BubblePolicy.State.UNSUPPORTED) { Text(tx.bubbleUnsupported, style = OieType.body, color = c.ink); return }
+    Row(Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically) {
+        Text(tx.bubbleSwitch, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
+        Switch(
+            modifier = Modifier.semantics { contentDescription = tx.bubbleSwitch },
+            checked = state.bubbleOn,
+            onCheckedChange = { on -> state.bubbleOn = on; if (on) app.oie.data.Bubble.show(context, tx) else app.oie.data.Bubble.hide(context) },
+            colors = SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
+        )
+    }
+    when (shown) {
+        app.oie.logic.BubblePolicy.State.NEEDS_NOTIFICATIONS, app.oie.logic.BubblePolicy.State.NEEDS_PERMISSION -> {
+            val forNotifications = shown == app.oie.logic.BubblePolicy.State.NEEDS_NOTIFICATIONS
+            Text(if (forNotifications) tx.bubbleNeedsNotifications else tx.bubbleNeedsPermission, style = OieType.body, color = c.ink)
+            QuietButton(tx.bubbleAllow, { runCatching { context.startActivity(app.oie.data.Bubble.settingsIntent(context, notifications)) } })
+            // Samsung tablets hide bubbles behind their own "floating notifications" setting.
+            if (!forNotifications && android.os.Build.MANUFACTURER.equals("samsung", ignoreCase = true)) Text(tx.bubbleSamsung, style = OieType.caption, color = c.muted)
+        }
+        app.oie.logic.BubblePolicy.State.ON -> Text(tx.bubbleOnLine, style = OieType.caption, color = c.muted)
+        else -> {}
+    }
 }

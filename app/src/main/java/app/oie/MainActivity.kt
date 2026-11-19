@@ -35,12 +35,18 @@ import app.oie.ui.setup.Setup
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 
-object BuildConfigInfo { const val VERSION = "0.24.0" }
+/**
+ * Oiê's window inside its Android bubble (docs/flows/bubble.md, v0.25): the same app and state as
+ * [MainActivity], drawn in a phone-sized window over other apps.
+ */
+class BubbleActivity : MainActivity()
+
+object BuildConfigInfo { const val VERSION = "0.25.0" }
 
 val LocalUpdater = androidx.compose.runtime.staticCompositionLocalOf<app.oie.update.Updater?> { null }
 val LocalNotifier = androidx.compose.runtime.staticCompositionLocalOf<app.oie.data.Notifier?> { null }
 
-class MainActivity : ComponentActivity() {
+open class MainActivity : ComponentActivity() {
     private val updater by lazy { app.oie.update.Updater(applicationContext, this.lifecycleScope) }
 
     private val tx by lazy { if (resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt }
@@ -56,6 +62,9 @@ class MainActivity : ComponentActivity() {
         appState?.let { notifier.quietSummary(it.takeQuietSummary()) }
         // The link listens in the background while the test is on (LinkService); make sure it runs.
         if (appState?.linkState?.on == true) app.oie.data.LinkService.start(this)
+        // v0.25: the bubble comes back each time Oiê opens, while the parent keeps it on (it may have been dismissed).
+        // Not from inside the bubble's own window: re-posting there would disturb the open window.
+        if (this !is BubbleActivity && (application as OieApp).state.bubbleOn) app.oie.data.Bubble.show(this, tx)
     }
 
     override fun onNewIntent(intent: android.content.Intent) {

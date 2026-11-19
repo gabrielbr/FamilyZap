@@ -114,4 +114,10 @@ class PhoneScreensTest {
             app.oie.ui.setup.Field("Emoji antes do nome", "😎", {}, "Opcional. Escolha um no teclado.")
         }
     }
+
+    // v0.25: the kid's home as it opens inside the bubble's phone-sized window, at 1.3× text.
+    @Test fun settingsBubble() = shot("p21-settings-bubble", bigText = true) {
+        Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.BubbleSetting(ready().apply { bubbleOn = true }) }
+    }
+    @Test fun kidHomeInTheBubble() = shot("p20-kid-home-bubble", bigText = true) { KidHome(ready()) }
 }
