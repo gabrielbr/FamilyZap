@@ -123,6 +123,10 @@ interface Strings {
     val notOnWhatsApp: String; val lookUpFailed: String; val looking: String
     fun unlinkConfirm(kid: String): String
     val onlyOutsideQuiet: String; val contactsArriving: String
+    // Problem report (docs/flows/problem-report.md, v0.14)
+    val problems: String; val noProblems: String; val copyReport: String; val copied: String; val clearReport: String; val reportPrivacy: String
+    fun closedByItself(day: Int, month: Int, time: String): String
+    val crashPointer: String; val openReport: String
 
     // Self-update (Gabriel Design System docs/self-update.md, "Words")
     fun updateAvailable(v: String): String
@@ -284,6 +288,11 @@ object Pt : Strings {
     override fun unlinkConfirm(kid: String) = "$kid para de receber e mandar mensagens até você conectar de novo com o código."
     override val onlyOutsideQuiet = "Só fora do silêncio"
     override val contactsArriving = "Carregando seus contatos do WhatsApp…"
+    override val problems = "Problemas"; override val noProblems = "Nenhum problema guardado."
+    override val copyReport = "Copiar relatório"; override val copied = "Copiado"; override val clearReport = "Apagar relatório"
+    override val reportPrivacy = "O relatório fica só neste tablet e não tem mensagens nem nomes. Copie e cole onde quiser mandar."
+    override fun closedByItself(day: Int, month: Int, time: String) = "O Oiê fechou sozinho em %02d/%02d às %s.".format(day, month, time)
+    override val crashPointer = "O Oiê fechou sozinho há pouco. Há um relatório para copiar."; override val openReport = "Ver relatório"
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -436,6 +445,11 @@ object En : Strings {
     override fun unlinkConfirm(kid: String) = "$kid stops sending and receiving messages until you link again with the code."
     override val onlyOutsideQuiet = "Only outside quiet hours"
     override val contactsArriving = "Loading your WhatsApp contacts…"
+    override val problems = "Problems"; override val noProblems = "No problems saved."
+    override val copyReport = "Copy report"; override val copied = "Copied"; override val clearReport = "Delete report"
+    override val reportPrivacy = "The report stays on this tablet and holds no messages or names. Copy it and paste it wherever you want to send it."
+    override fun closedByItself(day: Int, month: Int, time: String) = "Oiê closed by itself on %02d/%02d at %s.".format(day, month, time)
+    override val crashPointer = "Oiê closed by itself recently. There's a report to copy."; override val openReport = "See report"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

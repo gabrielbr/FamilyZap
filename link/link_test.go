@@ -1,7 +1,11 @@
 package oielink
 
 import (
+	"bytes"
+	"image"
+	"image/jpeg"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -206,3 +210,43 @@ func TestContactsChangedIsOncePerBurst(t *testing.T) {
 type listenerFunc func(kind, payload string)
 
 func (f listenerFunc) OnEvent(kind, payload string) { f(kind, payload) }
+
+func TestGuardTurnsAPanicIntoAnError(t *testing.T) {
+	got := make(chan string, 1)
+	k := &Link{l: listenerFunc(func(kind, payload string) {
+		if kind == "log" {
+			got <- payload
+		}
+	})}
+	f := func() (err error) {
+		defer k.guard("probe", &err)
+		var m map[string]int
+		m["boom"] = 1 // a nil-map write panics
+		return nil
+	}
+	if err := f(); err == nil || !strings.Contains(err.Error(), "probe") {
+		t.Fatalf("want an error naming the place, got %v", err)
+	}
+	if p := <-got; !strings.Contains(p, "panic") {
+		t.Fatalf("the panic must be reported: %s", p)
+	}
+}
+
+func TestJPEGInfoGivesSizeAndASmallPreview(t *testing.T) {
+	img := image.NewRGBA(image.Rect(0, 0, 400, 200))
+	var b bytes.Buffer
+	if err := jpeg.Encode(&b, img, nil); err != nil {
+		t.Fatal(err)
+	}
+	w, h, thumb := jpegInfo(b.Bytes())
+	if w != 400 || h != 200 || len(thumb) == 0 {
+		t.Fatalf("got %dx%d, %d bytes", w, h, len(thumb))
+	}
+	tc, err := jpeg.DecodeConfig(bytes.NewReader(thumb))
+	if err != nil || tc.Width != 72 || tc.Height != 36 {
+		t.Fatalf("preview %+v %v", tc, err)
+	}
+	if w, _, _ := jpegInfo([]byte("not a jpeg")); w != 0 {
+		t.Fatal("non-JPEG must give zeroes")
+	}
+}
