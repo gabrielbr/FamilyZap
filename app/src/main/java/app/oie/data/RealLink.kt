@@ -7,7 +7,6 @@ import app.oie.logic.Contact
 import app.oie.logic.Kind
 import java.io.File
 import java.util.concurrent.Executors
-import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -28,13 +27,21 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     /** Sends that failed while disconnected: retried once on the next "connected" (L4). */
     private val retryOnConnect = java.util.concurrent.ConcurrentLinkedQueue<app.oie.logic.Message>()
 
+    /**
+     * Runs link work off the main thread. An error there is written to the problem report and the
+     * work stops; it never closes the app (v0.16: an uncaught error here crashed Oiê mid-link).
+     */
+    private fun bg(block: () -> Unit) = io.execute {
+        try { block() } catch (e: Throwable) { Diagnostics.log("link: background error: ${e.javaClass.simpleName}: ${e.message}\n${e.stackTraceToString().take(1500)}") }
+    }
+
     override val connected: Boolean get() = ls.status == LinkState.Status.Connected
     override val profileName: String? = null
     override fun contacts(): List<Contact> = ls.available.toList()
 
     override fun send(message: app.oie.logic.Message) {
         ours += message.id
-        io.execute { deliver(message, retried = false) }
+        bg { deliver(message, retried = false) }
     }
 
     private fun signed(text: String): String = app.oie.logic.Signature.sign(state.kidName, text)
@@ -81,7 +88,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         // v0.14: after WhatsApp logged the tablet out, the old connection is spent; start a fresh one (a new QR).
         val fresh = ls.status == LinkState.Status.LoggedOut
         ls.status = LinkState.Status.Connecting
-        io.execute {
+        bg {
             if (fresh) { runCatching { link?.disconnect() }; link = null; Diagnostics.log("link: starting fresh after a logout") }
             val l = try {
                 link ?: oielink.Oielink.open(db.path, this).also { link = it }
@@ -89,7 +96,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 // The library can't run here (a tablet it wasn't built for, such as an x86 emulator).
                 Diagnostics.log("link: can't open: ${e.javaClass.simpleName}: ${e.message}")
                 main.post { ls.status = LinkState.Status.Unavailable }
-                return@execute
+                return@bg
             }
             try {
                 l.setReadOnly(!state.realMode)
@@ -108,7 +115,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     /** The parent turns the kid's side to the real WhatsApp (Conexão or setup): sending is allowed from now on. */
     fun goReal() {
         state.goReal()
-        io.execute { runCatching { link?.setReadOnly(false) } }
+        bg { runCatching { link?.setReadOnly(false) } }
     }
 
     /** After a network drop: connect again, unless the parent stopped the test or WhatsApp banned the number. */
@@ -118,20 +125,20 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
 
     /** Looks a phone number up on WhatsApp, for "Adicionar pelo número". Calls back on the main thread with the chat id, "" if it isn't on WhatsApp, or null on an error. */
     fun lookUp(phone: String, done: (String?) -> Unit) {
-        io.execute {
+        bg {
             val r = runCatching { link?.lookUp(phone) }.getOrNull()
             main.post { done(r) }
         }
     }
 
     fun stop() {
-        io.execute { runCatching { link?.disconnect() } }
+        bg { runCatching { link?.disconnect() } }
         if (ls.status !is LinkState.Status.Banned) ls.status = LinkState.Status.Off
     }
 
     /** Logs out of WhatsApp and deletes the session and the test from the tablet. */
     fun unlink() {
-        io.execute {
+        bg {
             runCatching { link?.unlink() }
             link = null
             listOf(db, File(db.path + "-wal"), File(db.path + "-shm")).forEach { it.delete() }
@@ -142,9 +149,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
 
     /** Reloads the parent's contacts (Contatos calls it when it opens; the link calls it as they arrive). */
     fun loadContacts() {
-        io.execute {
-            val json = runCatching { link?.contacts() }.getOrNull() ?: return@execute
-            val list = JSONArray(json).let { a -> (0 until a.length()).map { a.getJSONObject(it).run { Contact(getString("id"), getString("name"), optBoolean("isGroup")) } } }
+        bg {
+            val list = app.oie.logic.ContactsJson.parse(runCatching { link?.contacts() }.getOrNull())
             main.post { ls.available.clear(); ls.available.addAll(list) }
         }
     }
@@ -165,8 +171,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         val d = state.receive(m)
         if (d == app.oie.logic.Inbox.Decision.NOTIFY) state.allowed.firstOrNull { it.id == m.chatId }?.let { notifier?.message(m, it.name) }
         val kept = d == app.oie.logic.Inbox.Decision.NOTIFY || d == app.oie.logic.Inbox.Decision.QUIET
-        if (kept && (kind == Kind.PHOTO || kind == Kind.STICKER || kind == Kind.VOICE)) io.execute {
-            val bytes = runCatching { link?.download(m.id) }.getOrNull() ?: return@execute
+        if (kept && (kind == Kind.PHOTO || kind == Kind.STICKER || kind == Kind.VOICE)) bg {
+            val bytes = runCatching { link?.download(m.id) }.getOrNull() ?: return@bg
             val name = Photos.keepBytes(context, bytes)
             main.post {
                 val i = state.messages.indexOfFirst { it.id == m.id }
@@ -176,8 +182,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     }
 
     private fun offerSticker(id: String, animated: Boolean, at: Long) {
-        io.execute {
-            val bytes = runCatching { link?.download(id) }.getOrNull() ?: return@execute
+        bg {
+            val bytes = runCatching { link?.download(id) }.getOrNull() ?: return@bg
             val name = Photos.keepBytes(context, bytes)
             main.post { state.offerSticker(app.oie.logic.FamilySticker(id, name, animated, saved = false, at = at)).forEach { Photos.forget(context, it) } }
         }
@@ -198,7 +204,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 "paired", "connected" -> {
                     ls.status = LinkState.Status.Connected; loadContacts()
                     // L4: what failed while the link was down goes once more, and only once.
-                    generateSequence { retryOnConnect.poll() }.toList().forEach { m -> io.execute { deliver(m, retried = true) } }
+                    generateSequence { retryOnConnect.poll() }.toList().forEach { m -> bg { deliver(m, retried = true) } }
                 }
                 "disconnected" -> if (ls.status == LinkState.Status.Connected) ls.status = LinkState.Status.Disconnected
                 "replaced", "loggedOut" -> ls.status = LinkState.Status.LoggedOut
