@@ -8,7 +8,7 @@ tablet; decision 0003: built on whatsmeow). **Status:** 🟡 the link runs the r
 
 ### v0.8 on the kid's side
 - **Receiving:** `RealInbox.toMessage` comes first. It drops chats that aren't allowed, the parent's own messages, and the tablet's own sends echoing back (all tested). Then comes `Inbox.decide`, then the notification. Photos, stickers and voice that are kept are downloaded and sealed.
-- **Sending:** text, photos, and stickers (as JPEG pictures) go through `SendPace`. Each send uses the message's own id. A send that fails while the link is down is retried once, on the next "connected" (L4); after that it's marked failed for the kid. Voice waits for real recording (v0.9).
+- **Sending:** text, photos, and stickers (as JPEG pictures) go through `SendPace`. Each send uses the message's own id. A send that fails while the link is down is retried once, on the next "connected" (L4); after that it's marked failed for the kid. Voice goes as a WhatsApp voice note (PTT) since v0.11, Opus in Ogg on Android 10+, AAC before.
 
 ## How it fits together
 ```

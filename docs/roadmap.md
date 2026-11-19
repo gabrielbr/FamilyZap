@@ -12,7 +12,6 @@ Ideas and planned work. When something ships, move it into the docs.
 5. Decide distribution (Play or a direct APK with SHA256SUMS).
 
 ## Next
-- v0.9: real voice messages. Recording on the tablet (Opus in Ogg, as WhatsApp's own voice notes) and playing received ones.
 
 ## Later
 - Calls from the tablet (not possible through the linked-device bridge; decision 0001).

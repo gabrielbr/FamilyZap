@@ -55,6 +55,10 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 } else {
                     l.sendImage(m.chatId, Photos.stickerJpeg(context, app.oie.ui.kid.STICKERS[m.text] ?: error("sticker")), signed(""), m.id)
                 }
+                Kind.VOICE -> {
+                    val bytes = m.media?.let { Photos.openBytes(context, it) } ?: error("voice missing")
+                    l.sendVoice(m.chatId, bytes, m.durationSec.toLong(), Voice.mimetype(bytes), m.id)
+                }
                 else -> error("not supported yet")
             }
             Unit

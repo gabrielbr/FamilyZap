@@ -109,6 +109,7 @@ interface Strings {
     // Family stickers (v0.10)
     fun newStickersFrom(parent: String): String
     val keepSticker: String; val sendFamilySticker: String; val familyStickers: String
+    val micError: String
     // The real WhatsApp on the kid's side (v0.8)
     fun goRealButton(kid: String): String
     fun goRealBody(kid: String): String
@@ -256,7 +257,7 @@ object Pt : Strings {
     override val notifPhoto = "Mandou uma foto"; override val notifSticker = "Mandou uma figurinha"
     override fun quietSummary(n: Int) = if (n == 1) "1 mensagem enquanto estava em silêncio" else "$n mensagens enquanto estava em silêncio"
     override val deletedMessage = "Mensagem apagada"; override val simulateIncoming = "Simular mensagem da Vovó (teste)"
-    override val allowNotifications = "Para avisar quando a família mandar mensagem, o Oiê vai pedir permissão para notificações."
+    override val allowNotifications = "Para avisar quando a família mandar mensagem e para gravar áudios, o Oiê vai pedir permissão para notificações e para o microfone."
     override fun updateAvailable(v: String) = "Atualização disponível · $v"
     override fun updateButton(size: String) = "Atualizar · $size"
     override val updateLater = "Mais tarde"
@@ -306,6 +307,7 @@ object Pt : Strings {
     override val names = "Nomes"
     override fun newStickersFrom(parent: String) = "Novas de $parent"
     override val keepSticker = "Guardar"; override val sendFamilySticker = "Mandar figurinha da família"; override val familyStickers = "Da família"
+    override val micError = "Não deu para gravar. Tente de novo."
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -424,7 +426,7 @@ object En : Strings {
     override val notifPhoto = "Sent a photo"; override val notifSticker = "Sent a sticker"
     override fun quietSummary(n: Int) = if (n == 1) "1 message during quiet hours" else "$n messages during quiet hours"
     override val deletedMessage = "Message deleted"; override val simulateIncoming = "Pretend Grandma sent a message (test)"
-    override val allowNotifications = "To tell you when family sends a message, Oiê will ask to show notifications."
+    override val allowNotifications = "To tell you when family sends a message and to record voice messages, Oiê will ask for notifications and the microphone."
     override fun updateAvailable(v: String) = "Update available · $v"
     override fun updateButton(size: String) = "Update · $size"
     override val updateLater = "Later"
@@ -474,6 +476,7 @@ object En : Strings {
     override val names = "Names"
     override fun newStickersFrom(parent: String) = "New from $parent"
     override val keepSticker = "Keep"; override val sendFamilySticker = "Send a family sticker"; override val familyStickers = "From family"
+    override val micError = "Couldn't record. Try again."
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

@@ -51,6 +51,9 @@ flowchart TD
 | 4 | **Sending** | Can tap **Desfazer** within 5 s | The message shows in the chat as "Enviando…", with a **Desfazer** snackbar for 5 s. Nothing leaves the tablet until the 5 s are up. |
 | 5 | **Sent** | — | Goes out through the parent's WhatsApp. "Enviada · 16h32" shows under the **latest** sent message only (less-is-more: a state is said once). The family sees it from the parent's number, tagged with the kid's name, e.g. "Tito: Saudade, vó". |
 
+## v0.11: real voice
+Recording is real: Opus in Ogg on Android 10 and newer (WhatsApp's own voice-note format), AAC before that. The recording is sealed the moment it stops and goes out as a WhatsApp voice note (PTT). The microphone permission is asked at the end of setup, with the parent, or at the first recording on an older setup. If recording can't start: "Não deu para gravar. Tente de novo."
+
 ## Branches
 | At step | If | Then |
 |---|---|---|
