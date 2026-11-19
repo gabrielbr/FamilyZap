@@ -13,6 +13,9 @@ had a read-only rule test, and v0.8 turned the kid's side to the real link once 
 - Photos carry width, height and a 72px JPEG preview.
 - gomobile can't bind exported functions with more than two results, so helpers like `jpegInfo` stay unexported. `build-aar.sh` fails loudly if one slips in.
 
+### Exits the app can't catch (v0.15)
+`Open` points Go's crash output (`debug.SetCrashOutput`) at `whatsapp-link.db.crash`, next to the session. A fatal error ends the whole process with no Android crash, so on the next start the app moves that file into the problem report. It also reads `ActivityManager.getHistoricalProcessExitReasons` (Android 11+) for exits not reported yet.
+
 ### Contacts (v0.12)
 The phone sends the parent's contacts a few seconds after linking. The link emits `contactsChanged` once per burst (on `AppStateSyncComplete`, `Contact` and `PushName`) and the app reloads `Contacts()`. If none have come 8 s after connecting, it asks once for the contact list (`FetchAppState(critical_unblock_low)`, only if not synced). `LookUp(phone)` checks a typed number with `IsOnWhatsApp`, for "Adicionar pelo número".
 

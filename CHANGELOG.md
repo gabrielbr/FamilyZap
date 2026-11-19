@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.15.0
+- Oiê went back to the home screen without any message, and the tablet disappeared from WhatsApp's Dispositivos conectados, and not only when sending a photo. That kind of exit wasn't recorded. Now the problem report (Ajustes e ajuda › Problemas) also shows, the next time Oiê opens:
+  - a failure inside the WhatsApp connection itself;
+  - Android's reason for closing Oiê (for example low memory).
+- Nothing else changes on screen.
+
 ## 0.14.0
 - Sending a photo closed Oiê and logged the tablet out of WhatsApp. This version finds out why, and makes sure it can't happen the same way:
   - **Problem report:** Ajustes e ajuda › Problemas keeps a report on the tablet of what the link did, its errors, and any time Oiê closed by itself. "Copiar relatório" copies it, so you can paste it here. It has no messages or names, phone numbers are masked, and Oiê never sends it anywhere. After a crash, the report comes first in Ajustes e ajuda, and Conexão points to it.

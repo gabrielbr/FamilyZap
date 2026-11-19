@@ -15,7 +15,11 @@ _Designed with `ux-user-flows` on 2026-11-19 (v0.14), after the owner's first re
   - how the link changed (connecting, connected, disconnected, logged out with WhatsApp's reason code, blocked);
   - each send's kind and result, OK or the error;
   - the WhatsApp library's warnings and errors;
-  - a crash with its stack trace.
+  - a crash with its stack trace;
+  - **since v0.15**, what ended Oiê when it wasn't an ordinary crash, added the next time Oiê opens:
+    - a fatal error in the WhatsApp library (Go), which would otherwise vanish with the app;
+    - Android's own record of why the app ended (low memory, a native crash, killed, not responding), each exit once.
+- **Why v0.15:** the owner saw Oiê drop back to the home screen with no crash message, and Oiê vanish from WhatsApp's Dispositivos conectados. That kind of exit never reaches the app's own crash handler.
 - **Never:**
   - message text, names, photos;
   - phone numbers: any run of 6 or more digits is masked to its last 2 ("••••••12").

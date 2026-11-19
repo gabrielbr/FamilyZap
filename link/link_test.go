@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"image"
 	"image/jpeg"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -248,5 +249,15 @@ func TestJPEGInfoGivesSizeAndASmallPreview(t *testing.T) {
 	}
 	if w, _, _ := jpegInfo([]byte("not a jpeg")); w != 0 {
 		t.Fatal("non-JPEG must give zeroes")
+	}
+}
+
+func TestOpenSetsUpTheCrashFile(t *testing.T) {
+	db := filepath.Join(t.TempDir(), "s.db")
+	if _, err := Open(db, nl{}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(db + CrashSuffix); err != nil {
+		t.Fatalf("the crash file must exist next to the store: %v", err)
 	}
 }
