@@ -104,6 +104,7 @@ interface Strings {
     val notifChannel: String; val notifVoice: String; val notifPhoto: String; val notifSticker: String
     fun quietSummary(n: Int): String
     val deletedMessage: String; val simulateIncoming: String; val allowNotifications: String
+    val notifLinkChannel: String; val notifLinkOn: String
 
     // Rule test (docs/flows/rule-test.md)
     val ruleTestRow: String; val ruleTestTitle: String
@@ -284,6 +285,7 @@ object Pt : Strings {
     override fun bannedFor(hours: Int) = "O WhatsApp bloqueou este número por cerca de $hours h. O teste parou e não vai tentar de novo sozinho."
     override val loggedOutTest = "O WhatsApp desconectou este tablet."
     override val ruleTestUnavailable = "Este tablet não consegue usar a conexão com o WhatsApp."
+    override val notifLinkChannel = "Conexão com o WhatsApp"; override val notifLinkOn = "O Oiê está conectado."
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -441,6 +443,7 @@ object En : Strings {
     override fun bannedFor(hours: Int) = "WhatsApp blocked this number for about $hours h. The test stopped and won't try again on its own."
     override val loggedOutTest = "WhatsApp unlinked this tablet."
     override val ruleTestUnavailable = "This tablet can't use the WhatsApp link."
+    override val notifLinkChannel = "WhatsApp link"; override val notifLinkOn = "Oiê is connected."
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

@@ -86,10 +86,10 @@ fun RuleTestScreen(state: AppState) {
                     LinkTest.Status.Off -> if (t.chats.isEmpty() && t.entries.isEmpty()) {
                         Text(tx.ruleTestIntro(kid), style = OieType.body, color = c.ink)
                         Text(tx.ruleTestRisk, style = OieType.body, color = c.muted)
-                        PrimaryButton(tx.ruleTestStart, { t.on = true; link?.start() })
+                        PrimaryButton(tx.ruleTestStart, { link?.turnOn() ?: run { t.on = true } })
                     } else {
                         Text(tx.disconnected, style = OieType.body, color = c.ink)
-                        PrimaryButton(tx.reconnect, { t.on = true; link?.start() })
+                        PrimaryButton(tx.reconnect, { link?.turnOn() ?: run { t.on = true } })
                         Results(t, kid)
                     }
                     LinkTest.Status.Connecting -> Text(tx.ruleTestConnecting, style = OieType.body, color = c.muted)
@@ -106,7 +106,7 @@ fun RuleTestScreen(state: AppState) {
                     is LinkTest.Status.Banned -> { Text(tx.bannedFor(s.hours), style = OieType.body, color = c.ink); Results(t, kid) }
                     LinkTest.Status.LoggedOut -> {
                         Text(tx.loggedOutTest, style = OieType.body, color = c.ink)
-                        PrimaryButton(tx.reconnect, { link?.unlink(); t.on = true; link?.start() })
+                        PrimaryButton(tx.reconnect, { link?.unlink(); link?.turnOn() })
                     }
                     LinkTest.Status.Unavailable -> Text(tx.ruleTestUnavailable, style = OieType.body, color = c.ink)
                 }
