@@ -73,8 +73,8 @@ img, svg { display: block; }
 .lang button { font: 700 0.875rem/1 "Nunito", sans-serif; color: var(--brand-ink); background: transparent; border: 0; min-height: 44px; min-width: 48px; padding: 0 var(--s3); cursor: pointer; }
 .lang button[aria-pressed="true"] { background: var(--brand-ink); color: var(--brand-cream); }
 
-.hero__grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--s6) var(--s10); align-items: end; padding: var(--s6) 0 var(--s12); }
-.hero h1 { font-weight: 800; font-size: clamp(2.75rem, 6.6vw, 5.5rem); line-height: 0.98; letter-spacing: -0.035em; margin: 0; text-wrap: balance; }
+.hero__grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--s6) var(--s10); align-items: end; padding: var(--s4) 0 var(--s8); }
+.hero h1 { font-weight: 800; font-size: clamp(2.75rem, 6vw, 5rem); line-height: 0.98; letter-spacing: -0.035em; margin: 0; text-wrap: balance; }
 .hero__lede { font-size: clamp(1.125rem, 1.6vw, 1.375rem); line-height: 1.45; margin: 0 0 var(--s6); max-width: 30em; font-weight: 600; }
 .hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s4) var(--s6); }
 .hero__note { font-size: 0.9375rem; font-weight: 600; margin: 0; }
@@ -88,7 +88,7 @@ img, svg { display: block; }
 .family input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
 .family label span {
   display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s4); border-radius: var(--r-pill);
-  border: 1.5px solid var(--gds-ink); font-weight: 700; font-size: 0.9375rem; transition: background-color var(--t-std) var(--ease);
+  border: 1.5px solid var(--gds-ink); font-weight: 700; font-size: 0.9375rem; transition: background-color var(--t-std) var(--ease), color var(--t-std) var(--ease), border-color var(--t-std) var(--ease);
 }
 .family input:checked + span { background: var(--gds-ink); color: var(--gds-page); }
 .family input:focus-visible + span { outline: 3px solid var(--gds-mint); outline-offset: 2px; }
@@ -96,11 +96,15 @@ img, svg { display: block; }
 
 /* ---------- The story: a pinned stage, steps scrolling beside it ---------- */
 .story { position: relative; max-width: var(--page-max); margin: 0 auto; padding: 0 var(--s6); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); column-gap: var(--s10); }
-.stage { grid-column: 2; grid-row: 1; position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 9vh; }
+.stage { grid-column: 2; grid-row: 1; position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 3vh; transition: padding-top var(--t-scene) var(--ease); }
+/* Once the hero has scrolled away, the stage centres itself beside the step being read. */
+.stage.is-pinned { padding-top: max(3vh, calc(50svh - 270px)); }
 .steps { grid-column: 1; grid-row: 1; padding: var(--s8) 0 30vh; }
-.step { min-height: 78vh; display: flex; flex-direction: column; justify-content: center; opacity: 0.35; transition: opacity var(--t-scene) var(--ease); }
-.step.is-on { opacity: 1; }
-.step--intro { min-height: 0; padding-bottom: 30vh; opacity: 1; justify-content: flex-start; }
+.step { min-height: 78vh; display: flex; flex-direction: column; justify-content: center; transition: opacity var(--t-scene) var(--ease); }
+/* Only with JavaScript running does the story fade the steps not being read. */
+.js .step { opacity: 0.35; }
+.js .step.is-on { opacity: 1; }
+.step--intro, .js .step--intro { min-height: 0; padding-bottom: 30vh; opacity: 1; justify-content: flex-start; }
 .step h2 { font-weight: 800; font-size: clamp(1.75rem, 3.4vw, 2.75rem); line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 var(--s4); text-wrap: balance; }
 .step p { font-size: 1.1875rem; line-height: 1.55; margin: 0; max-width: 34ch; }
 .stage__tag { position: absolute; top: var(--s6); right: 0; margin: 0; font-size: 0.8125rem; font-weight: 800; color: var(--gds-muted); }
@@ -110,6 +114,8 @@ img, svg { display: block; }
 .stage:not([data-step="0"]) .actor { opacity: 0.4; filter: saturate(0.6); }
 .stage[data-focus="kid"] .actor--kid, .stage[data-focus="parent"] .actor--parent, .stage[data-focus="recv"] .actor--recv,
 .stage[data-step="2"] .actor--kid, .stage[data-step="4"] .actor--kid, .stage[data-step="4"] .actor--parent { opacity: 1; filter: none; }
+/* Step 6: the parent holds the tablet, so the phones step further back. */
+.stage[data-step="6"] .actor--parent, .stage[data-step="6"] .actor--recv { opacity: 0.22; }
 
 /* The person stands behind; the device is held up at the chest, so the head and shoulders show. */
 .actor { --aw: 228px; --pull: -0.62; --dw: 146px; }
@@ -124,6 +130,9 @@ img, svg { display: block; }
 .actor figcaption b { color: var(--gds-ink); font-size: 1rem; font-weight: 800; }
 .device { position: relative; border: 7px solid var(--brand-ink); background: var(--brand-ink); overflow: hidden; box-shadow: 0 12px 28px rgba(42, 23, 20, 0.22); }
 .phone { width: 100%; aspect-ratio: 9 / 16; border-radius: 24px; }
+/* In dark, the ink bezel would vanish into the ground: a muted edge keeps the device's shape. */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .device { box-shadow: 0 0 0 2px var(--gds-muted); } }
+:root[data-theme="dark"] .device { box-shadow: 0 0 0 2px var(--gds-muted); }
 .tablet { width: 100%; aspect-ratio: 4 / 3; border-radius: 16px; }
 
 /* The wire between the three: the family line from v1, carrying the message. */
@@ -193,7 +202,7 @@ img, svg { display: block; }
 @keyframes blink { 50% { opacity: 0; } }
 
 /* Step 5: the other people a kid can write to. */
-.others { list-style: none; margin: var(--s8) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s4) var(--s6); }
+.others { list-style: none; margin: var(--s8) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, max-content); gap: var(--s4) var(--s10); }
 .others li { display: grid; justify-items: center; gap: var(--s1); font-weight: 700; font-size: 0.9375rem; }
 .others .sil { width: 64px; height: 76px; margin: 0; }
 .others .sil-detail { stroke-width: 6; }

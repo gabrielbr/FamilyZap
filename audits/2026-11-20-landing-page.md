@@ -96,3 +96,51 @@
   - **The message rows:** they stay the app's message rows, never bubbles (brand rule).
   - **Layout:** the route reserves room for the tallest plate at every width and language, and lays out again when the font arrives or the size changes. Under reduced motion, the end frame is the full conversation, still.
 - **Checked:** desktop 1440 and phone 390 at five moments of the story, plus reduced motion. No horizontal scroll.
+
+## v2: a scrolling story with people (owner's feedback round 2, decision 0013)
+- **Feedback (the owner):**
+  - more human; a scrollytelling page;
+  - vector silhouettes of mother or father, son or daughter, and a grandparent;
+  - WhatsApp screens, in its colours with no branding, for the parent's phone (the bridge) and the receiver;
+  - not always grandma: friends too.
+- **Process:**
+  - decision 0013 records the exceptions (green, bubbles and devices, website only);
+  - the direction contract was rewritten (pinned by the owner's words);
+  - built code-led;
+  - checked at every step on desktop and phone, light and dark, PT and EN, with reduced motion;
+  - one fresh finish review, then a fix batch, then a verdict pass.
+- **Skills (loaded and read this session):** impeccable (new-work, craft-floor, finish review), graphic-design-fundamentals §13, ux-user-flows §13, less-is-more, value-focused-landing-page, web-design-skills.
+
+### What the page does now
+- **"Monte a sua família":** son or daughter, mother or father, and who they write to (Vó Rosa, Vô Zé, Tia Bia, Lucas the school friend). The names, silhouettes and messages follow the choice. It opens on Vô Zé.
+- **Six steps on a pinned stage:**
+  1. The kid writes; the words type out.
+  2. It leaves the parent's WhatsApp, signed, with the ticks shown.
+  3. It arrives.
+  4. The receiver types a reply ("digitando…" on the parent's phone), and it comes back to the tablet.
+  5. "Não é só …": the receiver cycles through the others.
+  6. The parent holds the tablet, in the parents' area.
+- **On a phone:** the stage pins above the text and shows one person at a time.
+- **Copy:** "a família e os amigos que você escolher" everywhere. The FAQ's first questions are "Quem recebe…?" and "A criança pode falar com os amigos?". The footer says the WhatsApp screens are example drawings.
+
+### Finish review, round 1: fix (no P0 or P1)
+| Finding | P | Fix |
+|---|---|---|
+| The line and the labels were under the fold at 1440×900 | P2 | Shorter hero; the stage sits near the top until the hero scrolls away |
+| Story text stayed faded without JS (about 2:1) | P2 | The fade only applies under `.js` |
+| Pinned stage high, with empty space below, out of line with the text | P2 | `.is-pinned` centres the stage |
+| Device bezels vanished in dark | P2 | A muted 2px edge in dark |
+| Picker labels flashed blank while switching | P3 | Colour and border transition with the background |
+| Step 5 list wrapped 3 + 1 | P3 | A 2×2 grid |
+| "Vovó"/"Vovô" differed only by an accent; the page opened on grandma | P3 | "Vó Rosa" and "Vô Zé"; it opens on Vô Zé |
+| "Ana" appeared twice in step 6 | P3 | The phones step back further in step 6 |
+
+- **Detector:** cramped-padding (the device bezels, intended), nested-cards (bubbles in the drawn phones, intended), aphoristic-cadence (it read labels as a sentence). All dismissed by the reviewer.
+
+### less-is-more
+| Element | Q | Decision |
+|---|---|---|
+| A separate "how it works" section | 2 | Not added: the story is the how-it-works |
+| The v1 kid-side, controls and family sections | 2 | Merged into steps 1, 3 and 6 |
+| A play/pause control | 1 | Not needed: scrolling drives the story; only step 5's cycle and the typing move, and both stop under reduced motion |
+| A picker for every family member | 4 | Only three choices; the fourth person (the receiver) cycles in step 5 |
