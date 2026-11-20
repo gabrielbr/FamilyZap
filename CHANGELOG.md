@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **Website:** the landing page in `site/` (PT and EN). Its hero animates the family line: Tito's message goes from the tablet, through your WhatsApp, to Vovó. Every "Baixar" links to the latest release. It goes live when oie.app is registered.
 
 ## 0.37.0
 - **The kid posts updates.** Turn it on in Ajustes e ajuda › Novidades › "Tito pode postar novidades" (off until you do; Novidades must be on).

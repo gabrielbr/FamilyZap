@@ -8,3 +8,8 @@ local.properties
 
 # whatsmeow with Oiê's patch, made by link/patch-whatsmeow.sh
 link/.whatsmeow/
+
+# Impeccable working files (the surface brief in .impeccable/surfaces/ is kept)
+.impeccable/review/
+.impeccable/questions/
+.impeccable/mocks/
