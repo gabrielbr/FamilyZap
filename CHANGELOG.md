@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- **Website: published from the public releases repo,** at https://gabrielbr.github.io/oie-releases/ (the downloads live there too). The source stays here.
+- **Website: the font is served by the site itself.** The pages no longer ask Google Fonts, or any other site, for anything. A check fails the publish if one ever does.
 - **Website, privacy in plain words:** "Nada passa por nós" on the landing page, a new question "O Oiê guarda alguma coisa sobre a minha família?", and the safety page all now say that Oiê has no servers, links to your WhatsApp like WhatsApp Web, and has no analytics, ads or tracking.
 - **Website: "Por que fizemos o Oiê" and a safety guide for parents** (`/seguranca/`, in English at `/safety/`). It explains why Oiê exists: the home phone of the 90s, which kids used to plan meeting friends in real life, without ads or data collection. Then a guide with sources:
   - talking first;

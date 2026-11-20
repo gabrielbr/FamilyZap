@@ -2,6 +2,13 @@
    the logo's brand colours (01 Brand/logo/README.md), and, inside .wa screens only, WhatsApp-like colours.
    Spacing: the core scale only (4 to 64). */
 
+/* Nunito (SIL OFL 1.1, fonts/OFL.txt), served from this site: the page asks no other site for anything.
+   Subset to Latin and punctuation from the app's own font files (app/src/main/res/font). */
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/nunito-400.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/nunito-600.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/nunito-700.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 800; font-display: swap; src: url("fonts/nunito-800.woff2") format("woff2"); }
+
 :root {
   /* The logo's own colours, fixed in both themes: the hero is always the coral field. */
   --brand-coral: #E8573C;
