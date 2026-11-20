@@ -33,6 +33,7 @@ object Codec {
         put("kidNicknames", JSONArray(s.kidNicknames.toList()))
         put("kidEmoji", s.kidEmoji)
         put("bubbleOn", s.bubbleOn)
+        put("nudgeOn", s.nudgeOn).put("nudgeDismissed", JSONObject(s.nudgeDismissed.toMap())).put("needYouAt", s.needYouAt)
         put("pinHash", s.pinHash ?: JSONObject.NULL)
         put("kidNoticeSeen", s.kidNoticeSeen)
         put("addRequested", s.addRequested).put("contactTipUsed", s.contactTipUsed)
@@ -48,6 +49,7 @@ object Codec {
                 .put("quietException", it.quietException).put("wholeGroup", it.showWholeGroup)
                 .put("phone", it.phone).put("waName", it.waName).put("paused", it.paused)
                 .put("photo", it.photo).put("photoId", it.photoId).put("photoAt", it.photoAt).put("parentLine", it.parentLine)
+                .put("birthday", it.birthday).put("needYou", it.needYou)
         }))
         put("periods", JSONArray(s.periods.map {
             JSONObject().put("name", it.name).put("days", JSONArray(it.days.map { d -> d.value }))
@@ -57,6 +59,7 @@ object Codec {
             JSONObject().put("id", it.id).put("chat", it.chatId).put("kid", it.fromKid).put("at", it.at)
                 .put("kind", it.kind.name).put("text", it.text).put("replyTo", it.replyTo ?: JSONObject.NULL)
                 .put("dur", it.durationSec).put("media", it.media ?: JSONObject.NULL).put("size", it.size)
+                .put("sender", it.sender).put("receipt", it.receipt.name).put("reactions", JSONObject(it.reactions))
         }))
         put("drafts", JSONObject(s.drafts.toMap()))
         put("lastSeen", JSONObject(s.lastSeen.toMap()))
@@ -71,6 +74,9 @@ object Codec {
         s.kidName = o.optString("kidName")
         s.kidEmoji = app.oie.logic.Signature.emojiOf(o.optString("kidEmoji"))
         s.bubbleOn = o.optBoolean("bubbleOn")
+        s.nudgeOn = o.optBoolean("nudgeOn")
+        s.nudgeDismissed.clear(); o.optJSONObject("nudgeDismissed")?.let { d -> d.keys().forEach { k -> s.nudgeDismissed[k] = d.getLong(k) } }
+        s.needYouAt = o.optLong("needYouAt")
         s.kidNicknames.clear(); o.optJSONArray("kidNicknames")?.let { a -> for (i in 0 until a.length()) s.kidNicknames += a.getString(i) }
         s.pinHash = if (o.isNull("pinHash")) null else o.getString("pinHash")
         s.kidNoticeSeen = o.optBoolean("kidNoticeSeen")
@@ -90,7 +96,7 @@ object Codec {
         o.optJSONArray("allowed")?.let { a ->
             for (i in 0 until a.length()) a.getJSONObject(i).run {
                 s.allowed += Contact(getString("id"), getString("name"), optBoolean("group"), optBoolean("quietException"), optBoolean("wholeGroup"), optString("phone"), optString("waName"), optBoolean("paused"),
-                    optString("photo"), optString("photoId"), optLong("photoAt"), optBoolean("parentLine"))
+                    optString("photo"), optString("photoId"), optLong("photoAt"), optBoolean("parentLine"), optString("birthday"), optBoolean("needYou"))
             }
         }
         o.optJSONArray("periods")?.let { a ->
@@ -106,7 +112,9 @@ object Codec {
                 s.messages += Message(
                     getString("id"), getString("chat"), getBoolean("kid"), getLong("at"), Kind.valueOf(getString("kind")),
                     optString("text"), if (isNull("replyTo")) null else getString("replyTo"), optInt("dur"),
-                    if (isNull("media")) null else getString("media"), optLong("size"),
+                    if (isNull("media")) null else getString("media"), optLong("size"), optString("sender"),
+                    runCatching { app.oie.logic.Receipt.valueOf(optString("receipt")) }.getOrDefault(app.oie.logic.Receipt.NONE),
+                    optJSONObject("reactions")?.let { r -> r.keys().asSequence().associateWith { k -> r.getString(k) } } ?: emptyMap(),
                 )
             }
         }

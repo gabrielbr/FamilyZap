@@ -351,6 +351,7 @@ private fun AboutAndHelp(state: AppState) {
     app.oie.ui.setup.Field(tx.emojiLabel, state.kidEmoji, { state.kidEmoji = app.oie.logic.Signature.emojiOf(it) }, tx.emojiHelp)
     SignaturePreview(state.kidName.ifBlank { tx.theKid }, state.kidEmoji)
     BubbleSetting(state)
+    NudgeSetting(state)
     Text(tx.help, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     help.forEachIndexed { i, (q, a) ->
         Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { open = if (open == i) null else i }.padding(vertical = OTokens.Spacing.space3)) {
@@ -456,6 +457,25 @@ private fun SignaturePreview(kid: String, emoji: String) {
         style = OieType.body, color = c.ink,
         modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.surface).padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
     )
+}
+
+/** The gentle nudge (v0.33, docs/flows/family-features.md): off until the parent turns it on. */
+@Composable
+internal fun NudgeSetting(state: AppState) {
+    val c = OieTheme.colors
+    val tx = str
+    val kid = state.kidName.ifBlank { tx.theKid }
+    Text(tx.nudgeTitle, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    Text(tx.nudgeBody(kid), style = OieType.caption, color = c.muted)
+    Row(Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically) {
+        Text(tx.nudgeSwitch(kid), style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
+        Switch(
+            modifier = Modifier.semantics { contentDescription = tx.nudgeSwitch(kid) },
+            checked = state.nudgeOn,
+            onCheckedChange = { state.nudgeOn = it },
+            colors = SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
+        )
+    }
 }
 
 /**

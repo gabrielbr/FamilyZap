@@ -39,6 +39,7 @@ Track: B · product with a team · Started: 2026-11-18
 | Flow "Kid sends a message": can't send in quiet hours; camera and gallery; an Oiê sticker set; 5 s undo | Owner | 2026-11-18 | Claude session |
 | Per-contact exceptions to quiet hours | Owner | 2026-11-18 | Claude session |
 | Parent area on the tablet behind a 6-digit Oiê PIN (no parent app, no server); setup asks names, first contacts, quiet hours | Owner | 2026-11-18 | Claude session |
+| v0.33 batch: no "escrevendo…"; "Preciso de você" only to marked people; the nudge off by default | Owner | 2026-11-20 | Claude session |
 
 ## Open items
 - [x] Keywords: Warm, Simple, Trustworthy, Close (2026-11-18).
@@ -73,6 +74,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.33: ten family features: receipts, reactions, read aloud, listen before sending, drawing, stickers from photos, photos per person, birthdays, "Preciso de você", the gentle nudge (2026-11-20). Open: the owner's device test of receipts and reactions on real WhatsApp.
 - [x] v0.32: voice messages re-packed into standard Ogg Opus before sending, so WhatsApp plays them (2026-11-20). Open: the owner's device test.
 - [x] v0.31: WhatsApp's Lottie stickers move (decision 0008); GIFs, stickers and pictures from the keyboard or paste (2026-11-20).
 - [x] v0.30: the kid can write to the parent who owns the WhatsApp, through a one-person group (fallback: the parent's own chat), decision 0007 (2026-11-19). Open: the owner's test that WhatsApp accepts the group.

@@ -141,4 +141,26 @@ class PhoneScreensTest {
     @Test fun chatBubbleTyping() = shot("p26-chat-bubble-typing", bigText = true) {
         Conversation(ready().apply { drafts["vovo"] = "Oi vó, tudo bem? Domingo eu vou" }, "vovo", inBubble = true, onLeave = {})
     }
+
+    // v0.33: the family features on a phone at 1.3x text.
+    private fun family() = ready().apply {
+        nudgeOn = true
+        allowed[0] = allowed[0].copy(birthday = "11-18"); allowed[1] = allowed[1].copy(needYou = true)
+        messages += app.oie.logic.Message("t1", "vovo2", true, now - 9L * 24 * 60 * 60 * 1000, app.oie.logic.Kind.TEXT, "Oi vô")
+        val i = messages.indexOfFirst { it.id == "s3" }
+        messages[i] = messages[i].copy(reactions = mapOf("kid" to "❤️", "x" to "❤️"))
+        messages += app.oie.logic.Message("k9", "vovo", true, now - 5 * 60 * 1000, app.oie.logic.Kind.TEXT, "Também tô com saudade", receipt = app.oie.logic.Receipt.DELIVERED)
+    }
+    @Test fun kidHomeFamily() = shot("p27-kid-home-family", bigText = true) { KidHome(family()) }
+    @Test fun conversationFamily() = shot("p28-conversation-family", bigText = true) { Conversation(family(), "vovo") }
+    @Test fun drawPad() = shot("p29-draw-pad", bigText = true) { app.oie.ui.kid.DrawPad("Vovó", {}, {}) }
+    @Test fun reactionSheet() = shot("p30-reaction-sheet", bigText = true) { val s = family(); app.oie.ui.kid.ReactionSheet(s.messages.first { it.id == "s3" }, {}, {}, {}) }
+    @Test fun contactEditorFamily() = shot("p31-contact-editor-family", bigText = true) {
+        val s = family()
+        androidx.compose.foundation.layout.Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.ContactEditor(s.allowed[1].copy(birthday = "31/02"), "Tito", s.link.contacts(), {}, {}, onRemove = {}) }
+    }
+    @Test fun listenBeforeSending() = shot("p32-listen-before-sending", bigText = true) {
+        Conversation(family(), "vovo", pendingPreview = app.oie.logic.Message("kv", "vovo", true, now, app.oie.logic.Kind.VOICE, durationSec = 8, media = "missing.sealed"))
+    }
+    @Test fun photosGrid() = shot("p33-photos", bigText = true) { val s = family(); app.oie.ui.kid.PhotosScreen(s, s.allowed[0], {}, {}) }
 }

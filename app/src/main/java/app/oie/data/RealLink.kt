@@ -82,7 +82,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         sentAt += System.currentTimeMillis()
         Diagnostics.log("send ${m.kind}${if (retried) " (retry)" else ""}: ${err?.let { "failed: ${it.message}" } ?: "ok"}")
         while (sentAt.size > app.oie.logic.SendPace.MAX_IN_WINDOW * 2) sentAt.removeAt(0)
-        if (err == null) { main.post { state.failed.remove(m.id) }; return }
+        if (err == null) { main.post { state.failed.remove(m.id); state.heard(listOf(m.id), app.oie.logic.Receipt.SENT) }; return }
         val wasDown = !connected || l == null
         if (!retried && wasDown) retryOnConnect += m else main.post { if (m.id !in state.failed) state.failed += m.id }
     }
@@ -185,6 +185,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     private fun receiveForKid(o: JSONObject) {
         val kind = runCatching { Kind.valueOf(o.optString("kind")) }.getOrDefault(Kind.UNSUPPORTED)
         if (kind == Kind.TEXT && command(o)) return
+        if (kind == Kind.REACTION) { reaction(o); return }
         // v0.10: a sticker the parent sends to their own chat is offered to the kid. Only stickers:
         // nothing else from that chat is read into Oiê.
         if (o.optBoolean("selfChat")) {
@@ -197,7 +198,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         val m = app.oie.logic.RealInbox.toMessage(
             o.optString("id"), o.optString("chat"), o.optString("chatAlt").ifEmpty { null }, o.optBoolean("fromMe"), ours,
             state.allowed, o.optLong("at"), kind, o.optString("text"), o.optString("replyTo").ifEmpty { null }, o.optInt("durationSec"), o.optLong("size"),
-        ) ?: return
+        )?.copy(sender = o.optString("sender")) ?: return
         val d = state.receive(m)
         // v0.29: with "Bolha na tela" on, the notification is also that chat's bubble.
         if (d == app.oie.logic.Inbox.Decision.NOTIFY) state.allowed.firstOrNull { it.id == m.chatId }?.let { notifier?.message(m, it, state.bubbleOn) }
@@ -334,6 +335,23 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         return true
     }
 
+    /**
+     * The kid's reaction (v0.33), at a person's pace like every send (L3). Its id is ours, so its echo is
+     * ignored. A reaction that fails isn't retried: it's small, and the kid sees it on the tablet anyway.
+     */
+    override fun react(target: app.oie.logic.Message, emoji: String) {
+        val id = "r${System.nanoTime()}"
+        ours += id
+        bg {
+            val wait = app.oie.logic.SendPace.waitMs(sentAt, System.currentTimeMillis())
+            if (wait > 0) Thread.sleep(wait)
+            val sender = if (target.fromKid) "" else target.sender
+            val r = runCatching { link?.sendReaction(target.chatId, target.id, sender, emoji, id) ?: error("not linked") }
+            sentAt += System.currentTimeMillis()
+            Diagnostics.log("send reaction: ${r.exceptionOrNull()?.let { "failed: ${it.message}" } ?: "ok"}")
+        }
+    }
+
     /** Oiê's answer in the parent's own chat, at a person's pace like every send (rules L2, L3). */
     private fun noteToSelf(text: String) {
         bg {
@@ -344,6 +362,21 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             sentAt += System.currentTimeMillis()
             Diagnostics.log("send answer: ${r.exceptionOrNull()?.let { "failed: ${it.message}" } ?: "ok"}")
         }
+    }
+
+    /**
+     * A reaction from the family (v0.33): only in an allowed chat, only on a message the kid has. The
+     * parent's own reactions from their phone stay private, like their messages (the line to the parent
+     * is the one place where "from me" is the parent talking to the kid).
+     */
+    private fun reaction(o: JSONObject) {
+        val id = o.optString("id")
+        if (id in ours) return
+        val chat = o.optString("chat"); val alt = o.optString("chatAlt")
+        val c = state.allowed.firstOrNull { it.id == chat || (alt.isNotEmpty() && it.id == alt) } ?: return
+        if (o.optBoolean("fromMe") && !c.parentLine) return
+        val who = o.optString("sender").ifEmpty { c.id }
+        state.reacted(o.optString("replyTo"), c.id, who, o.optString("text"))
     }
 
     private fun offerSticker(id: String, animated: Boolean, at: Long) {
@@ -360,7 +393,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         // The problem report: the library's warnings, errors and panics, and every change of the link's state.
         when (kind) {
             "log" -> { Diagnostics.log("wa ${o.optString("level")}: ${o.optString("msg")}"); return }
-            "message", "qr", "contactsChanged" -> {}
+            "message", "qr", "contactsChanged", "receipt" -> {}
             else -> Diagnostics.log("link: $kind ${o.toString().takeIf { it != "{}" } ?: ""}")
         }
         main.post {
@@ -382,6 +415,11 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 "pairError" -> ls.status = LinkState.Status.Off
                 "message" -> if (state.realMode) receiveForKid(o)
                 "contactsChanged" -> loadContacts()
+                // v0.33: "Entregue" and "Vovó viu" under the kid's messages.
+                "receipt" -> app.oie.logic.Receipts.of(o.optString("state"))?.let { r ->
+                    val a = o.optJSONArray("ids") ?: return@let
+                    state.heard((0 until a.length()).map { a.getString(it) }.toSet(), r)
+                }
                 "contactsSynced" -> { ls.contactsSynced = true; loadContacts() }
             }
         }

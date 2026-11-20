@@ -19,6 +19,12 @@
   --gds-snackbar: #2A1714;
   --gds-qr-ground: #FFFFFF;
   --gds-qr-ink: #2A1714;
+  --gds-draw-paper: #FFFFFF;
+  --gds-draw-ink: #2A1714;
+  --gds-draw-coral: #E8573C;
+  --gds-draw-sun: #E0A100;
+  --gds-draw-leaf: #2E9E5B;
+  --gds-draw-sky: #2F7FD8;
 }
 
 [data-theme="dark"] {
@@ -39,6 +45,12 @@
   --gds-snackbar: #FBEFE6;
   --gds-qr-ground: #FFFFFF;
   --gds-qr-ink: #2A1714;
+  --gds-draw-paper: #FFFFFF;
+  --gds-draw-ink: #2A1714;
+  --gds-draw-coral: #E8573C;
+  --gds-draw-sun: #E0A100;
+  --gds-draw-leaf: #2E9E5B;
+  --gds-draw-sky: #2F7FD8;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -59,6 +71,12 @@
     --gds-snackbar: #FBEFE6;
     --gds-qr-ground: #FFFFFF;
     --gds-qr-ink: #2A1714;
+    --gds-draw-paper: #FFFFFF;
+    --gds-draw-ink: #2A1714;
+    --gds-draw-coral: #E8573C;
+    --gds-draw-sun: #E0A100;
+    --gds-draw-leaf: #2E9E5B;
+    --gds-draw-sky: #2F7FD8;
   }
 }
 

@@ -18,6 +18,7 @@ import (
 	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/types"
+	"go.mau.fi/whatsmeow/types/events"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -89,7 +90,6 @@ func TestToIncomingKinds(t *testing.T) {
 
 func TestToIncomingDropsWhatTheAppNeverNeeds(t *testing.T) {
 	drops := map[string]*waE2E.Message{
-		"reaction": {ReactionMessage: &waE2E.ReactionMessage{Text: proto.String("❤")}},
 		"keys":     {SenderKeyDistributionMessage: &waE2E.SenderKeyDistributionMessage{}},
 		"edit-ish": {ProtocolMessage: &waE2E.ProtocolMessage{Type: waE2E.ProtocolMessage_MESSAGE_EDIT.Enum()}},
 	}
@@ -416,5 +416,42 @@ func TestALottieStickerGoesBackAsLottie(t *testing.T) {
 	s := LottieStickerMessage(whatsmeow.UploadResponse{FileLength: 9}).GetStickerMessage()
 	if !s.GetIsLottie() || !s.GetIsAnimated() || s.GetMimetype() != "application/was" {
 		t.Fatalf("%+v", s)
+	}
+}
+
+func TestReactionsComeThrough(t *testing.T) {
+	m := &waE2E.Message{ReactionMessage: &waE2E.ReactionMessage{Text: proto.String("❤"), Key: &waCommon.MessageKey{ID: proto.String("k1")}}}
+	got, ok := ToIncoming(info("r1", false), m)
+	if !ok || got.Kind != "REACTION" || got.Text != "❤" || got.ReplyTo != "k1" {
+		t.Fatalf("got %+v %v", got, ok)
+	}
+	off := &waE2E.Message{ReactionMessage: &waE2E.ReactionMessage{Text: proto.String(""), Key: &waCommon.MessageKey{ID: proto.String("k1")}}}
+	if got, _ := ToIncoming(info("r2", false), off); got.Text != "" || got.ReplyTo != "k1" {
+		t.Fatalf("a removed reaction keeps its target: %+v", got)
+	}
+}
+
+func TestReceiptOf(t *testing.T) {
+	cases := []struct {
+		typ    types.ReceiptType
+		fromMe bool
+		want   string
+	}{
+		{types.ReceiptTypeDelivered, false, "delivered"},
+		{types.ReceiptTypeRead, false, "read"},
+		{types.ReceiptTypePlayed, false, "read"},
+		{types.ReceiptTypeReadSelf, false, ""},
+		{types.ReceiptTypeRetry, false, ""},
+		{types.ReceiptTypeRead, true, ""},
+	}
+	for _, c := range cases {
+		r := &events.Receipt{Type: c.typ}
+		r.IsFromMe = c.fromMe
+		if got := ReceiptOf(r); got != c.want {
+			t.Fatalf("%q fromMe=%v: got %q, want %q", c.typ, c.fromMe, got, c.want)
+		}
+	}
+	if ReceiptOf(nil) != "" {
+		t.Fatal("nil")
 	}
 }

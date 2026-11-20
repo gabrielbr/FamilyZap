@@ -197,6 +197,33 @@ interface Strings {
     val version: String
     fun versionLine(v: String, code: Long): String
     val decimalComma: Boolean
+
+    // v0.33: family features (docs/flows/family-features.md)
+    fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean, time: String): String
+    val react: String; val readAloud: String; val stopReading: String
+    fun reactWith(emoji: String): String
+    fun reactionsA11y(list: String): String
+    fun birthdayToday(name: String): String
+    val birthdayLabel: String; val birthdayInvalid: String
+    fun birthdayHelp(kid: String): String
+    val needYouLabel: String
+    fun needYouHelp(kid: String): String
+    val needYouButton: String; val needYouSend: String; val needYouText: String; val needYouWait: String
+    fun needYouAsk(names: String): String
+    fun needYouSent(names: String): String
+    fun nudgeLine(name: String): String
+    val nudgeNotNow: String; val nudgeTitle: String
+    fun nudgeSwitch(kid: String): String
+    fun nudgeBody(kid: String): String
+    val draw: String; val drawThin: String; val drawThick: String; val drawClear: String; val drawDone: String; val drawA11y: String
+    fun drawFor(to: String): String
+    val drawColors: List<String>
+    val makeSticker: String; val stickerMade: String; val stickerError: String
+    val photos: String
+    fun photosWith(name: String): String
+    fun noPhotos(name: String): String
+    fun and(names: List<String>): String
+    val editContact: String
 }
 
 object Pt : Strings {
@@ -297,6 +324,7 @@ object Pt : Strings {
         "$kid vê as minhas conversas?" to "Não. O tablet mostra só o que foi mandado para $kid: respostas às mensagens de $kid, mensagens que começam com o nome de $kid, e o que chega até 24 horas depois da última mensagem de $kid. As suas outras conversas continuam só no seu WhatsApp.",
         "$kid sabe que eu vejo as mensagens?" to "Sim. Na primeira vez, o Oiê diz a $kid: \"${noticeBody(parent)}\"",
         "Quem pode falar com $kid?" to "Só quem está em Contatos. Mensagens de qualquer outra pessoa não aparecem no tablet. Num grupo, todos do grupo veem o que $kid manda. Em Contatos, toque em alguém para mudar o nome que $kid vê (Vovó, por exemplo) ou para remover. O nome muda só no Oiê, não no seu WhatsApp.",
+        "O que é o \"Preciso de você\"?" to "Um botão na tela inicial de $kid, que aparece quando você marca alguém em Contatos (toque na pessoa e ligue \"Recebe 'Preciso de você'\"). $kid confirma, e cada pessoa marcada recebe \"Preciso de você.\" no WhatsApp, até no horário de silêncio. Dá para mandar uma vez a cada 5 minutos. É um jeito de chamar vocês, não um serviço de emergência: em perigo, ligue 190 ou 192.",
         "Como funciona o horário de silêncio?" to "Durante um período, $kid lê e ouve, mas não manda mensagens. Quem tem \"Pode falar no silêncio\" em Contatos continua liberado. Dá para pausar um período sem apagar, por exemplo nas férias.",
         "O Oiê se desconectou. E agora?" to "Abra Conexão e toque em Conectar de novo. As mensagens que $kid mandou enquanto isso ficam guardadas e saem depois.",
         "Como mando figurinhas para $kid?" to "No seu WhatsApp, mande a figurinha para você mesmo, na conversa com o seu próprio nome. Ela aparece para $kid em Figurinhas, em Novas de $parent, e $kid escolhe se guarda. Só as figurinhas dessa conversa chegam ao Oiê; o resto dela fica só com você. Funciona com o WhatsApp de verdade ligado.",
@@ -419,6 +447,40 @@ object Pt : Strings {
     override val sendToGitHub = "Enviar para o GitHub"
     override fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean) = "Relatório do tablet · Oiê $version · %02d/%02d".format(day, month) + if (crashed) " · fechou sozinho" else ""
     override fun reportCut(kept: Int, total: Int) = "Só as últimas $kept de $total linhas cabem aqui. O relatório inteiro pode ser copiado no tablet."
+
+    override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean, time: String) = when (r) {
+        app.oie.logic.Receipt.READ -> if (group) "Alguém viu" else "$who viu"
+        app.oie.logic.Receipt.DELIVERED -> "Entregue · $time"
+        else -> "Enviada · $time"
+    }
+    override val react = "Reagir"; override val readAloud = "Ouvir"; override val stopReading = "Parar"
+    override fun reactWith(emoji: String) = "Reagir com $emoji"
+    override fun reactionsA11y(list: String) = "Reações: $list"
+    override fun birthdayToday(name: String) = "$name faz aniversário hoje"
+    override val birthdayLabel = "Aniversário (dia/mês)"
+    override val birthdayInvalid = "Esse dia não existe. Escreva dia/mês, como 25/12."
+    override fun birthdayHelp(kid: String) = "Por exemplo 25/12. No dia, $kid vê um lembrete. O ano não é guardado."
+    override val needYouLabel = "Recebe \"Preciso de você\""
+    override fun needYouHelp(kid: String) = "Quando $kid tocar em Preciso de você, essa pessoa recebe uma mensagem."
+    override val needYouButton = "Preciso de você"; override val needYouSend = "Mandar"; override val needYouText = "Preciso de você."
+    override val needYouWait = "Já foi. Dá para mandar de novo daqui a pouco."
+    override fun needYouAsk(names: String) = "Mandar \"Preciso de você\" para $names?"
+    override fun needYouSent(names: String) = "Mandado para $names."
+    override fun nudgeLine(name: String) = "Faz uma semana que você não fala com $name"
+    override val nudgeNotNow = "Agora não"; override val nudgeTitle = "Lembrete de família"
+    override fun nudgeSwitch(kid: String) = "Lembrar $kid de falar com a família"
+    override fun nudgeBody(kid: String) = "Se $kid passar uma semana sem escrever para alguém, o Oiê mostra um lembrete na tela inicial. Um por vez, sem contar dias."
+    override val draw = "Desenhar"; override val drawThin = "Fino"; override val drawThick = "Grosso"; override val drawClear = "Limpar"
+    override val drawDone = "Pronto"; override val drawA11y = "Área de desenho"
+    override fun drawFor(to: String) = "Desenho para $to"
+    override val drawColors = listOf("Preto", "Vermelho", "Amarelo", "Verde", "Azul")
+    override val makeSticker = "Criar figurinha"; override val stickerMade = "Figurinha criada. Ela está nas suas figurinhas."
+    override val stickerError = "Não deu para usar essa foto. Tente outra."
+    override val photos = "Fotos"
+    override fun photosWith(name: String) = "Fotos com $name"
+    override fun noPhotos(name: String) = "Ainda não tem fotos com $name."
+    override fun and(names: List<String>) = if (names.size < 2) names.joinToString() else names.dropLast(1).joinToString(", ") + " e " + names.last()
+    override val editContact = "Editar contato"
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -524,6 +586,7 @@ object En : Strings {
         "Can $kid see my chats?" to "No. The tablet only shows what was sent to $kid: replies to $kid's messages, messages that start with $kid's name, and what arrives up to 24 hours after $kid's last message. Your other chats stay only in your WhatsApp.",
         "Does $kid know I can see the messages?" to "Yes. The first time, Oiê tells $kid: \"${noticeBody(parent)}\"",
         "Who can talk to $kid?" to "Only the people in Contacts. Messages from anyone else don't appear on the tablet. In a group, everyone in it sees what $kid sends. In Contacts, tap someone to change the name $kid sees (Grandma, for example) or to remove them. The name changes only in Oiê, not in your WhatsApp.",
+        "What is \"I need you\"?" to "A button on $kid's home screen that shows once you mark someone in Contacts (tap the person and turn on \"Gets 'I need you'\"). $kid confirms, and each marked person gets \"I need you.\" on WhatsApp, even in quiet hours. It can be sent once every 5 minutes. It's a way to call you, not an emergency service: in danger, call the emergency number.",
         "How do quiet hours work?" to "During a period, $kid can read and listen, but not send. Anyone with \"Can talk in quiet hours\" in Contacts still gets through. You can pause a period without deleting it, for example on holiday.",
         "Oiê got disconnected. What now?" to "Open Connection and tap Link again. Messages $kid sent in the meantime are kept and go out afterwards.",
         "How do I send stickers to $kid?" to "In your WhatsApp, send the sticker to yourself, in the chat with your own name. It shows for $kid under Stickers, in New from $parent, and $kid chooses whether to keep it. Only stickers from that chat reach Oiê; the rest of it stays with you. Works once the real WhatsApp is on.",
@@ -646,6 +709,40 @@ object En : Strings {
     override val sendToGitHub = "Send to GitHub"
     override fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean) = "Tablet report · Oiê $version · %02d/%02d".format(day, month) + if (crashed) " · closed by itself" else ""
     override fun reportCut(kept: Int, total: Int) = "Only the last $kept of $total lines fit here. The whole report can be copied on the tablet."
+
+    override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean, time: String) = when (r) {
+        app.oie.logic.Receipt.READ -> if (group) "Someone saw it" else "$who saw it"
+        app.oie.logic.Receipt.DELIVERED -> "Delivered · $time"
+        else -> "Sent · $time"
+    }
+    override val react = "React"; override val readAloud = "Listen"; override val stopReading = "Stop"
+    override fun reactWith(emoji: String) = "React with $emoji"
+    override fun reactionsA11y(list: String) = "Reactions: $list"
+    override fun birthdayToday(name: String) = "It's $name's birthday today"
+    override val birthdayLabel = "Birthday (day/month)"
+    override val birthdayInvalid = "That day doesn't exist. Write day/month, like 25/12."
+    override fun birthdayHelp(kid: String) = "For example 25/12. On the day, $kid sees a reminder. The year isn't kept."
+    override val needYouLabel = "Gets \"I need you\""
+    override fun needYouHelp(kid: String) = "When $kid taps I need you, this person gets a message."
+    override val needYouButton = "I need you"; override val needYouSend = "Send"; override val needYouText = "I need you."
+    override val needYouWait = "It went. You can send it again in a little while."
+    override fun needYouAsk(names: String) = "Send \"I need you\" to $names?"
+    override fun needYouSent(names: String) = "Sent to $names."
+    override fun nudgeLine(name: String) = "It's been a week since you talked to $name"
+    override val nudgeNotNow = "Not now"; override val nudgeTitle = "Family reminder"
+    override fun nudgeSwitch(kid: String) = "Remind $kid to talk to family"
+    override fun nudgeBody(kid: String) = "If $kid goes a week without writing to someone, Oiê shows a reminder on the home screen. One at a time, no counting days."
+    override val draw = "Draw"; override val drawThin = "Thin"; override val drawThick = "Thick"; override val drawClear = "Clear"
+    override val drawDone = "Done"; override val drawA11y = "Drawing area"
+    override fun drawFor(to: String) = "Drawing for $to"
+    override val drawColors = listOf("Black", "Red", "Yellow", "Green", "Blue")
+    override val makeSticker = "Make a sticker"; override val stickerMade = "Sticker made. It's with your stickers."
+    override val stickerError = "Couldn't use that photo. Try another one."
+    override val photos = "Photos"
+    override fun photosWith(name: String) = "Photos with $name"
+    override fun noPhotos(name: String) = "No photos with $name yet."
+    override fun and(names: List<String>) = if (names.size < 2) names.joinToString() else names.dropLast(1).joinToString(", ") + " and " + names.last()
+    override val editContact = "Edit contact"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

@@ -16,6 +16,8 @@ interface WhatsAppLink {
     /** The parent's contacts and groups, for the parent to choose from. */
     fun contacts(): List<Contact>
     fun send(message: Message)
+    /** The kid's reaction on [target] (v0.33); an empty [emoji] takes it away. */
+    fun react(target: Message, emoji: String) {}
 }
 
 /** Sample family data for the v0.1 shell. Names are examples. */
@@ -36,4 +38,6 @@ class SampleLink : WhatsAppLink {
 
     val sent = mutableListOf<Message>()
     override fun send(message: Message) { sent += message }
+    val reacted = mutableListOf<Pair<String, String>>()
+    override fun react(target: Message, emoji: String) { reacted += target.id to emoji }
 }

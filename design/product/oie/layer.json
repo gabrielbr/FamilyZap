@@ -77,6 +77,54 @@
           "dark": "#2A1714"
         },
         "usage": "The QR code's modules: always dark on qr-ground. Also the caption on the QR card."
+      },
+      {
+        "name": "draw-paper",
+        "value": {
+          "light": "#FFFFFF",
+          "dark": "#FFFFFF"
+        },
+        "usage": "The drawing pad's paper (v0.33): always white, in both themes, so the picture the family gets looks the same."
+      },
+      {
+        "name": "draw-ink",
+        "value": {
+          "light": "#2A1714",
+          "dark": "#2A1714"
+        },
+        "usage": "Drawing colour: ink. The pad's colours are fixed in both themes because the drawing is sent as a picture."
+      },
+      {
+        "name": "draw-coral",
+        "value": {
+          "light": "#E8573C",
+          "dark": "#E8573C"
+        },
+        "usage": "Drawing colour: the brand coral."
+      },
+      {
+        "name": "draw-sun",
+        "value": {
+          "light": "#E0A100",
+          "dark": "#E0A100"
+        },
+        "usage": "Drawing colour: sun yellow. A swatch always has a hairline and a name, never colour alone."
+      },
+      {
+        "name": "draw-leaf",
+        "value": {
+          "light": "#2E9E5B",
+          "dark": "#2E9E5B"
+        },
+        "usage": "Drawing colour: leaf green."
+      },
+      {
+        "name": "draw-sky",
+        "value": {
+          "light": "#2F7FD8",
+          "dark": "#2F7FD8"
+        },
+        "usage": "Drawing colour: sky blue."
       }
     ],
     "type": [

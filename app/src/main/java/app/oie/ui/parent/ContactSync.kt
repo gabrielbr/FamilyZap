@@ -2,6 +2,9 @@ package app.oie.ui.parent
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -133,24 +136,45 @@ fun ContactEditor(ct: Contact, kid: String, fresh: List<Contact>, onSave: (Conta
     val c = OieTheme.colors
     val tx = str
     var name by remember(ct.id) { mutableStateOf(ct.name) }
+    // v0.33: the birthday (day and month) and "Preciso de você", for people only.
+    var birthday by remember(ct.id) { mutableStateOf(app.oie.logic.Birthdays.display(ct.birthday)) }
+    var needYou by remember(ct.id) { mutableStateOf(ct.needYou) }
+    val parsed = app.oie.logic.Birthdays.parse(birthday)
+    fun edited() = app.oie.logic.ContactNames.rename(ct, name).let { if (ct.isGroup) it else it.copy(birthday = parsed ?: ct.birthday, needYou = needYou) }
     androidx.activity.compose.BackHandler(onBack = onCancel)
     val wa = app.oie.logic.ContactNames.whatsAppName(ct)
     androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
         // Who this is, before the field: the WhatsApp name and the number, each on its own line.
         androidx.compose.foundation.layout.Column {
-            Text(tx.changeName, style = OieType.title, color = c.ink)
+            // v0.33 audit: the editor holds more than the name now (birthday, "Preciso de você").
+            Text(if (ct.isGroup) tx.changeName else tx.editContact, style = OieType.title, color = c.ink)
             if (ct.paused) Text(tx.pausedLine, style = OieType.body, color = c.ink)
             Text(tx.onWhatsApp(wa), style = OieType.body, color = c.ink)
             Text(contactNumber(tx, ct, fresh), style = OieType.body, color = c.muted)
         }
         // Typing counts as a touch, so the parent area doesn't close mid-name (v0.19 audit).
         app.oie.ui.setup.Field(tx.nameKidSees(kid), name, { name = it; touched() }, tx.renameHelp(wa))
+        if (!ct.isGroup) {
+            app.oie.ui.setup.Field(tx.birthdayLabel, birthday, { birthday = it; touched() }, if (parsed == null) tx.birthdayInvalid else tx.birthdayHelp(kid))
+            Row(Modifier.heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+                androidx.compose.foundation.layout.Column(Modifier.weight(1f)) {
+                    Text(tx.needYouLabel, style = OieType.label, color = c.ink)
+                    Text(tx.needYouHelp(kid), style = OieType.caption, color = c.muted)
+                }
+                androidx.compose.material3.Switch(
+                    modifier = androidx.compose.ui.Modifier.semantics { contentDescription = tx.needYouLabel },
+                    checked = needYou, onCheckedChange = { needYou = it; touched() },
+                    colors = androidx.compose.material3.SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
+                )
+            }
+        }
         app.oie.ui.setup.ButtonRow {
-            app.oie.ui.common.PrimaryButton(tx.save, { onSave(app.oie.logic.ContactNames.rename(ct, name)) })
+            // A day that doesn't exist keeps the editor open with its note, so nothing is saved wrong.
+            app.oie.ui.common.PrimaryButton(tx.save, { if (parsed != null || ct.isGroup) onSave(edited()) })
             QuietButton(tx.cancel, onCancel, Modifier.height(OTokens.Size.button))
         }
         // v0.21: a chat paused from the parent's WhatsApp can be resumed here too.
-        if (ct.paused && onRemove != null) QuietButton(tx.resumeChat, { onSave(app.oie.logic.ContactNames.rename(ct, name).copy(paused = false)) }, Modifier.height(OTokens.Size.button))
+        if (ct.paused && onRemove != null) QuietButton(tx.resumeChat, { onSave(edited().copy(paused = false)) }, Modifier.height(OTokens.Size.button))
         // Contatos only (v0.19 audit): removing moved here from each row, so a phone row has room for the number. Undo stays.
         if (onRemove != null) TextLink(tx.removeNamed(ct.name), onRemove, Modifier.padding(top = OTokens.Spacing.space4).offset(x = -OTokens.Spacing.space3))
     }

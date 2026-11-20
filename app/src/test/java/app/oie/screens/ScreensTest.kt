@@ -251,4 +251,47 @@ class ScreensTest {
     @Test fun contactsWithParentLine() = shot("40-contacts-with-line", false) {
         ParentArea(ready().apply { realMode = true; allowed.add(0, app.oie.logic.Contact("1203630@g.us", "Ana", isGroup = true, parentLine = true)) }, 0)
     }
+
+    // v0.33: the family features (docs/flows/family-features.md). The tests' day is 18 November.
+    private fun family() = ready().apply {
+        kidNoticeSeen = true; nudgeOn = true
+        allowed[0] = allowed[0].copy(birthday = "11-18"); allowed[1] = allowed[1].copy(needYou = true)
+        messages += Message("t1", "vovo2", true, now - 9L * 24 * 60 * 60 * 1000, Kind.TEXT, "Oi vô")
+        val i = messages.indexOfFirst { it.id == "s3" }
+        messages[i] = messages[i].copy(reactions = mapOf("kid" to "❤️"))
+        messages += Message("k9", "vovo", true, now - 5 * 60 * 1000, Kind.TEXT, "Também tô com saudade", receipt = app.oie.logic.Receipt.READ, reactions = mapOf("vovo" to "😂"))
+    }
+    @Test fun kidHomeFamily() = shot("41-kid-home-family", false) { KidHome(family()) }
+    @Test fun kidHomeFamilyDark() = shot("41-kid-home-family", true) { KidHome(family()) }
+    @Test fun conversationFamily() = shot("42-conversation-family", false) { Conversation(family(), "vovo") }
+    @Test fun conversationFamilyDark() = shot("42-conversation-family", true) { Conversation(family(), "vovo") }
+    @Test fun reactionSheet() = shot("43-reaction-sheet", false) {
+        val s = family(); app.oie.ui.kid.ReactionSheet(s.messages.first { it.id == "s3" }, {}, {}, {})
+    }
+    @Test fun reactionSheetDark() = shot("43-reaction-sheet", true) {
+        val s = family(); app.oie.ui.kid.ReactionSheet(s.messages.first { it.id == "s3" }, {}, {}, {})
+    }
+    @Test fun photosEmpty() = shot("44-photos-empty", false) { val s = family(); app.oie.ui.kid.PhotosScreen(s, s.allowed[1], {}, {}) }
+    @Test fun photosGrid() = shot("44-photos-grid", true) {
+        val s = withVideos(); s.messages.replaceAll { if (it.kind != Kind.TEXT && it.kind != Kind.VOICE) it.copy(media = "missing.sealed") else it }
+        app.oie.ui.kid.PhotosScreen(s, s.allowed[0], {}, {})
+    }
+    @Test fun drawPad() = shot("45-draw-pad", false) { app.oie.ui.kid.DrawPad("Vovó", {}, {}) }
+    @Test fun drawPadDark() = shot("45-draw-pad", true) { app.oie.ui.kid.DrawPad("Vovó", {}, {}) }
+    @Test fun contactEditorFamily() = shot("46-contact-editor-family", false) {
+        val s = family()
+        Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.ContactEditor(s.allowed[1].copy(birthday = "03-07"), "Tito", s.link.contacts(), {}, {}, onRemove = {}) }
+    }
+    @Test fun contactEditorFamilyDark() = shot("46-contact-editor-family", true) {
+        val s = family()
+        Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.ContactEditor(s.allowed[1].copy(birthday = "03-07"), "Tito", s.link.contacts(), {}, {}, onRemove = {}) }
+    }
+    @Test fun settingsNudge() = shot("47-settings-nudge", false) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.NudgeSetting(family()) } }
+    @Test fun settingsNudgeDark() = shot("47-settings-nudge", true) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.NudgeSetting(family().apply { nudgeOn = false }) } }
+    @Test fun needYouAsk() = shot("48-need-you-ask", false) { Box(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.kid.NeedYouCard("Mãe", {}, {}) } }
+    @Test fun needYouAskDark() = shot("48-need-you-ask", true) { Box(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.kid.NeedYouCard("Mãe e Vovô", {}, {}) } }
+    @Test fun listenBeforeSending() = shot("49-listen-before-sending", false) {
+        Conversation(family(), "vovo", pendingPreview = Message("kv", "vovo", true, now, Kind.VOICE, durationSec = 8, media = "missing.sealed"))
+    }
+    @Test fun kidHomeFamilyEnglish() = shot("41-kid-home-family-en", false, english = true) { KidHome(family()) }
 }
