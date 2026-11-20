@@ -71,6 +71,14 @@ _The owner, 2026-11-19: "animated stickers are not being animated", and "make su
 - **Storage:** videos and GIFs are sealed on the tablet like photos.
 - **The message rule doesn't change:** a video counts like any other message (reply, name in the caption, 24 h).
 
+## v0.31: WhatsApp's own animated stickers
+_The owner's test (2026-11-20): animated stickers from WhatsApp's own packs showed still._
+
+- **Why:** WhatsApp's store packs aren't animated WebP files. They're **Lottie** animations ("application/was", a small zip with an animation file), which Android can't draw by itself. Animated WebP stickers from other packs already moved (v0.27).
+- **Now:** Lottie stickers move with Airbnb's Lottie library (Apache 2.0, decision 0008), in the chat and in the sticker sheet. When the kid saves one and sends it back, it goes out as the same animated sticker.
+- **"Remove animations" on:** they stay on their first frame, like the others.
+- **The report** says which kind a sticker was (animated WebP, Lottie, still), with no picture.
+
 ## Branches
 | At step | If | Then |
 |---|---|---|

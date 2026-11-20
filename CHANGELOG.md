@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.31.0
+- **WhatsApp's own animated stickers move.** The ones from WhatsApp's sticker store are a different kind of animation (Lottie); now they move in the chat and in the sticker sheet, and a saved one goes back out animated.
+- **GIFs and stickers from the keyboard.** In the text field, a GIF or sticker picked in Gboard, or a picture, GIF or video pasted in, goes to its preview: GIFs to the GIF preview, pictures and stickers to the photo preview, videos to the video preview. Nothing is sent until Enviar.
+- Animated stickers use Airbnb's Lottie (Apache License 2.0), credited in Sobre.
+
 ## 0.30.0
 - **The kid can write to you, the parent whose WhatsApp Oiê uses.** In Contatos, "Criar conversa com Tito" creates a group with only you in your WhatsApp, named "Tito". You appear on the kid's screen with your name and picture. What he sends you shows in that group, and what you write there reaches him.
 - WhatsApp doesn't notify you of these messages, because they come from your own account. Pin the group at the top to see them.

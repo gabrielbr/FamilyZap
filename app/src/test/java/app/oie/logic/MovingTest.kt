@@ -33,4 +33,13 @@ class MovingTest {
         assertTrue(Moving.download(Kind.PHOTO, Long.MAX_VALUE))
         assertFalse(Moving.download(Kind.TEXT, 0))
     }
+
+    @Test fun whatsAppsOwnAnimatedStickersAreLottieZips() {
+        val was = byteArrayOf('P'.code.toByte(), 'K'.code.toByte(), 3, 4, 20, 0)
+        assertTrue(Moving.isLottie(was))
+        assertFalse(Moving.isLottie(webp(0x02)))
+        assertTrue(Moving.kindOf(was) == "lottie")
+        assertTrue(Moving.kindOf(webp(0x02)) == "animated webp")
+        assertTrue(Moving.kindOf(webp(0x00)) == "still")
+    }
 }

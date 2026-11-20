@@ -690,6 +690,9 @@ func IsSelfChat(chat, own, ownLID types.JID) bool {
 func (k *Link) SendSticker(chat string, webp []byte, animated bool, id string) (sent string, err error) {
 	defer k.guard("SendSticker", &err)
 	return k.sendMedia(chat, id, func(up whatsmeow.UploadResponse) *waE2E.Message {
+		if isLottie(webp) {
+			return LottieStickerMessage(up)
+		}
 		return StickerMessage(up, animated)
 	}, webp, whatsmeow.MediaImage)
 }
@@ -701,6 +704,22 @@ func StickerMessage(up whatsmeow.UploadResponse, animated bool) *waE2E.Message {
 		FileEncSHA256: up.FileEncSHA256, FileSHA256: up.FileSHA256, FileLength: proto.Uint64(up.FileLength),
 		Mimetype: proto.String("image/webp"), Width: proto.Uint32(512), Height: proto.Uint32(512), IsAnimated: proto.Bool(animated),
 	}}
+}
+
+// LottieStickerMessage is a WhatsApp store-pack animated sticker (v0.31): a Lottie animation in a zip,
+// "application/was". Sent back the way it came, so it stays animated.
+func LottieStickerMessage(up whatsmeow.UploadResponse) *waE2E.Message {
+	return &waE2E.Message{StickerMessage: &waE2E.StickerMessage{
+		URL: proto.String(up.URL), DirectPath: proto.String(up.DirectPath), MediaKey: up.MediaKey,
+		FileEncSHA256: up.FileEncSHA256, FileSHA256: up.FileSHA256, FileLength: proto.Uint64(up.FileLength),
+		Mimetype: proto.String("application/was"), Width: proto.Uint32(512), Height: proto.Uint32(512),
+		IsAnimated: proto.Bool(true), IsLottie: proto.Bool(true),
+	}}
+}
+
+// isLottie spots a Lottie sticker file: a zip ("PK\x03\x04").
+func isLottie(b []byte) bool {
+	return len(b) >= 4 && b[0] == 'P' && b[1] == 'K' && b[2] == 3 && b[3] == 4
 }
 
 // jpegInfo reads a photo's size and makes the small preview WhatsApp's own apps attach (at most

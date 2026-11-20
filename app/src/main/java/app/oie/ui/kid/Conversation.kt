@@ -45,6 +45,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.heightIn
+import app.oie.data.Diagnostics
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.content.contentReceiver
+import androidx.compose.foundation.content.consume
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -83,6 +90,8 @@ val STICKERS = linkedMapOf(
 )
 
 /** Prototype screens 03, 16–20. Flows: kid-sends-message.md, kid-receives-messages.md. */
+// v0.31: receiving GIFs and stickers from the keyboard uses Compose's content receiver, still marked experimental.
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun Conversation(state: AppState, contactId: String, openStickers: Boolean = false, inBubble: Boolean = false, onLeave: (() -> Unit)? = null) {
     val c = OieTheme.colors
@@ -95,7 +104,10 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
     // v0.24: while the link reconnects the kid can still write; messages wait and go out on connect (L4).
     val linkDown = app.oie.ui.common.linkShown(state) == app.oie.logic.LinkView.Shown.DOWN
     val canSend = state.canSend(contact) && !linkDown
-    var draft by remember { mutableStateOf(state.drafts[contactId] ?: "") }
+    // v0.31: a text field that also takes GIFs, stickers and pictures from the keyboard, and pasted media.
+    val field = androidx.compose.foundation.text.input.rememberTextFieldState(state.drafts[contactId] ?: "")
+    val draft = field.text.toString()
+    LaunchedEffect(field) { androidx.compose.runtime.snapshotFlow { field.text.toString() }.collect { state.drafts[contactId] = it } }
     var pending by remember { mutableStateOf<Message?>(null) }
     var stickers by remember { mutableStateOf(openStickers) }
     var recordingSince by remember { mutableLongStateOf(0L) }
@@ -117,6 +129,43 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
         photoError = kept == null
         preview?.let { Photos.forget(context, it) } // Trocar: the old pick is dropped
         preview = kept
+    }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    /**
+     * A GIF, sticker or picture from the keyboard, or a pasted or dropped file (v0.31): copied at once
+     * (the keyboard's permission to read it is short), then to the photo, GIF or video preview.
+     */
+    val receiver = remember(contactId) {
+        androidx.compose.foundation.content.ReceiveContentListener { content ->
+            var taken = false
+            content.consume { item ->
+                val uri = item.uri ?: return@consume false
+                if (taken) return@consume true
+                val goes = app.oie.logic.Pasted.route(runCatching { context.contentResolver.getType(uri) }.getOrNull())
+                if (goes == app.oie.logic.Pasted.Goes.NOTHING) return@consume false
+                taken = true
+                val copy = runCatching {
+                    val dir = java.io.File(context.cacheDir, "pasted").apply { mkdirs(); listFiles()?.forEach { it.delete() } }
+                    val f = java.io.File(dir, java.util.UUID.randomUUID().toString() + "." + app.oie.logic.Pasted.extension(goes))
+                    context.contentResolver.openInputStream(uri)?.use { input -> f.outputStream().use { input.copyTo(it) } } ?: error("unreadable")
+                    android.net.Uri.fromFile(f)
+                }.onFailure { Diagnostics.log("paste: couldn't read it (${it.javaClass.simpleName})") }.getOrNull()
+                if (copy == null) { photoError = true; return@consume true }
+                scope.launch {
+                    when (goes) {
+                        app.oie.logic.Pasted.Goes.GIF -> videoDraft = VideoDraft(copy, gif = true)
+                        app.oie.logic.Pasted.Goes.VIDEO -> videoDraft = VideoDraft(copy, gif = false)
+                        else -> {
+                            val kept = withContext(kotlinx.coroutines.Dispatchers.IO) { Photos.keep(context, copy) }
+                            photoError = kept == null
+                            preview?.let { Photos.forget(context, it) }
+                            preview = kept
+                        }
+                    }
+                }
+                true
+            }
+        }
     }
     val askMic = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { received(it) }
@@ -210,20 +259,34 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                     }
                     // v0.29: in a chat's bubble the field is focused at once, so the keyboard comes up to answer.
                     val focus = remember { androidx.compose.ui.focus.FocusRequester() }
+                    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
                     if (inBubble) LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
-                    OutlinedTextField(
-                        draft, { draft = it; state.drafts[contactId] = it }, Modifier.weight(1f).focusRequester(focus),
-                        placeholder = { Text(if (compact) tx.writeShort else tx.writeTo(contact.name), style = OieType.body, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
-                        textStyle = OieType.body,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = c.ink, unfocusedTextColor = c.ink, focusedContainerColor = c.surface,
-                            unfocusedContainerColor = c.surface, focusedBorderColor = c.ink, unfocusedBorderColor = c.line, cursorColor = c.ink,
-                        ),
+                    val focused by interaction.collectIsFocusedAsState()
+                    val shape = RoundedCornerShape(OTokens.Radius.radiusS)
+                    androidx.compose.foundation.text.BasicTextField(
+                        state = field,
+                        modifier = Modifier.weight(1f).focusRequester(focus).contentReceiver(receiver),
+                        textStyle = OieType.body.copy(color = c.ink),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(c.ink),
+                        interactionSource = interaction,
+                        lineLimits = androidx.compose.foundation.text.input.TextFieldLineLimits.MultiLine(maxHeightInLines = 5),
+                        decorator = { inner ->
+                            // The look of the field before v0.31: surface, a hairline (ink and thicker when focused).
+                            Box(
+                                Modifier.heightIn(min = OTokens.Spacing.space12 + OTokens.Spacing.space2).clip(shape).background(c.surface)
+                                    .border(if (focused) OTokens.Size.hairline * 2 else OTokens.Size.hairline, if (focused) c.ink else c.line, shape)
+                                    .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
+                                contentAlignment = Alignment.CenterStart,
+                            ) {
+                                if (field.text.isEmpty()) Text(if (compact) tx.writeShort else tx.writeTo(contact.name), style = OieType.body, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                                inner()
+                            }
+                        },
                     )
                     if (draft.isNotBlank()) {
                         PrimaryButton(tx.send, {
                             queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.TEXT, draft.trim()))
-                            draft = ""; state.drafts.remove(contactId)
+                            field.edit { replace(0, length, "") }; state.drafts.remove(contactId)
                         }, icon = R.drawable.gg_ic_send, iconOnly = compact)
                     }
                 }
@@ -256,7 +319,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                 Box(
                     Modifier.height(OTokens.Spacing.space12).clickable(role = Role.Button) {
                         // Undo puts the content back, so nothing is lost.
-                        if (it.kind == Kind.TEXT) draft = it.text
+                        if (it.kind == Kind.TEXT) field.edit { replace(0, length, it.text) }
                         if (it.kind == Kind.PHOTO) preview = it.media // back to the preview, nothing lost
                         pending = null
                     }.padding(horizontal = OTokens.Spacing.space3),
@@ -288,7 +351,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
         watching?.let { m -> VideoScreen(m.media, gif = m.kind == Kind.GIF, from = contact.name, onBack = { watching = null }) }
         videoDraft?.let { d ->
             LaunchedEffect(d.uri) {
-                val r = app.oie.data.VideoPrep.prepare(context, d.uri) { p -> videoDraft = videoDraft?.copy(progress = p) }
+                val r = app.oie.data.VideoPrep.prepare(context, d.uri, d.gif) { p -> videoDraft = videoDraft?.copy(progress = p) }
                 videoDraft = when (r) {
                     is app.oie.data.VideoPrep.Result.Ready -> videoDraft?.copy(ready = r, progress = 1f)
                     is app.oie.data.VideoPrep.Result.Problem -> videoDraft?.copy(problem = r.why)

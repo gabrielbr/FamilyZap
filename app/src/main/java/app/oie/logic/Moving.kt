@@ -21,6 +21,17 @@ object Moving {
     fun isAnimatedWebp(b: ByteArray): Boolean =
         b.size >= 21 && ascii(b, 0, "RIFF") && ascii(b, 8, "WEBP") && ascii(b, 12, "VP8X") && (b[20].toInt() and 0x02) != 0
 
+    /** WhatsApp's own animated sticker (v0.31): a Lottie animation in a zip ("application/was"). */
+    fun isLottie(b: ByteArray): Boolean = b.size >= 4 && b[0] == 'P'.code.toByte() && b[1] == 'K'.code.toByte() && b[2] == 3.toByte() && b[3] == 4.toByte()
+
+    /** What a sticker file is, for the problem report (no picture, just the kind). */
+    fun kindOf(b: ByteArray): String = when {
+        isLottie(b) -> "lottie"
+        isAnimatedWebp(b) -> "animated webp"
+        isGif(b) -> "gif"
+        else -> "still"
+    }
+
     /** A GIF file ("GIF87a" or "GIF89a"). */
     fun isGif(b: ByteArray): Boolean = b.size >= 6 && (ascii(b, 0, "GIF87a") || ascii(b, 0, "GIF89a"))
 

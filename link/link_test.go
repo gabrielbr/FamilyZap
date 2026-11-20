@@ -408,3 +408,13 @@ func TestOwnChatOnlyWhenItIsTheParentLine(t *testing.T) {
 	}
 	k.c.Store.ID = nil
 }
+
+func TestALottieStickerGoesBackAsLottie(t *testing.T) {
+	if !isLottie([]byte("PK\x03\x04rest")) || isLottie([]byte("RIFF....WEBP")) || isLottie(nil) {
+		t.Fatal("a .was sticker is a zip")
+	}
+	s := LottieStickerMessage(whatsmeow.UploadResponse{FileLength: 9}).GetStickerMessage()
+	if !s.GetIsLottie() || !s.GetIsAnimated() || s.GetMimetype() != "application/was" {
+		t.Fatalf("%+v", s)
+	}
+}
