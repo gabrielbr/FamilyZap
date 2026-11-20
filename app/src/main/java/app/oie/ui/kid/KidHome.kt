@@ -66,7 +66,11 @@ fun KidHome(state: AppState) {
             // v0.34 audit: both can be true at once (the link down in quiet hours), and both are said.
             // v0.34 audit round 2: a dropped internet says so (it comes back by itself); only a link that needs
             // the parent (logged out, banned, never linked) asks for them.
-            if (link == app.oie.logic.LinkView.Shown.DOWN) Banner(R.drawable.gg_ic_link, if (state.linkState.needsParent(state.realMode)) tx.linkDropped(state.parentName) else tx.offlineHome)
+            // Fresh review: no internet isn't a link problem, so it gets the info icon; the link icon is for "ask the parent".
+            if (link == app.oie.logic.LinkView.Shown.DOWN) {
+                val parentNeeded = state.linkState.needsParent(state.realMode)
+                Banner(if (parentNeeded) R.drawable.gg_ic_link else R.drawable.gg_ic_info, if (parentNeeded) tx.linkDropped(state.parentName) else tx.offlineHome)
+            }
             if (quiet != null) Banner(R.drawable.gg_ic_clock, tx.quietUntil(quiet.end.hour))
             // v0.34 audit (P0): the home scrolls, so every person is reachable on a phone and at large text.
             Column(

@@ -151,7 +151,12 @@ internal fun PhotosScreen(state: AppState, contact: Contact, onOpen: (Message) -
             Text(tx.photosWith(contact.name), style = OieType.title, color = c.ink)
         }
         if (media.isEmpty()) {
-            Text(tx.noPhotos(contact.name), style = OieType.body, color = c.muted, modifier = Modifier.padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space6))
+            // Fresh review: an empty state like the home's, with the brand's rounds, and the way to add one.
+            Column(Modifier.padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space8), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
+                app.oie.ui.common.Rounds()
+                Text(tx.noPhotos(contact.name), style = OieType.body, color = c.ink)
+                Text(tx.noPhotosHow, style = OieType.body, color = c.muted)
+            }
             return@Column
         }
         LazyVerticalGrid(
@@ -209,7 +214,7 @@ internal fun PhotoScreen(media: String, from: String, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().background(c.page)) {
         Bar {
             QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
-            Text(from, style = OieType.title, color = c.ink)
+            Text(tx.mediaFrom(tx.photo, from), style = OieType.title, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
         Box(Modifier.fillMaxSize().padding(OTokens.Spacing.space6), contentAlignment = Alignment.Center) {
             bmp?.let { Image(it.asImageBitmap(), tx.photo, Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)), contentScale = ContentScale.Fit) }

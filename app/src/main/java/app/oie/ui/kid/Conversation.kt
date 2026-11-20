@@ -265,7 +265,8 @@ fun Conversation(
         Column(Modifier.fillMaxSize()) {
             Bar {
                 QuietButton(null, { state.drafts[contactId] = draft; if (onLeave != null) onLeave() else state.route = Route.KidHome }, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
-                app.oie.ui.common.Avatar(contact, OTokens.Size.avatar)
+                // Fresh review: the same letters as on the home tile ("Vó", "Vô").
+                app.oie.ui.common.Avatar(contact, OTokens.Size.avatar, letters = app.oie.logic.Initials.of(state.reachable.map { it.name })[contact.name])
                 Text(contact.name, style = OieType.title, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 // v0.33: the photos, videos and GIFs in this chat. A word on the tablet, the icon alone on a phone.
                 // v0.34 audit round 2: "Fotos" keeps its word on a phone too (README §9; decision 0010 covers the composer only).
@@ -739,9 +740,10 @@ private fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: (
                 modifier = Modifier.weight(1f, fill = false).clip(RoundedCornerShape(OTokens.Radius.radiusM)),
                 contentScale = ContentScale.Fit,
             )
+            // Fresh review: the main button first, as on every other screen.
             Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                QuietButton(tx.swap, onSwap, Modifier.height(OTokens.Size.button))
                 PrimaryButton(tx.send, onSend, icon = R.drawable.gg_ic_send)
+                QuietButton(tx.swap, onSwap)
             }
         }
     }

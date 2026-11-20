@@ -128,8 +128,11 @@ fun PairScreen(state: AppState) {
         }
         Column(Modifier.fillMaxWidth().padding(OTokens.Spacing.space8), horizontalAlignment = Alignment.CenterHorizontally) {
             Column(Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                // v0.34 audit: the risk in ink, never softened (product law).
-                Text(tx.riskBody, style = OieType.body, color = c.ink)
+                // Fresh review: the parent read the risk in full at setup; here it's one tap away, in ink when open
+                // (never softened, product law), so the steps and the code come first.
+                var why by remember { androidx.compose.runtime.mutableStateOf(false) }
+                app.oie.ui.common.TextLink(tx.whatCanHappen, { why = !why })
+                if (why) Text(tx.riskBody, style = OieType.body, color = c.ink)
                 Pairing(state) {
                     if (!state.realMode) real?.goReal() ?: state.goReal()
                     state.route = Route.Parent(if (state.allowed.isEmpty()) 0 else 2)

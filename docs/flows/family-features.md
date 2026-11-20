@@ -9,7 +9,7 @@ Every feature keeps the product law: only allowed contacts, nothing to Oiê's se
 
 ## 1. "Vovó viu" (receipts)
 - WhatsApp reports when a sent message reached the phone (delivered) and when it was read.
-- Under the kid's **latest** sent message, one line: "Enviada" → "Entregue" → "Vovó viu". In a group: "Alguém viu" (WhatsApp says that someone read it, not who).
+- Under the kid's **latest** sent message, one line: "Mandada" → "Entregue" → "Vovó viu". In a group: "Alguém viu" (WhatsApp says that someone read it, not who).
 - If the family turned read receipts off, it stays "Entregue". That's their choice, said nowhere.
 - On the line to the parent (v0.30) there are no receipts: the parent reads with their own account, which WhatsApp doesn't report.
 

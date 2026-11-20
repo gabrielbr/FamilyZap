@@ -267,8 +267,8 @@ fun VideoScreen(media: String?, gif: Boolean, from: String, onBack: () -> Unit) 
     Column(Modifier.fillMaxSize().background(c.page)) {
         Bar {
             QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
-            Text(if (gif) tx.gifLabel else tx.video, style = OieType.title, color = c.ink)
-            Text(from, style = OieType.body, color = c.muted)
+            // Fresh review: one title pattern for media ("Vídeo de Vovó", "Foto de Vovó").
+            Text(tx.mediaFrom(if (gif) tx.gifLabel else tx.video, from), style = OieType.title, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
         Column(
             Modifier.fillMaxSize().padding(OTokens.Spacing.space6),
@@ -338,9 +338,10 @@ fun VideoPreview(draft: VideoDraft, to: String, onSwap: () -> Unit, onSend: () -
                 }
                 ready != null -> {
                     if (ready.gif) GifBubble(ready.media) { watch = true } else VideoBubble(ready.media, ready.seconds, tooBig = false, parent = "") { watch = true }
-                    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                        QuietButton(tx.swap, onSwap, Modifier.height(OTokens.Size.button))
+                    // Fresh review: the main button first, as on every other screen.
+                    app.oie.ui.setup.ButtonRow {
                         app.oie.ui.common.PrimaryButton(tx.send, onSend, icon = R.drawable.gg_ic_send)
+                        QuietButton(tx.swap, onSwap)
                     }
                 }
                 else -> {

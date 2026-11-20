@@ -111,8 +111,9 @@ fun PeriodEditor(initial: QuietPeriod?, onSave: (QuietPeriod) -> Unit, onDelete:
         val tp = rememberTimePickerState(initialHour = now.hour, initialMinute = now.minute, is24Hour = true)
         AlertDialog(
             onDismissRequest = { picking = null },
-            confirmButton = { TextLink(tx.ok, { val t = LocalTime.of(tp.hour, tp.minute); if (which == "start") start = t else end = t; picking = null }) },
-            dismissButton = { TextLink(tx.cancel, { picking = null }) },
+            // Fresh review: the dialog's buttons are the app's own (Usar main, Cancelar quiet), not bare links.
+            confirmButton = { app.oie.ui.common.PrimaryButton(tx.ok, { val t = LocalTime.of(tp.hour, tp.minute); if (which == "start") start = t else end = t; picking = null }) },
+            dismissButton = { QuietButton(tx.cancel, { picking = null }) },
             containerColor = c.surface,
             text = {
                 TimePicker(

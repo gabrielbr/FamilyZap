@@ -234,7 +234,7 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: Undo) {
                 Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.changeNameA11y(ct.name)) { touched(); editing = ct.id; state.contactTipUsed = true },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
-            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar)
+            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = app.oie.logic.Initials.of(state.allowed.map { it.name })[ct.name])
             // The switch is always labelled, on or off, right under the name, so it fits a phone too (v0.13 audit).
             Column(Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2)) {
                 Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -340,7 +340,8 @@ private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: Undo) 
             // v0.34 audit: the name over its days and hours, so a phone at large text keeps both readable.
             Column(Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2)) {
                 Text(tx.periodName(p.name), style = OieType.label, color = c.ink)
-                Text(if (p.on) "${daysLabel(tx, p.days)} · ${hoursLabel(tx, p)}" else tx.paused, style = OieType.bodySmall, color = c.muted)
+                // Fresh review: the schedule always shows (the switch says on or off; "Pausado" is a contact's word).
+                Text("${daysLabel(tx, p.days)} · ${hoursLabel(tx, p)}", style = OieType.bodySmall, color = c.muted)
             }
             Switch(
                 modifier = Modifier.semantics { contentDescription = tx.switchA11y(p.name, p.on) },
@@ -369,16 +370,21 @@ private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: Undo, 
     Text(tx.names, style = OieType.title, color = c.ink, modifier = if (crashed) Modifier.padding(top = OTokens.Spacing.space6) else Modifier)
     var parent by remember { mutableStateOf(state.parentName) }
     var kid by remember { mutableStateOf(state.kidName) }
-    app.oie.ui.setup.Field(tx.yourName, parent, { parent = it; if (it.isNotBlank()) state.parentName = it.trim() }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName))
-    app.oie.ui.setup.Field(tx.kidNameLabel, kid, { kid = it; if (it.isNotBlank()) state.kidName = it.trim() }, tx.kidNameHelp(state.kidName.ifBlank { tx.theKid }))
-    // v0.21: as many names as the family uses ("Tito, Chico, Fran"); any of them reaches the kid and works in commands.
     var nicks by remember { mutableStateOf(state.kidNicknames.joinToString(", ")) }
-    app.oie.ui.setup.Field(tx.nicknamesLabel(state.kidName.ifBlank { tx.theKid }), nicks, {
-        nicks = it; state.kidNicknames.clear(); state.kidNicknames.addAll(app.oie.logic.KidNames.parse(it))
-    }, tx.nicknamesHelp(state.kidName.ifBlank { tx.theKid }))
-    // v0.22: the kid's name goes out in WhatsApp's bold, after an emoji the parent may choose; the line below shows the result.
-    app.oie.ui.setup.Field(tx.emojiLabel, state.kidEmoji, { state.kidEmoji = app.oie.logic.Signature.emojiOf(it) }, tx.emojiHelp)
-    SignaturePreview(state.kidName.ifBlank { tx.theKid }, state.kidEmoji)
+    // Fresh review: the fields stand apart like in setup (24dp), so each help line belongs to its own field.
+    Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
+        app.oie.ui.setup.Field(tx.yourName, parent, { parent = it; touched(); if (it.isNotBlank()) state.parentName = it.trim() }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName), names = true)
+        app.oie.ui.setup.Field(tx.kidNameLabel, kid, { kid = it; touched(); if (it.isNotBlank()) state.kidName = it.trim() }, tx.kidNameHelp(state.kidName.ifBlank { tx.theKid }), names = true)
+        // v0.21: as many names as the family uses ("Tito, Chico, Fran"); any of them reaches the kid and works in commands.
+        app.oie.ui.setup.Field(tx.nicknamesLabel(state.kidName.ifBlank { tx.theKid }), nicks, {
+            nicks = it; touched(); state.kidNicknames.clear(); state.kidNicknames.addAll(app.oie.logic.KidNames.parse(it))
+        }, tx.nicknamesHelp(state.kidName.ifBlank { tx.theKid }), names = true)
+        // v0.22: the kid's name goes out in WhatsApp's bold, after an emoji the parent may choose; the line below shows the result.
+        Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+            app.oie.ui.setup.Field(tx.emojiLabel, state.kidEmoji, { touched(); state.kidEmoji = app.oie.logic.Signature.emojiOf(it) }, tx.emojiHelp)
+            SignaturePreview(state.kidName.ifBlank { tx.theKid }, state.kidEmoji)
+        }
+    }
     BubbleSetting(state)
     NudgeSetting(state)
     Text(tx.help, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
@@ -581,8 +587,8 @@ private fun ParentLineCard(state: AppState, touched: () -> Unit) {
         Text(if (state.parentName.isBlank()) tx.you else tx.parentLineTitle(state.parentName), style = OieType.label, color = c.ink)
         Text(tx.parentLineBody(kid), style = OieType.body, color = c.ink)
         // On a phone the second note is one tap away, so the contacts start higher (less-is-more Q3).
-        val compact = app.oie.ui.common.isCompact
-        var whyOpen by remember(compact) { mutableStateOf(!compact) }
+        // Fresh review: folded on the tablet too (three paragraphs were a lot to read before the contacts).
+        var whyOpen by remember { mutableStateOf(false) }
         if (whyOpen) Text(tx.parentLineNoNotify, style = OieType.caption, color = c.muted)
         else TextLink(tx.why, { whyOpen = true })
         note?.let { Text(it, style = OieType.body, color = c.ink) }

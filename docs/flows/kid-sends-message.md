@@ -211,3 +211,6 @@ _The owner's test (2026-11-20): the kid can record and listen in Oiê, but the f
 - **Reactions:** "Segure uma mensagem para reagir ou ouvir." shows under the chat until the kid has reacted once.
 - **The home:** it scrolls; the photos line up with the greeting; both banners can show (link down and quiet hours); "Preciso de você" opens a sheet, and answers in a snackbar, with the minutes left when it's too soon.
 - **People paused by the parent** leave the home without a word (the kid can't change it, and the parent's reasons are theirs).
+
+## v0.34: one verb
+The kid's side says **Mandar** everywhere (the voice's own examples: "Mandar oi"): the send button, "Mandando para Vovó" in the undo bar, "Mandada" under the last message. "Enviar" is left only in the parent's "Enviar para o GitHub".

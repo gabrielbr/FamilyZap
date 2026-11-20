@@ -224,7 +224,8 @@ interface Strings {
     fun photosWith(name: String): String
     fun noPhotos(name: String): String
     fun and(names: List<String>): String
-    val editContact: String
+    val editContact: String; val noPhotosHow: String
+    fun mediaFrom(what: String, who: String): String
     val forgotTitle: String; val forgotShowCode: String
     val ok: String; val arriving: String; val you: String; val why: String; val drawUse: String
     fun recordingEnds(seconds: Int): String
@@ -240,7 +241,7 @@ interface Strings {
 
 object Pt : Strings {
     override val back = "Voltar"; override val cont = "Continuar"; override val cancel = "Cancelar"; override val undo = "Desfazer"
-    override val later = "Depois"; override val skip = "Pular"; override val send = "Enviar"; override val save = "Salvar"
+    override val later = "Depois"; override val skip = "Pular"; override val send = "Mandar"; override val save = "Salvar"
     override val add = "Adicionar"; override val remove = "Remover"; override val groupWarning = "Grupo · todos do grupo veem as mensagens"
     override fun stepOf(n: Int) = "Passo $n de 6"
     override val welcomeBody = "O Oiê é para seu filho ou filha conversar com a família pelo seu WhatsApp, só com quem você escolher."
@@ -268,7 +269,7 @@ object Pt : Strings {
     override val parentButton = "Pais"
     override fun hello(kid: String) = "Oiê, $kid"
     override val whoToTalk = "Com quem você quer falar?"
-    override fun nobodyYet(parent: String) = "Ainda não tem ninguém aqui. Peça para $parent escolher quem você pode chamar."
+    override fun nobodyYet(parent: String) = "Ainda não tem ninguém aqui. Peça para $parent escolher com quem você pode falar."
     override val askToAdd = "Pedir para adicionar alguém"
     override fun askedToAdd(parent: String) = "Pedido enviado. $parent vai ver na área dos pais."
     override fun kidAsked(kid: String) = "$kid pediu para adicionar alguém."
@@ -280,18 +281,18 @@ object Pt : Strings {
     override fun quietUntil(hour: Int) = "Horário de silêncio até ${hour}h. Dá para ler e ouvir, mas não para mandar."
     override fun quietUntilShort(hour: Int) = "Horário de silêncio até ${hour}h."
     override fun firstHi(name: String) = "Mande o primeiro oi para $name."
-    override val sending = "Enviando…"
-    override fun sentAt(time: String) = "Enviada · $time"
+    override val sending = "Mandando…"
+    override fun sentAt(time: String) = "Mandada · $time"
     override fun askReconnect(parent: String) = "Peça para $parent conectar de novo."
     override val recording = "Gravando…"; override val releaseToSend = "Solte para enviar"
     override fun writeTo(name: String) = "Escreva para $name"
-    override fun sendingTo(name: String) = "Enviando para $name"
+    override fun sendingTo(name: String) = "Mandando para $name"
     override val photoError = "Não deu para abrir essa foto. Tente outra."
     override val recordA11y = "Gravar áudio"; override val recordingA11y = "Gravando. Toque para enviar"
     override fun stickerA11y(word: String) = "Figurinha: $word"
     override fun sendSticker(word: String) = "Mandar figurinha $word"
     override fun onlyInWhatsApp(name: String) = "$name mandou algo que só abre no WhatsApp."
-    override val stickers = "Figurinhas"; override val photo = "Foto"; override val camera = "Câmera"; override val gallery = "Galeria"
+    override val stickers = "Figurinhas"; override val photo = "Foto"; override val camera = "Câmera"; override val gallery = "Escolher da galeria"
     override fun photoFor(name: String) = "Foto para $name"
     override val photoPreviewA11y = "A foto que você vai mandar"; override val swap = "Trocar"
     override fun listenA11y(seconds: Int) = "Ouvir áudio de $seconds segundos"
@@ -304,7 +305,7 @@ object Pt : Strings {
     override fun connectingTo(parent: String) = "Conectando ao WhatsApp de $parent…"
     override val disconnected = "O Oiê se desconectou do seu WhatsApp."
     override val reconnect = "Conectar de novo"
-    override fun whoCanCall(kid: String) = "Quem $kid pode chamar"
+    override fun whoCanCall(kid: String) = "Com quem $kid pode falar"
     override fun peopleAndGroups(people: Int, groups: Int) =
         "$people ${if (people == 1) "pessoa" else "pessoas"}, $groups ${if (groups == 1) "grupo" else "grupos"}"
     override val canTalkInQuiet = "Pode falar no silêncio"
@@ -393,7 +394,7 @@ object Pt : Strings {
     override val linkConnect = "Conectar o WhatsApp"
     override val linkWaiting = "Esperando o WhatsApp do seu celular."
     override val notSent = "Não foi"; override val tryAgain = "Tentar de novo"; override val unlinkReal = "Desconectar o WhatsApp"
-    override fun pickRealContacts(kid: String) = "Escolha nos seus contatos quem $kid pode chamar."
+    override fun pickRealContacts(kid: String) = "Escolha nos seus contatos com quem $kid pode falar."
     override val names = "Nomes"
     override fun newStickersFrom(parent: String) = "Novas de $parent"
     override val keepSticker = "Guardar"; override val sendFamilySticker = "Mandar figurinha da família"; override val familyStickers = "Da família"
@@ -464,7 +465,7 @@ object Pt : Strings {
     override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean) = when (r) {
         app.oie.logic.Receipt.READ -> if (group) "Alguém viu" else "$who viu"
         app.oie.logic.Receipt.DELIVERED -> "Entregue"
-        else -> "Enviada"
+        else -> "Mandada"
     }
     override val react = "Reagir"; override val readAloud = "Ouvir"; override val stopReading = "Parar"
     override fun reactWith(emoji: String) = "Reagir com $emoji"
@@ -493,7 +494,8 @@ object Pt : Strings {
     override fun photosWith(name: String) = "Fotos com $name"
     override fun noPhotos(name: String) = "Ainda não tem fotos com $name."
     override fun and(names: List<String>) = if (names.size < 2) names.joinToString() else names.dropLast(1).joinToString(", ") + " e " + names.last()
-    override val editContact = "Editar contato"
+    override val editContact = "Editar contato"; override val noPhotosHow = "As fotos, os vídeos e os GIFs da conversa aparecem aqui. Para mandar um, toque em Foto."
+    override fun mediaFrom(what: String, who: String) = "$what de $who"
     override val newMessages = "Novas"; override val reactHint = "Segure uma mensagem para reagir ou ouvir."
     override val releaseToCancel = "Solte para cancelar"; override val holdToRecord = "Segure o botão enquanto fala."
     override val photoShort = "Foto"; override val stickerShort = "Figurinha"; override val pauseA11y = "Pausar"; override val close = "Fechar"
@@ -503,7 +505,7 @@ object Pt : Strings {
     override val offlineHome = "Sem internet agora. Suas mensagens vão quando ela voltar."
     override val you = "Você"; override val why = "Por quê?"; override val drawUse = "Usar desenho"
     override fun recordingEnds(seconds: Int) = "Termina em $seconds s"
-    override val ok = "OK"; override val arriving = "Chegando…"
+    override val ok = "Usar"; override val arriving = "Chegando…"
     override val welcomeTitle = "A família ao alcance."
     override val sectionQuietShort = "Silêncio"; override val sectionHelpShort = "Ajustes"; override val expanded = "Aberto"; override val collapsed = "Fechado"
     override val reportCleared = "Relatório apagado."
@@ -545,7 +547,7 @@ object En : Strings {
     override val parentButton = "Parents"
     override fun hello(kid: String) = "Oiê, $kid"
     override val whoToTalk = "Who do you want to talk to?"
-    override fun nobodyYet(parent: String) = "Nobody here yet. Ask $parent to choose who you can call."
+    override fun nobodyYet(parent: String) = "Nobody here yet. Ask $parent to choose who you can talk to."
     override val askToAdd = "Ask to add someone"
     override fun askedToAdd(parent: String) = "Request sent. $parent will see it in the parent area."
     override fun kidAsked(kid: String) = "$kid asked you to add someone."
@@ -568,7 +570,7 @@ object En : Strings {
     override fun stickerA11y(word: String) = "Sticker: $word"
     override fun sendSticker(word: String) = "Send sticker $word"
     override fun onlyInWhatsApp(name: String) = "$name sent something that only opens in WhatsApp."
-    override val stickers = "Stickers"; override val photo = "Photo"; override val camera = "Camera"; override val gallery = "Gallery"
+    override val stickers = "Stickers"; override val photo = "Photo"; override val camera = "Camera"; override val gallery = "Choose from gallery"
     override fun photoFor(name: String) = "Photo for $name"
     override val photoPreviewA11y = "The photo you're about to send"; override val swap = "Change"
     override fun listenA11y(seconds: Int) = "Play a $seconds-second voice message"
@@ -581,7 +583,7 @@ object En : Strings {
     override fun connectingTo(parent: String) = "Connecting to $parent's WhatsApp…"
     override val disconnected = "Oiê got disconnected from your WhatsApp."
     override val reconnect = "Link again"
-    override fun whoCanCall(kid: String) = "Who $kid can call"
+    override fun whoCanCall(kid: String) = "Who $kid can talk to"
     override fun peopleAndGroups(people: Int, groups: Int) =
         "$people ${if (people == 1) "person" else "people"}, $groups ${if (groups == 1) "group" else "groups"}"
     override val canTalkInQuiet = "Can talk in quiet hours"
@@ -773,7 +775,8 @@ object En : Strings {
     override fun photosWith(name: String) = "Photos with $name"
     override fun noPhotos(name: String) = "No photos with $name yet."
     override fun and(names: List<String>) = if (names.size < 2) names.joinToString() else names.dropLast(1).joinToString(", ") + " and " + names.last()
-    override val editContact = "Edit contact"
+    override val editContact = "Edit contact"; override val noPhotosHow = "The chat's photos, videos and GIFs show here. To send one, tap Photo."
+    override fun mediaFrom(what: String, who: String) = "$what from $who"
     override val newMessages = "New"; override val reactHint = "Hold a message to react or listen."
     override val releaseToCancel = "Release to cancel"; override val holdToRecord = "Hold the button while you talk."
     override val photoShort = "Photo"; override val stickerShort = "Sticker"; override val pauseA11y = "Pause"; override val close = "Close"
@@ -783,7 +786,7 @@ object En : Strings {
     override val offlineHome = "No internet right now. Your messages go when it's back."
     override val you = "You"; override val why = "Why?"; override val drawUse = "Use drawing"
     override fun recordingEnds(seconds: Int) = "Ends in $seconds s"
-    override val ok = "OK"; override val arriving = "On its way…"
+    override val ok = "Use"; override val arriving = "On its way…"
     override val welcomeTitle = "Family, within reach."
     override val sectionQuietShort = "Quiet"; override val sectionHelpShort = "Settings"; override val expanded = "Open"; override val collapsed = "Closed"
     override val reportCleared = "Report deleted."

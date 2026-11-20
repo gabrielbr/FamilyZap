@@ -14,6 +14,7 @@ Ideas and planned work. When something ships, move it into the docs.
 ## Next
 
 ## Later
+- The Oiê sticker words are drawn into each sticker; "Boa noite" sits smaller than the others. Redraw it at the same size (an asset change in 01 Brand/stickers).
 - Link with a phone-number code as well as the QR (WhatsApp supports it; the link library has PairWithCode). For the owner to decide.
 - A backspace icon in the Gabriel core set, for the PIN keypad (the key says "Apagar" until then).
 - "Escrevendo…" while family types: left out in v0.33, because it needs the parent to show as online (rule L7).

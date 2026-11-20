@@ -75,7 +75,8 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
             Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState())
                 // v0.34 audit: the app's side margin, and one left edge on every step (the column fills its 600dp).
                 .padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space8),
-            contentAlignment = Alignment.Center,
+            // Fresh review: steps start at the top, so the title doesn't jump from step to step.
+            contentAlignment = Alignment.TopCenter,
         ) {
             Column(Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
                 // v0.34 audit: every step's heading is a title (display is the kid's greeting alone).
@@ -264,6 +265,7 @@ private fun ContactsStep(state: AppState, next: () -> Unit, back: () -> Unit) {
     // v0.34 audit round 2: "Mudar nome" on the person just picked, not repeated on every picked row (names can
     // also be changed any time in Contatos).
     var lastPicked by remember { mutableStateOf<String?>(null) }
+    val letters = remember(all) { app.oie.logic.Initials.of(all.map { it.name }) }
     all.firstOrNull { it.id == editing }?.let { ct ->
         app.oie.ui.parent.ContactEditor(ct, state.kidName.ifBlank { tx.theKid }, fresh,
             onSave = { renamed[it.id] = it; editing = null }, onCancel = { editing = null })
@@ -290,7 +292,7 @@ private fun ContactsStep(state: AppState, next: () -> Unit, back: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
-                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar)
+                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters[ct.name])
                 // The group note sits under the name, so it fits a phone (v0.17 audit).
                 Column(Modifier.weight(1f)) {
                     Text(ct.name, style = OieType.label, color = c.ink)

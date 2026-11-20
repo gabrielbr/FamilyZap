@@ -78,12 +78,10 @@ fun ForgotPin(state: AppState, stage: Int) {
                     }
                 } else if (state.pinResetFrom.isEmpty() || stale) {
                     if (state.linkState.pairFailed) Text(tx.linkFailed, style = OieType.body, color = c.coralText)
-                    app.oie.ui.setup.ButtonRow {
-                        PrimaryButton(tx.forgotShowCode, { sawQr = false; real?.relinkForPin() })
-                        QuietButton(tx.cancel, { state.route = Route.ParentPin })
-                    }
+                    // Fresh review: one way out, the bar's arrow (Cancelar here did the same).
+                    PrimaryButton(tx.forgotShowCode, { sawQr = false; real?.relinkForPin() })
                 } else {
-                    Pairing(state, back = { state.route = Route.ParentPin }) {
+                    Pairing(state) {
                         if (!sawQr) return@Pairing
                         val before = state.pinResetFrom
                         real?.ownChat { now ->

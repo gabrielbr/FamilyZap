@@ -14,7 +14,7 @@ A design pass over every screen, with the four design skills and anti-slop, in r
 
 ## 0.33.0
 Ten things for the family, in one update:
-- **"Vovó viu".** Under the kid's last message: Enviada, then Entregue, then "Vovó viu" (in a group, "Alguém viu").
+- **"Vovó viu".** Under the kid's last message: Mandada, then Entregue, then "Vovó viu" (in a group, "Alguém viu").
 - **Reactions.** The family's reactions show under the message. The kid holds a message to react with ❤️ 😂 😮 😢 👍 🙏; the same one again takes it away.
 - **Ouvir.** In the same place, the tablet reads a message aloud with its own voice. Nothing is sent anywhere.
 - **Listen before it goes.** After recording, the undo bar has Ouvir; the 5 seconds wait while it plays.
