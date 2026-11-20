@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- **Website polished to full marks (impeccable, independent review): 40/40 and 20/20 on both pages.**
+  - **Safety page:** calmer text, with one weight per job, sources as small print, and 190 and 100 one tap to call.
+  - **Landing page:** the story works on phones (one person at a time, never over the words), "Próximo" moves through the steps, and nothing fails contrast.
+  - **Landing page copy:** it says to open the page on the kid's tablet, what to do if Android won't install, and what happens if WhatsApp blocks the number.
 - **Website: published from the public releases repo,** at https://gabrielbr.github.io/oie-releases/ (the downloads live there too). The source stays here.
 - **Website: the font is served by the site itself.** The pages no longer ask Google Fonts, or any other site, for anything. A check fails the publish if one ever does.
 - **Website, privacy in plain words:** "Nada passa por nós" on the landing page, a new question "O Oiê guarda alguma coisa sobre a minha família?", and the safety page all now say that Oiê has no servers, links to your WhatsApp like WhatsApp Web, and has no analytics, ads or tracking.

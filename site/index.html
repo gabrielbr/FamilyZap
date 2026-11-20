@@ -24,12 +24,13 @@
   {"@type":"Question","name":"Quem recebe precisa instalar alguma coisa?","acceptedAnswer":{"@type":"Answer","text":"Não. Avós, tios ou amigos recebem no WhatsApp deles, como qualquer mensagem sua, com o nome da criança na frente."}},
   {"@type":"Question","name":"A criança pode falar com os amigos?","acceptedAnswer":{"@type":"Answer","text":"Pode, se você adicionar o contato. O amigo recebe do seu número, com o nome da criança na frente. A criança só fala com quem você aprovar, e ninguém de fora fala com ela pelo Oiê."}},
   {"@type":"Question","name":"A criança precisa de um celular?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê fica num tablet Android que vocês já têm e usa o seu WhatsApp."}},
-  {"@type":"Question","name":"O Oiê é do WhatsApp?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê é um app independente, que conecta ao seu WhatsApp como o WhatsApp Web faz, e não é afiliado ao WhatsApp nem à Meta. O uso segue os termos do WhatsApp, que pode restringir números que usam apps de terceiros. Por isso o Oiê manda no ritmo de uma pessoa, uma mensagem de cada vez."}},
+  {"@type":"Question","name":"O Oiê é do WhatsApp?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê é um app independente, que conecta ao seu WhatsApp como o WhatsApp Web faz, e não é afiliado ao WhatsApp nem à Meta. O uso segue os termos do WhatsApp, que pode restringir ou bloquear números que usam apps de terceiros. Por isso o Oiê manda no ritmo de uma pessoa, uma mensagem de cada vez."}},
   {"@type":"Question","name":"O Oiê guarda alguma coisa sobre a minha família?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê não tem servidor. O tablet conecta ao seu WhatsApp como o WhatsApp Web, e as mensagens vão só pelo WhatsApp. Não tem análise de uso, anúncio nem rastreamento. A única outra conexão é para ver se há versão nova do Oiê, na página pública dele no GitHub."}},
+  {"@type":"Question","name":"E se o WhatsApp bloquear o meu número?","acceptedAnswer":{"@type":"Answer","text":"O Oiê para na hora, mostra no tablet o aviso do WhatsApp com quanto tempo dura e não tenta de novo sozinho. No seu celular, siga o que o WhatsApp mostrar. Quando quiser, desconecte o Oiê em Aparelhos conectados, no seu WhatsApp."}},
   {"@type":"Question","name":"Eu vejo o que a criança manda?","acceptedAnswer":{"@type":"Answer","text":"Vê. As mensagens saem do seu WhatsApp, então também ficam no seu celular. A criança fica sabendo disso no primeiro uso."}},
   {"@type":"Question","name":"Dá para ver e postar status?","acceptedAnswer":{"@type":"Answer","text":"Dá, se você ligar nos ajustes. A criança vê as novidades de quem está nos contatos dela, e o que ela posta só essas pessoas veem."}},
   {"@type":"Question","name":"Dá para fazer ligação?","acceptedAnswer":{"@type":"Answer","text":"Ainda não. Por enquanto: mensagens, áudios, fotos, vídeos e figurinhas."}},
-  {"@type":"Question","name":"Por que não está na Play Store?","acceptedAnswer":{"@type":"Answer","text":"Por enquanto o Oiê é baixado direto da página de versões. Cada versão traz a soma SHA-256 para conferir o arquivo, e o app avisa quando tem versão nova."}}
+  {"@type":"Question","name":"Por que não está na Play Store?","acceptedAnswer":{"@type":"Answer","text":"Por enquanto o Oiê é baixado direto da página de versões. Cada versão traz um código (SHA-256) para conferir que o arquivo é o original, e o app avisa quando tem versão nova."}}
  ]}
 ]}
 </script>
@@ -69,7 +70,6 @@
           <button type="button" data-lang="pt" aria-pressed="true" lang="pt-BR">PT</button>
           <button type="button" data-lang="en" aria-pressed="false" lang="en">EN</button>
         </div>
-        <a class="btn btn--ink nav__get" href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener" data-t="navGet">Baixar</a>
       </div>
     </nav>
 
@@ -79,7 +79,7 @@
         <p class="hero__lede" data-t="lede">Do tablet, a criança conversa com a família e os amigos que você escolher, pelo seu WhatsApp.</p>
         <div class="hero__actions">
           <a class="btn btn--ink" href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener" data-t="cta">Baixar o Oiê</a>
-          <p class="hero__note"><span data-t="ctaNote">Para tablets Android 8 ou mais novos.</span> <a href="#baixar" data-t="ctaHow">Como instalar</a></p>
+          <p class="hero__note"><span data-t="ctaNote">Abra esta página no tablet Android da criança (Android 8 ou mais novo).</span> <a href="#baixar" data-t="ctaHow">Como instalar</a></p>
         </div>
       </div>
 
@@ -91,7 +91,7 @@
 <main>
   <section class="story" id="historia" aria-label="Como funciona" data-t-aria="storyA11y">
     <div class="stage" id="stage" data-step="0" data-focus="kid">
-      <p class="stage__tag" data-t="example">Exemplo</p>
+      <p class="stage__tag"><span id="tagText" data-t="example">Exemplo</span> <a class="stage__next" id="tagNext" href="#passo-1" hidden></a></p>
       <div class="cast">
         <!-- 1. The kid, holding the tablet (Oiê's own screen) -->
         <figure class="actor actor--kid" data-actor="kid">
@@ -164,7 +164,7 @@
           <figcaption><b data-v="recvName">Vô Zé</b><span data-v="recvCap">no WhatsApp dele</span></figcaption>
         </figure>
       </div>
-      <div class="wire" aria-hidden="true"><span class="wire__dot" id="dot"></span></div>
+      <div class="wire" aria-hidden="true"><span class="wire__run" id="run"><span class="wire__dot" id="dot"></span></span></div>
     </div>
 
     <div class="steps">
@@ -188,26 +188,26 @@
             <label><input type="radio" name="recv" value="aunt"><span data-t="rcvAunt">Tia Bia</span></label>
             <label><input type="radio" name="recv" value="friend"><span data-t="rcvFriend">Lucas, da escola</span></label>
           </fieldset>
-          <a class="family__go" href="#historia" data-t="familyGo">Ver a história</a>
+          <a class="family__go" href="#passo-1" data-t="familyGo">Ver a história</a>
       </form>
       </article>
-      <article class="step" data-step="1" data-focus="kid">
+      <article class="step" id="passo-1" data-step="1" data-focus="kid">
         <h2 data-s="s1h">Tito quer falar com o Vô Zé.</h2>
         <p data-s="s1p">No tablet, Tito vê só as pessoas que você escolheu. Um toque na foto, e é só escrever, gravar um áudio ou mandar uma foto.</p>
       </article>
-      <article class="step" data-step="2" data-focus="parent">
+      <article class="step" id="passo-2" data-step="2" data-focus="parent">
         <h2 data-s="s2h">A mensagem sai do seu WhatsApp.</h2>
         <p data-s="s2p">O Oiê manda pelo WhatsApp do seu celular, com o nome de Tito na frente. Ela fica no seu celular também: você vê tudo o que sai.</p>
       </article>
-      <article class="step" data-step="3" data-focus="recv">
+      <article class="step" id="passo-3" data-step="3" data-focus="recv">
         <h2 data-s="s3h">E chega no WhatsApp do Vô Zé.</h2>
         <p data-s="s3p">Para o Vô Zé, é uma mensagem sua, como qualquer outra. Ninguém precisa baixar nada.</p>
       </article>
-      <article class="step" data-step="4" data-focus="recv">
+      <article class="step" id="passo-4" data-step="4" data-focus="recv">
         <h2 data-s="s4h">O Vô Zé responde como sempre.</h2>
         <p data-s="s4p">A resposta volta pelo seu WhatsApp e aparece no tablet, na conversa com o Vô Zé.</p>
       </article>
-      <article class="step" data-step="5" data-focus="recv">
+      <article class="step" id="passo-5" data-step="5" data-focus="recv">
         <h2 data-s="s5h">Não é só o Vô Zé.</h2>
         <p data-s="s5p">Avós, tios, primos e os amigos da escola. Qualquer pessoa que você aprovar, e mais ninguém.</p>
         <ul class="others" aria-hidden="true">
@@ -217,9 +217,10 @@
           <li><svg class="sil" viewBox="0 0 200 240" data-draw="friend"></svg><span data-t="friendName">Lucas, da escola</span></li>
         </ul>
       </article>
-      <article class="step" data-step="6" data-focus="kid">
+      <article class="step" id="passo-6" data-step="6" data-focus="kid">
         <h2 data-s="s6h">Você escolhe quem.</h2>
         <p data-s="s6p">Numa área com PIN, no próprio tablet: os contatos, o horário de silêncio e pausar uma conversa. No seu celular, você só lê um QR, uma vez.</p>
+        <a class="family__go step__again" href="#historia" data-t="again">Trocar a família e ver de novo</a>
       </article>
     </div>
   </section>
@@ -245,12 +246,13 @@
           <details><summary data-t="q1">Quem recebe precisa instalar alguma coisa?</summary><p data-t="a1">Não. Avós, tios ou amigos recebem no WhatsApp deles, como qualquer mensagem sua, com o nome da criança na frente.</p></details>
           <details><summary data-t="q2">A criança pode falar com os amigos?</summary><p data-t="a2">Pode, se você adicionar o contato. O amigo recebe do seu número, com o nome da criança na frente. A criança só fala com quem você aprovar, e ninguém de fora fala com ela pelo Oiê.</p></details>
           <details><summary data-t="q3">A criança precisa de um celular?</summary><p data-t="a3">Não. O Oiê fica num tablet Android que vocês já têm e usa o seu WhatsApp.</p></details>
-          <details><summary data-t="q4">O Oiê é do WhatsApp?</summary><p data-t="a4">Não. O Oiê é um app independente, que conecta ao seu WhatsApp como o WhatsApp Web faz, e não é afiliado ao WhatsApp nem à Meta. O uso segue os termos do WhatsApp, que pode restringir números que usam apps de terceiros. Por isso o Oiê manda no ritmo de uma pessoa, uma mensagem de cada vez.</p></details>
+          <details><summary data-t="q4">O Oiê é do WhatsApp?</summary><p data-t="a4">Não. O Oiê é um app independente, que conecta ao seu WhatsApp como o WhatsApp Web faz, e não é afiliado ao WhatsApp nem à Meta. O uso segue os termos do WhatsApp, que pode restringir ou bloquear números que usam apps de terceiros. Por isso o Oiê manda no ritmo de uma pessoa, uma mensagem de cada vez.</p></details>
           <details><summary data-t="q9">O Oiê guarda alguma coisa sobre a minha família?</summary><p data-t="a9">Não. O Oiê não tem servidor. O tablet conecta ao seu WhatsApp como o WhatsApp Web, e as mensagens vão só pelo WhatsApp. Não tem análise de uso, anúncio nem rastreamento. A única outra conexão é para ver se há versão nova do Oiê, na página pública dele no GitHub.</p></details>
+          <details><summary data-t="q10">E se o WhatsApp bloquear o meu número?</summary><p data-t="a10">O Oiê para na hora, mostra no tablet o aviso do WhatsApp com quanto tempo dura e não tenta de novo sozinho. No seu celular, siga o que o WhatsApp mostrar. Quando quiser, desconecte o Oiê em Aparelhos conectados, no seu WhatsApp.</p></details>
           <details><summary data-t="q5">Eu vejo o que a criança manda?</summary><p data-t="a5">Vê. As mensagens saem do seu WhatsApp, então também ficam no seu celular. A criança fica sabendo disso no primeiro uso.</p></details>
           <details><summary data-t="q6">Dá para ver e postar status?</summary><p data-t="a6">Dá, se você ligar nos ajustes. A criança vê as novidades de quem está nos contatos dela, e o que ela posta só essas pessoas veem.</p></details>
           <details><summary data-t="q7">Dá para fazer ligação?</summary><p data-t="a7">Ainda não. Por enquanto: mensagens, áudios, fotos, vídeos e figurinhas.</p></details>
-          <details><summary data-t="q8">Por que não está na Play Store?</summary><p data-t="a8">Por enquanto o Oiê é baixado direto da página de versões. Cada versão traz a soma SHA-256 para conferir o arquivo, e o app avisa quando tem versão nova.</p></details>
+          <details><summary data-t="q8">Por que não está na Play Store?</summary><p data-t="a8">Por enquanto o Oiê é baixado direto da página de versões. Cada versão traz um código (SHA-256) para conferir que o arquivo é o original, e o app avisa quando tem versão nova.</p></details>
         </div>
       </div>
     </section>
@@ -262,11 +264,11 @@
         <div class="get">
           <div>
             <a class="btn btn--coral" href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener" data-t="cta">Baixar o Oiê</a>
-            <p class="get__small" data-t="getSmall">Para Android 8 ou mais novo. O arquivo vem da página de versões do Oiê no GitHub, com a soma SHA-256 de cada versão.</p>
+            <p class="get__small" data-t="getSmall">Para Android 8 ou mais novo. O arquivo vem da página de versões do Oiê no GitHub, com um código (SHA-256) para conferir que o arquivo é o original.</p>
           </div>
           <ol class="steps-get">
             <li><span data-t="g1">No tablet da criança, toque em Baixar o Oiê e abra o arquivo.</span></li>
-            <li><span data-t="g2">Se o Android pedir, permita instalar apps do navegador.</span></li>
+            <li><span data-t="g2">Se o Android pedir, permita instalar apps do navegador. Se ele não deixar, o tablet pode ter um controle dos pais ou da escola: quem cuida dele pode liberar.</span></li>
             <li><span data-t="g3">Abra o Oiê: seu nome, o da criança, e um QR que você lê no seu WhatsApp.</span></li>
             <li><span data-t="g4">Escolha os contatos, da família ou amigos. A criança já pode mandar o primeiro oi.</span></li>
           </ol>
@@ -278,7 +280,7 @@
       <div class="stop__body">
         <h2 id="aviso" data-t="noticeH">Aviso</h2>
         <p data-t-html="n1">O Oiê é um app independente que conecta ao seu WhatsApp como o WhatsApp Web faz. <b>Não é afiliado ao WhatsApp nem à Meta.</b></p>
-        <p data-t="n2">Use por sua conta: conectar um aparelho segue os termos do WhatsApp, que pode restringir números que usam apps de terceiros. O Oiê manda no ritmo de uma pessoa, uma mensagem de cada vez, e explica isso antes de você conectar.</p>
+        <p data-t="n2">Use por sua conta: conectar um aparelho segue os termos do WhatsApp, que pode restringir ou bloquear números que usam apps de terceiros. O Oiê manda no ritmo de uma pessoa, uma mensagem de cada vez, e explica isso antes de você conectar.</p>
       </div>
     </section>
   </div>

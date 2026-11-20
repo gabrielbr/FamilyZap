@@ -44,7 +44,10 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --t-std: 150ms;
   --t-emph: 250ms;
-  --t-scene: 600ms;
+  /* Scene changes use the emphasised duration. The message travelling along the wire is the one longer motion,
+     a story illustration recorded in decision 0013; nothing bounces, and "Remove animations" stops it all. */
+  --t-scene: var(--t-emph);
+  --t-travel: 1200ms;
 
   color-scheme: light dark;
 }
@@ -79,9 +82,9 @@ img, svg { display: block; }
 /* ---------- The coral hero ---------- */
 .hero { background: var(--brand-coral); color: var(--brand-ink); }
 .wrap { max-width: var(--page-max); margin: 0 auto; padding: 0 var(--s6); }
-.nav { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); padding: var(--s6) 0; }
+.nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s4); padding: var(--s6) 0; }
 .nav__logo img { width: 92px; height: auto; }
-.nav__right { display: flex; align-items: center; gap: var(--s4); }
+.nav__right { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: var(--s4); }
 .nav__get { display: none; }
 .nav__link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--brand-ink); }
 .lang { display: inline-flex; border: 1.5px solid var(--brand-ink); border-radius: var(--r-pill); overflow: hidden; }
@@ -101,25 +104,27 @@ img, svg { display: block; }
 .family legend { width: 100%; padding: 0; margin-bottom: var(--s2); font-size: 0.875rem; font-weight: 700; color: var(--gds-muted); }
 .family label { position: relative; }
 /* Four people to write to: two by two, so none sits alone on a line. */
-.family fieldset:last-of-type { display: grid; grid-template-columns: repeat(2, max-content); }
+.family fieldset:last-of-type { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .family fieldset:last-of-type legend { grid-column: 1 / -1; }
 .family fieldset:last-of-type label span { width: 100%; }
 .family input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
 .family label span {
   display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s4); border-radius: var(--r-pill);
-  border: 1.5px solid var(--gds-ink); font-weight: 700; font-size: 0.9375rem; transition: background-color var(--t-std) var(--ease), color var(--t-std) var(--ease), border-color var(--t-std) var(--ease);
+  border: 1.5px solid var(--gds-ink); font-weight: 700; font-size: 0.9375rem; line-height: 1.25; padding-block: var(--s2); overflow-wrap: anywhere; transition: background-color var(--t-std) var(--ease), color var(--t-std) var(--ease), border-color var(--t-std) var(--ease);
 }
 .family input:checked + span { background: var(--gds-ink); color: var(--gds-page); }
 .family input:focus-visible + span { outline: 3px solid var(--gds-mint); outline-offset: 2px; }
 .family__go { font-weight: 800; justify-self: start; min-height: 44px; display: inline-flex; align-items: center; }
+.step__again { margin-top: var(--s4); align-self: flex-start; }
 
 /* ---------- The story: a pinned stage, steps scrolling beside it ---------- */
 .story { position: relative; max-width: var(--page-max); margin: 0 auto; padding: 0 var(--s6); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); column-gap: var(--s10); }
-.stage { grid-column: 2; grid-row: 1; position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 3vh; transition: padding-top var(--t-scene) var(--ease); }
-/* Once the hero has scrolled away, the stage centres itself beside the step being read. */
-.stage.is-pinned { padding-top: max(3vh, calc(50svh - 300px)); }
+.stage { grid-column: 2; grid-row: 1; position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 3vh; }
+/* Once the hero has scrolled away, the stage centres itself beside the step being read (by transform: no layout). */
+.stage > :is(.cast, .wire) { transition: transform var(--t-scene) var(--ease); }
+.stage.is-pinned > :is(.cast, .wire) { transform: translateY(max(0px, calc(50svh - 300px - 3vh))); }
 .steps { grid-column: 1; grid-row: 1; padding: var(--s8) 0 30vh; }
-.step { min-height: 78vh; display: flex; flex-direction: column; justify-content: center; transition: color var(--t-scene) var(--ease); }
+.step { min-height: 78vh; scroll-margin-top: calc(11vh - var(--s16)); /* a jump lands with the words mid-screen */ display: flex; flex-direction: column; justify-content: center; transition: color var(--t-scene) var(--ease); }
 /* Only with JavaScript running does the story fade the steps not being read. */
 .js .step { color: var(--gds-muted); }
 .js .step h2 { color: var(--gds-muted); }
@@ -127,15 +132,30 @@ img, svg { display: block; }
 .step--intro, .js .step--intro { min-height: 0; padding-bottom: 30vh; opacity: 1; justify-content: flex-start; }
 .step h2 { font-weight: 800; font-size: clamp(1.75rem, 3.4vw, 2.75rem); line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 var(--s4); text-wrap: balance; }
 .step p { font-size: 1.1875rem; line-height: 1.55; margin: 0; max-width: 34ch; }
-.stage__tag { position: absolute; top: var(--s6); right: 0; margin: 0; font-size: 0.8125rem; font-weight: 800; color: var(--gds-muted); }
+.stage__tag { position: absolute; top: var(--s6); right: 0; z-index: 3; margin: 0; display: flex; align-items: center; gap: var(--s3); font-size: 0.8125rem; font-weight: 800; color: var(--gds-muted); }
+.stage__next { display: inline-flex; align-items: center; min-height: 44px; color: var(--gds-ink); }
 
 .cast { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: var(--s2); position: relative; z-index: 1; }
-.actor { margin: 0; display: grid; justify-items: center; position: relative; transition: opacity var(--t-scene) var(--ease), filter var(--t-scene) var(--ease); }
-.stage:not([data-step="0"]) .actor { opacity: 0.4; filter: saturate(0.6); }
-.stage[data-focus="kid"] .actor--kid, .stage[data-focus="parent"] .actor--parent, .stage[data-focus="recv"] .actor--recv,
-.stage[data-step="2"] .actor--kid, .stage[data-step="4"] .actor--kid, .stage[data-step="4"] .actor--parent { opacity: 1; filter: none; }
-/* Step 6: the parent holds the tablet, so the phones step further back. */
-.stage[data-step="6"] .actor--parent, .stage[data-step="6"] .actor--recv { opacity: 0.22; }
+.actor { margin: 0; display: grid; justify-items: center; position: relative; }
+/* Only the drawing steps back; the names under it keep their full contrast. */
+.actor > .sil, .actor > .hold { transition: opacity var(--t-scene) var(--ease), filter var(--t-scene) var(--ease); }
+/* People not in focus step back: the person fades and their screen goes grey and lighter. The screens are pictures
+   (aria-hidden, their words are in the step text), so WCAG 1.4.3's exemption for text in a picture applies. */
+.stage:not([data-step="0"]) .actor > .sil { opacity: 0.4; }
+.stage:not([data-step="0"]) .actor > .hold { filter: grayscale(1); --bezel: var(--gds-muted); }
+/* Lighter, but solid: a wash of the page colour over the screen (opacity would show the person through the device). */
+.device::after { content: ""; position: absolute; inset: 0; background: var(--gds-page); opacity: 0; pointer-events: none; transition: opacity var(--t-scene) var(--ease); }
+.stage:not([data-step="0"]) .actor > .hold .device::after { opacity: 0.5; }
+.stage:not([data-step="0"]) .actor > .hold .hand { opacity: 0.4; }
+.stage[data-focus="kid"] .actor--kid > :is(.sil, .hold), .stage[data-focus="parent"] .actor--parent > :is(.sil, .hold), .stage[data-focus="recv"] .actor--recv > :is(.sil, .hold),
+.stage[data-step="2"] .actor--kid > :is(.sil, .hold), .stage[data-step="4"] .actor--kid > :is(.sil, .hold), .stage[data-step="4"] .actor--parent > :is(.sil, .hold) { opacity: 1; filter: none; --bezel: var(--brand-ink); }
+.stage[data-focus="kid"] .actor--kid > .hold .device::after, .stage[data-focus="parent"] .actor--parent > .hold .device::after, .stage[data-focus="recv"] .actor--recv > .hold .device::after,
+.stage[data-step="2"] .actor--kid > .hold .device::after, .stage[data-step="4"] .actor--kid > .hold .device::after, .stage[data-step="4"] .actor--parent > .hold .device::after { opacity: 0; }
+.stage[data-focus="kid"] .actor--kid > .hold .hand, .stage[data-focus="parent"] .actor--parent > .hold .hand, .stage[data-focus="recv"] .actor--recv > .hold .hand,
+.stage[data-step="2"] .actor--kid > .hold .hand, .stage[data-step="4"] .actor--kid > .hold .hand, .stage[data-step="4"] .actor--parent > .hold .hand { opacity: 1; }
+/* Step 6: the parent holds the tablet, so the parent's own figure leaves (one Ana on stage), and the receiver steps back. */
+.stage[data-step="6"] .actor--parent { visibility: hidden; }
+.stage[data-step="6"] .actor--recv > .sil { opacity: 0.25; }
 
 /* The person stands behind; the device is held up at the chest, so the head and shoulders show. */
 .actor { --aw: 228px; --pull: -0.36; --dw: 146px; }
@@ -150,24 +170,21 @@ img, svg { display: block; }
 .sil .hd { transform-box: view-box; transform-origin: 100px 150px; transition: transform var(--t-scene) var(--ease); }
 /* Typing: the head tips down towards the device, the thumbs tap. */
 .actor.is-typing .hd { transform: rotate(5deg) translateY(4px); }
-.actor.is-typing .hand { animation: tap 0.36s ease-in-out infinite; }
-.actor.is-typing .hand--r { animation-delay: 0.18s; }
+.actor.is-typing .hand { animation: tap calc(var(--t-std) * 2) var(--ease) infinite; }
+.actor.is-typing .hand--r { animation-delay: var(--t-std); }
 @keyframes tap { 50% { transform: translateY(-7px) scale(0.9); } }
-/* Reading: a nod. The answer lands: a small hop. Once each. */
-.actor.is-nod .hd { animation: nod 0.9s var(--ease) 0.6s 2; }
+/* Reading: one nod. The answer lands: the tablet gives one press (97%, the system's press), no bounce. */
+.actor.is-nod .hd { animation: nod calc(var(--t-emph) * 2) var(--ease) var(--t-emph) 1; }
 @keyframes nod { 50% { transform: rotate(-6deg) translateY(2px); } }
-.actor.is-hop .sil, .actor.is-hop .hold { animation: hop 0.7s var(--ease); }
-@keyframes hop { 40% { transform: translateY(-12px); } }
-/* The person in focus breathes a little. */
-.stage[data-focus="kid"] .actor--kid .sil, .stage[data-focus="parent"] .actor--parent .sil, .stage[data-focus="recv"] .actor--recv .sil { animation: breathe 3.6s ease-in-out infinite; transform-origin: 50% 100%; }
-@keyframes breathe { 50% { transform: scaleY(1.015); } }
+.actor.is-hop .hold { animation: press calc(var(--t-emph) * 2) var(--ease); }
+@keyframes press { 50% { transform: scale(0.97); } }
 .hold { position: relative; z-index: 2; width: var(--dw); max-width: 100%; margin-top: calc(var(--aw) * var(--pull)); }
-.hand { position: absolute; top: 56%; width: 30px; height: 30px; border-radius: 50%; background: var(--gds-ink); border: 4px solid var(--gds-page); }
+.hand { transition: opacity var(--t-scene) var(--ease); position: absolute; top: 56%; width: 30px; height: 30px; border-radius: 50%; background: var(--gds-ink); border: 4px solid var(--gds-page); }
 .hand--l { left: -15px; }
 .hand--r { right: -15px; }
 .actor figcaption { display: grid; justify-items: center; text-align: center; margin-top: var(--s3); font-size: 0.875rem; line-height: 1.3; color: var(--gds-muted); font-weight: 600; }
 .actor figcaption b { color: var(--gds-ink); font-size: 1rem; font-weight: 800; }
-.device { position: relative; border: 7px solid var(--brand-ink); background: var(--brand-ink); overflow: hidden; box-shadow: 0 12px 28px rgba(42, 23, 20, 0.22); }
+.device { position: relative; border: 7px solid var(--bezel, var(--brand-ink)); background: var(--bezel, var(--brand-ink)); transition: border-color var(--t-scene) var(--ease), background-color var(--t-scene) var(--ease); overflow: hidden; }
 .phone { width: 100%; aspect-ratio: 9 / 16; border-radius: 24px; }
 /* In dark, the ink bezel would vanish into the ground: a muted edge keeps the device's shape. */
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .device { box-shadow: 0 0 0 2px var(--gds-muted); } }
@@ -176,16 +193,21 @@ img, svg { display: block; }
 
 /* The wire between the three: the family line from v1, carrying the message. */
 .wire { flex: none; position: relative; height: var(--line); margin: var(--s4) 6% 0; background: var(--gds-ink); border-radius: var(--line); }
-.wire__dot { position: absolute; top: 50%; left: 0; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--gds-mint); border: 4px solid var(--gds-page); transition: left 1200ms var(--ease), opacity var(--t-emph) var(--ease); opacity: 0; }
+/* The dot rides a run as wide as the wire, so it moves by transform (no layout) along it. */
+.wire__run { position: absolute; inset: 0; transform: translateX(0); transition: transform var(--t-travel) var(--ease); }
+/* The run slides past the wire's end when the dot reaches the receiver: the wire clips it (with room for the dot),
+   so the page never scrolls sideways and nothing else on the stage is cut. */
+.wire { overflow: clip; overflow-clip-margin: var(--s3); }
+.wire__dot { position: absolute; top: 50%; left: 0; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--gds-mint); border: 4px solid var(--gds-page); transition: opacity var(--t-emph) var(--ease); opacity: 0; }
 
 /* ---------- Oiê's own screen on the tablet (coral frame, message rows) ---------- */
 .oie { position: absolute; inset: 0; background: var(--brand-cream); border: 4px solid var(--brand-coral); display: flex; flex-direction: column; font-size: 11px; line-height: 1.35; color: var(--brand-ink); }
 .oie__bar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid var(--oie-line); font-weight: 800; font-size: 12px; }
 .oie__face { width: 22px; height: 22px; border-radius: 50%; background: var(--brand-selected); display: grid; place-items: center; font-size: 9px; font-weight: 800; }
-.oie__home { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); align-content: center; gap: 6px; padding: 8px; }
-.oie__tile { display: grid; justify-items: center; gap: 3px; font-style: normal; }
+.oie__home { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-content: center; gap: 6px; padding: 8px; }
+.oie__tile { min-width: 0; display: grid; justify-items: center; gap: 3px; font-style: normal; }
 .oie__tile b { width: 38px; height: 38px; border-radius: 50%; background: var(--brand-selected); display: grid; place-items: center; font-size: 13px; }
-.oie__tile i { font-style: normal; font-weight: 700; font-size: 10px; white-space: nowrap; }
+.oie__tile i { max-width: 100%; font-style: normal; font-weight: 700; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .oie__chat { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 5px; padding: 8px; }
 .oie__msg { margin: 0; max-width: 78%; padding: 5px 8px; border-radius: 6px; transition: opacity var(--t-scene) var(--ease), transform var(--t-scene) var(--ease); }
 .oie__msg small { display: block; font-size: 8.5px; color: var(--brand-muted); font-weight: 700; }
@@ -238,7 +260,7 @@ img, svg { display: block; }
 .wa .kbd { background: var(--wa-kbd); }
 .device.is-typing .kbd { max-height: 40%; padding: 5px; }
 .kbd__row { display: flex; justify-content: center; gap: 3px; }
-.kbd i { flex: 1; max-width: 13px; height: 13px; border-radius: 3px; background: var(--oie-surface); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18); transition: background-color 80ms linear, transform 80ms linear; }
+.kbd i { flex: 1; max-width: 13px; height: 13px; border-radius: 3px; background: var(--oie-surface); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18); transition: background-color calc(var(--t-std) / 2) linear, transform calc(var(--t-std) / 2) linear; }
 .kbd i.kbd__space { max-width: none; flex: 0 0 55%; }
 .kbd i.is-hit { background: var(--brand-coral); transform: translateY(1px); }
 .wa .kbd i.is-hit { background: var(--wa-send); }
@@ -246,9 +268,9 @@ img, svg { display: block; }
 /* The three dots WhatsApp shows while the other person types. */
 .wa__dots { display: none; gap: 3px; padding: 7px 9px; }
 .wa__dots.is-on { display: inline-flex; }
-.wa__dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--wa-meta); animation: dot 1.1s ease-in-out infinite; }
-.wa__dots i:nth-child(2) { animation-delay: 0.15s; }
-.wa__dots i:nth-child(3) { animation-delay: 0.3s; }
+.wa__dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--wa-meta); animation: dot calc(var(--t-emph) * 4) var(--ease) infinite; }
+.wa__dots i:nth-child(2) { animation-delay: var(--t-std); }
+.wa__dots i:nth-child(3) { animation-delay: calc(var(--t-std) * 2); }
 @keyframes dot { 30% { transform: translateY(-3px); opacity: 0.5; } }
 
 /* Messages appear when their step comes (data-show = the step they arrive in). */
@@ -261,13 +283,13 @@ img, svg { display: block; }
 .stage[data-step="5"] .actor--recv [data-show] { display: block; animation: appear var(--t-scene) var(--ease); }
 
 /* Typing caret. */
-.caret { display: inline-block; width: 1.5px; height: 1.1em; margin-left: 1px; vertical-align: -0.2em; background: currentColor; animation: blink 1s steps(1) infinite; }
+.caret { display: inline-block; width: 1.5px; height: 1.1em; margin-left: 1px; vertical-align: -0.2em; background: currentColor; animation: blink calc(var(--t-emph) * 4) steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
 /* Step 5: the other people a kid can write to. */
-.others { list-style: none; margin: var(--s8) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, max-content); gap: var(--s4) var(--s10); }
-.others li { display: grid; justify-items: center; gap: var(--s1); font-weight: 700; font-size: 0.9375rem; }
-.others .sil { width: 92px; height: 110px; margin: 0; }
+.others { list-style: none; margin: var(--s8) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 9rem)); gap: var(--s4) var(--s6); }
+.others li { min-width: 0; display: grid; justify-items: center; gap: var(--s1); font-weight: 700; font-size: 0.9375rem; text-align: center; overflow-wrap: anywhere; }
+.others .sil { width: 92px; height: 110px; max-width: 100%; margin: 0; }
 .others .d { stroke-width: 6; }
 
 /* ---------- After the story: stations on a coral spine (as v1) ---------- */
@@ -322,7 +344,16 @@ footer { border-top: 1px solid var(--gds-line); }
   .story { grid-template-columns: minmax(0, 1fr); padding: 0; }
   .stage { grid-column: 1; height: 62svh; top: 0; z-index: 2; background: var(--gds-page); padding: var(--s4) var(--s4) var(--s3); border-bottom: 1px solid var(--gds-line); justify-content: flex-end; }
   .steps { grid-column: 1; grid-row: 2; padding: var(--s8) var(--s4) 40vh; }
-  .step { min-height: 62vh; justify-content: flex-start; padding-top: var(--s8); }
+  /* While the visitor builds their family, the stage scrolls away with the page, so the whole form is in reach. */
+  .stage[data-step="0"] { position: relative; }
+  /* The stage pins as soon as the form's end slides under it, and step 1 follows right after. */
+  .step--intro, .js .step--intro { padding-bottom: var(--s6); }
+  /* "Ver a história" lands with step 1's heading just under the pinned stage. */
+  .step { scroll-margin-top: calc(62svh - var(--s16) - var(--s4)); } /* lands just under the stage; the page's 64px scroll-padding adds to it */
+  /* The stage is already at the top on a phone: no centring shift (it would push the drawing over the words). */
+  .stage.is-pinned > :is(.cast, .wire) { transform: none; }
+  /* A step is as tall as the band under the stage: the next words arrive as the last ones leave. */
+  .step { min-height: 38svh; justify-content: flex-start; padding-top: var(--s4); }
   .step p { max-width: none; }
   .cast { grid-template-columns: minmax(0, 1fr); justify-items: center; }
   .actor { grid-area: 1 / 1; }

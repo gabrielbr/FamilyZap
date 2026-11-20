@@ -35,3 +35,6 @@ The first landing page (site/, v1) drew the mechanism as an abstract route, and 
 - This is an exception to the brand rules on green, bubbles and devices (`02 Design System/README.md` §1 and §8, `01 Brand/imagery-and-icons.md`). It is **for the website only**; the app never shows green or bubbles.
 - The website copy and FAQ say "a família e os amigos que você escolher" and name several receivers.
 - The WhatsApp-like colours live only in the site's `.wa` screens, as named constants with this decision cited.
+
+## Update, 2026-11-20: motion on the website
+Scene changes in the story use the system's durations (250ms, presses 150ms) and its one ease, with no bounce. The message travelling along the wire takes 1.2s, the one longer motion; it is a story illustration, not interface feedback. Typing taps, the WhatsApp dots and the caret mimic real gestures. Nothing loops forever: the step-5 receivers go round once. With "Remove animations", everything shows its end state.
