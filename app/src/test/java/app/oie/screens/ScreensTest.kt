@@ -349,4 +349,24 @@ class ScreensTest {
         }
         Conversation(s, "mae")
     }
+
+    // v0.36: family statuses (docs/flows/statuses.md). The clock is held so the 5 s timer doesn't move on.
+    private fun statuses() = ready().apply {
+        kidNoticeSeen = true; statusesOn = true; linkedSince = now - 20L * 60 * 60 * 1000
+        statuses += app.oie.logic.Status("st1", "vovo", "vovo", now - 2L * 60 * 60 * 1000, Kind.TEXT, "Bolo de laranja saindo do forno")
+        statuses += app.oie.logic.Status("st2", "vovo", "vovo", now - 40L * 60 * 1000, Kind.TEXT, "Quem vem no domingo?")
+        statuses += app.oie.logic.Status("st3", "bia", "bia", now - 5L * 60 * 60 * 1000, Kind.TEXT, "Praia hoje", viewed = true)
+    }
+    private fun held(name: String, dark: Boolean, content: @Composable () -> Unit) { compose.mainClock.autoAdvance = false; shot(name, dark, content = content) }
+    @Test fun kidHomeStatuses() = shot("60-kid-home-statuses", false) { KidHome(statuses()) }
+    @Test fun kidHomeStatusesDark() = shot("60-kid-home-statuses", true) { KidHome(statuses()) }
+    @Test fun statusViewer() = held("61-status-viewer", false) { app.oie.ui.kid.StatusViewer(statuses(), "vovo", {}) }
+    @Test fun statusViewerDark() = held("61-status-viewer", true) { app.oie.ui.kid.StatusViewer(statuses().apply { statuses[0] = statuses[0].copy(reaction = "❤️") }, "vovo", {}) }
+    @Test fun statusReply() = held("62-status-reply", false) { app.oie.ui.kid.StatusViewer(statuses(), "vovo", {}, startReplying = true) }
+    @Test fun statusReplyDark() = held("62-status-reply", true) { app.oie.ui.kid.StatusViewer(statuses(), "vovo", {}, startReplying = true) }
+    @Test fun settingsStatuses() = shot("63-settings-statuses", false) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.StatusSetting(statuses()) } }
+    @Test fun settingsStatusesDark() = shot("63-settings-statuses", true) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.StatusSetting(statuses().apply { statusesOn = false }) } }
+    @Test fun conversationStatusReply() = shot("64-conversation-status-reply", false) {
+        Conversation(statuses().apply { messages += Message("kr", "vovo", true, now - 60_000, Kind.TEXT, "Quero um pedaço", replyTo = "st1", statusQuote = "Resposta a uma novidade") }, "vovo")
+    }
 }

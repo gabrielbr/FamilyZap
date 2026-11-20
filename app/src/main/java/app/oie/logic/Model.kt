@@ -66,6 +66,8 @@ data class Message(
     val receipt: Receipt = Receipt.NONE,
     /** Reactions on it (v0.33): who ("kid", or a family member's WhatsApp id) to their emoji. */
     val reactions: Map<String, String> = emptyMap(),
+    /** The kid's reply to a status (v0.36): what it answered, shown above the text; [replyTo] is the status. */
+    val statusQuote: String = "",
 )
 
 /** One quiet-hours period (docs/flows/contacts-quiet-hours.md). End before start means overnight. */

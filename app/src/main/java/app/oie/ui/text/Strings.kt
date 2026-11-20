@@ -224,6 +224,17 @@ interface Strings {
     fun photosWith(name: String): String
     fun noPhotos(name: String): String
     fun and(names: List<String>): String
+    // v0.36: family statuses (docs/flows/statuses.md)
+    val novidades: String; val statusNew: String; val resume: String; val previous: String; val nextOne: String
+    val reply: String; val statusReplyQuote: String; val statusesTitle: String
+    fun watchStatus(name: String): String
+    fun statusNewA11y(name: String): String
+    fun ago(minutes: Int): String
+    fun replyTo(name: String): String
+    fun sentTo(name: String): String
+    fun statusTooBig(parent: String): String
+    fun statusesSwitch(kid: String): String
+    fun statusesBody(kid: String): String
     val editContact: String; val noPhotosHow: String
     fun mediaFrom(what: String, who: String): String
     val forgotTitle: String; val forgotShowCode: String
@@ -338,6 +349,7 @@ object Pt : Strings {
         "$kid sabe que eu vejo as mensagens?" to "Sim. Na primeira vez, o Oiê diz a $kid: “${noticeBody(parent)}”",
         "Quem pode falar com $kid?" to "Só quem está em Contatos. Mensagens de qualquer outra pessoa não aparecem no tablet. Num grupo, todos do grupo veem o que $kid manda. Em Contatos, toque em alguém para mudar o nome que $kid vê (Vovó, por exemplo) ou para remover. O nome muda só no Oiê, não no seu WhatsApp.",
         "O que é o “Preciso de você”?" to "Um botão na tela inicial de $kid, que aparece quando você marca alguém em Contatos (toque na pessoa e ligue “Recebe 'Preciso de você'”). $kid confirma, e cada pessoa marcada recebe “Preciso de você.” no WhatsApp, até no horário de silêncio. Dá para mandar uma vez a cada 5 minutos. É um jeito de chamar vocês, não um serviço de emergência: em perigo, ligue 190 ou 192.",
+        "O que são as Novidades?" to "São os status do WhatsApp de quem está em Contatos. Ligue em Ajustes e ajuda › Novidades. $kid vê as fotos, os vídeos e os textos, pode reagir e responder (a resposta vai para a conversa com a pessoa). Quando $kid vê uma novidade, a pessoa vê que você viu, porque é a sua conta. Os seus próprios status não aparecem, nem os de mais ninguém. Cada novidade some do tablet depois de 24 horas.",
         "Como funciona o horário de silêncio?" to "Durante um período, $kid lê e ouve, mas não manda mensagens. Quem tem “Pode falar no silêncio” em Contatos continua liberado. Dá para pausar um período sem apagar, por exemplo nas férias.",
         "O Oiê se desconectou. E agora?" to "Abra Conexão e toque em Conectar o WhatsApp. As mensagens que $kid mandou enquanto isso ficam guardadas e saem depois.",
         "Como mando figurinhas para $kid?" to "No seu WhatsApp, mande a figurinha para você mesmo, na conversa com o seu próprio nome. Ela aparece para $kid em Figurinhas, em Novas de $parent, e $kid escolhe se guarda. Só as figurinhas dessa conversa chegam ao Oiê; o resto dela fica só com você. Funciona com o WhatsApp de verdade ligado.",
@@ -494,6 +506,17 @@ object Pt : Strings {
     override fun photosWith(name: String) = "Fotos com $name"
     override fun noPhotos(name: String) = "Ainda não tem fotos com $name."
     override fun and(names: List<String>) = if (names.size < 2) names.joinToString() else names.dropLast(1).joinToString(", ") + " e " + names.last()
+    override val novidades = "Novidades"; override val statusNew = "nova"; override val resume = "Continuar"
+    override val previous = "Anterior"; override val nextOne = "Próxima"; override val reply = "Responder"
+    override val statusReplyQuote = "Resposta a uma novidade"; override val statusesTitle = "Novidades"
+    override fun watchStatus(name: String) = "Ver a novidade de $name"
+    override fun statusNewA11y(name: String) = "$name, novidade nova"
+    override fun ago(minutes: Int) = when { minutes < 1 -> "agora"; minutes < 60 -> "há $minutes min"; else -> "há ${minutes / 60} h" }
+    override fun replyTo(name: String) = "Resposta para $name"
+    override fun sentTo(name: String) = "Mandado para $name"
+    override fun statusTooBig(parent: String) = "Essa novidade só abre no WhatsApp de $parent."
+    override fun statusesSwitch(kid: String) = "Ver novidades da família"
+    override fun statusesBody(kid: String) = "$kid vê as novidades (status) de quem está em Contatos e pode reagir e responder. Quando $kid vê uma, a pessoa vê que você viu, porque é a sua conta. Nada de outras pessoas chega."
     override val editContact = "Editar contato"; override val noPhotosHow = "As fotos, os vídeos e os GIFs da conversa aparecem aqui. Para mandar um, toque em Foto."
     override fun mediaFrom(what: String, who: String) = "$what de $who"
     override val newMessages = "Novas"; override val reactHint = "Segure uma mensagem para reagir ou ouvir."
@@ -620,6 +643,7 @@ object En : Strings {
         "Does $kid know I can see the messages?" to "Yes. The first time, Oiê tells $kid: “${noticeBody(parent)}”",
         "Who can talk to $kid?" to "Only the people in Contacts. Messages from anyone else don't appear on the tablet. In a group, everyone in it sees what $kid sends. In Contacts, tap someone to change the name $kid sees (Grandma, for example) or to remove them. The name changes only in Oiê, not in your WhatsApp.",
         "What is “I need you”?" to "A button on $kid's home screen that shows once you mark someone in Contacts (tap the person and turn on “Gets 'I need you'”). $kid confirms, and each marked person gets “I need you.” on WhatsApp, even in quiet hours. It can be sent once every 5 minutes. It's a way to call you, not an emergency service: in danger, call the emergency number.",
+        "What are Updates?" to "They're the WhatsApp statuses of the people in Contacts. Turn them on in Settings and help › Updates. $kid sees the photos, videos and texts, and can react and reply (the reply goes to the chat with that person). When $kid sees one, the person sees you viewed it, because it's your account. Your own statuses don't show, nor anyone else's. Each update leaves the tablet after 24 hours.",
         "How do quiet hours work?" to "During a period, $kid can read and listen, but not send. Anyone with “Can talk in quiet hours” in Contacts still gets through. You can pause a period without deleting it, for example on holiday.",
         "Oiê got disconnected. What now?" to "Open Connection and tap Link WhatsApp. Messages $kid sent in the meantime are kept and go out afterwards.",
         "How do I send stickers to $kid?" to "In your WhatsApp, send the sticker to yourself, in the chat with your own name. It shows for $kid under Stickers, in New from $parent, and $kid chooses whether to keep it. Only stickers from that chat reach Oiê; the rest of it stays with you. Works once the real WhatsApp is on.",
@@ -775,6 +799,17 @@ object En : Strings {
     override fun photosWith(name: String) = "Photos with $name"
     override fun noPhotos(name: String) = "No photos with $name yet."
     override fun and(names: List<String>) = if (names.size < 2) names.joinToString() else names.dropLast(1).joinToString(", ") + " and " + names.last()
+    override val novidades = "Updates"; override val statusNew = "new"; override val resume = "Continue"
+    override val previous = "Previous"; override val nextOne = "Next"; override val reply = "Reply"
+    override val statusReplyQuote = "Reply to a status"; override val statusesTitle = "Updates"
+    override fun watchStatus(name: String) = "See $name's update"
+    override fun statusNewA11y(name: String) = "$name, new update"
+    override fun ago(minutes: Int) = when { minutes < 1 -> "now"; minutes < 60 -> "$minutes min ago"; else -> "${minutes / 60} h ago" }
+    override fun replyTo(name: String) = "Reply to $name"
+    override fun sentTo(name: String) = "Sent to $name"
+    override fun statusTooBig(parent: String) = "This update only opens in $parent's WhatsApp."
+    override fun statusesSwitch(kid: String) = "See the family's updates"
+    override fun statusesBody(kid: String) = "$kid sees the updates (status) of the people in Contacts and can react and reply. When $kid sees one, the person sees you viewed it, because it's your account. Nothing from anyone else comes through."
     override val editContact = "Edit contact"; override val noPhotosHow = "The chat's photos, videos and GIFs show here. To send one, tap Photo."
     override fun mediaFrom(what: String, who: String) = "$what from $who"
     override val newMessages = "New"; override val reactHint = "Hold a message to react or listen."

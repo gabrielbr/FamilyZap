@@ -52,6 +52,64 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var pinResetFrom by mutableStateOf("")
     /** The kid has reacted once (v0.34): the "hold a message" hint goes. */
     var reactTipUsed by mutableStateOf(false)
+    /** Family statuses (v0.36): off until the parent turns them on. */
+    var statusesOn by mutableStateOf(false)
+    /** When the kid's side was linked to the real WhatsApp: nothing from before it is shown (rule L6). */
+    var linkedSince by mutableStateOf(0L)
+    /** The family's live statuses. */
+    val statuses = mutableStateListOf<app.oie.logic.Status>()
+
+    /** A status from the link (v0.36). Kept only by the rules in Statuses.keep; returns whether it was. */
+    fun receiveStatus(s: app.oie.logic.Status, now: Long = clock()): Boolean {
+        val from = allowed.firstOrNull { it.id == s.contactId }
+        if (!app.oie.logic.Statuses.keep(statusesOn, from, s.at, linkedSince, now) || statuses.any { it.id == s.id }) return false
+        statuses += s
+        return true
+    }
+
+    /** Its owner deleted it. Returns its media file, for the caller to delete. */
+    fun removeStatus(id: String): String? {
+        val i = statuses.indexOfFirst { it.id == id }
+        return if (i < 0) null else statuses.removeAt(i).media
+    }
+
+    /** A day has passed (or statuses were turned off): they go. Returns their media files to delete. */
+    fun expireStatuses(now: Long = clock()): List<String> {
+        val gone = statuses.filter { !statusesOn || !app.oie.logic.Statuses.alive(it, now) || allowed.none { c -> c.id == it.contactId && !c.paused } }
+        statuses.removeAll(gone.toSet())
+        return gone.mapNotNull { it.media }
+    }
+
+    /** The kid saw it: marked here and on WhatsApp (the owner's choice: the poster sees the parent's account). */
+    fun viewStatus(id: String) {
+        val i = statuses.indexOfFirst { it.id == id }
+        if (i < 0 || statuses[i].viewed) return
+        statuses[i] = statuses[i].copy(viewed = true)
+        wa.markStatusViewed(statuses[i])
+    }
+
+    /** The kid's reaction; the same one again takes it away. */
+    fun reactToStatus(id: String, emoji: String) {
+        val i = statuses.indexOfFirst { it.id == id }
+        if (i < 0) return
+        val send = if (statuses[i].reaction == emoji) "" else emoji
+        statuses[i] = statuses[i].copy(reaction = send)
+        wa.reactToStatus(statuses[i], send)
+    }
+
+    /**
+     * The kid's answer to a status: a message in the poster's chat, quoting the status, shown in the kid's
+     * chat with them too. Returns the message, or null when the status is gone.
+     */
+    fun replyToStatus(id: String, text: String, quote: String, now: Long = clock()): Message? {
+        val s = statuses.firstOrNull { it.id == id } ?: return null
+        if (text.isBlank()) return null
+        val m = Message("k${System.nanoTime()}", s.contactId, true, now, Kind.TEXT, text.trim(), replyTo = s.id, sender = s.poster, statusQuote = quote)
+        messages += m
+        wa.send(m)
+        return m
+    }
+
     /** The reaction the kid used last (v0.34): shown first in the sheet. */
     var lastReaction by mutableStateOf<String?>(null)
     /** When the kid last sent "Preciso de você" (v0.33), for the 5-minute gap. */
@@ -156,6 +214,7 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     /** Turns the kid's side to the real WhatsApp: the sample chats and contacts go; the parent picks real ones. */
     fun goReal() {
         realMode = true
+        linkedSince = clock()
         allowed.clear(); messages.clear(); drafts.clear(); lastSeen.clear(); failed.clear(); quietCount = 0
     }
     /** Unsent drafts per contact (flow: Remembers). */

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.36.0
+- **Novidades: the family's WhatsApp statuses.** Off until you turn it on in Ajustes e ajuda › Novidades. Then the kid's home shows a row of faces for the people in Contatos who posted in the last 24 hours, with a coral ring and "nova" until seen.
+- **Watching:** photos and texts stay 5 seconds, videos play to the end. Tap the right side for the next, the left for the previous; Pausar holds it.
+- **Reacting and answering:** the six reactions, and Responder. Both go to that person's own chat (the reply also shows in the kid's chat, marked "Resposta a uma novidade"). Nothing goes to anyone else.
+- **What the family sees:** when the kid watches a status, the person sees that you viewed it, because it's your account. Your own statuses never show, nor anyone outside Contatos. Each status leaves the tablet after 24 hours.
+- Posting a status from the tablet comes next (0.37).
+
 ## 0.35.0
 - **The line to you now shows up on your phone.** WhatsApp never notifies an account of its own messages, and Tito writes from yours. Now, after each message Tito sends you, Oiê uses WhatsApp's own "Marcar como não lida" on that chat: it gets the unread dot and moves to the top of your chats. There's still no sound (WhatsApp doesn't allow it for your own account). Only that chat is ever touched.
 

@@ -716,6 +716,72 @@ func (k *Link) OwnChat() string {
 	return ""
 }
 
+// statusKey is a family member's status as a reaction or a reply points at it (v0.36).
+func statusKey(poster types.JID, statusID string) *waCommon.MessageKey {
+	return &waCommon.MessageKey{
+		RemoteJID: proto.String(types.StatusBroadcastJID.String()), FromMe: proto.Bool(false),
+		ID: proto.String(statusID), Participant: proto.String(poster.String()),
+	}
+}
+
+// StatusReaction is the kid's reaction to a status; an empty emoji takes it away.
+func StatusReaction(poster types.JID, statusID, emoji string, at time.Time) *waE2E.Message {
+	return &waE2E.Message{ReactionMessage: &waE2E.ReactionMessage{
+		Key: statusKey(poster, statusID), Text: proto.String(emoji), SenderTimestampMS: proto.Int64(at.UnixMilli()),
+	}}
+}
+
+// StatusReply is the kid's answer to a status, quoting it, as WhatsApp's own "reply to status".
+func StatusReply(poster types.JID, statusID, text string) *waE2E.Message {
+	return &waE2E.Message{ExtendedTextMessage: &waE2E.ExtendedTextMessage{
+		Text: proto.String(text),
+		ContextInfo: &waE2E.ContextInfo{
+			StanzaID: proto.String(statusID), Participant: proto.String(poster.String()),
+			RemoteJID: proto.String(types.StatusBroadcastJID.String()),
+		},
+	}}
+}
+
+// SendStatusReaction reacts to a family member's status. It goes to the poster's own chat, never to the
+// status broadcast (that would reach the parent's whole status audience). Same rules as every send.
+func (k *Link) SendStatusReaction(poster, statusID, emoji, id string) (sent string, err error) {
+	defer k.guard("SendStatusReaction", &err)
+	to, err := k.target(poster)
+	if err != nil {
+		return "", err
+	}
+	if err := k.maySend(); err != nil {
+		return "", err
+	}
+	_, err = k.c.SendMessage(context.Background(), to, StatusReaction(to, statusID, emoji, time.Now()), whatsmeow.SendRequestExtra{ID: types.MessageID(id)})
+	return id, err
+}
+
+// SendStatusReply answers a family member's status in the poster's own chat, quoting the status.
+func (k *Link) SendStatusReply(poster, statusID, text, id string) (sent string, err error) {
+	defer k.guard("SendStatusReply", &err)
+	to, err := k.target(poster)
+	if err != nil {
+		return "", err
+	}
+	if err := k.maySend(); err != nil {
+		return "", err
+	}
+	_, err = k.c.SendMessage(context.Background(), to, StatusReply(to, statusID, text), whatsmeow.SendRequestExtra{ID: types.MessageID(id)})
+	return id, err
+}
+
+// MarkStatusViewed tells the poster their status was seen (the owner's choice, v0.36): they see the
+// parent's account in the viewers, since the tablet is the parent's WhatsApp. A receipt, not a message.
+func (k *Link) MarkStatusViewed(poster, statusID string, atMillis int64) (err error) {
+	defer k.guard("MarkStatusViewed", &err)
+	from, err := types.ParseJID(poster)
+	if err != nil {
+		return err
+	}
+	return k.c.MarkRead(context.Background(), []types.MessageID{types.MessageID(statusID)}, time.UnixMilli(atMillis), types.StatusBroadcastJID, from)
+}
+
 // UnreadPatch is WhatsApp's own "mark as unread" for a chat, up to the message just sent from this
 // account (v0.35). Kept separate from MarkUnread so it can be tested without a connection.
 func UnreadPatch(chat types.JID, lastID string, at time.Time) appstate.PatchInfo {
@@ -942,12 +1008,17 @@ type Incoming struct {
 	Animated bool `json:"animated,omitempty"`
 	// Size is the media's size in bytes (v0.27): the app doesn't download a video over its limit.
 	Size int64 `json:"size,omitempty"`
+	// Status marks a family member's status (v0.36). Chat is then the poster (who posted it), not
+	// WhatsApp's "status broadcast"; the app keeps it only for allowed people and only when the parent
+	// turned statuses on. The parent's own statuses never come through.
+	Status bool `json:"status,omitempty"`
 }
 
 // ToIncoming translates a whatsmeow message for the app. ok is false for what the app never needs
 // (edits, receipts-like protocol messages, status updates). Reactions come as Kind "REACTION" (v0.33).
 func ToIncoming(info types.MessageInfo, m *waE2E.Message) (Incoming, bool) {
-	if m == nil || info.Chat.Server == types.BroadcastServer {
+	status := info.Chat == types.StatusBroadcastJID
+	if m == nil || (info.Chat.Server == types.BroadcastServer && !status) || (status && info.IsFromMe) {
 		return Incoming{}, false
 	}
 	in := Incoming{
@@ -1006,6 +1077,10 @@ func ToIncoming(info types.MessageInfo, m *waE2E.Message) (Incoming, bool) {
 	}
 	if ctx != nil {
 		in.ReplyTo = ctx.GetStanzaID()
+	}
+	if status {
+		// A status belongs to its poster: the app matches it to an allowed contact like a chat.
+		in.Status, in.Chat, in.ReplyTo = true, info.Sender.ToNonAD().String(), ""
 	}
 	return in, true
 }

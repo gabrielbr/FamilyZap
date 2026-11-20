@@ -389,6 +389,7 @@ private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: Undo, 
     }
     BubbleSetting(state)
     NudgeSetting(state)
+    StatusSetting(state)
     Text(tx.help, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     help.forEachIndexed { i, (q, a) ->
         // v0.34 audit: a 56dp row, and TalkBack hears whether it's open.
@@ -511,6 +512,16 @@ private fun SignaturePreview(kid: String, emoji: String) {
         style = OieType.body, color = c.ink,
         modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.surface).padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
     )
+}
+
+/** Family statuses (v0.36, docs/flows/statuses.md): off until the parent turns them on. */
+@Composable
+internal fun StatusSetting(state: AppState) {
+    val c = OieTheme.colors
+    val tx = str
+    val kid = state.kidName.ifBlank { tx.theKid }
+    Text(tx.statusesTitle, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    app.oie.ui.common.SwitchRow(tx.statusesSwitch(kid), state.statusesOn, { state.statusesOn = it }, help = tx.statusesBody(kid))
 }
 
 /** The gentle nudge (v0.33, docs/flows/family-features.md): off until the parent turns it on. */
