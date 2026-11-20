@@ -90,14 +90,15 @@ Full rules in [`01 Brand/imagery-and-icons.md`](../01%20Brand/imagery-and-icons.
 - Files: the design system's `assets/icons/android/gg_ic_*.xml`.
 - Camera, image, sticker, send, link and clock are missing from the set. They are being added to the core in the same style (owner's decision, 2026-11-18), not drawn here.
 - Colour: ink, or muted for secondary; coral only on the one main action.
-- function only, always with a text label on the kid side (one exception: the conversation's composer on a narrow screen, decision 0010);
+- function only, always with a text label on the kid side (one exception: the conversation's composer on a narrow screen, decision 0010, where Anexar shows its plus alone);
 - never emoji as icons.
 
 ## 10. Components
 The rules are below. Previews come with the first screens (Stage 5), built from the tokens only.
 - **Main button:** 52dp tall, coral fill, ink label, verb first. One per screen.
 - **Quiet button:** 52dp, surface fill with a line border, ink label.
-- **Contact tile (kid home):** 96dp round photo (or the initial on cream), name below in label. One tap opens the conversation. Only allowed contacts appear.
+- **Person row (kid home, phone; v0.38):** 48dp round photo, name in label with when in caption, the last message in body-small on one line (bold ink when unread), "N novas" pill. One tap opens the conversation.
+- **Person card (kid home, tablet; v0.38):** surface, hairline, 8dp radius; photo, name in title, when, the last message on two lines, and two quiet buttons, Escrever and Gravar áudio (gone in quiet hours or while the link is down). Even columns, at least 300dp wide. Only allowed contacts appear, in the parent's order.
 - **Message row:** the kid's messages on `selected`, family messages on `surface`, with ink text, times in caption and muted. Not green bubbles, and no WhatsApp look.
 - **Record button:** round, coral, 72dp inside the conversation. Hold to record a voice message, release to send, slide away to cancel. It is the screen's one accent.
 - **Notice sheet:** the parent's risk notice and the kid's first-use notice. Title, body and one main button. It appears once and is never dismissed by accident.

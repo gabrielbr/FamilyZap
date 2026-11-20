@@ -131,7 +131,7 @@ class PhoneScreensTest {
     }
 
     // v0.28: the photo-or-video sheet and a video's preview on a phone, at 1.3× text.
-    @Test fun photoOrVideoSheet() = shot("p23-photo-or-video-sheet", bigText = true) { app.oie.ui.kid.PhotoSourceSheet("camera", {}, {}) }
+    @Test fun attachSheet() = shot("p23-attach-sheet", bigText = true) { app.oie.ui.kid.AttachSheet(ready(), "camera", {}, {}, {}, {}, {}) }
     @Test fun videoTooLong() = shot("p24-video-too-long", bigText = true) {
         app.oie.ui.kid.VideoPreview(app.oie.ui.kid.VideoDraft(android.net.Uri.parse("content://test/clip"), gif = false, problem = app.oie.data.VideoPrep.Why.TOO_LONG), "Vovó", {}, {}, {})
     }
@@ -199,4 +199,18 @@ class PhoneScreensTest {
     @Test fun statusWriter() = shot("p50-status-writer", bigText = true) { app.oie.ui.kid.StatusWriter(posting(), {}, {}, start = "Fiz um desenho do Bento") }
     @Test fun ownStatus() { compose.mainClock.autoAdvance = false; shot("p51-own-status", bigText = true) { app.oie.ui.kid.StatusViewer(posting(), app.oie.logic.Statuses.MINE, {}) } }
     @Test fun settingsPosting() = shot("p52-settings-posting", bigText = true) { androidx.compose.foundation.layout.Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.StatusSetting(posting()) } }
+    /** v0.38: every kind of preview on the home: unread text, a photo with its words, a sticker, a voice message that didn't go, a long old text. */
+    private fun previews() = ready().apply {
+        kidNoticeSeen = true
+        val day = 24L * 60 * 60 * 1000
+        messages.removeAll { true }
+        messages += app.oie.logic.Message("v1", "vovo", false, now - 5 * 60_000, app.oie.logic.Kind.TEXT, "Tito, olha o bolo que eu fiz hoje para o domingo")
+        messages += app.oie.logic.Message("m1", "mae", true, now - day, app.oie.logic.Kind.PHOTO, "Olha meu desenho")
+        messages += app.oie.logic.Message("z1", "vovo2", true, now - 3 * day, app.oie.logic.Kind.STICKER, "Te amo")
+        messages += app.oie.logic.Message("b1", "bia", true, now - 60 * 60_000, app.oie.logic.Kind.VOICE, durationSec = 72)
+        failed += "b1"
+        messages += app.oie.logic.Message("p1", "primos", true, now - 10 * day, app.oie.logic.Kind.TEXT, "Quem vai\nno sábado?")
+    }
+    @Test fun homePreviews() = shot("p49-kid-home-previews") { KidHome(previews()) }
+    @Test fun homePreviewsBig() = shot("p50-kid-home-previews-big-text", bigText = true) { KidHome(previews()) }
 }

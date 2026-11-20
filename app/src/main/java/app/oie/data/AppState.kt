@@ -16,10 +16,14 @@ import java.security.MessageDigest
 import java.time.LocalDateTime
 
 /** Where the app is (the files in docs/flows). System Back walks this backwards. */
+/** v0.38: how a chat opens from a card on the home (flow kid-home-and-attach.md). */
+enum class Start { NONE, WRITE, RECORD }
+
 sealed interface Route {
     data class Setup(val step: Int) : Route // 0 welcome, 1 risk, 2 link, 3 names, 4 pin, 5 contacts, 6 quiet, 7 done
     data object KidHome : Route
-    data class Conversation(val contactId: String) : Route
+    /** v0.38: [start] is what the home's card asked for: the keyboard up (Escrever) or a recording running (Gravar áudio). */
+    data class Conversation(val contactId: String, val start: Start = Start.NONE) : Route
     data object ParentPin : Route
     data class Parent(val section: Int) : Route // 0 contacts, 1 quiet hours, 2 connection, 3 about
     data object Pair : Route // Conexão › Conectar o WhatsApp

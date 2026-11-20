@@ -8,5 +8,8 @@ Design System §9 says icons on the kid side always carry a word. In the convers
 ## Decision
 On a tablet the composer's buttons show their word ("Foto", "Figurinha", "Enviar"). On a narrow screen (under 600dp) they show the icon alone, with the word as their TalkBack label, and the camera and stickers step aside while the kid types.
 
+## Update, v0.38 (2026-11-20)
+The camera and sticker buttons became one, **Anexar** (the line set's plus), at the owner's request. On the tablet it reads "Anexar"; on a narrow screen the plus alone, labelled "Anexar foto, vídeo, desenho ou figurinha" for TalkBack, and it still steps aside while the kid types.
+
 ## Consequences
 This is the one exception to §9's "always with a word". Every other kid-side icon keeps its word.

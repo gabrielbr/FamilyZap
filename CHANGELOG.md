@@ -7,6 +7,13 @@
   - **The screens:** the message is shown on the tablet, then on your WhatsApp, then on theirs, and the reply comes back.
   - **Not only grandma:** the copy and FAQ now say "family and friends you choose" (decision 0013).
 
+## 0.38.0
+- **A new home for the kid.** Each person now shows what you last said and when ("Você: Também tô com saudade · 16h35", "Áudio · 1:12 · Ontem"), with "3 novas" and the line in bold when something is unread. People stay in the order you set, so Vovó is always in the same place.
+  - **On a phone:** a list, like a chat app.
+  - **On the tablet:** cards, each with **Escrever** (opens the chat with the keyboard up) and **Gravar áudio** (opens the chat already recording: tap the microphone to send, or Cancelar). In quiet hours, or while WhatsApp is disconnected, the cards keep only the reading.
+- **Anexar instead of Foto.** The chat's photo button is now **Anexar**: Tirar foto, Gravar vídeo, Galeria and Desenhar, with the stickers right below, so a sticker is still two taps. The separate sticker button is gone.
+- **Fixed:** leaving a chat while a voice message was recording by tap (TalkBack) left the microphone on. Leaving now throws the recording away.
+
 ## 0.37.0
 - **The kid posts updates.** Turn it on in Ajustes e ajuda › Novidades › "Tito pode postar novidades" (off until you do; Novidades must be on).
 - **What the kid can post:** a photo, a video (up to 1 minute) or a text. The home's Novidades row gets **Postar**, and once the kid has posted, **Você**.

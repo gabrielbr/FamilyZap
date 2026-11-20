@@ -1,6 +1,11 @@
 package app.oie.ui.kid
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -99,42 +104,9 @@ fun KidHome(state: AppState) {
                     // v0.33: today's birthdays first: they're once a year.
                     HomeReminders(state, birthdays = true)
                     NovidadesRow(state, onOpen = { watching = it }, onPost = { posting = true })
-                    // v0.34 audit: on a phone, two even columns filling the width; on the tablet, tiles a little wider
-                    // than their photo (so long names fit), pulled left by the difference so the first photo starts on
-                    // the greeting's edge. Rows sit close on a phone, so the next row peeks above the fold.
-                    val compact = app.oie.ui.common.isCompact
-                    // Two people with the same first letter ("Vovó", "Vovô") get two letters each, so they differ at a glance.
-                    val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
-                    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    val tileW = if (compact) (maxWidth - OTokens.Spacing.space4) / 2 else OTokens.Size.contactTile + OTokens.Spacing.space8
-                    FlowRow(
-                        Modifier.padding(top = OTokens.Spacing.space8).then(if (compact) Modifier else Modifier.offset(x = -OTokens.Spacing.space4)),
-                        horizontalArrangement = Arrangement.spacedBy(if (compact) OTokens.Spacing.space4 else OTokens.Spacing.space8),
-                        verticalArrangement = Arrangement.spacedBy(if (compact) OTokens.Spacing.space2 else OTokens.Spacing.space6),
-                    ) {
-                        state.reachable.forEach { ct ->
-                            val unread = state.unread(ct.id)
-                            val label = ct.name + if (unread > 0) ", " + tx.newCount(unread) else ""
-                            Column(
-                                Modifier.width(tileW)
-                                    .clip(RoundedCornerShape(OTokens.Radius.radiusM))
-                                    .pressable { state.route = Route.Conversation(ct.id) }
-                                    .semantics(mergeDescendants = true) { contentDescription = label }
-                                    .padding(vertical = OTokens.Spacing.space4),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
-                            ) {
-                                app.oie.ui.common.Avatar(ct, OTokens.Size.contactTile, letters = letters[ct.name])
-                                Text(ct.name, style = OieType.label, color = c.ink)
-                                if (unread > 0) Text(
-                                    tx.newCount(unread), style = OieType.caption, color = c.page,
-                                    modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(c.ink)
-                                        .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
-                                )
-                            }
-                        }
-                    }
-                    }
+                    // v0.38: a list on a phone (like a chat app's), cards with Escrever and Gravar áudio on the tablet;
+                    // each says the last message and when. The parent's order stays (v0.34: places don't move).
+                    People(state)
                     // v0.33 audit: the gentle nudge after the people, so it never pushes them down (calm, not a nag).
                     HomeReminders(state, birthdays = false)
                     // v0.33: only when the parent marked someone to get it.
@@ -146,6 +118,155 @@ fun KidHome(state: AppState) {
         watching?.let { StatusViewer(state, it, onClose = { watching = null }) }
         if (posting) StatusPoster(state, onClose = { posting = false })
         if (notice) KidNotice(state)
+    }
+}
+
+/**
+ * v0.38 (flow kid-home-and-attach.md): every person the kid can reach, with the last message in a few words.
+ * A phone lists them in rows; the tablet shows cards in even columns, each with Escrever and Gravar áudio.
+ */
+@Composable
+private fun People(state: AppState) {
+    // Two people with the same first letter ("Vovó", "Vovô") get two letters each, so they differ at a glance.
+    val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
+    if (app.oie.ui.common.isCompact) {
+        Column(Modifier.fillMaxWidth().padding(top = OTokens.Spacing.space4)) {
+            state.reachable.forEach { ct -> PersonRow(state, ct, letters[ct.name]) }
+        }
+        return
+    }
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth().padding(top = OTokens.Spacing.space6)) {
+        // Cards at least half the reading column wide (300dp), as many as fit: 3 on a landscape tablet, 2 standing.
+        val gap = OTokens.Spacing.space4
+        val columns = ((maxWidth + gap) / (OTokens.Size.contentMax / 2 + gap)).toInt().coerceAtLeast(1)
+        val cardW = (maxWidth - gap * (columns - 1)) / columns
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(gap), verticalArrangement = Arrangement.spacedBy(gap)) {
+            state.reachable.forEach { ct -> PersonCard(state, ct, letters[ct.name], Modifier.width(cardW)) }
+        }
+    }
+}
+
+/** What a row or card says about a person's chat: the last message, and when. */
+private class Said(val preview: String, val whenText: String?, val unread: Int, val label: String, val failed: Boolean)
+
+@Composable
+private fun said(state: AppState, ct: app.oie.logic.Contact): Said {
+    val tx = str
+    // Audit (P2): the chat's messages are filtered once per person, for both the preview and the unread count.
+    val seen = state.visible(ct.id)
+    val p = app.oie.logic.HomeList.preview(seen, state.failed.toSet())
+    val unread = seen.count { !it.fromKid && it.at > state.lastSeen.getOrDefault(ct.id, 0L) }
+    val preview = if (p == null) tx.noMessagesYet else {
+        val base = when (p.what) {
+            app.oie.logic.HomeList.What.TEXT -> p.text
+            app.oie.logic.HomeList.What.VOICE -> tx.voicePreview(p.seconds)
+            app.oie.logic.HomeList.What.PHOTO -> if (p.text.isEmpty()) tx.photo else tx.photo + " · " + p.text
+            app.oie.logic.HomeList.What.VIDEO -> if (p.text.isEmpty()) tx.video else tx.video + " · " + p.text
+            app.oie.logic.HomeList.What.GIF -> tx.gifLabel
+            app.oie.logic.HomeList.What.STICKER -> tx.sticker
+            app.oie.logic.HomeList.What.DELETED -> tx.deletedMessage
+            app.oie.logic.HomeList.What.OTHER -> tx.somethingInWhatsApp
+        }
+        val own = if (p.mine) tx.mine(base) else base
+        if (p.failed) tx.notSent + " · " + own else own
+    }
+    val whenText = p?.let {
+        when (val w = app.oie.logic.HomeList.whenOf(it.at, java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(state.clock()), java.time.ZoneId.systemDefault()))) {
+            is app.oie.logic.HomeList.When.Time -> tx.clock(w.hour, w.minute).let { t -> if (w.minute == 0 && t.endsWith("h")) t + "00" else t }
+            app.oie.logic.HomeList.When.Yesterday -> tx.yesterday
+            is app.oie.logic.HomeList.When.Weekday -> tx.weekday(w.day)
+            is app.oie.logic.HomeList.When.Date -> tx.date(w.day, w.month)
+        }
+    }
+    val label = listOfNotNull(ct.name, if (unread > 0) tx.newCount(unread) else null, preview, whenText).joinToString(", ")
+    return Said(preview, whenText, unread, label, p?.failed == true)
+}
+
+/** "3 novas": ink ground, page text (a word, never a bare dot or colour). */
+@Composable
+private fun NewPill(n: Int) {
+    val c = OieTheme.colors
+    Text(
+        str.newCount(n), style = OieType.caption, color = c.page, maxLines = 1,
+        modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(c.ink)
+            .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
+    )
+}
+
+/** A phone's row: photo, name and when on top, the last message under it, "2 novas" at the end. One tap opens the chat. */
+@Composable
+private fun PersonRow(state: AppState, ct: app.oie.logic.Contact, letters: String?) {
+    val c = OieTheme.colors
+    val s = said(state, ct)
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin + OTokens.Spacing.space4)
+            .clip(RoundedCornerShape(OTokens.Radius.radiusM))
+            .pressable { state.route = Route.Conversation(ct.id) }
+            .semantics(mergeDescendants = true) { contentDescription = s.label; role = Role.Button }
+            .padding(vertical = OTokens.Spacing.space2),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
+    ) {
+        app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                s.whenText?.let { Text(it, style = OieType.caption, color = if (s.unread > 0) c.ink else c.muted, maxLines = 1) }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                // A message that didn't go says "Não foi" in the error colour, as in the chat (a word, never the colour alone).
+                Text(s.preview, style = if (s.unread > 0) OieType.label else OieType.bodySmall, color = if (s.failed) c.coralText else if (s.unread > 0) c.ink else c.muted,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                if (s.unread > 0) NewPill(s.unread)
+            }
+        }
+    }
+}
+
+/**
+ * The tablet's card: the same words as the phone's row, the last message on up to two lines, and two
+ * quiet actions: Escrever (the chat with the keyboard up) and Gravar áudio (the chat, already recording).
+ * In quiet hours the actions go, as in the chat; the card still opens it to read and listen.
+ */
+@Composable
+private fun PersonCard(state: AppState, ct: app.oie.logic.Contact, letters: String?, modifier: Modifier) {
+    val c = OieTheme.colors
+    val tx = str
+    val s = said(state, ct)
+    val shape = RoundedCornerShape(OTokens.Radius.radiusM)
+    val canSend = state.canSend(ct) && app.oie.ui.common.linkShown(state) != app.oie.logic.LinkView.Shown.DOWN
+    Column(
+        modifier.clip(shape).background(c.surface).border(OTokens.Size.hairline, c.line, shape)
+            .padding(OTokens.Spacing.space2),
+    ) {
+        Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(OTokens.Radius.radiusS))
+                .pressable { state.route = Route.Conversation(ct.id) }
+                .semantics(mergeDescendants = true) { contentDescription = s.label; role = Role.Button }
+                .padding(OTokens.Spacing.space2),
+            verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
+        ) {
+            // One height with or without the time under the name, so the cards in a row line up.
+            Row(Modifier.heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
+                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters)
+                Column(Modifier.weight(1f)) {
+                    Text(ct.name, style = OieType.title, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    s.whenText?.let { Text(it, style = OieType.caption, color = c.muted, maxLines = 1) }
+                }
+                if (s.unread > 0) NewPill(s.unread)
+            }
+            // Two lines held even when the message is short, so the cards in a row line up.
+            Text(s.preview, style = if (s.unread > 0) OieType.label else OieType.body, color = if (s.failed) c.coralText else if (s.unread > 0) c.ink else c.muted,
+                minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+        if (canSend) Row(
+            Modifier.fillMaxWidth().padding(OTokens.Spacing.space2),
+            horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
+        ) {
+            QuietButton(tx.write, { state.route = Route.Conversation(ct.id, app.oie.data.Start.WRITE) }, Modifier.weight(1f), contentDescription = tx.writeA11y(ct.name))
+            QuietButton(tx.recordAudio, { state.route = Route.Conversation(ct.id, app.oie.data.Start.RECORD) }, Modifier.weight(1f), icon = R.drawable.gg_ic_mic, contentDescription = tx.recordA11yTo(ct.name))
+        }
     }
 }
 

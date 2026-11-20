@@ -106,7 +106,7 @@ open class MainActivity : ComponentActivity() {
                         when (val r = state.route) {
                             is Route.Setup -> Setup(state, r.step, onClose = { finish() })
                             Route.KidHome -> KidHome(state)
-                            is Route.Conversation -> Conversation(state, r.contactId)
+                            is Route.Conversation -> Conversation(state, r.contactId, start = r.start)
                             Route.ParentPin -> ParentPin(state)
                             is Route.Parent -> ParentArea(state, r.section)
                             Route.Pair -> app.oie.ui.parent.PairScreen(state)

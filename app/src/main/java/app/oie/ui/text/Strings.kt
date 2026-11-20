@@ -63,7 +63,7 @@ interface Strings {
     fun photoFor(name: String): String
     val photoPreviewA11y: String; val swap: String
     fun listenA11y(seconds: Int): String
-    val photoButton: String; val stickerButton: String
+    val attachA11y: String
 
     // Parent area
     val parentArea: String; val enterPin: String; val tooMany: String; val wrongPin: String; val forgotPin: String
@@ -109,7 +109,7 @@ interface Strings {
     fun videoTooBig(parent: String): String
     val pause: String; val play: String
     // v0.28: sending videos and GIFs.
-    val photoOrVideo: String; val takePhoto: String; val recordVideo: String
+    val takePhoto: String; val recordVideo: String
     val writeShort: String
     // v0.30: the line to the parent who owns the WhatsApp (decision 0007).
     fun parentLineTitle(parent: String): String
@@ -249,12 +249,21 @@ interface Strings {
     fun recordingEnds(seconds: Int): String
     val linkPreparing: String; val linkSlow: String; val whatCanHappen: String; val offlineHome: String
     val newMessages: String; val reactHint: String; val releaseToCancel: String; val holdToRecord: String
-    val photoShort: String; val stickerShort: String; val pauseA11y: String; val close: String
+    val attach: String; val pauseA11y: String; val close: String
     fun downloading(length: String): String
     val welcomeTitle: String; val linkFailed: String; val linkOffline: String
     val sectionQuietShort: String; val sectionHelpShort: String; val expanded: String; val collapsed: String; val reportCleared: String
     fun periodName(name: String): String
     fun forgotBody(kid: String): String
+    // v0.38: the home's rows and cards, and the composer's Anexar sheet (flow kid-home-and-attach.md)
+    val write: String; val recordAudio: String; val noMessagesYet: String; val yesterday: String; val sticker: String
+    val somethingInWhatsApp: String; val tapToSend: String; val galleryShort: String
+    fun mine(text: String): String
+    fun voicePreview(seconds: Int): String
+    fun weekday(day: Int): String
+    fun date(day: Int, month: Int): String
+    fun writeA11y(name: String): String
+    fun recordA11yTo(name: String): String
 }
 
 object Pt : Strings {
@@ -314,7 +323,7 @@ object Pt : Strings {
     override fun photoFor(name: String) = "Foto para $name"
     override val photoPreviewA11y = "A foto que você vai mandar"; override val swap = "Trocar"
     override fun listenA11y(seconds: Int) = "Ouvir áudio de $seconds segundos"
-    override val photoButton = "Foto"; override val stickerButton = "Figurinhas"
+    override val attachA11y = "Anexar foto, vídeo, desenho ou figurinha"
     override val parentArea = "Área dos pais"; override val enterPin = "Digite o seu PIN."
     override val tooMany = "Muitas tentativas. Espere 1 minuto."; override val wrongPin = "PIN errado. Tente de novo."; override val forgotPin = "Esqueci o PIN"
     override val leave = "Sair"; override val sectionContacts = "Contatos"; override val sectionQuiet = "Horário de silêncio"
@@ -385,7 +394,7 @@ object Pt : Strings {
     override fun parentLineFallback(kid: String) = "O WhatsApp não aceitou o grupo. $kid vai escrever na sua Mensagem para você; para responder, deslize a mensagem dele ou comece com o nome dele."
     override fun parentLineInGroup(kid: String) = "Grupo “$kid” no seu WhatsApp"
     override val parentLineInOwnChat = "Sua Mensagem para você no WhatsApp"
-    override val photoOrVideo = "Foto ou vídeo"; override val takePhoto = "Tirar foto"; override val recordVideo = "Gravar vídeo"
+    override val takePhoto = "Tirar foto"; override val recordVideo = "Gravar vídeo"
     override fun videoFor(to: String) = "Vídeo para $to"
     override fun gifFor(to: String) = "GIF para $to"
     override val preparingVideo = "Preparando o vídeo…"
@@ -537,7 +546,7 @@ object Pt : Strings {
     override fun mediaFrom(what: String, who: String) = "$what de $who"
     override val newMessages = "Novas"; override val reactHint = "Segure uma mensagem para reagir ou ouvir."
     override val releaseToCancel = "Solte para cancelar"; override val holdToRecord = "Segure o botão enquanto fala."
-    override val photoShort = "Foto"; override val stickerShort = "Figurinha"; override val pauseA11y = "Pausar"; override val close = "Fechar"
+    override val attach = "Anexar"; override val pauseA11y = "Pausar"; override val close = "Fechar"
     override fun downloading(length: String) = "Vídeo de $length, chegando…"
     override val linkPreparing = "Preparando o código…"; override val linkSlow = "Isso pode levar até 1 minuto."
     override val whatCanHappen = "O que pode acontecer com o meu WhatsApp?"
@@ -553,6 +562,15 @@ object Pt : Strings {
     override fun periodName(name: String) = name
     override val forgotTitle = "Fazer um PIN novo"; override val forgotShowCode = "Mostrar o código"
     override fun forgotBody(kid: String) = "Para provar que é você, conecte o Oiê ao seu WhatsApp de novo. O tablet sai do WhatsApp e mostra um código para ler com o seu celular, como no começo. Os contatos e as conversas de $kid continuam aqui. Depois, você escolhe o PIN novo."
+    override val write = "Escrever"; override val recordAudio = "Gravar áudio"; override val noMessagesYet = "Ainda sem mensagens"
+    override val yesterday = "Ontem"; override val sticker = "Figurinha"; override val somethingInWhatsApp = "Algo que só abre no WhatsApp"
+    override val tapToSend = "Toque no microfone para enviar"; override val galleryShort = "Galeria"
+    override fun mine(text: String) = "Você: $text"
+    override fun voicePreview(seconds: Int) = "Áudio · %d:%02d".format(seconds / 60, seconds % 60)
+    override fun weekday(day: Int) = listOf("Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo")[(day - 1).coerceIn(0, 6)]
+    override fun date(day: Int, month: Int) = "%02d/%02d".format(day, month)
+    override fun writeA11y(name: String) = "Escrever para $name"
+    override fun recordA11yTo(name: String) = "Gravar áudio para $name"
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -613,7 +631,7 @@ object En : Strings {
     override fun photoFor(name: String) = "Photo for $name"
     override val photoPreviewA11y = "The photo you're about to send"; override val swap = "Change"
     override fun listenA11y(seconds: Int) = "Play a $seconds-second voice message"
-    override val photoButton = "Photo"; override val stickerButton = "Stickers"
+    override val attachA11y = "Attach a photo, video, drawing or sticker"
     override val parentArea = "Parent area"; override val enterPin = "Enter your PIN."
     override val tooMany = "Too many tries. Wait 1 minute."; override val wrongPin = "Wrong PIN. Try again."; override val forgotPin = "I forgot the PIN"
     override val leave = "Leave"; override val sectionContacts = "Contacts"; override val sectionQuiet = "Quiet hours"
@@ -688,7 +706,7 @@ object En : Strings {
     override fun parentLineFallback(kid: String) = "WhatsApp didn't accept the group. $kid will write in your Message yourself chat; to answer, swipe to reply to his message or start with his name."
     override fun parentLineInGroup(kid: String) = "Group “$kid” in your WhatsApp"
     override val parentLineInOwnChat = "Your Message yourself chat in WhatsApp"
-    override val photoOrVideo = "Photo or video"; override val takePhoto = "Take a photo"; override val recordVideo = "Record a video"
+    override val takePhoto = "Take a photo"; override val recordVideo = "Record a video"
     override fun videoFor(to: String) = "Video for $to"
     override fun gifFor(to: String) = "GIF for $to"
     override val preparingVideo = "Getting the video ready…"
@@ -839,7 +857,7 @@ object En : Strings {
     override fun mediaFrom(what: String, who: String) = "$what from $who"
     override val newMessages = "New"; override val reactHint = "Hold a message to react or listen."
     override val releaseToCancel = "Release to cancel"; override val holdToRecord = "Hold the button while you talk."
-    override val photoShort = "Photo"; override val stickerShort = "Sticker"; override val pauseA11y = "Pause"; override val close = "Close"
+    override val attach = "Attach"; override val pauseA11y = "Pause"; override val close = "Close"
     override fun downloading(length: String) = "A $length video, on its way…"
     override val linkPreparing = "Preparing the code…"; override val linkSlow = "This can take up to a minute."
     override val whatCanHappen = "What could happen to my WhatsApp?"
@@ -856,6 +874,15 @@ object En : Strings {
     override fun periodName(name: String) = when (name) { "Escola" -> "School"; "Dormir" -> "Sleep"; else -> name }
     override val forgotTitle = "Make a new PIN"; override val forgotShowCode = "Show the code"
     override fun forgotBody(kid: String) = "To prove it's you, link Oiê to your WhatsApp again. The tablet leaves WhatsApp and shows a code to scan with your phone, like at the start. $kid's contacts and chats stay here. Then you choose the new PIN."
+    override val write = "Write"; override val recordAudio = "Record audio"; override val noMessagesYet = "No messages yet"
+    override val yesterday = "Yesterday"; override val sticker = "Sticker"; override val somethingInWhatsApp = "Something that only opens in WhatsApp"
+    override val tapToSend = "Tap the microphone to send"; override val galleryShort = "Gallery"
+    override fun mine(text: String) = "You: $text"
+    override fun voicePreview(seconds: Int) = "Voice message · %d:%02d".format(seconds / 60, seconds % 60)
+    override fun weekday(day: Int) = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")[(day - 1).coerceIn(0, 6)]
+    override fun date(day: Int, month: Int) = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")[(month - 1).coerceIn(0, 11)] + " $day"
+    override fun writeA11y(name: String) = "Write to $name"
+    override fun recordA11yTo(name: String) = "Record audio for $name"
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

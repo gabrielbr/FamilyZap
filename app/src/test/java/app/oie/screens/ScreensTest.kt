@@ -236,7 +236,8 @@ class ScreensTest {
 
     // v0.28: sending videos and GIFs.
     private val anyUri = android.net.Uri.parse("content://test/clip")
-    @Test fun photoOrVideoSheet() = shot("37-photo-or-video-sheet", false) { app.oie.ui.kid.PhotoSourceSheet("camera", {}, {}) }
+    @Test fun attachSheet() = shot("37-attach-sheet", false) { app.oie.ui.kid.AttachSheet(ready(), "camera", {}, {}, {}, {}, {}) }
+    @Test fun attachSheetDark() = shot("37-attach-sheet", true) { app.oie.ui.kid.AttachSheet(ready(), "camera", {}, {}, {}, {}, {}) }
     @Test fun videoPreparing() = shot("38-video-preparing", false) { app.oie.ui.kid.VideoPreview(app.oie.ui.kid.VideoDraft(anyUri, gif = false, progress = 0.4f), "Vovó", {}, {}, {}) }
     @Test fun videoTooLong() = shot("38-video-too-long", true) {
         app.oie.ui.kid.VideoPreview(app.oie.ui.kid.VideoDraft(anyUri, gif = false, problem = app.oie.data.VideoPrep.Why.TOO_LONG), "Vovó", {}, {}, {})
@@ -391,4 +392,20 @@ class ScreensTest {
     @Test fun ownStatusFailed() = held("69-own-status-failed", false) { app.oie.ui.kid.StatusViewer(posting(failed = true), app.oie.logic.Statuses.MINE, {}) }
     @Test fun settingsPosting() = shot("70-settings-posting", false) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.StatusSetting(posting()) } }
     @Test fun settingsPostingDark() = shot("70-settings-posting", true) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.StatusSetting(posting().apply { postingOn = false }) } }
+    /** v0.38: every kind of preview on the home: unread text, a photo with its words, a sticker, a voice message that didn't go, a long old text. */
+    private fun previews() = ready().apply {
+        kidNoticeSeen = true
+        val day = 24L * 60 * 60 * 1000
+        messages.removeAll { true }
+        messages += app.oie.logic.Message("v1", "vovo", false, now - 5 * 60_000, app.oie.logic.Kind.TEXT, "Tito, olha o bolo que eu fiz hoje para o domingo")
+        messages += app.oie.logic.Message("m1", "mae", true, now - day, app.oie.logic.Kind.PHOTO, "Olha meu desenho")
+        messages += app.oie.logic.Message("z1", "vovo2", true, now - 3 * day, app.oie.logic.Kind.STICKER, "Te amo")
+        messages += app.oie.logic.Message("b1", "bia", true, now - 60 * 60_000, app.oie.logic.Kind.VOICE, durationSec = 72)
+        failed += "b1"
+        messages += app.oie.logic.Message("p1", "primos", true, now - 10 * day, app.oie.logic.Kind.TEXT, "Quem vai\nno sábado?")
+    }
+    @Test fun homePreviews() = shot("66-kid-home-previews", false) { KidHome(previews()) }
+    @Test fun homePreviewsDark() = shot("66-kid-home-previews", true) { KidHome(previews()) }
+    @Test fun homePreviewsEnglish() = shot("66-kid-home-previews-en", false, english = true) { KidHome(previews()) }
+    @Test fun recordingByTap() = shot("67-recording-by-tap", false) { Conversation(family(), "vovo", recordingPreviewSec = 3, tapPreview = true) }
 }
