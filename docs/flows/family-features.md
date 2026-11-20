@@ -43,7 +43,8 @@ Every feature keeps the product law: only allowed contacts, nothing to Oiê's se
 - In the message's long-press menu: **Ouvir**. Android's own voice reads the text on the tablet. Nothing is sent anywhere.
 
 ## 8. Listen before sending
-- After a voice message is recorded, the 5-second undo bar gets **Ouvir**. The kid hears it, then lets it go or taps Desfazer.
+- While the 5-second undo shows, the kid taps the ▶ on the voice message to hear it; the 5 seconds wait while it plays. Then it goes, or **Desfazer**.
+- (v0.33 put **Ouvir** in the undo bar; v0.34 took it out: it duplicated the ▶, and a snackbar has one action.)
 - No extra tap on the common path (less-is-more): releasing still sends.
 
 ## 9. "Preciso de você"

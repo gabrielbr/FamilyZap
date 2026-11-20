@@ -273,7 +273,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                 Modifier.weight(1f).fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin),
                 state = list, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
                 // Room under the last message for the undo snackbar, so it never covers what's being sent.
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = if (pending != null) OTokens.Spacing.space16 + OTokens.Spacing.space4 else OTokens.Spacing.space4),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = if (pending != null) OTokens.Spacing.space16 + OTokens.Spacing.space12 else OTokens.Spacing.space4),
             ) {
                 item { Box(Modifier.height(OTokens.Spacing.space6)) }
                 if (visible.isEmpty() && pending == null) item { Text(tx.firstHi(contact.name), style = OieType.body, color = c.muted) }

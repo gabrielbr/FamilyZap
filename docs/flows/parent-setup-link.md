@@ -29,7 +29,7 @@ flowchart TD
   linked -- Yes --> names[Your name, prefilled from WhatsApp<br/>Your kid's name]
   names --> pin[Create a 6-digit PIN, twice]
   pin --> contacts[Choose who your kid can talk to<br/>at least 1, or Depois]
-  contacts --> quiet[Quiet hours<br/>Pular or set times + exceptions]
+  contacts --> quiet[Quiet hours<br/>turn periods on, or leave them off]
   quiet --> done[Pronto. Entregue o tablet para {criança}]
   done --> kid([Kid side: the kid notice, then the home])
 ```
@@ -45,7 +45,7 @@ flowchart TD
 | 3 | **Names** | Checks their own name (prefilled from the WhatsApp profile name) and types the kid's name | The kid's name tags messages ("Tito: …"). The parent's name is used in the kid notice. Both can be changed later in the parent area. |
 | 4 | **PIN** | Types 6 digits, then again | "Esse PIN abre a área dos pais neste tablet. Não use o mesmo PIN do tablet." Rejects 000000, 123456 and the like, with a plain reason. |
 | 5 | **First contacts** | Searches and picks family from their WhatsApp contacts and groups, then taps **Continuar** | Shows the parent's contacts with search. Picked ones go to the top with a check and `selected`. At least one keeps the kid's home from being empty; **Depois** is allowed (the kid's home then shows its empty state). Details in flow "Choose contacts + quiet hours". |
-| 6 | **Quiet hours** | Taps **Pular**, or sets times (e.g. school 7h–12h, bed 21h–7h) and optional exceptions (contacts allowed even then) | Default: none. Exceptions per contact (the owner's decision, 2026-11-18). |
+| 6 | **Quiet hours** | Turns the preset periods on (or leaves them off), or sets times (e.g. school 7h–12h, bed 21h–7h) and optional exceptions (contacts allowed even then) | Default: none. Exceptions per contact (the owner's decision, 2026-11-18). |
 | 7 | **Done** | Hands the tablet over | "Pronto. Entregue o tablet para {criança}." One button: **Abrir para {criança}**. The kid side opens with the kid notice. |
 
 ## Branches
@@ -101,7 +101,7 @@ flowchart TD
 Both names from setup step 3 can be changed later in Parent area › **Ajustes e ajuda** (formerly "Ajuda e sobre"). A blank field keeps the last name. The kid's name drives the message rule ("Tito, …") and signs the kid's messages ("Tito: Oi, vó"), so a change takes effect at once for both.
 
 ## v0.8: the real link
-- **Step 2:** "Conectar o WhatsApp" shows the QR and WhatsApp's own steps. When the phone scans it, the kid's side uses the real WhatsApp (`AppState.realMode`), and the contacts step lists the parent's real contacts, with a search when there are more than 12. **Usar exemplo por enquanto** keeps the sample, for trying Oiê out.
+- **Step 2:** "Conectar o WhatsApp" shows the QR and WhatsApp's own steps. When the phone scans it, the kid's side uses the real WhatsApp (`AppState.realMode`), and the contacts step lists the parent's real contacts, with a search when there are more than 12. (**Usar exemplo por enquanto** was removed in v0.12.)
 - **Since v0.12 there is no sample.** Setup step 2 links the real WhatsApp, with no "use the sample" way out. A tablet updated from the sample drops its sample chats and contacts. Conexão then shows **Conectar o WhatsApp**, which shows the risk and the QR, and lands in Contatos when nobody is chosen yet. **Desconectar o WhatsApp** unlinks.
 - **Contatos (v0.12):**
   - the parent's contacts arrive a few seconds after linking; the list reloads as they come and each time Contatos opens;
@@ -110,7 +110,8 @@ Both names from setup step 3 can be changed later in Parent area › **Ajustes e
 
 ## Reconnect and forgot PIN
 - **Reconnect** (the link dropped). The kid's side says "Peça para {nome} conectar de novo." The parent opens **Área dos pais** with the PIN, sees "O Oiê se desconectou do seu WhatsApp", and taps **Conectar de novo**, which goes back to step 2. Messages the kid sent meanwhile are kept and go out after.
-- **Forgot PIN.** On the PIN screen: **Esqueci o PIN**, then relink WhatsApp (step 2) with the same number, then set a new PIN. Being able to link the same WhatsApp proves it's the parent.
+- **Forgot PIN (v0.34, fixed).** On the PIN screen: **Esqueci o PIN** opens **Fazer um PIN novo**. It explains, then **Mostrar o código**: the tablet leaves WhatsApp and shows a fresh QR. When the **same** WhatsApp scans it, the parent chooses a new PIN and lands in the parent area; the kid's contacts and chats stay. When **another** WhatsApp scans it, Oiê starts over from the names step (the old contacts belonged to the old account). Being able to link the same WhatsApp proves it's the parent.
+  - Before v0.34 it went to setup step 2, which skipped ahead when WhatsApp was already linked: anyone holding the tablet could set a new PIN and pick contacts (the design audit's P0).
 - **Unlink** (parent area): **Desconectar do WhatsApp** is destructive and can't be undone from the tablet. It is the one place with a confirm: "O {criança} não vai conseguir mandar nem receber mensagens até você conectar de novo." **Desconectar** (stop fill) / **Cancelar**.
 
 ## v0.20: "desconectado" on the tablet, "conectado" on the phone
@@ -195,3 +196,14 @@ _The owner's report (2026-11-19): after updating, Oiê says it needs to connect 
 **Issues**
 - **Important:** a linking alternative to the QR (WhatsApp's phone-number code). Check whether the linking method offers it, and add it as "Conectar com código" if so.
 - **Polish:** the 4 phone steps should follow the WhatsApp version on the parent's phone (menu names change). Keep them in one place in the code, easy to update.
+
+## v0.34: the design pass
+- **Welcome:** the brand's rounds and "A família ao alcance." (the name isn't retyped under the logo).
+- **One title style** on every step, one left edge, and **Voltar** on steps 2 to 6.
+- **Risk notice:** **Entendi, conectar** starts the link, so step 2 opens on the QR. **Agora não** closes Oiê and it opens on the welcome next time.
+- **Step 2:** coming back when it's already linked shows "Conectado ao WhatsApp de Ana." with **Continuar** (it used to jump forward by itself). Waiting shows a spinner; a failed try says "Não deu para conectar…", no internet says "Sem internet no tablet…", each above **Conectar o WhatsApp**.
+- **Step 3:** the parent's name comes from their WhatsApp profile when it's blank.
+- **Step 4:** after "Os PINs não são iguais" it starts over from the first PIN.
+- **Step 5:** picked rows are highlighted and checked for TalkBack; **Depois** shows only while nobody is picked, then **Continuar · N escolhidos**.
+- **Step 6:** each period is one switch row; **Pular** went (it did what Continuar does).
+- **Fields:** the label is read with the field, the border is visible (3:1), and errors are announced.

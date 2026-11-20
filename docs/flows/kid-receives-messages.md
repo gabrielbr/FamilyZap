@@ -131,3 +131,9 @@ _The owner's test (2026-11-20): animated stickers from WhatsApp's own packs show
 **Issues**
 - **Critical (for the build, not for this doc):** the "meant for the kid" rule. If it's wrong, either the kid sees the parent's private chats or misses family messages. Fix: test it with 3 families' real chat patterns before Stage 7, and decide with the owner.
 - **Important:** a family member may not know to start with the kid's name. Fix: the kid's messages arrive tagged "Tito: …", so replies naturally follow; and add a one-line tip in the website's "for family" section.
+
+## v0.34: the design pass
+- The conversation now really opens on the first unread message, under a "Novas" line, as step 2 says (it opened on the oldest).
+- A video still downloading says "Vídeo de 0:42, chegando…", with no ▶ (nothing to play yet).
+- Pictures, video frames and profile photos are opened off the main thread, so the chat scrolls smoothly.
+- A tap on a photo opens it big (v0.33); a family member's reaction shows under the message.
