@@ -665,44 +665,42 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
 private fun StickerRows(state: AppState, onMake: () -> Unit, onPick: (String) -> Unit, onPickFamily: (app.oie.logic.FamilySticker) -> Unit) {
     val c = OieTheme.colors
     val tx = str
-        run {
-            Text(tx.stickers, style = OieType.label, color = c.ink)
-            val tile = OTokens.Size.contactTile + OTokens.Spacing.space6
-            val saved = state.stickers.filter { it.saved }
-            val fresh = state.stickers.filter { !it.saved }
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                STICKERS.forEach { (w, res) ->
-                    Image(
-                        painterResource(res), contentDescription = tx.sendSticker(w),
-                        modifier = Modifier.size(tile).clip(RoundedCornerShape(OTokens.Radius.radiusL))
-                            .clickable(role = Role.Button) { onPick(w) },
-                    )
-                }
-            }
-            // Family stickers the kid saved (v0.10): tap to send, like Oiê's own.
-            if (saved.isNotEmpty()) {
-                Text(tx.familyStickers, style = OieType.label, color = c.ink)
-                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                    saved.forEach { s ->
-                        FamilyStickerTile(s.media, tile, Modifier.clickable(role = Role.Button) { onPickFamily(s) }.semantics { contentDescription = tx.sendFamilySticker })
-                    }
-                }
-            }
-            // New ones from the parent's own chat: the kid chooses which to keep.
-            if (fresh.isNotEmpty()) {
-                Text(tx.newStickersFrom(state.parentName), style = OieType.label, color = c.ink)
-                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                    fresh.forEach { s ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            FamilyStickerTile(s.media, tile)
-                            TextLink(tx.keepSticker, { state.saveSticker(s.id) })
-                        }
-                    }
-                }
-            }
-            // v0.33: a sticker from a photo, kept with the family ones.
-            QuietButton(tx.makeSticker, onMake, Modifier.height(OTokens.Size.button), icon = R.drawable.gg_ic_plus)
+    Text(tx.stickers, style = OieType.label, color = c.ink)
+    val tile = OTokens.Size.contactTile + OTokens.Spacing.space6
+    val saved = state.stickers.filter { it.saved }
+    val fresh = state.stickers.filter { !it.saved }
+    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+        STICKERS.forEach { (w, res) ->
+            Image(
+                painterResource(res), contentDescription = tx.sendSticker(w),
+                modifier = Modifier.size(tile).clip(RoundedCornerShape(OTokens.Radius.radiusL))
+                    .clickable(role = Role.Button) { onPick(w) },
+            )
         }
+    }
+    // Family stickers the kid saved (v0.10): tap to send, like Oiê's own.
+    if (saved.isNotEmpty()) {
+        Text(tx.familyStickers, style = OieType.label, color = c.ink)
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+            saved.forEach { s ->
+                FamilyStickerTile(s.media, tile, Modifier.clickable(role = Role.Button) { onPickFamily(s) }.semantics { contentDescription = tx.sendFamilySticker })
+            }
+        }
+    }
+    // New ones from the parent's own chat: the kid chooses which to keep.
+    if (fresh.isNotEmpty()) {
+        Text(tx.newStickersFrom(state.parentName), style = OieType.label, color = c.ink)
+        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+            fresh.forEach { s ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    FamilyStickerTile(s.media, tile)
+                    TextLink(tx.keepSticker, { state.saveSticker(s.id) })
+                }
+            }
+        }
+    }
+    // v0.33: a sticker from a photo, kept with the family ones.
+    QuietButton(tx.makeSticker, onMake, Modifier.height(OTokens.Size.button), icon = R.drawable.gg_ic_plus)
 }
 
 /** A family sticker on the tile Oiê's own use (page colour, large radius). Empty if the file is missing. */
