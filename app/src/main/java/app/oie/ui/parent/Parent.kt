@@ -202,6 +202,8 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: Undo) {
     // v0.19: the name the kid sees, edited in place of the list, like a quiet period.
     var editing by remember { mutableStateOf<String?>(null) }
     val fresh = state.wa.contacts()
+    // Whole-app review: one set of letters for everyone on this screen (allowed and addable), as in setup.
+    val letters = remember(state.allowed.toList(), fresh) { app.oie.logic.Initials.of((state.allowed + fresh).map { it.name }) }
     state.allowed.indexOfFirst { it.id == editing }.takeIf { it >= 0 }?.let { i ->
         ContactEditor(state.allowed[i], state.kidName.ifBlank { tx.theKid }, fresh,
             onSave = { touched(); state.allowed[i] = it; editing = null }, onCancel = { editing = null },
@@ -234,7 +236,7 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: Undo) {
                 Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.changeNameA11y(ct.name)) { touched(); editing = ct.id; state.contactTipUsed = true },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
-            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = app.oie.logic.Initials.of(state.allowed.map { it.name })[ct.name])
+            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters[ct.name])
             // The switch is always labelled, on or off, right under the name, so it fits a phone too (v0.13 audit).
             Column(Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2)) {
                 Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -281,7 +283,7 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: Undo) {
                 Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button) { touched(); state.allowed.add(ct) },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
-                Initial(ct.name, OTokens.Size.avatar)
+                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters[ct.name])
                 // The group note under the name, so it fits a phone (v0.17 audit).
                 Column(Modifier.weight(1f)) {
                     Text(ct.name, style = OieType.label, color = c.ink)

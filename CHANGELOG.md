@@ -10,6 +10,7 @@ A design pass over every screen, with the four design skills and anti-slop, in r
 - **Setup** is calmer: one title style, Voltar on every step, the QR beside its steps on the tablet, clear lines when linking fails or there's no internet, and your name filled in from WhatsApp.
 - **Parent area:** undo is one bar at the bottom that never scrolls away; Back in a quiet period's editor no longer loses it; a phone shows the four sections at once; the 2-minute lock counts typing and scrolling as activity.
 - **Everywhere:** buttons press to 97%, sheets close with Back or a swipe down, errors are announced to TalkBack, and dark mode's overlays darken.
+- **One word on the kid's side:** "Mandar" (the voice guide's own); the contact list says "Com quem Tito pode falar" (there are no calls).
 - **For you to confirm:** the logo's size in the top bar (decision 0012).
 
 ## 0.33.0
