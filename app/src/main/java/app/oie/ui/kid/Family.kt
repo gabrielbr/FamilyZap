@@ -180,7 +180,7 @@ private fun MediaTile(m: Message, onOpen: () -> Unit) {
     ) {
         if (m.kind == Kind.PHOTO) {
             var bmp by remember(m.media) { mutableStateOf<android.graphics.Bitmap?>(null) }
-            LaunchedEffect(m.media) { bmp = withContext(Dispatchers.IO) { m.media?.let { Photos.load(context, it, Photos.MAX_SIDE / 4) } } }
+            LaunchedEffect(m.media) { bmp = withContext(app.oie.data.Background.dispatcher) { m.media?.let { Photos.load(context, it, Photos.MAX_SIDE / 4) } } }
             bmp?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
         } else {
             // v0.34 audit: a video or GIF shows its first picture, with ▶ on it, like in the chat.
@@ -205,7 +205,7 @@ internal fun PhotoScreen(media: String, from: String, onBack: () -> Unit) {
     val context = LocalContext.current
     androidx.activity.compose.BackHandler(onBack = onBack)
     var bmp by remember(media) { mutableStateOf<android.graphics.Bitmap?>(null) }
-    LaunchedEffect(media) { bmp = withContext(Dispatchers.IO) { Photos.load(context, media, Photos.MAX_SIDE) } }
+    LaunchedEffect(media) { bmp = withContext(app.oie.data.Background.dispatcher) { Photos.load(context, media, Photos.MAX_SIDE) } }
     Column(Modifier.fillMaxSize().background(c.page)) {
         Bar {
             QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)

@@ -253,7 +253,7 @@ fun Avatar(contact: app.oie.logic.Contact, size: Dp, modifier: Modifier = Modifi
     val px = with(androidx.compose.ui.platform.LocalDensity.current) { size.roundToPx() }
     var picture by androidx.compose.runtime.remember(contact.photo) { androidx.compose.runtime.mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
     androidx.compose.runtime.LaunchedEffect(contact.photo, px) {
-        picture = if (contact.photo.isEmpty()) null else kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        picture = if (contact.photo.isEmpty()) null else kotlinx.coroutines.withContext(app.oie.data.Background.dispatcher) {
             runCatching { app.oie.data.Photos.load(context, contact.photo, px)?.asImageBitmap() }.getOrNull()
         }
     }

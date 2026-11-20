@@ -36,7 +36,7 @@ class PhoneScreensTest {
     @get:Rule val compose = createComposeRule()
     private val now = 1_795_020_000_000L
 
-    @org.junit.Before fun pinTimeZone() { java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC")) }
+    @org.junit.Before fun pinTimeZone() { java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC")); app.oie.data.Background.dispatcher = kotlinx.coroutines.Dispatchers.Unconfined }
 
     private fun ready(): AppState = AppState(clock = { now }).apply {
         parentName = "Ana"; kidName = "Tito"

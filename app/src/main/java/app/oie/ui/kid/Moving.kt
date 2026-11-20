@@ -71,7 +71,7 @@ import kotlinx.coroutines.withContext
 internal fun rememberBytes(media: String?): ByteArray? {
     val context = LocalContext.current
     var bytes by remember(media) { mutableStateOf<ByteArray?>(null) }
-    LaunchedEffect(media) { bytes = if (media == null) null else withContext(Dispatchers.IO) { Photos.openBytes(context, media) } }
+    LaunchedEffect(media) { bytes = if (media == null) null else withContext(app.oie.data.Background.dispatcher) { Photos.openBytes(context, media) } }
     return bytes
 }
 
@@ -177,7 +177,7 @@ internal fun rememberFirstFrame(bytes: ByteArray?): android.graphics.Bitmap? {
     var frame by remember(bytes) { mutableStateOf<android.graphics.Bitmap?>(null) }
     LaunchedEffect(bytes) {
         val b = bytes ?: return@LaunchedEffect
-        frame = withContext(Dispatchers.IO) {
+        frame = withContext(app.oie.data.Background.dispatcher) {
             runCatching { MediaMetadataRetriever().run { setDataSource(BytesSource(b)); val f = getFrameAtTime(0); release(); f } }.getOrNull()
         }
     }
@@ -358,7 +358,7 @@ internal fun rememberPhoto(media: String?, maxSide: Int): android.graphics.Bitma
     val context = LocalContext.current
     var bmp by remember(media, maxSide) { mutableStateOf<android.graphics.Bitmap?>(null) }
     androidx.compose.runtime.LaunchedEffect(media, maxSide) {
-        bmp = media?.let { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { Photos.load(context, it, maxSide) } }
+        bmp = media?.let { kotlinx.coroutines.withContext(app.oie.data.Background.dispatcher) { Photos.load(context, it, maxSide) } }
     }
     return bmp
 }
@@ -375,7 +375,7 @@ internal fun rememberVideoFrame(media: String?): android.graphics.Bitmap? {
     LaunchedEffect(media) {
         val m = media ?: return@LaunchedEffect
         if (frame != null) return@LaunchedEffect
-        frame = withContext(Dispatchers.IO) {
+        frame = withContext(app.oie.data.Background.dispatcher) {
             runCatching {
                 val bytes = Photos.openBytes(context, m) ?: return@runCatching null
                 MediaMetadataRetriever().run { setDataSource(BytesSource(bytes)); val f = getFrameAtTime(0); release(); f }
