@@ -20,6 +20,13 @@
   --wa-meta: #667781;
   --wa-read: #53BDEB;
   --wa-send: #00A884;
+  --wa-face: #DFE5E7;
+  --wa-face-ink: #54656F;
+  --wa-kbd: #D9DDE1;
+  /* Oiê's drawn tablet screen: the light theme's line and surface tokens, fixed (the drawing is always light). */
+  --oie-line: #EFD9CC;
+  --oie-surface: #FFFFFF;
+  --oie-kbd: #E9E3DA;
 
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px; --s16: 64px;
   --r-control: 4px; --r-card: 8px; --r-pill: 16px;
@@ -80,9 +87,9 @@ img, svg { display: block; }
 .hero__note { font-size: 0.9375rem; font-weight: 600; margin: 0; }
 
 /* "Monte a sua família": the visitor's own family runs the story below. */
-.family { background: var(--gds-surface); color: var(--gds-ink); border: 1px solid var(--gds-line); border-radius: var(--r-card); padding: var(--s6); display: grid; gap: var(--s4); }
+.family { min-width: 0; background: var(--gds-surface); color: var(--gds-ink); border: 1px solid var(--gds-line); border-radius: var(--r-card); padding: var(--s6); display: grid; gap: var(--s4); }
 .family__title { margin: 0; font-weight: 800; font-size: 1.125rem; line-height: 1.3; }
-.family fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
+.family fieldset { min-width: 0; border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
 .family legend { width: 100%; padding: 0; margin-bottom: var(--s2); font-size: 0.875rem; font-weight: 700; color: var(--gds-muted); }
 .family label { position: relative; }
 /* Four people to write to: two by two, so none sits alone on a line. */
@@ -104,10 +111,11 @@ img, svg { display: block; }
 /* Once the hero has scrolled away, the stage centres itself beside the step being read. */
 .stage.is-pinned { padding-top: max(3vh, calc(50svh - 300px)); }
 .steps { grid-column: 1; grid-row: 1; padding: var(--s8) 0 30vh; }
-.step { min-height: 78vh; display: flex; flex-direction: column; justify-content: center; transition: opacity var(--t-scene) var(--ease); }
+.step { min-height: 78vh; display: flex; flex-direction: column; justify-content: center; transition: color var(--t-scene) var(--ease); }
 /* Only with JavaScript running does the story fade the steps not being read. */
-.js .step { opacity: 0.35; }
-.js .step.is-on { opacity: 1; }
+.js .step { color: var(--gds-muted); }
+.js .step h2 { color: var(--gds-muted); }
+.js .step.is-on, .js .step.is-on h2 { color: var(--gds-ink); }
 .step--intro, .js .step--intro { min-height: 0; padding-bottom: 30vh; opacity: 1; justify-content: flex-start; }
 .step h2 { font-weight: 800; font-size: clamp(1.75rem, 3.4vw, 2.75rem); line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 var(--s4); text-wrap: balance; }
 .step p { font-size: 1.1875rem; line-height: 1.55; margin: 0; max-width: 34ch; }
@@ -159,12 +167,12 @@ img, svg { display: block; }
 .tablet { width: 100%; aspect-ratio: 4 / 3; border-radius: 16px; }
 
 /* The wire between the three: the family line from v1, carrying the message. */
-.wire { position: relative; height: var(--line); margin: var(--s4) 6% 0; background: var(--gds-ink); border-radius: var(--line); }
+.wire { flex: none; position: relative; height: var(--line); margin: var(--s4) 6% 0; background: var(--gds-ink); border-radius: var(--line); }
 .wire__dot { position: absolute; top: 50%; left: 0; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--gds-mint); border: 4px solid var(--gds-page); transition: left 1200ms var(--ease), opacity var(--t-emph) var(--ease); opacity: 0; }
 
 /* ---------- Oiê's own screen on the tablet (coral frame, message rows) ---------- */
 .oie { position: absolute; inset: 0; background: var(--brand-cream); border: 4px solid var(--brand-coral); display: flex; flex-direction: column; font-size: 11px; line-height: 1.35; color: var(--brand-ink); }
-.oie__bar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid #EFD9CC; font-weight: 800; font-size: 12px; }
+.oie__bar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid var(--oie-line); font-weight: 800; font-size: 12px; }
 .oie__face { width: 22px; height: 22px; border-radius: 50%; background: var(--brand-selected); display: grid; place-items: center; font-size: 9px; font-weight: 800; }
 .oie__home { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); align-content: center; gap: 6px; padding: 8px; }
 .oie__tile { display: grid; justify-items: center; gap: 3px; font-style: normal; }
@@ -176,16 +184,19 @@ img, svg { display: block; }
 .oie__msg--out { align-self: flex-end; background: var(--brand-selected); }
 /* Once the answer is in, the tablet drops "Mandada" so both messages fit. */
 .stage[data-replied] .oie__msg small { display: none; }
-.oie__msg--in { align-self: flex-start; background: #FFFFFF; border: 1px solid #EFD9CC; }
-.oie__compose { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-top: 1px solid #EFD9CC; }
-.oie__field { flex: 1; min-height: 22px; border: 1px solid #EFD9CC; border-radius: 4px; background: #FFFFFF; padding: 3px 6px; white-space: nowrap; overflow: hidden; }
+.oie__msg--in { align-self: flex-start; background: var(--oie-surface); border: 1px solid var(--oie-line); }
+.oie__compose { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-top: 1px solid var(--oie-line); }
+.oie__field { flex: 1; min-height: 22px; border: 1px solid var(--oie-line); border-radius: 4px; background: var(--oie-surface); padding: 3px 6px; white-space: nowrap; overflow: hidden; }
 .oie__mic { width: 24px; height: 24px; border-radius: 50%; background: var(--brand-coral); display: grid; place-items: center; }
 .oie__mic .icon { width: 13px; height: 13px; stroke-width: 2.2; }
 .oie__parent { position: absolute; inset: 0; background: var(--brand-cream); padding: 10px 12px; display: none; }
 .oie__ptitle { margin: 0 0 6px; font-weight: 800; font-size: 13px; }
-.oie__prow { margin: 0; display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #EFD9CC; font-weight: 700; }
+.oie__prow { margin: 0; display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--oie-line); font-weight: 700; }
 .sw { width: 26px; height: 15px; border-radius: 8px; background: var(--brand-ink); position: relative; }
 .sw::after { content: ""; position: absolute; right: 2px; top: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--brand-cream); }
+
+/* Older messages scroll up under the header, as in a real chat: a short fade says "there's more above". */
+.oie__chat, .wa__chat { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px); mask-image: linear-gradient(to bottom, transparent 0, #000 14px); }
 
 /* What the tablet shows, step by step. */
 .stage .oie__chat, .stage .oie__compose { display: none; }
@@ -198,7 +209,7 @@ img, svg { display: block; }
 /* ---------- The family's WhatsApp (decision 0013: colours only, no logo) ---------- */
 .wa { position: absolute; inset: 0; background: var(--wa-chat); display: flex; flex-direction: column; font-size: 11px; line-height: 1.35; color: var(--wa-text); }
 .wa__bar { background: var(--wa-bar); color: var(--wa-on-bar); display: flex; align-items: center; gap: 6px; padding: 18px 8px 7px; }
-.wa__face { width: 24px; height: 24px; border-radius: 50%; background: #DFE5E7; color: #54656F; display: grid; place-items: center; font-size: 9px; font-weight: 800; flex: none; }
+.wa__face { width: 24px; height: 24px; border-radius: 50%; background: var(--wa-face); color: var(--wa-face-ink); display: grid; place-items: center; font-size: 9px; font-weight: 800; flex: none; }
 .wa__who { display: grid; line-height: 1.2; }
 .wa__who b { font-size: 12px; }
 .wa__who small { font-size: 9px; opacity: 0.9; }
@@ -210,16 +221,16 @@ img, svg { display: block; }
 .ticks { width: 13px; height: 13px; fill: none; stroke: var(--wa-meta); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .ticks--read, .stage[data-step="3"] #ticks, .stage[data-step="4"] #ticks { stroke: var(--wa-read); }
 .wa__compose { display: flex; align-items: center; gap: 5px; padding: 6px; }
-.wa__field { flex: 1; min-height: 24px; background: #FFFFFF; border-radius: 12px; padding: 4px 9px; color: var(--wa-meta); white-space: nowrap; overflow: hidden; }
+.wa__field { flex: 1; min-height: 24px; background: var(--wa-in); border-radius: 12px; padding: 4px 9px; color: var(--wa-meta); white-space: nowrap; overflow: hidden; }
 .wa__field.is-typing { color: var(--wa-text); }
 .wa__send { width: 24px; height: 24px; border-radius: 50%; background: var(--wa-send); flex: none; }
 
 /* The keyboard rises from the bottom of the screen while someone types; a key lights up for every letter. */
-.kbd { flex: none; max-height: 0; overflow: hidden; display: grid; gap: 3px; padding: 0 5px; background: #E9E3DA; transition: max-height var(--t-scene) var(--ease), padding var(--t-scene) var(--ease); }
-.wa .kbd { background: #D9DDE1; }
+.kbd { flex: none; max-height: 0; overflow: hidden; display: grid; gap: 3px; padding: 0 5px; background: var(--oie-kbd); transition: max-height var(--t-scene) var(--ease), padding var(--t-scene) var(--ease); }
+.wa .kbd { background: var(--wa-kbd); }
 .device.is-typing .kbd { max-height: 40%; padding: 5px; }
 .kbd__row { display: flex; justify-content: center; gap: 3px; }
-.kbd i { flex: 1; max-width: 13px; height: 13px; border-radius: 3px; background: #FFFFFF; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18); transition: background-color 80ms linear, transform 80ms linear; }
+.kbd i { flex: 1; max-width: 13px; height: 13px; border-radius: 3px; background: var(--oie-surface); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18); transition: background-color 80ms linear, transform 80ms linear; }
 .kbd i.kbd__space { max-width: none; flex: 0 0 55%; }
 .kbd i.is-hit { background: var(--brand-coral); transform: translateY(1px); }
 .wa .kbd i.is-hit { background: var(--wa-send); }
@@ -284,10 +295,17 @@ img, svg { display: block; }
 footer { border-top: 1px solid var(--gds-line); }
 .foot { max-width: var(--page-max); margin: 0 auto; padding: var(--s10) var(--s6); display: flex; flex-wrap: wrap; gap: var(--s6) var(--s10); justify-content: space-between; align-items: flex-start; font-size: 0.9375rem; color: var(--gds-muted); }
 .foot img { width: 72px; height: auto; margin-bottom: var(--s3); }
-.foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); }
+.foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.foot ul a { display: inline-flex; align-items: center; min-height: 44px; }
 .foot p { margin: 0; max-width: 40ch; }
 
 @media (min-width: 900px) { .nav__get { display: inline-flex; } }
+@media (min-width: 900px) and (max-width: 1199px) {
+  .actor { --aw: 196px; --dw: 124px; }
+  .wa, .oie { font-size: 9.5px; }
+  .wa__bar { padding-top: 12px; }
+  .actor--kid { --aw: 184px; --dw: 196px; }
+}
 @media (max-width: 1099px) {
   .hero__grid { grid-template-columns: minmax(0, 1fr); align-items: start; }
 }
@@ -303,8 +321,10 @@ footer { border-top: 1px solid var(--gds-line); }
   .stage .actor { opacity: 0 !important; pointer-events: none; }
   .stage[data-focus="kid"] .actor--kid, .stage[data-focus="parent"] .actor--parent, .stage[data-focus="recv"] .actor--recv,
   .stage[data-step="0"] .actor--kid { opacity: 1 !important; filter: none; }
-  .actor { --aw: 240px; --dw: 140px; }
-  .actor--kid { --aw: 220px; --dw: 270px; }
+  .actor { --aw: 220px; --dw: 132px; }
+  .wa { font-size: 10px; }
+  .wa__bar { padding-top: 12px; }
+  .actor--kid { --aw: 200px; --dw: 250px; }
   .step { opacity: 1; }
   .wire { margin: var(--s3) var(--s8) 0; }
   .stage__tag { top: var(--s3); right: var(--s4); }
