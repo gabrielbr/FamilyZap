@@ -129,7 +129,7 @@ fun MovingImage(media: String, side: Dp, contentDescription: String?, modifier: 
  * it; a GIF loops without sound. [onProgress] gets the position and the length in ms.
  */
 @Composable
-private fun VideoSurface(
+internal fun VideoSurface(
     bytes: ByteArray, loop: Boolean, muted: Boolean, play: Boolean, modifier: Modifier = Modifier,
     onProgress: (Int, Int) -> Unit = { _, _ -> }, onEnd: () -> Unit = {},
 ) {

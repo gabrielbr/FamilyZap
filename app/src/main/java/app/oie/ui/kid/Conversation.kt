@@ -625,7 +625,11 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
                 }
                 Kind.UNSUPPORTED -> Text(tx.onlyInWhatsApp(name), style = OieType.body, color = c.muted)
                 Kind.DELETED -> Text(tx.deletedMessage, style = OieType.body.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic), color = c.muted)
-                else -> Text(m.text, style = OieType.body, color = ink, modifier = Modifier.weight(1f, fill = false))
+                // v0.36: an answer to a status says so above the text.
+                else -> Column(Modifier.weight(1f, fill = false)) {
+                    if (m.statusQuote.isNotEmpty()) Text(m.statusQuote, style = OieType.caption, color = c.muted)
+                    Text(m.text, style = OieType.body, color = ink)
+                }
             }
             Text(status ?: hour(tx, m.at), style = OieType.caption, color = c.muted, maxLines = 1, softWrap = false)
         }

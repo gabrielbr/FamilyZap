@@ -18,6 +18,10 @@ interface WhatsAppLink {
     fun send(message: Message)
     /** The kid's reaction on [target] (v0.33); an empty [emoji] takes it away. */
     fun react(target: Message, emoji: String) {}
+    /** A family member's status was seen on the tablet (v0.36). */
+    fun markStatusViewed(status: app.oie.logic.Status) {}
+    /** The kid's reaction to a status, sent to the poster's own chat; an empty [emoji] takes it away. */
+    fun reactToStatus(status: app.oie.logic.Status, emoji: String) {}
 }
 
 /** Sample family data for the v0.1 shell. Names are examples. */
@@ -40,4 +44,7 @@ class SampleLink : WhatsAppLink {
     override fun send(message: Message) { sent += message }
     val reacted = mutableListOf<Pair<String, String>>()
     override fun react(target: Message, emoji: String) { reacted += target.id to emoji }
+    val statusViews = mutableListOf<String>()
+    override fun markStatusViewed(status: app.oie.logic.Status) { statusViews += status.id }
+    override fun reactToStatus(status: app.oie.logic.Status, emoji: String) { reacted += status.id to emoji }
 }

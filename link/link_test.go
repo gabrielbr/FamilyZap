@@ -98,10 +98,15 @@ func TestToIncomingDropsWhatTheAppNeverNeeds(t *testing.T) {
 			t.Fatalf("%s should be dropped", name)
 		}
 	}
-	status := info("s", false)
-	status.Chat = types.StatusBroadcastJID
-	if _, ok := ToIncoming(status, &waE2E.Message{Conversation: proto.String("hi")}); ok {
-		t.Fatal("status updates should be dropped")
+	own := info("s", true)
+	own.Chat = types.StatusBroadcastJID
+	if _, ok := ToIncoming(own, &waE2E.Message{Conversation: proto.String("hi")}); ok {
+		t.Fatal("the parent's own statuses never come through (v0.36)")
+	}
+	list := info("b", false)
+	list.Chat = types.NewJID("1234", types.BroadcastServer)
+	if _, ok := ToIncoming(list, &waE2E.Message{Conversation: proto.String("hi")}); ok {
+		t.Fatal("broadcast lists other than status are dropped")
 	}
 }
 
@@ -487,5 +492,28 @@ func TestMarkUnreadOnlyOnTheParentLine(t *testing.T) {
 	k.SetParentLine("120363000000000000@g.us")
 	if err := k.MarkUnread("5511999990000@s.whatsapp.net", "k1", 1); err == nil {
 		t.Fatal("another chat: must refuse")
+	}
+}
+
+func TestAFamilyStatusComesThroughAsThePosters(t *testing.T) {
+	i := info("st1", false)
+	i.Chat = types.StatusBroadcastJID
+	i.Sender = types.NewJID("5511999990000", types.DefaultUserServer)
+	got, ok := ToIncoming(i, &waE2E.Message{ImageMessage: &waE2E.ImageMessage{Caption: proto.String("o bolo")}})
+	if !ok || !got.Status || got.Chat != "5511999990000@s.whatsapp.net" || got.Kind != "PHOTO" || got.Text != "o bolo" {
+		t.Fatalf("got %+v %v", got, ok)
+	}
+}
+
+func TestStatusReactionAndReplyPointAtTheStatus(t *testing.T) {
+	poster := types.NewJID("5511999990000", types.DefaultUserServer)
+	r := StatusReaction(poster, "st1", "❤️", time.UnixMilli(1)).GetReactionMessage()
+	k := r.GetKey()
+	if k.GetRemoteJID() != "status@broadcast" || k.GetID() != "st1" || k.GetParticipant() != poster.String() || k.GetFromMe() || r.GetText() != "❤️" {
+		t.Fatalf("reaction key: %+v", k)
+	}
+	c := StatusReply(poster, "st1", "Que lindo").GetExtendedTextMessage()
+	if c.GetText() != "Que lindo" || c.GetContextInfo().GetStanzaID() != "st1" || c.GetContextInfo().GetRemoteJID() != "status@broadcast" || c.GetContextInfo().GetParticipant() != poster.String() {
+		t.Fatalf("reply context: %+v", c.GetContextInfo())
 	}
 }

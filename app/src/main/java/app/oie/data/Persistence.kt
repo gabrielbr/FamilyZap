@@ -34,6 +34,12 @@ object Codec {
         put("kidEmoji", s.kidEmoji)
         put("bubbleOn", s.bubbleOn)
         put("pinResetFrom", s.pinResetFrom).put("reactTipUsed", s.reactTipUsed).put("lastReaction", s.lastReaction ?: "")
+        put("statusesOn", s.statusesOn).put("linkedSince", s.linkedSince)
+        put("statuses", JSONArray(s.statuses.map {
+            JSONObject().put("id", it.id).put("contact", it.contactId).put("poster", it.poster).put("at", it.at).put("kind", it.kind.name)
+                .put("text", it.text).put("media", it.media ?: JSONObject.NULL).put("size", it.size).put("dur", it.durationSec)
+                .put("viewed", it.viewed).put("reaction", it.reaction)
+        }))
         put("nudgeOn", s.nudgeOn).put("nudgeDismissed", JSONObject(s.nudgeDismissed.toMap())).put("needYouAt", s.needYouAt)
         put("pinHash", s.pinHash ?: JSONObject.NULL)
         put("kidNoticeSeen", s.kidNoticeSeen)
@@ -60,7 +66,7 @@ object Codec {
             JSONObject().put("id", it.id).put("chat", it.chatId).put("kid", it.fromKid).put("at", it.at)
                 .put("kind", it.kind.name).put("text", it.text).put("replyTo", it.replyTo ?: JSONObject.NULL)
                 .put("dur", it.durationSec).put("media", it.media ?: JSONObject.NULL).put("size", it.size)
-                .put("sender", it.sender).put("receipt", it.receipt.name).put("reactions", JSONObject(it.reactions))
+                .put("sender", it.sender).put("receipt", it.receipt.name).put("reactions", JSONObject(it.reactions)).put("statusQuote", it.statusQuote)
         }))
         put("drafts", JSONObject(s.drafts.toMap()))
         put("lastSeen", JSONObject(s.lastSeen.toMap()))
@@ -76,6 +82,16 @@ object Codec {
         s.kidEmoji = app.oie.logic.Signature.emojiOf(o.optString("kidEmoji"))
         s.bubbleOn = o.optBoolean("bubbleOn")
         s.nudgeOn = o.optBoolean("nudgeOn")
+        s.statusesOn = o.optBoolean("statusesOn")
+        s.linkedSince = o.optLong("linkedSince")
+        s.statuses.clear()
+        o.optJSONArray("statuses")?.let { a ->
+            for (i in 0 until a.length()) a.getJSONObject(i).run {
+                s.statuses += app.oie.logic.Status(getString("id"), getString("contact"), optString("poster"), getLong("at"),
+                    runCatching { Kind.valueOf(getString("kind")) }.getOrDefault(Kind.UNSUPPORTED), optString("text"),
+                    if (isNull("media")) null else getString("media"), optLong("size"), optInt("dur"), optBoolean("viewed"), optString("reaction"))
+            }
+        }
         s.pinResetFrom = o.optString("pinResetFrom")
         s.reactTipUsed = o.optBoolean("reactTipUsed")
         s.lastReaction = o.optString("lastReaction").ifEmpty { null }
@@ -119,6 +135,7 @@ object Codec {
                     if (isNull("media")) null else getString("media"), optLong("size"), optString("sender"),
                     runCatching { app.oie.logic.Receipt.valueOf(optString("receipt")) }.getOrDefault(app.oie.logic.Receipt.NONE),
                     optJSONObject("reactions")?.let { r -> r.keys().asSequence().associateWith { k -> r.getString(k) } } ?: emptyMap(),
+                    optString("statusQuote"),
                 )
             }
         }

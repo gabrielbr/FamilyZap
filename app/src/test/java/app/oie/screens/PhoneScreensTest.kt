@@ -176,4 +176,15 @@ class PhoneScreensTest {
     @Test fun linkQr() = shot("p43-link-qr", bigText = true) { app.oie.ui.setup.Setup(AppState(clock = { now }).apply { linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Qr("2@sample-code-for-the-screenshot,abc,def,ghi") }, 2, onClose = {}) }
     @Test fun setupPin() = shot("p44-setup-pin", bigText = true) { app.oie.ui.setup.Setup(AppState(), 4, onClose = {}) }
     @Test fun recording() = shot("p45-recording", bigText = true) { Conversation(family(), "vovo", recordingPreviewSec = 115) }
+
+    // v0.36: family statuses on a phone at 1.3x text.
+    private fun statuses() = ready().apply {
+        statusesOn = true; linkedSince = now - 20L * 60 * 60 * 1000
+        statuses += app.oie.logic.Status("st1", "vovo", "vovo", now - 2L * 60 * 60 * 1000, app.oie.logic.Kind.TEXT, "Bolo de laranja saindo do forno")
+        statuses += app.oie.logic.Status("st3", "bia", "bia", now - 5L * 60 * 60 * 1000, app.oie.logic.Kind.TEXT, "Praia hoje", viewed = true)
+    }
+    @Test fun kidHomeStatuses() = shot("p44-kid-home-statuses", bigText = true) { KidHome(statuses()) }
+    @Test fun statusViewer() { compose.mainClock.autoAdvance = false; shot("p45-status-viewer", bigText = true) { app.oie.ui.kid.StatusViewer(statuses(), "vovo", {}) } }
+    @Test fun statusReply() { compose.mainClock.autoAdvance = false; shot("p46-status-reply", bigText = true) { app.oie.ui.kid.StatusViewer(statuses(), "vovo", {}, startReplying = true) } }
+    @Test fun settingsStatuses() = shot("p47-settings-statuses", bigText = true) { androidx.compose.foundation.layout.Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.StatusSetting(statuses()) } }
 }

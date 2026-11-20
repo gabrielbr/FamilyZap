@@ -56,7 +56,9 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         val err: Throwable? = if (l == null) IllegalStateException("not linked") else runCatching {
             when (m.kind) {
                 // The kid writes from the parent's number, so the family sees who it is: "Tito: Oi, vó" (setup promises this).
-                Kind.TEXT -> l.sendTextWithID(m.chatId, signed(m.text), m.replyTo ?: "", m.id)
+                // v0.36: an answer to a status quotes it, in the poster's chat.
+                Kind.TEXT -> if (m.statusQuote.isNotEmpty() && m.replyTo != null) l.sendStatusReply(m.sender.ifEmpty { m.chatId }, m.replyTo, signed(m.text), m.id)
+                    else l.sendTextWithID(m.chatId, signed(m.text), m.replyTo ?: "", m.id)
                 Kind.PHOTO -> l.sendImage(m.chatId, m.media?.let { Photos.openBytes(context, it) } ?: error("photo missing"), signed(""), m.id)
                 // A family sticker the kid saved goes as a real WhatsApp sticker; Oiê's own go as pictures.
                 Kind.STICKER -> if (m.media != null) {
@@ -221,6 +223,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     /** The kid's side: RealInbox first (allowed chats only, never the parent's own), then Inbox.decide. */
     private fun receiveForKid(o: JSONObject) {
         val kind = runCatching { Kind.valueOf(o.optString("kind")) }.getOrDefault(Kind.UNSUPPORTED)
+        // v0.36: a family member's status goes its own way (never a chat message, never a command).
+        if (o.optBoolean("status")) { statusIn(o, kind); return }
         if (kind == Kind.TEXT && command(o)) return
         if (kind == Kind.REACTION) { reaction(o); return }
         // v0.10: a sticker the parent sends to their own chat is offered to the kid. Only stickers:
@@ -398,6 +402,51 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             r.getOrNull()?.let { ours += it }
             sentAt += System.currentTimeMillis()
             Diagnostics.log("send answer: ${r.exceptionOrNull()?.let { "failed: ${it.message}" } ?: "ok"}")
+        }
+    }
+
+    /**
+     * A family member's status (v0.36, docs/flows/statuses.md): kept only by AppState's rules (statuses on,
+     * an allowed person, after the link, alive); its picture or video is fetched like a message's. A
+     * status its owner deleted goes from the tablet.
+     */
+    private fun statusIn(o: JSONObject, kind: Kind) {
+        if (!state.statusesOn) return
+        val chat = o.optString("chat"); val alt = o.optString("chatAlt")
+        val c = state.allowed.firstOrNull { it.id == chat || (alt.isNotEmpty() && it.id == alt) } ?: return
+        if (kind == Kind.DELETED) { state.removeStatus(o.optString("replyTo"))?.let { Photos.forget(context, it) }; return }
+        val s = app.oie.logic.Status(o.optString("id"), c.id, chat, o.optLong("at"), kind, o.optString("text"),
+            size = o.optLong("size"), durationSec = o.optInt("durationSec"))
+        if (!state.receiveStatus(s)) return
+        Diagnostics.log("status: ${kind.name.lowercase()}")
+        if (app.oie.logic.Moving.download(kind, s.size)) bg {
+            val bytes = runCatching { link?.download(s.id) }.getOrNull() ?: return@bg
+            val name = Photos.keepBytes(context, bytes)
+            main.post {
+                val i = state.statuses.indexOfFirst { it.id == s.id }
+                if (i >= 0) state.statuses[i] = state.statuses[i].copy(media = name) else Photos.forget(context, name)
+            }
+        }
+    }
+
+    /** The poster sees it viewed, as the parent's account (the owner's choice). A receipt, not a message. */
+    override fun markStatusViewed(status: app.oie.logic.Status) {
+        bg {
+            val r = runCatching { link?.markStatusViewed(status.poster, status.id, System.currentTimeMillis()) }
+            r.exceptionOrNull()?.let { Diagnostics.log("status viewed: failed: ${it.message}") }
+        }
+    }
+
+    /** The kid's reaction to a status: to the poster's own chat, at a person's pace (L3). */
+    override fun reactToStatus(status: app.oie.logic.Status, emoji: String) {
+        val id = "r${System.nanoTime()}"
+        ours += id
+        bg {
+            val wait = app.oie.logic.SendPace.waitMs(sentAt, System.currentTimeMillis())
+            if (wait > 0) Thread.sleep(wait)
+            val r = runCatching { link?.sendStatusReaction(status.poster, status.id, emoji, id) ?: error("not linked") }
+            sentAt += System.currentTimeMillis()
+            Diagnostics.log("send status reaction: ${r.exceptionOrNull()?.let { "failed: ${it.message}" } ?: "ok"}")
         }
     }
 

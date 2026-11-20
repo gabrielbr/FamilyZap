@@ -66,11 +66,13 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 | L2 | **Only allowed chats.** Sends go only to contacts the parent allowed, never to the parent's own number, never to a list. | `Inbox.decide`, the allowed list; no bulk send anywhere |
 | L2 (v0.21) | **The parent's own chat gets only Oiê's answers to the parent's commands** ("/Tito parar"), never anything from the kid (decision 0005). | `SendSelfNote`; `ParentCommand` reads commands only from the parent's own account |
 | L2 (v0.30) | **The parent's own chat may receive the kid's messages only when the parent made it the line to the kid** (WhatsApp refused the one-person group; decision 0007). | `SetParentLine`, `target` |
+| L2 (v0.36) | **Statuses never go to the status broadcast.** A reaction or a reply to a family status goes to the poster's own chat (the broadcast would reach the parent's whole status audience). Only statuses from allowed, unpaused people are kept; never the parent's own, never other broadcast lists. | `ToIncoming`, `SendStatusReaction`, `SendStatusReply` (via `target`) |
 | L3 | **Human pace.** At least 2 s between sends, at most 30 in 10 minutes. The app waits rather than refuses. | `SendPace` (tested) |
 | L4 | **No duplicates.** A send is retried at most once, with the same message ID, only after a reconnect. Other errors show "Não foi" with Tentar de novo for the kid. | whatsmeow `SendRequestExtra{ID}` |
 | L5 | **Bounded reconnects.** whatsmeow reconnects on its own, waiting 2 s longer each time, and stops after 8 tries. After that, the app tries again when the network or the app comes back. | `AutoReconnectHook`; `LinkService` network callback (v0.7) |
 | L6 | **Little history.** At pairing, ask for 1 day of history. Oiê shows nothing from before the link. | `HistorySyncConfig` limits |
 | L7 | **No fake activity.** No automatic "online", "typing" or read receipts. Presence is sent only so WhatsApp knows the name. | no `SendChatPresence`, no `MarkRead` (open question: read receipts) |
+| L7 (v0.36) | **One exception: a family status the kid watched is marked viewed,** only when the parent turned Novidades on (the owner chose it, 2026-11-20; the switch says views show as the parent). Chats still send no read receipts. | `MarkStatusViewed` |
 | L8 | **The session stays on the tablet,** in the app's private no-backup storage, and is deleted when the parent unlinks. | `noBackupFilesDir`; `Unlink` deletes it |
 | L9 | **A ban stops everything.** On `TemporaryBan` or `LoggedOut`, stop sending. Tell the parent in plain words, in the parent area. Never retry around it. | `events.TemporaryBan`, `events.LoggedOut` |
 
