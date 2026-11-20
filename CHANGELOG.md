@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.34.0
+A design pass over every screen, with the four design skills and anti-slop, in rounds until each area scored its maximum. What you'll notice:
+- **Fixed: "Esqueci o PIN" was not safe.** It could let anyone holding the tablet set a new PIN while WhatsApp was linked. Now a new PIN needs the same WhatsApp to link again (a fresh QR, scanned with your phone); the kid's contacts and chats stay. If another WhatsApp links, Oiê starts over.
+- **The kid's home** scrolls (people further down were unreachable on a phone), keeps two even columns on a phone, and shows "Vó" and "Vô" when two people share a first letter. A Wi-Fi drop says "Sem internet agora…" instead of asking you to reconnect.
+- **Chats** open on the first new message, under a "Novas" line. Recording shows a clock, a Cancelar, a countdown in the last 10 seconds (2 minutes at most), and sliding off the button cancels. A short hint shows how to react, until the kid has reacted once.
+- **Setup** is calmer: one title style, Voltar on every step, the QR beside its steps on the tablet, clear lines when linking fails or there's no internet, and your name filled in from WhatsApp.
+- **Parent area:** undo is one bar at the bottom that never scrolls away; Back in a quiet period's editor no longer loses it; a phone shows the four sections at once; the 2-minute lock counts typing and scrolling as activity.
+- **Everywhere:** buttons press to 97%, sheets close with Back or a swipe down, errors are announced to TalkBack, and dark mode's overlays darken.
+- **For you to confirm:** the logo's size in the top bar (decision 0012).
+
 ## 0.33.0
 Ten things for the family, in one update:
 - **"Vovó viu".** Under the kid's last message: Enviada, then Entregue, then "Vovó viu" (in a group, "Alguém viu").

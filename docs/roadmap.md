@@ -14,6 +14,8 @@ Ideas and planned work. When something ships, move it into the docs.
 ## Next
 
 ## Later
+- Link with a phone-number code as well as the QR (WhatsApp supports it; the link library has PairWithCode). For the owner to decide.
+- A backspace icon in the Gabriel core set, for the PIN keypad (the key says "Apagar" until then).
 - "Escrevendo…" while family types: left out in v0.33, because it needs the parent to show as online (rule L7).
 - A family reaction could notify the kid (v0.33 keeps them quiet).
 - Calls from the tablet (not possible through the linked-device bridge; decision 0001).
