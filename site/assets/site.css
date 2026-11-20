@@ -102,7 +102,7 @@ img, svg { display: block; }
 .story { position: relative; max-width: var(--page-max); margin: 0 auto; padding: 0 var(--s6); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); column-gap: var(--s10); }
 .stage { grid-column: 2; grid-row: 1; position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 3vh; transition: padding-top var(--t-scene) var(--ease); }
 /* Once the hero has scrolled away, the stage centres itself beside the step being read. */
-.stage.is-pinned { padding-top: max(3vh, calc(50svh - 270px)); }
+.stage.is-pinned { padding-top: max(3vh, calc(50svh - 300px)); }
 .steps { grid-column: 1; grid-row: 1; padding: var(--s8) 0 30vh; }
 .step { min-height: 78vh; display: flex; flex-direction: column; justify-content: center; transition: opacity var(--t-scene) var(--ease); }
 /* Only with JavaScript running does the story fade the steps not being read. */
@@ -122,12 +122,13 @@ img, svg { display: block; }
 .stage[data-step="6"] .actor--parent, .stage[data-step="6"] .actor--recv { opacity: 0.22; }
 
 /* The person stands behind; the device is held up at the chest, so the head and shoulders show. */
-.actor { --aw: 228px; --pull: -0.62; --dw: 146px; }
-.actor--kid { --aw: 210px; --pull: -0.55; --dw: 236px; }
+.actor { --aw: 228px; --pull: -0.36; --dw: 146px; }
+.actor--kid { --aw: 210px; --pull: -0.25; --dw: 236px; }
 .sil { width: var(--aw); height: calc(var(--aw) * 1.2); fill: var(--gds-ink); color: var(--gds-ink); max-width: 100%; }
 /* The details that give each person their character: clothes, glasses, earrings, in the page's colour. */
 .sil .d, .others .d { fill: none; stroke: var(--gds-page); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
 .sil .dot, .others .dot { fill: var(--gds-page); }
+.sil .e, .others .e { fill: none; stroke: var(--gds-ink); stroke-width: 4; }
 .sil .num, .others .num { fill: var(--gds-page); font: 800 30px "Nunito", sans-serif; }
 .sil { overflow: visible; }
 .sil .hd { transform-box: view-box; transform-origin: 100px 150px; transition: transform var(--t-scene) var(--ease); }
@@ -232,12 +233,13 @@ img, svg { display: block; }
 @keyframes dot { 30% { transform: translateY(-3px); opacity: 0.5; } }
 
 /* Messages appear when their step comes (data-show = the step they arrive in). */
-[data-show] { opacity: 0; transform: translateY(6px); }
+[data-show] { display: none; }
+@keyframes appear { from { opacity: 0; transform: translateY(6px); } }
 .stage[data-step="2"] [data-show="2"],
 .stage[data-step="3"] [data-show="2"], .stage[data-step="3"] [data-show="3"],
 .stage[data-step="4"] [data-show="2"], .stage[data-step="4"] [data-show="3"],
 .stage[data-step="4"][data-replied] [data-show="4"],
-.stage[data-step="5"] .actor--recv [data-show] { opacity: 1; transform: none; }
+.stage[data-step="5"] .actor--recv [data-show] { display: block; animation: appear var(--t-scene) var(--ease); }
 
 /* Typing caret. */
 .caret { display: inline-block; width: 1.5px; height: 1.1em; margin-left: 1px; vertical-align: -0.2em; background: currentColor; animation: blink 1s steps(1) infinite; }
@@ -246,7 +248,7 @@ img, svg { display: block; }
 /* Step 5: the other people a kid can write to. */
 .others { list-style: none; margin: var(--s8) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, max-content); gap: var(--s4) var(--s10); }
 .others li { display: grid; justify-items: center; gap: var(--s1); font-weight: 700; font-size: 0.9375rem; }
-.others .sil { width: 64px; height: 76px; margin: 0; }
+.others .sil { width: 92px; height: 110px; margin: 0; }
 .others .d { stroke-width: 6; }
 
 /* ---------- After the story: stations on a coral spine (as v1) ---------- */
@@ -260,7 +262,7 @@ img, svg { display: block; }
 .honest h3 { margin: 0 0 var(--s3); font-size: 1.25rem; font-weight: 800; }
 .honest blockquote { margin: 0 0 var(--s6); font-size: 1.125rem; line-height: 1.55; font-weight: 600; max-width: var(--measure); }
 .honest__why { margin: 0; max-width: var(--measure); }
-.facts { list-style: none; margin: var(--s8) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6) var(--s10); }
+.facts { list-style: none; margin: var(--s4) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s6) var(--s10); }
 .facts li { display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: var(--s3); }
 .facts__dot { width: 14px; height: 14px; margin: 6px 4px 0; border-radius: 50%; border: 3px solid var(--gds-mint); }
 .faq { max-width: 760px; border-top: 1px solid var(--gds-line); }
@@ -274,6 +276,10 @@ img, svg { display: block; }
 .steps-get { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: var(--s4); }
 .steps-get li { counter-increment: s; display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: var(--s3); }
 .steps-get li::before { content: counter(s); width: 32px; height: 32px; border-radius: 50%; background: var(--gds-selected); display: grid; place-items: center; font-weight: 800; }
+/* The notice: plain sentences under a plain heading, as quiet as the rest of the page. */
+.notice h2 { font-size: 1.375rem; }
+.notice p { margin: 0 0 var(--s3); max-width: var(--measure); color: var(--gds-muted); }
+.notice p b { color: var(--gds-ink); }
 .get__small { font-size: 0.9375rem; color: var(--gds-muted); margin-top: var(--s4); }
 footer { border-top: 1px solid var(--gds-line); }
 .foot { max-width: var(--page-max); margin: 0 auto; padding: var(--s10) var(--s6); display: flex; flex-wrap: wrap; gap: var(--s6) var(--s10); justify-content: space-between; align-items: flex-start; font-size: 0.9375rem; color: var(--gds-muted); }
@@ -297,7 +303,7 @@ footer { border-top: 1px solid var(--gds-line); }
   .stage .actor { opacity: 0 !important; pointer-events: none; }
   .stage[data-focus="kid"] .actor--kid, .stage[data-focus="parent"] .actor--parent, .stage[data-focus="recv"] .actor--recv,
   .stage[data-step="0"] .actor--kid { opacity: 1 !important; filter: none; }
-  .actor { --aw: 240px; --dw: 156px; }
+  .actor { --aw: 240px; --dw: 140px; }
   .actor--kid { --aw: 220px; --dw: 270px; }
   .step { opacity: 1; }
   .wire { margin: var(--s3) var(--s8) 0; }

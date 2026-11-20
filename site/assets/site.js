@@ -68,18 +68,18 @@
     storyA11y: "How it works", example: "Example", sent: "Sent", parentArea: "Contacts", waField: "Message", typing: "typing…",
     capKid: "on the tablet, with Oiê", capParent: "your WhatsApp, the bridge",
     auntName: "Aunt Bia", friendName: "Lucas, from school",
-    honH: "No fine print.", honBox: "Before linking, Oiê tells you:",
-    risk: "Oiê uses your WhatsApp in a way WhatsApp doesn’t officially offer. WhatsApp may limit or block your number. If it does, you lose access until you sort it out with WhatsApp.",
-    riskWhy: "To lower that risk, Oiê sends at a person’s pace and never sends in bulk.",
-    f1: "<b>Only the people you approve.</b> Family or friends: your kid talks to no one else, and no one else reaches them through Oiê.",
-    f2: "<b>You see what goes out.</b> Messages go out from your WhatsApp, so they’re on your phone too. Your kid is told this the first time.",
-    f3: "<b>Nothing is kept by us.</b> Messages and contacts stay on the tablet. No ads, and no tracking of kids.",
-    f4: "<b>Not made by WhatsApp.</b> Oiê isn’t made or approved by WhatsApp or Meta. And it doesn’t replace your attention.",
+    yoursH: "What stays with you.",
+    f1: "<b>Only the people you approve.</b> Family or friends: your kid talks with the people on their list, and only those people reach them.",
+    f2: "<b>You see what goes out.</b> Messages go out from your WhatsApp, so they’re on your phone too. Your kid knows this from day one.",
+    f3: "<b>Everything stays on the tablet.</b> Messages and contacts stay on your own device. No ads and no tracking.",
+    noticeH: "Notice",
+    n1: "Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does. <b>It is not affiliated with WhatsApp or Meta.</b>",
+    n2: "Use at your own risk: linking a device to WhatsApp is subject to WhatsApp’s terms. Before you link, the app explains this calmly.",
     faqH: "Questions from the family",
     q1: "Does the person receiving need to install anything?", a1: "No. Grandparents, aunts or friends get it in their WhatsApp, like any message from you, with your kid’s name in front.",
     q2: "Can my kid talk to friends?", a2: "Yes, if you add the contact. The friend gets it from your number, with your kid’s name in front. Your kid only talks to people you approve, and no one else reaches them through Oiê.",
     q3: "Does my kid need a phone?", a3: "No. Oiê runs on an Android tablet you already have and uses your WhatsApp.",
-    q4: "Can WhatsApp block my number?", a4: "It can. Oiê uses your WhatsApp in a way WhatsApp doesn’t officially offer. That’s why we tell you before linking. Oiê sends at a person’s pace and never in bulk.",
+    q4: "Is Oiê made by WhatsApp?", a4: "No. Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does, and it is not affiliated with WhatsApp or Meta. Use is subject to WhatsApp’s terms. Oiê sends messages at a person’s pace, one at a time.",
     q5: "Do I see what my kid sends?", a5: "Yes. Messages go out from your WhatsApp, so they’re on your phone too. Your kid is told this the first time.",
     q6: "Can they see and post status updates?", a6: "Yes, if you turn it on in settings. Your kid sees updates from their contacts, and only those people see what your kid posts.",
     q7: "Can they make calls?", a7: "Not yet. For now: messages, voice notes, photos, videos and stickers.",
@@ -89,7 +89,7 @@
     g3: "Open Oiê: your name, your kid’s, and a QR code you scan in your WhatsApp.", g4: "Choose the contacts, family or friends. Your kid can send the first hello.",
     getSmall: "For Android 8 or newer. The file comes from Oiê’s releases page on GitHub, with each release’s SHA-256 sum.",
     footLine: "Family, within reach.", footAll: "All releases", footLib: "whatsmeow (MPL-2.0)", footPatch: "The whatsmeow file Oiê modifies",
-    footLegal: "Oiê isn’t made or approved by WhatsApp or Meta. WhatsApp is a trademark of Meta. The WhatsApp screens on this page are example drawings.",
+    footLegal: "Oiê is an independent app, not affiliated with WhatsApp or Meta. WhatsApp is a trademark of Meta. The screens on this page are example drawings.",
     title: "Oiê: family within reach, from your kid’s tablet",
     desc: "From a tablet, your kid talks with the family and friends you choose, through your WhatsApp. For Android tablets.",
   };
@@ -174,6 +174,7 @@
   const waDots = $("#waDots");
   const still = window.matchMedia("(prefers-reduced-motion: reduce)");
   let typer = null;
+  let later = []; // timers that belong to the current step; cleared when the step changes
   let cycler = null;
   const CHAR_MS = 90;
 
@@ -196,12 +197,12 @@
       if (key) { key.classList.add("is-hit"); setTimeout(() => key.classList.remove("is-hit"), 120); }
       if (n >= text.length) {
         clearInterval(typer);
-        setTimeout(() => {
+        later.push(setTimeout(() => {
           el.textContent = text;
           actor.classList.remove("is-typing");
           device.classList.remove("is-typing");
           if (done) done();
-        }, 500);
+        }, 500));
       }
     }, CHAR_MS);
   }
@@ -229,6 +230,7 @@
     stage.dataset.focus = focus || "kid";
     all(".step").forEach((s) => s.classList.toggle("is-on", Number(s.dataset.step) === n));
     clearInterval(typer); clearInterval(cycler);
+    later.forEach(clearTimeout); later = [];
     stage.removeAttribute("data-replied");
     waTyping.hidden = true;
     waDots.classList.remove("is-on");
@@ -254,7 +256,7 @@
         composeRecv.textContent = dict().waField;
         stage.setAttribute("data-replied", "");
         moveDot(0);
-        setTimeout(() => react("kid", "is-hop"), 900);
+        later.push(setTimeout(() => react("kid", "is-hop"), 900));
       });
     } else if (n === 5) {
       moveDot(null);

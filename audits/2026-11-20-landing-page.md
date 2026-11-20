@@ -181,3 +181,21 @@
 
   The kid's typing is not shown to others, because Oiê sends no typing presence (rule L7).
 - **Detector:** pulsing-dot (the typing dots, asked for), plus the earlier device/bubble/label findings. All intended.
+
+### v3 review (fresh reviewer): fix, then a verdict pass
+| Finding | P | Fix |
+|---|---|---|
+| A typing timer from an old step could fire after the step changed (sent text back in the composer, a late hop) | P1 | Step-owned timers, cleared on every step change |
+| The tablet's sent bubble was cut off under its header | P2 | Unsent messages take no room; they appear with a short rise |
+| The clothes were hidden by the devices; the step-5 figures were too small | P2 | Devices held lower, so collars show; step-5 figures at 92×110 |
+| Vô Zé's cap read like Lucas's | P2 | A real flat cap |
+| Paulo's beard line read as a smile (a face) | P3 | Solid beard, no line |
+| Ana's earring read as a nick | P3 | An ink hoop below the ear |
+
+### The disclaimer, in the tone of wacli.sh (owner's request)
+- **Change:** the owner found the old copy too negative and pointed to wacli's site, where the disclaimer is three plain sentences near the bottom: third-party, not affiliated with WhatsApp or Meta, use at your own risk because linking follows WhatsApp's terms.
+- **The coral "Sem letra miúda" box is gone.** In its place:
+  - "O que fica com você", three positive facts;
+  - a plain "Aviso" near the end ("O Oiê é um app independente que conecta ao seu WhatsApp como o WhatsApp Web faz. Não é afiliado ao WhatsApp nem à Meta. Use por sua conta: conectar um aparelho ao WhatsApp segue os termos do WhatsApp. Antes de conectar, o app explica isso com calma.");
+  - the FAQ question "O Oiê é do WhatsApp?".
+- **Product law still holds:** the risk is stated and not hidden, and the app's own notice before linking is unchanged (`01 Brand/voice.md`).
