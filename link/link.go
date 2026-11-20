@@ -24,6 +24,7 @@ import (
 	"os"
 	"runtime/debug"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -532,6 +533,16 @@ func (k *Link) SendVideo(chat string, mp4 []byte, seconds, width, height int, th
 // SendVoice sends a voice note. mimetype is "audio/ogg; codecs=opus" for WhatsApp's own voice notes.
 func (k *Link) SendVoice(chat string, audio []byte, seconds int, mimetype, id string) (sent string, err error) {
 	defer k.guard("SendVoice", &err)
+	// v0.32: an Ogg recording is re-packed into a standard Ogg Opus stream, with its length from the
+	// audio itself (WhatsApp couldn't play what Android's writer produced). If it isn't Ogg Opus after
+	// all, it's refused rather than sent broken.
+	if strings.HasPrefix(mimetype, "audio/ogg") {
+		clean, secs, nerr := normalizeOpus(audio)
+		if nerr != nil {
+			return "", nerr
+		}
+		audio, seconds = clean, secs
+	}
 	return k.sendMedia(chat, id, func(up whatsmeow.UploadResponse) *waE2E.Message {
 		return VoiceMessage(up, seconds, mimetype)
 	}, audio, whatsmeow.MediaAudio)

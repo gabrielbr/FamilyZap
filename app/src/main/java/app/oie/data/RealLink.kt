@@ -72,6 +72,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 }
                 Kind.VOICE -> {
                     val bytes = m.media?.let { Photos.openBytes(context, it) } ?: error("voice missing")
+                    Diagnostics.log("voice: ${Voice.mimetype(bytes).substringBefore(';')}, ${bytes.size / 1024} KB")
                     l.sendVoice(m.chatId, bytes, m.durationSec.toLong(), Voice.mimetype(bytes), m.id)
                 }
                 else -> error("not supported yet")
