@@ -9,7 +9,7 @@ Every feature keeps the product law: only allowed contacts, nothing to Oiê's se
 
 ## 1. "Vovó viu" (receipts)
 - WhatsApp reports when a sent message reached the phone (delivered) and when it was read.
-- Under the kid's **latest** sent message, one line: "Enviada" → "Entregue" → "Vovó viu". In a group: "Alguém viu" (WhatsApp says that someone read it, not who).
+- Under the kid's **latest** sent message, one line: "Mandada" → "Entregue" → "Vovó viu". In a group: "Alguém viu" (WhatsApp says that someone read it, not who).
 - If the family turned read receipts off, it stays "Entregue". That's their choice, said nowhere.
 - On the line to the parent (v0.30) there are no receipts: the parent reads with their own account, which WhatsApp doesn't report.
 
@@ -21,12 +21,12 @@ Every feature keeps the product law: only allowed contacts, nothing to Oiê's se
 
 ## 3. Birthdays
 - In a contact's editor (parent area): **Aniversário**, the day and the month (no year: no age is kept).
-- On the day, the kid's home shows one line at the top, "Hoje é aniversário da Vovó", and tapping it opens her chat.
+- On the day, the kid's home shows one line at the top, "Vovó faz aniversário hoje" (no "da/do": the name works for anyone), and tapping it opens her chat.
 
 ## 4. The gentle nudge
 - In Ajustes e ajuda: **Lembrar Tito de falar com a família**, off by default.
 - It sits after the people on the home screen (audit: it must never push them down).
-- When it's on, and a person hasn't heard from the kid for 7 days, the kid's home shows one line: "Faz uma semana que você não fala com o Vovô". It never shows more than one, and it never counts streaks.
+- When it's on, and a person hasn't heard from the kid for 7 days, the kid's home shows one line: "Uma semana sem falar com Vovô" (v0.34: shorter, one line on a phone). It never shows more than one, and it never counts streaks.
   - Tapping opens the chat.
   - **Agora não** hides it for that person for 7 days.
 - Groups and paused chats are never nudged.
@@ -43,7 +43,8 @@ Every feature keeps the product law: only allowed contacts, nothing to Oiê's se
 - In the message's long-press menu: **Ouvir**. Android's own voice reads the text on the tablet. Nothing is sent anywhere.
 
 ## 8. Listen before sending
-- After a voice message is recorded, the 5-second undo bar gets **Ouvir**. The kid hears it, then lets it go or taps Desfazer.
+- While the 5-second undo shows, the kid taps the ▶ on the voice message to hear it; the 5 seconds wait while it plays. Then it goes, or **Desfazer**.
+- (v0.33 put **Ouvir** in the undo bar; v0.34 took it out: it duplicated the ▶, and a snackbar has one action.)
 - No extra tap on the common path (less-is-more): releasing still sends.
 
 ## 9. "Preciso de você"

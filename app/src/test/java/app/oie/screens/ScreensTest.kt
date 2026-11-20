@@ -54,7 +54,7 @@ class ScreensTest {
     /** A fixed clock (18 Nov 2026, 16:40 UTC) and time zone, so the times in the screenshots never change. */
     private val now = 1_795_020_000_000L
 
-    @org.junit.Before fun pinTimeZone() { java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC")) }
+    @org.junit.Before fun pinTimeZone() { java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("UTC")); app.oie.data.Background.dispatcher = kotlinx.coroutines.Dispatchers.Unconfined }
 
     private fun ready(): AppState = AppState(clock = { now }).apply {
         parentName = "Ana"; kidName = "Tito"
@@ -294,4 +294,59 @@ class ScreensTest {
         Conversation(family(), "vovo", pendingPreview = Message("kv", "vovo", true, now, Kind.VOICE, durationSec = 8, media = "missing.sealed"))
     }
     @Test fun kidHomeFamilyEnglish() = shot("41-kid-home-family-en", false, english = true) { KidHome(family()) }
+
+    // v0.34: the screens that had no screenshot yet, so the design pass can see them.
+    @Test fun setupWelcome() = shot("50-setup-welcome", false) { Setup(AppState(), 0, onClose = {}) }
+    @Test fun setupWelcomeDark() = shot("50-setup-welcome", true) { Setup(AppState(), 0, onClose = {}) }
+    @Test fun setupQuiet() = shot("51-setup-quiet", false) { Setup(ready(), 6, onClose = {}) }
+    @Test fun setupDone() = shot("52-setup-done", false) { Setup(ready(), 7, onClose = {}) }
+    @Test fun setupDoneDark() = shot("52-setup-done", true) { Setup(ready(), 7, onClose = {}) }
+    @Test fun periodEditor() = shot("53-period-editor", false) {
+        val s = ready(); Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.PeriodEditor(s.periods[0], {}, {}, {}) }
+    }
+    @Test fun periodEditorNew() = shot("53-period-editor-new", true) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.PeriodEditor(null, {}, null, {}) } }
+    @Test fun connectionConnected() = shot("54-connection-connected", false) { ParentArea(ready().apply { realMode = true; linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Connected }, 2) }
+    // v0.34: Esqueci o PIN, the proof first (link WhatsApp again), then the new PIN.
+    @Test fun forgotPin() = shot("55-forgot-pin", false) { app.oie.ui.parent.ForgotPin(ready().apply { realMode = true }, 0) }
+    @Test fun forgotPinDark() = shot("55-forgot-pin", true) { app.oie.ui.parent.ForgotPin(ready().apply { realMode = true }, 0) }
+    @Test fun forgotPinNew() = shot("55-forgot-pin-new", false) { app.oie.ui.parent.ForgotPin(ready(), 1) }
+    // v0.34 round 2: every state of setup step 2, the forgot-PIN QR, setup in dark, and the home offline.
+    private fun linkIn(status: app.oie.data.LinkState.Status, failed: Boolean = false) = AppState(clock = { now }).apply {
+        linkState.on = true; linkState.status = status; linkState.pairFailed = failed
+    }
+    private val qr = app.oie.data.LinkState.Status.Qr("2@sample-code-for-the-screenshot,abc,def,ghi")
+    @Test fun linkQr() = shot("56-link-qr", false) { Setup(linkIn(qr), 2, onClose = {}) }
+    @Test fun linkWaiting() = shot("56-link-waiting", false) { Setup(linkIn(app.oie.data.LinkState.Status.Connecting), 2, onClose = {}) }
+    @Test fun linkFailed() = shot("56-link-failed", false) { Setup(linkIn(app.oie.data.LinkState.Status.Off, failed = true), 2, onClose = {}) }
+    @Test fun linkOffline() = shot("56-link-offline", true) { Setup(linkIn(app.oie.data.LinkState.Status.Disconnected), 2, onClose = {}) }
+    @Test fun linkAlready() = shot("56-link-already", false) { Setup(ready().apply { realMode = true; linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Connected }, 2, onClose = {}) }
+    @Test fun forgotPinQr() = shot("55-forgot-pin-qr", false) { app.oie.ui.parent.ForgotPin(ready().apply { realMode = true; pinResetFrom = "x"; linkState.on = true; linkState.status = qr }, 0) }
+    @Test fun namesDark() = shot("06-setup-names", true) { Setup(AppState().apply { parentName = "Ana"; kidName = "Tito" }, 3, onClose = {}) }
+    @Test fun pinDark() = shot("07-setup-pin", true) { Setup(AppState(), 4, onClose = {}) }
+    @Test fun contactsDark() = shot("25-setup-contacts-picked", true) { Setup(renamed(), 5, onClose = {}) }
+    @Test fun quietDark() = shot("51-setup-quiet", true) { Setup(ready(), 6, onClose = {}) }
+    @Test fun kidHomeOffline() {
+        // Oiê opened two minutes ago, so the 30-second grace is over (LinkView).
+        var t = now - 120_000
+        val s = AppState(clock = { t }).apply {
+            parentName = "Ana"; kidName = "Tito"; link.pretendLinked(); allowed.addAll(link.contacts().take(5)); setPin("402817"); finishSetup()
+            kidNoticeSeen = true; realMode = true; link.pretendDropped(); linkState.on = true
+            linkState.status = app.oie.data.LinkState.Status.Disconnected; linkState.downSince = now - 120_000
+        }
+        t = now
+        shot("57-kid-home-offline", false) { KidHome(s) }
+    }
+    // v0.34 round 3: recording, its last 10 s, the slip line, and a long chat that opens on "Novas".
+    @Test fun recording() = shot("58-recording", false) { Conversation(family(), "vovo", recordingPreviewSec = 5) }
+    @Test fun recordingEnds() = shot("58-recording-ends", true) { Conversation(family(), "vovo", recordingPreviewSec = 115) }
+    @Test fun recordingSlip() = shot("58-recording-slip", false) { Conversation(family(), "vovo", slipPreview = true) }
+    @Test fun longChatOpensOnNew() = shot("59-long-chat-new", false) {
+        val s = ready().apply {
+            kidNoticeSeen = true
+            messages.removeAll { it.chatId == "mae" }
+            repeat(30) { k -> messages += Message("m$k", "mae", k % 3 == 0, now - (60 - k) * 60_000L, Kind.TEXT, "Mensagem ${k + 1}") }
+            lastSeen["mae"] = now - (60 - 24) * 60_000L - 1
+        }
+        Conversation(s, "mae")
+    }
 }

@@ -96,3 +96,23 @@ object NeedYou {
     /** Milliseconds until the kid can send it again (0 = now). */
     fun waitMs(lastAt: Long, now: Long): Long = if (lastAt == 0L) 0 else (lastAt + GAP_MS - now).coerceAtLeast(0)
 }
+
+/**
+ * The letters on a person's round when there's no photo (v0.34): the first letter; when two people
+ * share it ("Vovó", "Vovô"), the first letter plus the first letter where the names differ ("Vó", "Vô").
+ */
+object Initials {
+    fun of(names: List<String>): Map<String, String> {
+        val byFirst = names.distinct().groupBy { it.take(1).uppercase() }
+        return names.distinct().associateWith { name ->
+            val first = name.take(1).uppercase()
+            val others = byFirst[first].orEmpty().filter { it != name }
+            if (others.isEmpty()) first
+            else {
+                val i = (1 until name.length).firstOrNull { k -> others.all { o -> k >= o.length || !o[k].equals(name[k], ignoreCase = true) } }
+                    ?: (1 until name.length).firstOrNull { k -> others.any { o -> k >= o.length || !o[k].equals(name[k], ignoreCase = true) } }
+                if (i == null) first else first + name[i].lowercaseChar()
+            }
+        }
+    }
+}

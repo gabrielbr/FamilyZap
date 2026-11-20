@@ -110,6 +110,7 @@ open class MainActivity : ComponentActivity() {
                             Route.ParentPin -> ParentPin(state)
                             is Route.Parent -> ParentArea(state, r.section)
                             Route.Pair -> app.oie.ui.parent.PairScreen(state)
+                            is Route.ForgotPin -> app.oie.ui.parent.ForgotPin(state, r.stage)
                         }
                         // The update sheet shows only in the parent area: the kid isn't asked to update the app.
                         if (state.route is Route.Parent || state.route == Route.ParentPin || state.route == Route.Pair) app.oie.update.UpdateSheet(updater)
@@ -120,6 +121,7 @@ open class MainActivity : ComponentActivity() {
                     state.route = when (val r = state.route) {
                         is Route.Setup -> Route.Setup(r.step - 1)
                         Route.Pair -> Route.Parent(2)
+                        is Route.ForgotPin -> Route.ParentPin
                         else -> Route.KidHome
                     }
                 }

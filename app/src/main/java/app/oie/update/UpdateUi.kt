@@ -40,7 +40,7 @@ fun UpdateSheet(updater: Updater) {
         is State.Failed -> st.offer
         else -> null
     } ?: return
-    Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(enabled = st !is State.Downloading) { if (st is State.Available) updater.later(offer) }, contentAlignment = Alignment.BottomCenter) {
+    Box(Modifier.fillMaxSize().background(c.scrim).clickable(enabled = st !is State.Downloading) { if (st is State.Available) updater.later(offer) }, contentAlignment = Alignment.BottomCenter) {
         Column(
             Modifier.width(OTokens.Size.contentMax).clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
                 .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),
@@ -85,10 +85,10 @@ fun UpdateAboutRows(updater: Updater) {
     val tx = str
     Text(tx.versionLine(updater.versionName, updater.versionCode), style = OieType.body, color = c.ink)
     if (!updater.isReleaseBuild) {
-        Text(tx.releaseOnly(updater.versionName, "app.oie"), style = OieType.caption, color = c.muted)
+        Text(tx.releaseOnly, style = OieType.caption, color = c.muted)
         return
     }
-    QuietButton(tx.checkForUpdates, { updater.check(manual = true) }, Modifier.height(OTokens.Size.button))
+    QuietButton(tx.checkForUpdates, { updater.check(manual = true) })
     when (val st = updater.state) {
         State.Checking -> Text(tx.checking, style = OieType.body, color = c.muted)
         is State.UpToDate -> Text(tx.latest(st.version), style = OieType.body, color = c.ink)

@@ -92,8 +92,10 @@ fun AddByNumber(open: Boolean, touched: () -> Unit = {}, onAdd: (Contact) -> Uni
     var busy by remember { mutableStateOf(false) }
     if (!shown) { TextLink(tx.addByNumber, { shown = true; touched() }); return }
     Text(tx.addByNumber, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
-    app.oie.ui.setup.Field(tx.contactNameLabel, name, { name = it; note = null; touched() }, "")
-    app.oie.ui.setup.Field(tx.numberLabel, number, { number = it; note = null; touched() }, note ?: tx.numberHelp)
+    app.oie.ui.setup.Field(tx.contactNameLabel, name, { name = it; note = null; touched() }, "", names = true)
+    // v0.34 audit round 2: "not on WhatsApp" is an error (colour, announced); the number gets the phone keypad.
+    app.oie.ui.setup.Field(tx.numberLabel, number, { number = it; note = null; touched() }, tx.numberHelp, error = note,
+        keyboard = androidx.compose.ui.text.input.KeyboardType.Phone)
     QuietButton(if (busy) tx.looking else tx.add, {
         if (busy || name.isBlank() || number.count { it.isDigit() } < 10) return@QuietButton
         busy = true
@@ -153,30 +155,22 @@ fun ContactEditor(ct: Contact, kid: String, fresh: List<Contact>, onSave: (Conta
             Text(contactNumber(tx, ct, fresh), style = OieType.body, color = c.muted)
         }
         // Typing counts as a touch, so the parent area doesn't close mid-name (v0.19 audit).
-        app.oie.ui.setup.Field(tx.nameKidSees(kid), name, { name = it; touched() }, tx.renameHelp(wa))
+        app.oie.ui.setup.Field(tx.nameKidSees(kid), name, { name = it; touched() }, tx.renameHelp(wa), names = true)
         if (!ct.isGroup) {
-            app.oie.ui.setup.Field(tx.birthdayLabel, birthday, { birthday = it; touched() }, if (parsed == null) tx.birthdayInvalid else tx.birthdayHelp(kid))
-            Row(Modifier.heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                androidx.compose.foundation.layout.Column(Modifier.weight(1f)) {
-                    Text(tx.needYouLabel, style = OieType.label, color = c.ink)
-                    Text(tx.needYouHelp(kid), style = OieType.caption, color = c.muted)
-                }
-                androidx.compose.material3.Switch(
-                    modifier = androidx.compose.ui.Modifier.semantics { contentDescription = tx.needYouLabel },
-                    checked = needYou, onCheckedChange = { needYou = it; touched() },
-                    colors = androidx.compose.material3.SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
-                )
-            }
+            // v0.34 audit: a day that doesn't exist is an error (colour, border, announced), not a grey hint.
+            app.oie.ui.setup.Field(tx.birthdayLabel, birthday, { birthday = it; touched() }, tx.birthdayHelp(kid), error = if (parsed == null) tx.birthdayInvalid else null)
+            // v0.34 audit: one switch row (the whole row toggles; TalkBack reads it once, with its state).
+            app.oie.ui.common.SwitchRow(tx.needYouLabel, needYou, { needYou = it; touched() }, help = tx.needYouHelp(kid))
         }
         app.oie.ui.setup.ButtonRow {
-            // A day that doesn't exist keeps the editor open with its note, so nothing is saved wrong.
-            app.oie.ui.common.PrimaryButton(tx.save, { if (parsed != null || ct.isGroup) onSave(edited()) })
-            QuietButton(tx.cancel, onCancel, Modifier.height(OTokens.Size.button))
+            // A day that doesn't exist can't be saved: Salvar waits until it's fixed (the error says how).
+            app.oie.ui.common.PrimaryButton(tx.save, { onSave(edited()) }, enabled = parsed != null || ct.isGroup)
+            QuietButton(tx.cancel, onCancel)
         }
         // v0.21: a chat paused from the parent's WhatsApp can be resumed here too.
         if (ct.paused && onRemove != null) QuietButton(tx.resumeChat, { onSave(edited().copy(paused = false)) }, Modifier.height(OTokens.Size.button))
         // Contatos only (v0.19 audit): removing moved here from each row, so a phone row has room for the number. Undo stays.
-        if (onRemove != null) TextLink(tx.removeNamed(ct.name), onRemove, Modifier.padding(top = OTokens.Spacing.space4).offset(x = -OTokens.Spacing.space3))
+        if (onRemove != null) TextLink(tx.removeNamed(ct.name), onRemove, Modifier.padding(top = OTokens.Spacing.space4))
     }
 }
 

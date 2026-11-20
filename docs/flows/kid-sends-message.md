@@ -42,9 +42,9 @@ flowchart TD
 | # | Screen / step | What the kid does | What the system does |
 |---|---|---|---|
 | 0 | **Kid notice** (first open only) | Reads it, taps **Entendi** | Shows once: "Suas mensagens saem do WhatsApp de {nome}, então {nome} pode ver o que você manda." Not shown again (it can be found in Ajuda). |
-| 1 | **Kid home** | Sees the allowed family as 96dp round photos with names. Taps one | Shows only contacts the parent allowed, and the people the kid talked to most recently first. A dot with a word ("2 novas") marks unread messages. |
-| 2 | **Conversation** | Sees recent messages. Picks how to answer | Opens on the latest message. The 72dp record button is the one accent. The text field, photo and sticker sit beside it as quiet buttons. |
-| 3a | **Voice message** | Holds the record button and talks, then releases | Records with a running timer and a waveform. Releasing sends it. Sliding away or tapping **Cancelar** throws it away. **Tap-to-record** is also offered: tap starts, tap again sends (no drag needed, WCAG 2.5.7). Maximum 2 minutes, with a visible countdown in the last 10 s. |
+| 1 | **Kid home** | Sees the allowed family as 96dp round photos with names. Taps one | Shows only contacts the parent allowed, in the order the parent set them (v0.34: a steady order, so the kid finds each person in the same place every day). A dot with a word ("2 novas") marks unread messages. |
+| 2 | **Conversation** | Sees recent messages. Picks how to answer | Opens on the first unread message under a "Novas" line, else on the newest (v0.34). The 72dp record button is the one accent. The text field, photo and sticker sit beside it as quiet buttons. |
+| 3a | **Voice message** | Holds the record button and talks, then releases | Records with a running clock ("Gravando · 0:05"). Releasing sends it. Sliding off the button and releasing throws it away ("Solte para cancelar" while off). **Cancelar** shows beside the clock. **Tap-to-record** is TalkBack's action on the button: tap starts, tap again sends (no hold or drag needed, WCAG 2.5.7); a quick touch tap is a slip (below). Maximum 2 minutes: the last 10 s count down ("Termina em 8 s"), then it goes by itself. (No waveform: the clock says it's recording, v0.34.) |
 | 3b | **Text** | Types, taps **Enviar** | **Enviar** becomes active when the text isn't empty. The draft is kept if the kid leaves. |
 | 3c | **Photo** | Taps the photo button, picks **Câmera** or **Galeria**, then **Enviar** | Asks for the camera or photos permission the first time, with a reason in plain words. Shows a big preview with **Enviar** and **Trocar**. |
 | 3d | **Sticker** | Taps the sticker button, taps a sticker | Opens the Oiê set as a sheet. One tap sends. |
@@ -58,7 +58,7 @@ Recording is real: Opus in Ogg on Android 10 and newer (WhatsApp's own voice-not
 | At step | If | Then |
 |---|---|---|
 | 1 | Quiet hours are on | The home shows "Horário de silêncio até 18h" at the top. Photos stay, and the kid can open conversations and read and listen, but the send controls are **off**, with the same line in place of the record button. No queueing (owner's decision). |
-| 1 | No allowed contacts | Empty state: one cluster of the logo's rounds, "Ainda não tem ninguém aqui. Peça para {nome} escolher quem você pode chamar." No button: the kid can't fix it. |
+| 1 | No allowed contacts | Empty state: one cluster of the logo's rounds, "Ainda não tem ninguém aqui. Peça para {nome} escolher quem você pode chamar." One button, **Pedir para adicionar alguém**, which tells the parent in their area (the owner's choice, 2026-11-18). |
 | 2 | Back / system back | Returns to the home. Any draft or photo choice is kept. |
 | 3a | Recording under 1 s | Treated as a slip and not sent. Line: "Segure o botão enquanto fala." |
 | 3a | Microphone permission denied | "O Oiê precisa do microfone para gravar áudio." **Abrir configurações**. Text, photo and sticker still work. |
@@ -72,7 +72,7 @@ Recording is real: Opus in Ogg on Android 10 and newer (WhatsApp's own voice-not
 ## States per step
 | Step | Empty | Loading | Partial | Error | Success | Offline |
 |---|---|---|---|---|---|---|
-| Home | "Ainda não tem ninguém aqui…" | Photos as initials on cream until they load | Some photos missing: show initials | — | Allowed family shown | Home works; the banner reads "Sem internet. Suas mensagens vão quando voltar." |
+| Home | "Ainda não tem ninguém aqui…" | Photos as initials on cream until they load | Some photos missing: show initials | — | Allowed family shown | Home works; the link banner says it ("Peça para {nome} conectar de novo."), and messages wait to go out. |
 | Conversation | "Mande o primeiro oi para {Vovó}." | Skeleton rows under 1 s | Older messages load on scroll | Media failed: "Não abriu. Toque para tentar de novo." | — | Read what's on the tablet; sends are queued |
 | Sending | — | "Enviando…" | — | "Não foi…" + Tentar de novo | "Enviada · hora" | "Vai quando a internet voltar" |
 
@@ -85,7 +85,7 @@ Recording is real: Opus in Ogg on Android 10 and newer (WhatsApp's own voice-not
 ## Remembers
 - The draft text, per contact.
 - The last photo source (Câmera or Galeria) opens first next time.
-- The home orders family by most recent conversation.
+- The home keeps the parent's order (v0.34; the earlier plan was most recent first, dropped so places don't move).
 
 ## Notes
 - **Copy** follows `01 Brand/voice.md`: Enviar, Desfazer, Cancelar, Câmera, Galeria, Trocar, Entendi.
@@ -202,3 +202,15 @@ _The owner's test (2026-11-20): the kid can record and listen in Oiê, but the f
 **Issues**
 - **Important:** quiet hours with "can't send" may frustrate a kid who wants to say good night at bedtime. Fix to consider: let the parent allow some contacts during quiet hours, a per-contact exception. Decide in the contacts and quiet hours flow.
 - **Polish:** the record button's label must change with the state (Gravar → Gravando 0:12 → Solte para enviar) for screen readers.
+
+## v0.34: the design pass
+- **Recording:** a running clock ("Gravando · 0:05"). Releasing sends; sliding off the button and releasing cancels ("Solte para cancelar", in the error colour, while off). A press under a second shows "Segure o botão enquanto fala.".
+- **Undo:** the design system's snackbar, with one action, **Desfazer**. For a voice message, Desfazer means it isn't sent (the recording goes).
+- **Listen before it goes:** the ▶ on the voice message itself, while the 5 seconds wait (v0.33 had a second button in the bar; it duplicated the ▶).
+- **The chat opens** on the first unread message under "Novas", else on the newest; sending brings the newest into view.
+- **Reactions:** "Segure uma mensagem para reagir ou ouvir." shows under the chat until the kid has reacted once.
+- **The home:** it scrolls; the photos line up with the greeting; both banners can show (link down and quiet hours); "Preciso de você" opens a sheet, and answers in a snackbar, with the minutes left when it's too soon.
+- **People paused by the parent** leave the home without a word (the kid can't change it, and the parent's reasons are theirs).
+
+## v0.34: one verb
+The kid's side says **Mandar** everywhere (the voice's own examples: "Mandar oi"): the send button, "Mandando para Vovó" in the undo bar, "Mandada" under the last message. "Enviar" is left only in the parent's "Enviar para o GitHub".

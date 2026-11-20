@@ -50,7 +50,8 @@ fun PinPad(entered: String, onChange: (String) -> Unit) {
                 row.forEach { k ->
                     when (k) {
                         ' ' -> Spacer(Modifier.size(OTokens.Size.record))
-                        '<' -> Key(onClick = { onChange(entered.dropLast(1)) }, label = tx.erase) { OIcon(R.drawable.gg_ic_back) }
+                        // v0.34 audit round 2: the word, not the Back arrow (the same arrow sat in the bar on this screen).
+                        '<' -> Key(onClick = { onChange(entered.dropLast(1)) }, label = tx.erase) { Text(tx.erase, style = OieType.caption, color = c.ink, maxLines = 1) }
                         else -> Key(onClick = { if (entered.length < Pin.LENGTH) onChange(entered + k) }, label = k.toString()) {
                             Text(k.toString(), style = OieType.title, color = c.ink)
                         }
@@ -68,7 +69,7 @@ private fun Key(onClick: () -> Unit, label: String, content: @Composable () -> U
     Box(
         Modifier.size(OTokens.Size.record).clip(CircleShape).background(c.surface)
             .border(BorderStroke(OTokens.Size.hairline, c.line), CircleShape)
-            .clickable(role = Role.Button, onClickLabel = label, onClick = onClick)
+            .pressable(label = label, onClick = onClick)
             .semantics { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) { content() }

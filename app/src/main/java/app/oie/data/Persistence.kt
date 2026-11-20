@@ -33,6 +33,7 @@ object Codec {
         put("kidNicknames", JSONArray(s.kidNicknames.toList()))
         put("kidEmoji", s.kidEmoji)
         put("bubbleOn", s.bubbleOn)
+        put("pinResetFrom", s.pinResetFrom).put("reactTipUsed", s.reactTipUsed).put("lastReaction", s.lastReaction ?: "")
         put("nudgeOn", s.nudgeOn).put("nudgeDismissed", JSONObject(s.nudgeDismissed.toMap())).put("needYouAt", s.needYouAt)
         put("pinHash", s.pinHash ?: JSONObject.NULL)
         put("kidNoticeSeen", s.kidNoticeSeen)
@@ -75,6 +76,9 @@ object Codec {
         s.kidEmoji = app.oie.logic.Signature.emojiOf(o.optString("kidEmoji"))
         s.bubbleOn = o.optBoolean("bubbleOn")
         s.nudgeOn = o.optBoolean("nudgeOn")
+        s.pinResetFrom = o.optString("pinResetFrom")
+        s.reactTipUsed = o.optBoolean("reactTipUsed")
+        s.lastReaction = o.optString("lastReaction").ifEmpty { null }
         s.nudgeDismissed.clear(); o.optJSONObject("nudgeDismissed")?.let { d -> d.keys().forEach { k -> s.nudgeDismissed[k] = d.getLong(k) } }
         s.needYouAt = o.optLong("needYouAt")
         s.kidNicknames.clear(); o.optJSONArray("kidNicknames")?.let { a -> for (i in 0 until a.length()) s.kidNicknames += a.getString(i) }

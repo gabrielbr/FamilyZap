@@ -31,6 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.error
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -69,35 +73,46 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
         // Every step scrolls, so its buttons are always reachable, at phone width and large text too (v0.17 audit).
         Box(
             Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState())
-                .padding(if (app.oie.ui.common.isCompact) OTokens.Spacing.space6 else OTokens.Spacing.space12),
-            contentAlignment = Alignment.Center,
+                // v0.34 audit: the app's side margin, and one left edge on every step (the column fills its 600dp).
+                .padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space8),
+            // Fresh review: steps start at the top, so the title doesn't jump from step to step.
+            contentAlignment = Alignment.TopCenter,
         ) {
-            Column(Modifier.widthIn(max = OTokens.Size.contentMax), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
+            Column(Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
+                // v0.34 audit: every step's heading is a title (display is the kid's greeting alone).
                 when (step) {
                     0 -> {
-                        Text(app.oie.ui.theme.OTokens.Brand.name, style = OieType.display, color = c.ink)
+                        // The brand's touching rounds, once (README §7: the splash and empty states); the logo
+                        // is in the bar, so the name isn't retyped here.
+                        app.oie.ui.common.Rounds()
+                        Text(tx.welcomeTitle, style = OieType.title, color = c.ink)
                         Text(tx.welcomeBody, style = OieType.body, color = c.ink)
                         PrimaryButton(tx.start, { go(1) })
                     }
                     1 -> {
-                        Text(tx.riskTitle, style = OieType.display, color = c.ink)
+                        val real = app.oie.ui.parent.LocalRealLink.current
+                        Text(tx.riskTitle, style = OieType.title, color = c.ink)
                         // The approved risk notice (01 Brand/voice.md), in full, before anything is linked.
                         Text(
                             tx.riskBody,
                             style = OieType.body, color = c.ink,
                         )
                         ButtonRow {
-                            PrimaryButton(tx.riskAccept, { go(2) })
-                            QuietButton(tx.riskDecline, onClose, Modifier.height(OTokens.Size.button))
+                            // v0.34 audit: "Entendi, conectar" starts the link, so step 2 opens on the QR (no second "Conectar").
+                            PrimaryButton(tx.riskAccept, { real?.turnOn(); go(2) })
+                            // Agora não: Oiê opens on the welcome next time, as the flow says.
+                            QuietButton(tx.riskDecline, { go(0); onClose() })
                         }
                     }
-                    2 -> LinkStep(state, back = { go(1) }, next = { if (!state.realMode) state.parentName = state.link.profileName; go(3) })
+                    // v0.34 audit: the parent's name comes from their WhatsApp profile when they haven't typed one (never asked twice).
+                    2 -> LinkStep(state, back = { go(1) }, next = { if (state.parentName.isBlank()) state.parentName = state.wa.profileName.orEmpty(); go(3) })
                     3 -> NamesStep(state, back = { go(2) }, next = { go(4) })
-                    4 -> CreatePinStep(state, next = { go(5) })
-                    5 -> ContactsStep(state, next = { go(6) })
-                    6 -> QuietStep(state, next = { go(7) })
+                    // v0.34 audit round 2: Voltar centred under the centred keypad.
+                    4 -> { CreatePinStep(state, next = { go(5) }); Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { QuietButton(tx.back, { go(3) }) } }
+                    5 -> ContactsStep(state, next = { go(6) }, back = { go(4) })
+                    6 -> QuietStep(state, next = { go(7) }, back = { go(5) })
                     else -> {
-                        Text(tx.done, style = OieType.display, color = c.ink)
+                        Text(tx.done, style = OieType.title, color = c.ink)
                         Text(tx.handOver(state.kidName), style = OieType.body, color = c.ink)
                         // Notifications and the microphone are asked for here, with the parent, after saying why (ux-user-flows §8).
                         val ask = androidx.activity.compose.rememberLauncherForActivityResult(
@@ -120,9 +135,12 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
 
 @Composable
 fun Wordmark() {
+    val mark = painterResource(R.drawable.oie_wordmark)
     androidx.compose.foundation.Image(
-        painterResource(R.drawable.oie_wordmark), contentDescription = "Oiê",
-        modifier = Modifier.height(OTokens.Spacing.space8),
+        mark, contentDescription = "Oiê",
+        // v0.34 audit: the trimmed mark, 40dp tall and about 52dp wide (about 104 physical px on the tablet, above the
+        // logo's "64 px wide on screen"), with the i's dot of clear space in the 56dp bar (decision 0012).
+        modifier = Modifier.height(OTokens.Spacing.space10).aspectRatio(mark.intrinsicSize.width / mark.intrinsicSize.height),
     )
 }
 
@@ -133,10 +151,22 @@ private fun LinkStep(state: AppState, back: () -> Unit, next: () -> Unit) {
     Text(tx.linkTitle, style = OieType.title, color = c.ink)
     // v0.8: the real link. Once the phone scans the QR, the kid's side uses the real WhatsApp.
     val real = app.oie.ui.parent.LocalRealLink.current
-    app.oie.ui.parent.Pairing(state) { real?.goReal() ?: state.goReal(); next() }
-    ButtonRow {
-        QuietButton(tx.back, back, Modifier.height(OTokens.Size.button))
+    // v0.34 audit: coming back to this step when it's already linked shows that, with Continuar; it no longer
+    // jumps forward by itself (Back from the names bounced), and it never starts the kid's side over.
+    val already = androidx.compose.runtime.remember { state.realMode && state.linkState.status == app.oie.data.LinkState.Status.Connected }
+    if (already) {
+        Text(tx.connectedTo(state.wa.profileName ?: state.parentName), style = OieType.body, color = c.ink)
+        ButtonRow {
+            PrimaryButton(tx.cont, next)
+            QuietButton(tx.back, back)
+        }
+        return
     }
+    app.oie.ui.parent.Pairing(state, back = back) { if (!state.realMode) real?.goReal() ?: state.goReal(); next() }
+    // Help where it's needed (Nielsen 10): the risk, one tap away.
+    var why by remember { mutableStateOf(false) }
+    TextLink(tx.whatCanHappen, { why = !why })
+    if (why) Text(tx.riskBody, style = OieType.body, color = c.ink)
 }
 
 @Composable
@@ -144,33 +174,51 @@ private fun NamesStep(state: AppState, back: () -> Unit, next: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     Text(tx.namesTitle, style = OieType.title, color = c.ink)
-    Field(tx.yourName, state.parentName, { state.parentName = it }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName))
-    Field(tx.kidNameLabel, state.kidName, { state.kidName = it }, tx.kidNameHelp(state.kidName.ifBlank { "Tito" }))
+    Field(tx.yourName, state.parentName, { state.parentName = it }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName), names = true)
+    Field(tx.kidNameLabel, state.kidName, { state.kidName = it }, tx.kidNameHelp(state.kidName.ifBlank { tx.theKid }), names = true)
+    // Help where it's needed (Nielsen 10) is on the link step; here the hints under each field do it.
     ButtonRow {
         PrimaryButton(tx.cont, next, enabled = state.kidName.isNotBlank() && state.parentName.isNotBlank())
-        QuietButton(tx.back, back, Modifier.height(OTokens.Size.button))
+        QuietButton(tx.back, back)
     }
 }
 
+/**
+ * A labelled text field (README §10). v0.34 audit: TalkBack reads the label with the field; the
+ * border is `muted` (3:1 against the page, so the field can be found); an [error] replaces the help in
+ * the error colour, with an error border, and is announced. Names start with a capital.
+ */
 @Composable
-fun Field(label: String, value: String, onChange: (String) -> Unit, help: String) {
+fun Field(label: String, value: String, onChange: (String) -> Unit, help: String, error: String? = null,
+          keyboard: androidx.compose.ui.text.input.KeyboardType = androidx.compose.ui.text.input.KeyboardType.Text, names: Boolean = false) {
     val c = OieTheme.colors
-    val tx = str
     Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
         Text(label, style = OieType.label, color = c.ink)
         OutlinedTextField(
-            value, onChange, Modifier.fillMaxWidth(), textStyle = OieType.body, singleLine = true,
+            value, onChange,
+            Modifier.fillMaxWidth().semantics {
+                contentDescription = label
+                if (error != null) error(error)
+            },
+            textStyle = OieType.body, singleLine = true, isError = error != null,
+            // Names start each word with a capital ("Maria Silva"); a number gets the phone keypad.
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                capitalization = if (names) androidx.compose.ui.text.input.KeyboardCapitalization.Words else androidx.compose.ui.text.input.KeyboardCapitalization.Sentences,
+                keyboardType = keyboard,
+            ),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = c.ink, unfocusedTextColor = c.ink, focusedContainerColor = c.surface,
-                unfocusedContainerColor = c.surface, focusedBorderColor = c.ink, unfocusedBorderColor = c.line, cursorColor = c.ink,
+                unfocusedContainerColor = c.surface, focusedBorderColor = c.ink, unfocusedBorderColor = c.muted, cursorColor = c.ink,
+                errorBorderColor = c.coralText, errorContainerColor = c.surface, errorTextColor = c.ink, errorCursorColor = c.ink,
             ),
         )
-        Text(help, style = OieType.caption, color = c.muted)
+        if (error != null) Text(error, style = OieType.caption, color = c.coralText, modifier = Modifier.semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
+        else if (help.isNotBlank()) Text(help, style = OieType.caption, color = c.muted)
     }
 }
 
 @Composable
-private fun CreatePinStep(state: AppState, next: () -> Unit) {
+internal fun CreatePinStep(state: AppState, next: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     var first by remember { mutableStateOf<String?>(null) }
@@ -178,7 +226,9 @@ private fun CreatePinStep(state: AppState, next: () -> Unit) {
     var error by remember { mutableStateOf<String?>(null) }
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
         Text(if (first == null) tx.pinCreate else tx.pinAgain, style = OieType.title, color = c.ink)
-        Text(error ?: tx.pinCreateHelp, style = OieType.body, color = if (error != null) c.coralText else c.muted, textAlign = TextAlign.Center)
+        // v0.34 audit: an error is announced by TalkBack.
+        Text(error ?: tx.pinCreateHelp, style = OieType.body, color = if (error != null) c.coralText else c.muted, textAlign = TextAlign.Center,
+            modifier = Modifier.semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
         PinPad(entered) { v ->
             entered = v
             if (v.length == Pin.LENGTH) {
@@ -187,7 +237,8 @@ private fun CreatePinStep(state: AppState, next: () -> Unit) {
                     f == null && Pin.problem(v) == Pin.Problem.EASY -> { error = tx.pinEasy; entered = "" }
                     f == null -> { first = v; entered = ""; error = null }
                     f == v -> { state.setPin(v); next() }
-                    else -> { error = tx.pinMismatch; entered = "" } // only the second entry clears
+                    // v0.34 audit: a typo could be in either entry, so a mismatch starts over from the first (Android's way).
+                    else -> { error = tx.pinMismatch; entered = ""; first = null }
                 }
             }
         }
@@ -195,7 +246,7 @@ private fun CreatePinStep(state: AppState, next: () -> Unit) {
 }
 
 @Composable
-private fun ContactsStep(state: AppState, next: () -> Unit) {
+private fun ContactsStep(state: AppState, next: () -> Unit, back: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     val picked = remember { mutableStateListOf<String>().apply { addAll(state.allowed.map { it.id }) } }
@@ -206,8 +257,15 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
     val renamed = remember { mutableStateMapOf<String, app.oie.logic.Contact>().apply { state.allowed.forEach { put(it.id, it) } } }
     var editing by remember { mutableStateOf<String?>(null) }
     val fresh = state.wa.contacts()
-    val all = (added + fresh.filter { a -> added.none { it.id == a.id } }).map { renamed[it.id] ?: it }
-        .sortedWith(compareBy({ it.isGroup }, { it.name.lowercase() })) // people first, then groups
+    // v0.34 audit round 2: sorted once per change, not on every recomposition.
+    val all = remember(fresh, added.toList(), renamed.toMap()) {
+        (added + fresh.filter { a -> added.none { it.id == a.id } }).map { renamed[it.id] ?: it }
+            .sortedWith(compareBy({ it.isGroup }, { it.name.lowercase() })) // people first, then groups
+    }
+    // v0.34 audit round 2: "Mudar nome" on the person just picked, not repeated on every picked row (names can
+    // also be changed any time in Contatos).
+    var lastPicked by remember { mutableStateOf<String?>(null) }
+    val letters = remember(all) { app.oie.logic.Initials.of(all.map { it.name }) }
     all.firstOrNull { it.id == editing }?.let { ct ->
         app.oie.ui.parent.ContactEditor(ct, state.kidName.ifBlank { tx.theKid }, fresh,
             onSave = { renamed[it.id] = it; editing = null }, onCancel = { editing = null })
@@ -221,16 +279,20 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
     if (all.size > SEARCH_FROM) Field(tx.search, query, { query = it }, tx.pickRealContacts(state.kidName))
     val shown = all.filter { it.id in picked || app.oie.logic.ContactNames.matches(it, query) }.take(if (all.size > SEARCH_FROM) SEARCH_MAX else all.size)
     // Plain rows (at most 30, see SEARCH_MAX) in the scrolling page, not a fixed-height box (v0.17 audit).
-    Column {
+    // v0.34 audit: a small gap, so two picked rows don't run together.
+    Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
         shown.forEach { ct ->
             val on = ct.id in picked
+            // v0.34 audit: a picked row is `selected` (README: picked things), and TalkBack hears "checked".
             Row(
                 Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)
-                    .clickable(role = Role.Checkbox) { if (on) picked.remove(ct.id) else picked.add(ct.id) },
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(OTokens.Radius.radiusM)).background(if (on) c.selected else androidx.compose.ui.graphics.Color.Transparent)
+                    .toggleable(on, role = Role.Checkbox) { if (on) picked.remove(ct.id) else { picked.add(ct.id); lastPicked = ct.id } }
+                    .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
-                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar)
+                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters[ct.name])
                 // The group note sits under the name, so it fits a phone (v0.17 audit).
                 Column(Modifier.weight(1f)) {
                     Text(ct.name, style = OieType.label, color = c.ink)
@@ -238,7 +300,7 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
                     if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted) else app.oie.ui.parent.ContactLines(ct, fresh)
                     // v0.19: a picked contact can get the name the kid will see. Its own target (the row picks), under
                     // the lines so a phone keeps the width for the name (v0.19 audit).
-                    if (on) TextLink(tx.changeName, { editing = ct.id }, Modifier.offset(x = -OTokens.Spacing.space3).semantics { contentDescription = tx.changeNameA11y(ct.name) })
+                    if (on && ct.id == (lastPicked ?: picked.firstOrNull())) TextLink(tx.changeName, { editing = ct.id }, Modifier.semantics { contentDescription = tx.changeNameA11y(ct.name) })
                 }
                 if (on) OIcon(R.drawable.gg_ic_check, contentDescription = tx.chosen)
             }
@@ -248,24 +310,27 @@ private fun ContactsStep(state: AppState, next: () -> Unit) {
         if (added.none { it.id == ct.id }) added.add(ct)
         if (ct.id !in picked) picked.add(ct.id)
     }
+    // v0.34 audit: one way on. With nobody picked yet it's "Depois"; once someone is, "Continuar com N".
     ButtonRow {
-        PrimaryButton(tx.continueWith(picked.size), {
+        if (picked.isEmpty()) QuietButton(tx.later, next)
+        else PrimaryButton(tx.continueWith(picked.size), {
             state.allowed.clear(); state.allowed.addAll(all.filter { it.id in picked }); next()
         })
-        QuietButton(tx.later, next, Modifier.height(OTokens.Size.button))
+        QuietButton(tx.back, back)
     }
 }
 
 @Composable
-private fun QuietStep(state: AppState, next: () -> Unit) {
+private fun QuietStep(state: AppState, next: () -> Unit, back: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     Text(tx.quietTitle, style = OieType.title, color = c.ink)
-    Text(tx.quietSetupBody(state.kidName), style = OieType.body, color = c.muted)
+    Text(tx.quietSetupBody(state.kidName), style = OieType.body, color = c.ink)
     QuietList(state)
+    // v0.34 audit: Pular did what Continuar does (the switches already say what's on), so it went.
     ButtonRow {
         PrimaryButton(tx.cont, next)
-        QuietButton(tx.skip, next, Modifier.height(OTokens.Size.button))
+        QuietButton(tx.back, back)
     }
 }
 
@@ -274,15 +339,13 @@ private fun QuietStep(state: AppState, next: () -> Unit) {
 fun QuietList(state: AppState) {
     val c = OieTheme.colors
     val tx = str
+    // v0.34 audit: each period is one switch row (the whole row toggles, TalkBack reads its name and state),
+    // with the days and hours under the name so it fits a phone at large text.
     state.periods.forEachIndexed { i, p ->
-        Row(Modifier.fillMaxWidth().height(OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-            Text(p.name, style = OieType.label, color = c.ink)
-            Text("${app.oie.ui.parent.daysLabel(tx, p.days)} · ${app.oie.ui.parent.hoursLabel(tx, p)}", style = OieType.bodySmall, color = c.muted, modifier = Modifier.weight(1f))
-            Switch(
-                checked = p.on, onCheckedChange = { state.periods[i] = p.copy(on = it) },
-                colors = SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
-            )
-        }
+        app.oie.ui.common.SwitchRow(
+            tx.periodName(p.name), p.on, { state.periods[i] = p.copy(on = it) },
+            help = "${app.oie.ui.parent.daysLabel(tx, p.days)} · ${app.oie.ui.parent.hoursLabel(tx, p)}",
+        )
     }
 }
 

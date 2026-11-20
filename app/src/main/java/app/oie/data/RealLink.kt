@@ -36,7 +36,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     }
 
     override val connected: Boolean get() = ls.status == LinkState.Status.Connected
-    override val profileName: String? = null
+    /** The parent's WhatsApp profile name (v0.34), to fill in setup's name field; null until it's known. */
+    override val profileName: String? get() = runCatching { link?.ownName() }.getOrNull()?.ifBlank { null }
     override fun contacts(): List<Contact> = ls.available.toList()
 
     override fun send(message: app.oie.logic.Message) {
@@ -147,6 +148,33 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
     /** After a network drop: connect again, unless the parent stopped the test or WhatsApp banned the number. */
     fun reconnectIfDropped() {
         main.post { if (ls.on && (ls.status == LinkState.Status.Disconnected || ls.status == LinkState.Status.Off)) start() }
+    }
+
+    /**
+     * Esqueci o PIN (v0.34, docs/flows/parent-setup-link.md): remembers which WhatsApp the tablet is linked
+     * to, logs the tablet out, and starts a fresh link (a new QR). The kid's contacts and chats stay; only
+     * the session is replaced. The parent proves it's them by linking the same WhatsApp again.
+     */
+    fun relinkForPin() {
+        val before = ls.status
+        ls.status = LinkState.Status.Connecting
+        ls.pairFailed = false
+        bg {
+            val own = runCatching { link?.ownChat() }.getOrNull().orEmpty()
+            // v0.34 audit round 2: without knowing which WhatsApp it is now, the same account couldn't be told
+            // apart from another one, and the kid's chats would be wiped. So nothing is undone; the parent tries again.
+            if (own.isEmpty()) { main.post { ls.status = before; ls.pairFailed = true }; return@bg }
+            runCatching { link?.unlink() }
+            link = null
+            listOf(db, File(db.path + "-wal"), File(db.path + "-shm")).forEach { it.delete() }
+            Diagnostics.log("pin reset: relinking")
+            main.post { state.pinResetFrom = own; ls.clear(); turnOn(); start() }
+        }
+    }
+
+    /** The WhatsApp the tablet is linked to now (its own chat id), on the main thread; "" if unknown. */
+    fun ownChat(done: (String) -> Unit) {
+        bg { val o = runCatching { link?.ownChat() }.getOrNull().orEmpty(); main.post { done(o) } }
     }
 
     /** Looks a phone number up on WhatsApp, for "Adicionar pelo número". Calls back on the main thread with the chat id, "" if it isn't on WhatsApp, or null on an error. */
@@ -398,7 +426,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         }
         main.post {
             when (kind) {
-                "qr" -> ls.status = LinkState.Status.Qr(o.optString("code"))
+                "qr" -> { ls.status = LinkState.Status.Qr(o.optString("code")); ls.pairFailed = false }
                 "paired", "connected" -> {
                     // A fresh pairing starts the contact list from nothing (v0.17).
                     if (kind == "paired") { ls.contactsSynced = false; ls.linkedAt = state.clock() }
@@ -412,7 +440,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 "disconnected" -> if (ls.status == LinkState.Status.Connected) { ls.status = LinkState.Status.Disconnected; ls.downSince = state.clock() }
                 "replaced", "loggedOut" -> ls.status = LinkState.Status.LoggedOut
                 "temporaryBan" -> { ls.status = LinkState.Status.Banned(((o.optLong("expiresInSeconds") + 3599) / 3600).toInt()); LinkService.stop(context) }
-                "pairError" -> ls.status = LinkState.Status.Off
+                "pairError" -> { ls.status = LinkState.Status.Off; ls.pairFailed = true }
                 "message" -> if (state.realMode) receiveForKid(o)
                 "contactsChanged" -> loadContacts()
                 // v0.33: "Entregue" and "Vovó viu" under the kid's messages.

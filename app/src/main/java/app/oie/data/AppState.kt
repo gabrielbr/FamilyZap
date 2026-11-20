@@ -23,6 +23,8 @@ sealed interface Route {
     data object ParentPin : Route
     data class Parent(val section: Int) : Route // 0 contacts, 1 quiet hours, 2 connection, 3 about
     data object Pair : Route // Conexão › Conectar o WhatsApp
+    /** Esqueci o PIN (v0.34): 0 = link WhatsApp again (the proof), 1 = the new PIN. */
+    data class ForgotPin(val stage: Int) : Route
 }
 
 /**
@@ -43,6 +45,15 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var nudgeOn by mutableStateOf(false)
     /** "Agora não" on a nudge: the contact id and when (v0.33). That person isn't nudged again for a week. */
     val nudgeDismissed = mutableStateMapOf<String, Long>()
+    /**
+     * Esqueci o PIN (v0.34): the WhatsApp the tablet was linked to before the parent asked for a new
+     * PIN, kept until the same WhatsApp links again (the proof it's the parent). "" when no reset is running.
+     */
+    var pinResetFrom by mutableStateOf("")
+    /** The kid has reacted once (v0.34): the "hold a message" hint goes. */
+    var reactTipUsed by mutableStateOf(false)
+    /** The reaction the kid used last (v0.34): shown first in the sheet. */
+    var lastReaction by mutableStateOf<String?>(null)
     /** When the kid last sent "Preciso de você" (v0.33), for the 5-minute gap. */
     var needYouAt by mutableStateOf(0L)
     /** The kid's name first, then the nicknames. */
@@ -101,6 +112,8 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     fun react(id: String, emoji: String) {
         val i = messages.indexOfFirst { it.id == id }
         if (i < 0) return
+        reactTipUsed = true
+        lastReaction = emoji
         val (send, after) = app.oie.logic.Reactions.kidTaps(messages[i].reactions, emoji)
         messages[i] = messages[i].copy(reactions = after)
         wa.react(messages[i], send)

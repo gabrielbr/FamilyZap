@@ -68,10 +68,10 @@ import kotlinx.coroutines.withContext
 
 /** A sealed file opened into memory, off the main thread. Null while loading or if missing. */
 @Composable
-private fun rememberBytes(media: String?): ByteArray? {
+internal fun rememberBytes(media: String?): ByteArray? {
     val context = LocalContext.current
     var bytes by remember(media) { mutableStateOf<ByteArray?>(null) }
-    LaunchedEffect(media) { bytes = if (media == null) null else withContext(Dispatchers.IO) { Photos.openBytes(context, media) } }
+    LaunchedEffect(media) { bytes = if (media == null) null else withContext(app.oie.data.Background.dispatcher) { Photos.openBytes(context, media) } }
     return bytes
 }
 
@@ -118,7 +118,8 @@ fun MovingImage(media: String, side: Dp, contentDescription: String?, modifier: 
         }
     }
     val px = with(androidx.compose.ui.platform.LocalDensity.current) { side.roundToPx() }
-    val still = remember(media) { Photos.load(context, media, px) }
+    // v0.34 audit: decoded off the main thread.
+    val still = rememberPhoto(media, px)
     if (still != null) Image(still.asImageBitmap(), contentDescription = contentDescription, modifier = modifier.size(side))
     else Box(modifier.size(side))
 }
@@ -172,11 +173,11 @@ private fun VideoSurface(
 
 /** A video's first frame, from memory (null if Android can't read it). */
 @Composable
-private fun rememberFirstFrame(bytes: ByteArray?): android.graphics.Bitmap? {
+internal fun rememberFirstFrame(bytes: ByteArray?): android.graphics.Bitmap? {
     var frame by remember(bytes) { mutableStateOf<android.graphics.Bitmap?>(null) }
     LaunchedEffect(bytes) {
         val b = bytes ?: return@LaunchedEffect
-        frame = withContext(Dispatchers.IO) {
+        frame = withContext(app.oie.data.Background.dispatcher) {
             runCatching { MediaMetadataRetriever().run { setDataSource(BytesSource(b)); val f = getFrameAtTime(0); release(); f } }.getOrNull()
         }
     }
@@ -196,13 +197,12 @@ fun VideoBubble(media: String?, seconds: Int, tooBig: Boolean, parent: String, o
     val tx = str
     if (media == null) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
-            // No ▶ on a video that can't play here (v0.27 audit): it would promise a tap that does nothing.
-            if (!tooBig) OIcon(R.drawable.gg_ic_play, tint = c.muted)
-            Text(if (tooBig) tx.videoTooBig(parent) else tx.video + " · " + clockOf(seconds), style = OieType.body, color = c.muted)
+            // No ▶ on a video that can't play yet (v0.34 audit): it says it's on its way instead.
+            Text(if (tooBig) tx.videoTooBig(parent) else tx.downloading(clockOf(seconds)), style = OieType.body, color = c.muted)
         }
         return
     }
-    val frame = rememberFirstFrame(rememberBytes(media))
+    val frame = rememberVideoFrame(media)
     Box(
         // Half the column on a tablet; narrower when a phone has less room (v0.27 audit).
         Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(OTokens.Radius.radiusS))
@@ -236,7 +236,10 @@ fun GifBubble(media: String?, onWatch: () -> Unit) {
         Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.line)
             .clickable(role = Role.Button, onClick = onWatch).semantics(mergeDescendants = true) { contentDescription = tx.notifGif },
     ) {
-        if (bytes == null) Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f))
+        // Round 3: while it arrives, the placeholder says so (as a video does).
+        if (bytes == null) Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f), contentAlignment = Alignment.Center) {
+            Text(tx.arriving, style = OieType.body, color = c.muted)
+        }
         else if (animate) VideoSurface(bytes, loop = true, muted = true, play = true, modifier = Modifier.fillMaxWidth())
         else rememberFirstFrame(bytes)?.let { Image(it.asImageBitmap(), contentDescription = null, modifier = Modifier.fillMaxWidth(), contentScale = ContentScale.FillWidth) }
             ?: Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f))
@@ -264,8 +267,8 @@ fun VideoScreen(media: String?, gif: Boolean, from: String, onBack: () -> Unit) 
     Column(Modifier.fillMaxSize().background(c.page)) {
         Bar {
             QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
-            Text(if (gif) tx.gifLabel else tx.video, style = OieType.title, color = c.ink)
-            Text(from, style = OieType.body, color = c.muted)
+            // Fresh review: one title pattern for media ("Vídeo de Vovó", "Foto de Vovó").
+            Text(tx.mediaFrom(if (gif) tx.gifLabel else tx.video, from), style = OieType.title, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
         Column(
             Modifier.fillMaxSize().padding(OTokens.Spacing.space6),
@@ -335,9 +338,10 @@ fun VideoPreview(draft: VideoDraft, to: String, onSwap: () -> Unit, onSend: () -
                 }
                 ready != null -> {
                     if (ready.gif) GifBubble(ready.media) { watch = true } else VideoBubble(ready.media, ready.seconds, tooBig = false, parent = "") { watch = true }
-                    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                        QuietButton(tx.swap, onSwap, Modifier.height(OTokens.Size.button))
+                    // Fresh review: the main button first, as on every other screen.
+                    app.oie.ui.setup.ButtonRow {
                         app.oie.ui.common.PrimaryButton(tx.send, onSend, icon = R.drawable.gg_ic_send)
+                        QuietButton(tx.swap, onSwap)
                     }
                 }
                 else -> {
@@ -350,4 +354,37 @@ fun VideoPreview(draft: VideoDraft, to: String, onSwap: () -> Unit, onSend: () -
             }
         }
     }
+}
+
+/** A stored picture, opened and decoded off the main thread at [maxSide] px (v0.34 audit); null until ready. */
+@Composable
+internal fun rememberPhoto(media: String?, maxSide: Int): android.graphics.Bitmap? {
+    val context = LocalContext.current
+    var bmp by remember(media, maxSide) { mutableStateOf<android.graphics.Bitmap?>(null) }
+    androidx.compose.runtime.LaunchedEffect(media, maxSide) {
+        bmp = media?.let { kotlinx.coroutines.withContext(app.oie.data.Background.dispatcher) { Photos.load(context, it, maxSide) } }
+    }
+    return bmp
+}
+
+/** First frames of videos, by file name (v0.34 audit round 2): decoded once, the video itself not kept in memory. */
+private val frames = android.util.LruCache<String, android.graphics.Bitmap>(FRAMES_KEPT)
+private const val FRAMES_KEPT = 24
+
+/** A stored video's first frame, read off the main thread and cached; null until ready. */
+@Composable
+internal fun rememberVideoFrame(media: String?): android.graphics.Bitmap? {
+    val context = LocalContext.current
+    var frame by remember(media) { mutableStateOf(media?.let { frames.get(it) }) }
+    LaunchedEffect(media) {
+        val m = media ?: return@LaunchedEffect
+        if (frame != null) return@LaunchedEffect
+        frame = withContext(app.oie.data.Background.dispatcher) {
+            runCatching {
+                val bytes = Photos.openBytes(context, m) ?: return@runCatching null
+                MediaMetadataRetriever().run { setDataSource(BytesSource(bytes)); val f = getFrameAtTime(0); release(); f }
+            }.getOrNull()?.also { frames.put(m, it) }
+        }
+    }
+    return frame
 }

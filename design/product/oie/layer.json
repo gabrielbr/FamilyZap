@@ -125,6 +125,14 @@
           "dark": "#2F7FD8"
         },
         "usage": "Drawing colour: sky blue."
+      },
+      {
+        "name": "scrim",
+        "value": {
+          "light": "#732A1714",
+          "dark": "#B30E0807"
+        },
+        "usage": "Behind a sheet or dialog (v0.34): warm ink at 45% by day, near-black at 70% at night, so it always darkens."
       }
     ],
     "type": [

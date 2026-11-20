@@ -174,3 +174,12 @@ _The owner, 2026-11-19: "the contacts don't bring all their information, for exa
 **Issues**
 - **Important:** the per-contact exception sits inside each contact's detail, so it's easy to miss. Fix: in Horário de silêncio, add a row "Podem falar mesmo assim: Mãe, Vovó" that opens the list of switches.
 - **Polish:** the 5-try PIN wait (proposed) needs owner confirmation.
+
+## v0.34: the design pass
+- **Quem pode falar no silêncio:** the switch and its line show only when a quiet period is on (with none, a column of "off" switches read as "blocked").
+- **Undo** (a removed contact, a deleted period, a deleted problem report) is one snackbar pinned to the bottom of the parent area, announced by TalkBack.
+- **The period editor:** Back closes it (it left the parent area and lost the period); the days wrap on a phone and are checkboxes for TalkBack; **Apagar período** sits apart from Salvar.
+- **The 2-minute timer** restarts on any touch or scroll, and on typing in any field.
+- **Phone:** the four sections are a 2 x 2 grid (Contatos, Silêncio, Conexão, Ajustes), all in view.
+- **Settings switches** (bubble, reminder, "Preciso de você") are whole-row switches. The bubble's row says "Ligada. Falta o Android permitir" until Android allows it.
+- **Desconectar o WhatsApp** wears the stop colour, with **Cancelar** beside it.

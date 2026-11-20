@@ -193,13 +193,13 @@ interface Strings {
     fun latest(v: String): String
     fun couldNotCheck(reason: String): String
     val downloadFailed: String; val checksumFailed: String; val signatureFailed: String; val allowInstalls: String
-    fun releaseOnly(v: String, id: String): String
+    val releaseOnly: String
     val version: String
     fun versionLine(v: String, code: Long): String
     val decimalComma: Boolean
 
     // v0.33: family features (docs/flows/family-features.md)
-    fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean, time: String): String
+    fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean): String
     val react: String; val readAloud: String; val stopReading: String
     fun reactWith(emoji: String): String
     fun reactionsA11y(list: String): String
@@ -208,7 +208,8 @@ interface Strings {
     fun birthdayHelp(kid: String): String
     val needYouLabel: String
     fun needYouHelp(kid: String): String
-    val needYouButton: String; val needYouSend: String; val needYouText: String; val needYouWait: String
+    val needYouButton: String; val needYouSend: String; val needYouText: String
+    fun needYouWait(minutes: Int): String
     fun needYouAsk(names: String): String
     fun needYouSent(names: String): String
     fun nudgeLine(name: String): String
@@ -223,12 +224,24 @@ interface Strings {
     fun photosWith(name: String): String
     fun noPhotos(name: String): String
     fun and(names: List<String>): String
-    val editContact: String
+    val editContact: String; val noPhotosHow: String
+    fun mediaFrom(what: String, who: String): String
+    val forgotTitle: String; val forgotShowCode: String
+    val ok: String; val arriving: String; val you: String; val why: String; val drawUse: String
+    fun recordingEnds(seconds: Int): String
+    val linkPreparing: String; val linkSlow: String; val whatCanHappen: String; val offlineHome: String
+    val newMessages: String; val reactHint: String; val releaseToCancel: String; val holdToRecord: String
+    val photoShort: String; val stickerShort: String; val pauseA11y: String; val close: String
+    fun downloading(length: String): String
+    val welcomeTitle: String; val linkFailed: String; val linkOffline: String
+    val sectionQuietShort: String; val sectionHelpShort: String; val expanded: String; val collapsed: String; val reportCleared: String
+    fun periodName(name: String): String
+    fun forgotBody(kid: String): String
 }
 
 object Pt : Strings {
     override val back = "Voltar"; override val cont = "Continuar"; override val cancel = "Cancelar"; override val undo = "Desfazer"
-    override val later = "Depois"; override val skip = "Pular"; override val send = "Enviar"; override val save = "Salvar"
+    override val later = "Depois"; override val skip = "Pular"; override val send = "Mandar"; override val save = "Salvar"
     override val add = "Adicionar"; override val remove = "Remover"; override val groupWarning = "Grupo · todos do grupo veem as mensagens"
     override fun stepOf(n: Int) = "Passo $n de 6"
     override val welcomeBody = "O Oiê é para seu filho ou filha conversar com a família pelo seu WhatsApp, só com quem você escolher."
@@ -241,7 +254,7 @@ object Pt : Strings {
     override val linkPlaceholder = "Versão de teste: o código do WhatsApp entra aqui na próxima versão."
     override val linkSimulate = "Simular conexão (teste)"
     override val namesTitle = "Como vocês se chamam?"; override val yourName = "Seu nome"; override val kidNameLabel = "Como a família chama seu filho ou filha?"
-    override fun yourNameHelp(kid: String, parent: String) = "Aparece para $kid como \"WhatsApp de $parent\"."
+    override fun yourNameHelp(kid: String, parent: String) = "Aparece para $kid como “WhatsApp de $parent”."
     override fun kidNameHelp(kid: String) = "Vai em negrito no começo das mensagens de $kid."
     override val pinCreate = "Crie um PIN de 6 números"; override val pinAgain = "Digite o PIN de novo"
     override val pinCreateHelp = "Ele abre a área dos pais neste tablet. Não use o mesmo PIN do tablet."
@@ -256,9 +269,9 @@ object Pt : Strings {
     override val parentButton = "Pais"
     override fun hello(kid: String) = "Oiê, $kid"
     override val whoToTalk = "Com quem você quer falar?"
-    override fun nobodyYet(parent: String) = "Ainda não tem ninguém aqui. Peça para $parent escolher quem você pode chamar."
+    override fun nobodyYet(parent: String) = "Ainda não tem ninguém aqui. Peça para $parent escolher com quem você pode falar."
     override val askToAdd = "Pedir para adicionar alguém"
-    override fun askedToAdd(parent: String) = "Pedido enviado. $parent vai ver na área dos pais."
+    override fun askedToAdd(parent: String) = "Pedido feito. $parent vai ver na área dos pais."
     override fun kidAsked(kid: String) = "$kid pediu para adicionar alguém."
     override fun newCount(n: Int) = "$n ${if (n == 1) "nova" else "novas"}"
     override val noticeTitle = "Antes de começar"
@@ -268,18 +281,18 @@ object Pt : Strings {
     override fun quietUntil(hour: Int) = "Horário de silêncio até ${hour}h. Dá para ler e ouvir, mas não para mandar."
     override fun quietUntilShort(hour: Int) = "Horário de silêncio até ${hour}h."
     override fun firstHi(name: String) = "Mande o primeiro oi para $name."
-    override val sending = "Enviando…"
-    override fun sentAt(time: String) = "Enviada · $time"
+    override val sending = "Mandando…"
+    override fun sentAt(time: String) = "Mandada · $time"
     override fun askReconnect(parent: String) = "Peça para $parent conectar de novo."
-    override val recording = "Gravando…"; override val releaseToSend = "Solte para enviar"
+    override val recording = "Gravando…"; override val releaseToSend = "Solte para mandar"
     override fun writeTo(name: String) = "Escreva para $name"
-    override fun sendingTo(name: String) = "Enviando para $name"
+    override fun sendingTo(name: String) = "Mandando para $name"
     override val photoError = "Não deu para abrir essa foto. Tente outra."
-    override val recordA11y = "Gravar áudio"; override val recordingA11y = "Gravando. Toque para enviar"
+    override val recordA11y = "Gravar áudio"; override val recordingA11y = "Gravando. Toque para mandar"
     override fun stickerA11y(word: String) = "Figurinha: $word"
     override fun sendSticker(word: String) = "Mandar figurinha $word"
     override fun onlyInWhatsApp(name: String) = "$name mandou algo que só abre no WhatsApp."
-    override val stickers = "Figurinhas"; override val photo = "Foto"; override val camera = "Câmera"; override val gallery = "Galeria"
+    override val stickers = "Figurinhas"; override val photo = "Foto"; override val camera = "Câmera"; override val gallery = "Escolher da galeria"
     override fun photoFor(name: String) = "Foto para $name"
     override val photoPreviewA11y = "A foto que você vai mandar"; override val swap = "Trocar"
     override fun listenA11y(seconds: Int) = "Ouvir áudio de $seconds segundos"
@@ -292,7 +305,7 @@ object Pt : Strings {
     override fun connectingTo(parent: String) = "Conectando ao WhatsApp de $parent…"
     override val disconnected = "O Oiê se desconectou do seu WhatsApp."
     override val reconnect = "Conectar de novo"
-    override fun whoCanCall(kid: String) = "Quem $kid pode chamar"
+    override fun whoCanCall(kid: String) = "Com quem $kid pode falar"
     override fun peopleAndGroups(people: Int, groups: Int) =
         "$people ${if (people == 1) "pessoa" else "pessoas"}, $groups ${if (groups == 1) "grupo" else "grupos"}"
     override val canTalkInQuiet = "Pode falar no silêncio"
@@ -322,11 +335,11 @@ object Pt : Strings {
     override fun helpItems(kid: String, parent: String) = listOf(
         "O que pode acontecer com o meu WhatsApp?" to riskBody,
         "$kid vê as minhas conversas?" to "Não. O tablet mostra só o que foi mandado para $kid: respostas às mensagens de $kid, mensagens que começam com o nome de $kid, e o que chega até 24 horas depois da última mensagem de $kid. As suas outras conversas continuam só no seu WhatsApp.",
-        "$kid sabe que eu vejo as mensagens?" to "Sim. Na primeira vez, o Oiê diz a $kid: \"${noticeBody(parent)}\"",
+        "$kid sabe que eu vejo as mensagens?" to "Sim. Na primeira vez, o Oiê diz a $kid: “${noticeBody(parent)}”",
         "Quem pode falar com $kid?" to "Só quem está em Contatos. Mensagens de qualquer outra pessoa não aparecem no tablet. Num grupo, todos do grupo veem o que $kid manda. Em Contatos, toque em alguém para mudar o nome que $kid vê (Vovó, por exemplo) ou para remover. O nome muda só no Oiê, não no seu WhatsApp.",
-        "O que é o \"Preciso de você\"?" to "Um botão na tela inicial de $kid, que aparece quando você marca alguém em Contatos (toque na pessoa e ligue \"Recebe 'Preciso de você'\"). $kid confirma, e cada pessoa marcada recebe \"Preciso de você.\" no WhatsApp, até no horário de silêncio. Dá para mandar uma vez a cada 5 minutos. É um jeito de chamar vocês, não um serviço de emergência: em perigo, ligue 190 ou 192.",
-        "Como funciona o horário de silêncio?" to "Durante um período, $kid lê e ouve, mas não manda mensagens. Quem tem \"Pode falar no silêncio\" em Contatos continua liberado. Dá para pausar um período sem apagar, por exemplo nas férias.",
-        "O Oiê se desconectou. E agora?" to "Abra Conexão e toque em Conectar de novo. As mensagens que $kid mandou enquanto isso ficam guardadas e saem depois.",
+        "O que é o “Preciso de você”?" to "Um botão na tela inicial de $kid, que aparece quando você marca alguém em Contatos (toque na pessoa e ligue “Recebe 'Preciso de você'”). $kid confirma, e cada pessoa marcada recebe “Preciso de você.” no WhatsApp, até no horário de silêncio. Dá para mandar uma vez a cada 5 minutos. É um jeito de chamar vocês, não um serviço de emergência: em perigo, ligue 190 ou 192.",
+        "Como funciona o horário de silêncio?" to "Durante um período, $kid lê e ouve, mas não manda mensagens. Quem tem “Pode falar no silêncio” em Contatos continua liberado. Dá para pausar um período sem apagar, por exemplo nas férias.",
+        "O Oiê se desconectou. E agora?" to "Abra Conexão e toque em Conectar o WhatsApp. As mensagens que $kid mandou enquanto isso ficam guardadas e saem depois.",
         "Como mando figurinhas para $kid?" to "No seu WhatsApp, mande a figurinha para você mesmo, na conversa com o seu próprio nome. Ela aparece para $kid em Figurinhas, em Novas de $parent, e $kid escolhe se guarda. Só as figurinhas dessa conversa chegam ao Oiê; o resto dela fica só com você. Funciona com o WhatsApp de verdade ligado.",
         "Posso mudar algo pelo meu WhatsApp?" to "Sim. Numa conversa do seu WhatsApp, mande /$kid (ou /um apelido) e o Oiê responde na sua conversa com você mesmo, com a lista: parar, voltar, adicionar e remover. O comando vale para a conversa onde você mandou. Quem está nela vê o seu comando, mas não as respostas. Só o seu WhatsApp pode usar.",
         "Esqueci o PIN" to "Na tela do PIN, toque em Esqueci o PIN e conecte o mesmo WhatsApp de novo. Isso prova que é você. Depois crie um PIN novo.",
@@ -345,12 +358,12 @@ object Pt : Strings {
     override val writeShort = "Escreva"
     override fun parentLineTitle(parent: String) = "Você ($parent)"
     override fun parentLineCreate(kid: String) = "Criar conversa com $kid"
-    override fun parentLineBody(kid: String) = "Cria no seu WhatsApp um grupo só seu chamado \"$kid\". O que $kid mandar para você aparece lá, e o que você escrever lá chega para $kid."
+    override fun parentLineBody(kid: String) = "Cria no seu WhatsApp um grupo só seu chamado “$kid”. O que $kid mandar para você aparece lá, e o que você escrever lá chega para $kid."
     override val parentLineNoNotify = "O WhatsApp não avisa você dessas mensagens, porque saem da sua própria conta. Fixe a conversa no topo para ver quando chegam."
     override val parentLineCreating = "Criando…"
     override val parentLineNotNow = "Conecte o WhatsApp para criar a conversa."
     override fun parentLineFallback(kid: String) = "O WhatsApp não aceitou o grupo. $kid vai escrever na sua Mensagem para você; para responder, deslize a mensagem dele ou comece com o nome dele."
-    override fun parentLineInGroup(kid: String) = "Grupo \"$kid\" no seu WhatsApp"
+    override fun parentLineInGroup(kid: String) = "Grupo “$kid” no seu WhatsApp"
     override val parentLineInOwnChat = "Sua Mensagem para você no WhatsApp"
     override val photoOrVideo = "Foto ou vídeo"; override val takePhoto = "Tirar foto"; override val recordVideo = "Gravar vídeo"
     override fun videoFor(to: String) = "Vídeo para $to"
@@ -373,7 +386,7 @@ object Pt : Strings {
     override val checksumFailed = "O download não confere com a soma de verificação da versão, então não foi instalado."
     override val signatureFailed = "O download não foi assinado pelo Oiê, então não foi instalado."
     override val allowInstalls = "Permita instalações deste app e toque em Atualizar de novo."
-    override fun releaseOnly(v: String, id: String) = "A atualização automática só funciona na versão de lançamento ($v / $id)."
+    override val releaseOnly = "A atualização automática só funciona na versão de lançamento."
     override val version = "Versão"
     override fun versionLine(v: String, code: Long) = "Oiê v$v ($code)"
     override val decimalComma = true
@@ -381,7 +394,7 @@ object Pt : Strings {
     override val linkConnect = "Conectar o WhatsApp"
     override val linkWaiting = "Esperando o WhatsApp do seu celular."
     override val notSent = "Não foi"; override val tryAgain = "Tentar de novo"; override val unlinkReal = "Desconectar o WhatsApp"
-    override fun pickRealContacts(kid: String) = "Escolha nos seus contatos quem $kid pode chamar."
+    override fun pickRealContacts(kid: String) = "Escolha nos seus contatos com quem $kid pode falar."
     override val names = "Nomes"
     override fun newStickersFrom(parent: String) = "Novas de $parent"
     override val keepSticker = "Guardar"; override val sendFamilySticker = "Mandar figurinha da família"; override val familyStickers = "Da família"
@@ -402,7 +415,7 @@ object Pt : Strings {
     override val emojiLabel = "Emoji antes do nome"; override val emojiHelp = "Opcional. Escolha um no teclado."
     override val looksLikeOnWhatsApp = "Fica assim no WhatsApp:"; override val sampleMessage = "Oi, vó"
     override fun nicknamesLabel(kid: String) = "Apelidos de $kid"
-    override fun nicknamesHelp(kid: String) = "Separados por vírgula. Uma mensagem que começa com qualquer um deles, como \"Oi Chico\", chega para $kid."
+    override fun nicknamesHelp(kid: String) = "Separados por vírgula. Uma mensagem que começa com qualquer um deles, como “Oi Chico”, chega para $kid."
     override val pausedLine = "Pausado pelo seu WhatsApp"; override val resumeChat = "Voltar a receber"
     override fun cmdHelp(kid: String, cmd: String, here: String?) = listOfNotNull(
         "Oiê · comandos para $kid", here,
@@ -423,7 +436,7 @@ object Pt : Strings {
     override fun cmdRemoved(chat: String, kid: String) = "Oiê · $chat saiu dos contatos de $kid."
     override fun cmdNotIn(kid: String, cmd: String) = "Oiê · esta conversa não está nos contatos de $kid. Para incluir: $cmd adicionar"
     override fun cmdOwnChat(kid: String, cmd: String) = "Oiê · mande o comando na conversa que você quer mudar, por exemplo na conversa com a avó: $cmd parar"
-    override fun cmdUnknown(word: String, kid: String, cmd: String) = "Oiê · não entendi \"$word\".\n" + cmdHelp(kid, cmd, null)
+    override fun cmdUnknown(word: String, kid: String, cmd: String) = "Oiê · não entendi “$word”.\n" + cmdHelp(kid, cmd, null)
     override fun renameHint(kid: String) = "Toque em alguém para mudar o nome que $kid vê ou para remover."
     override fun removeNamed(name: String) = "Remover $name dos contatos"
     override val changeName = "Mudar nome"; override val noNumber = "Número não disponível"; override val groupShort = "Grupo"
@@ -448,10 +461,11 @@ object Pt : Strings {
     override fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean) = "Relatório do tablet · Oiê $version · %02d/%02d".format(day, month) + if (crashed) " · fechou sozinho" else ""
     override fun reportCut(kept: Int, total: Int) = "Só as últimas $kept de $total linhas cabem aqui. O relatório inteiro pode ser copiado no tablet."
 
-    override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean, time: String) = when (r) {
+    // v0.34 audit: no time here; the message already shows it.
+    override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean) = when (r) {
         app.oie.logic.Receipt.READ -> if (group) "Alguém viu" else "$who viu"
-        app.oie.logic.Receipt.DELIVERED -> "Entregue · $time"
-        else -> "Enviada · $time"
+        app.oie.logic.Receipt.DELIVERED -> "Entregue"
+        else -> "Mandada"
     }
     override val react = "Reagir"; override val readAloud = "Ouvir"; override val stopReading = "Parar"
     override fun reactWith(emoji: String) = "Reagir com $emoji"
@@ -460,13 +474,13 @@ object Pt : Strings {
     override val birthdayLabel = "Aniversário (dia/mês)"
     override val birthdayInvalid = "Esse dia não existe. Escreva dia/mês, como 25/12."
     override fun birthdayHelp(kid: String) = "Por exemplo 25/12. No dia, $kid vê um lembrete. O ano não é guardado."
-    override val needYouLabel = "Recebe \"Preciso de você\""
+    override val needYouLabel = "Recebe “Preciso de você”"
     override fun needYouHelp(kid: String) = "Quando $kid tocar em Preciso de você, essa pessoa recebe uma mensagem."
     override val needYouButton = "Preciso de você"; override val needYouSend = "Mandar"; override val needYouText = "Preciso de você."
-    override val needYouWait = "Já foi. Dá para mandar de novo daqui a pouco."
-    override fun needYouAsk(names: String) = "Mandar \"Preciso de você\" para $names?"
+    override fun needYouWait(minutes: Int) = if (minutes <= 1) "Já foi. Dá para mandar de novo em 1 minuto." else "Já foi. Dá para mandar de novo em $minutes minutos."
+    override fun needYouAsk(names: String) = "Mandar “Preciso de você” para $names?"
     override fun needYouSent(names: String) = "Mandado para $names."
-    override fun nudgeLine(name: String) = "Faz uma semana que você não fala com $name"
+    override fun nudgeLine(name: String) = "Uma semana sem falar com $name"
     override val nudgeNotNow = "Agora não"; override val nudgeTitle = "Lembrete de família"
     override fun nudgeSwitch(kid: String) = "Lembrar $kid de falar com a família"
     override fun nudgeBody(kid: String) = "Se $kid passar uma semana sem escrever para alguém, o Oiê mostra um lembrete na tela inicial. Um por vez, sem contar dias."
@@ -480,7 +494,26 @@ object Pt : Strings {
     override fun photosWith(name: String) = "Fotos com $name"
     override fun noPhotos(name: String) = "Ainda não tem fotos com $name."
     override fun and(names: List<String>) = if (names.size < 2) names.joinToString() else names.dropLast(1).joinToString(", ") + " e " + names.last()
-    override val editContact = "Editar contato"
+    override val editContact = "Editar contato"; override val noPhotosHow = "As fotos, os vídeos e os GIFs da conversa aparecem aqui. Para mandar um, toque em Foto."
+    override fun mediaFrom(what: String, who: String) = "$what de $who"
+    override val newMessages = "Novas"; override val reactHint = "Segure uma mensagem para reagir ou ouvir."
+    override val releaseToCancel = "Solte para cancelar"; override val holdToRecord = "Segure o botão enquanto fala."
+    override val photoShort = "Foto"; override val stickerShort = "Figurinha"; override val pauseA11y = "Pausar"; override val close = "Fechar"
+    override fun downloading(length: String) = "Vídeo de $length, chegando…"
+    override val linkPreparing = "Preparando o código…"; override val linkSlow = "Isso pode levar até 1 minuto."
+    override val whatCanHappen = "O que pode acontecer com o meu WhatsApp?"
+    override val offlineHome = "Sem internet agora. Suas mensagens vão quando ela voltar."
+    override val you = "Você"; override val why = "Por quê?"; override val drawUse = "Usar desenho"
+    override fun recordingEnds(seconds: Int) = "Termina em $seconds s"
+    override val ok = "Usar"; override val arriving = "Chegando…"
+    override val welcomeTitle = "A família ao alcance."
+    override val sectionQuietShort = "Silêncio"; override val sectionHelpShort = "Ajustes"; override val expanded = "Aberto"; override val collapsed = "Fechado"
+    override val reportCleared = "Relatório apagado."
+    override val linkFailed = "Não deu para conectar. Confira a internet do celular e tente de novo."
+    override val linkOffline = "Sem internet no tablet. Quando ela voltar, tente de novo."
+    override fun periodName(name: String) = name
+    override val forgotTitle = "Fazer um PIN novo"; override val forgotShowCode = "Mostrar o código"
+    override fun forgotBody(kid: String) = "Para provar que é você, conecte o Oiê ao seu WhatsApp de novo. O tablet sai do WhatsApp e mostra um código para ler com o seu celular, como no começo. Os contatos e as conversas de $kid continuam aqui. Depois, você escolhe o PIN novo."
 }
 
 /** English, translated from the Portuguese (01 Brand/voice.md: a native reader checks it before release). */
@@ -499,7 +532,7 @@ object En : Strings {
     override val linkPlaceholder = "Test version: the WhatsApp code goes here in the next version."
     override val linkSimulate = "Pretend to link (test)"
     override val namesTitle = "What are your names?"; override val yourName = "Your name"; override val kidNameLabel = "What does the family call your child?"
-    override fun yourNameHelp(kid: String, parent: String) = "$kid sees it as \"$parent's WhatsApp\"."
+    override fun yourNameHelp(kid: String, parent: String) = "$kid sees it as “$parent's WhatsApp”."
     override fun kidNameHelp(kid: String) = "It goes in bold at the start of $kid's messages."
     override val pinCreate = "Create a 6-digit PIN"; override val pinAgain = "Enter the PIN again"
     override val pinCreateHelp = "It opens the parent area on this tablet. Don't use the tablet's own PIN."
@@ -514,7 +547,7 @@ object En : Strings {
     override val parentButton = "Parents"
     override fun hello(kid: String) = "Oiê, $kid"
     override val whoToTalk = "Who do you want to talk to?"
-    override fun nobodyYet(parent: String) = "Nobody here yet. Ask $parent to choose who you can call."
+    override fun nobodyYet(parent: String) = "Nobody here yet. Ask $parent to choose who you can talk to."
     override val askToAdd = "Ask to add someone"
     override fun askedToAdd(parent: String) = "Request sent. $parent will see it in the parent area."
     override fun kidAsked(kid: String) = "$kid asked you to add someone."
@@ -537,7 +570,7 @@ object En : Strings {
     override fun stickerA11y(word: String) = "Sticker: $word"
     override fun sendSticker(word: String) = "Send sticker $word"
     override fun onlyInWhatsApp(name: String) = "$name sent something that only opens in WhatsApp."
-    override val stickers = "Stickers"; override val photo = "Photo"; override val camera = "Camera"; override val gallery = "Gallery"
+    override val stickers = "Stickers"; override val photo = "Photo"; override val camera = "Camera"; override val gallery = "Choose from gallery"
     override fun photoFor(name: String) = "Photo for $name"
     override val photoPreviewA11y = "The photo you're about to send"; override val swap = "Change"
     override fun listenA11y(seconds: Int) = "Play a $seconds-second voice message"
@@ -550,7 +583,7 @@ object En : Strings {
     override fun connectingTo(parent: String) = "Connecting to $parent's WhatsApp…"
     override val disconnected = "Oiê got disconnected from your WhatsApp."
     override val reconnect = "Link again"
-    override fun whoCanCall(kid: String) = "Who $kid can call"
+    override fun whoCanCall(kid: String) = "Who $kid can talk to"
     override fun peopleAndGroups(people: Int, groups: Int) =
         "$people ${if (people == 1) "person" else "people"}, $groups ${if (groups == 1) "group" else "groups"}"
     override val canTalkInQuiet = "Can talk in quiet hours"
@@ -584,11 +617,11 @@ object En : Strings {
     override fun helpItems(kid: String, parent: String) = listOf(
         "What could happen to my WhatsApp?" to riskBody,
         "Can $kid see my chats?" to "No. The tablet only shows what was sent to $kid: replies to $kid's messages, messages that start with $kid's name, and what arrives up to 24 hours after $kid's last message. Your other chats stay only in your WhatsApp.",
-        "Does $kid know I can see the messages?" to "Yes. The first time, Oiê tells $kid: \"${noticeBody(parent)}\"",
+        "Does $kid know I can see the messages?" to "Yes. The first time, Oiê tells $kid: “${noticeBody(parent)}”",
         "Who can talk to $kid?" to "Only the people in Contacts. Messages from anyone else don't appear on the tablet. In a group, everyone in it sees what $kid sends. In Contacts, tap someone to change the name $kid sees (Grandma, for example) or to remove them. The name changes only in Oiê, not in your WhatsApp.",
-        "What is \"I need you\"?" to "A button on $kid's home screen that shows once you mark someone in Contacts (tap the person and turn on \"Gets 'I need you'\"). $kid confirms, and each marked person gets \"I need you.\" on WhatsApp, even in quiet hours. It can be sent once every 5 minutes. It's a way to call you, not an emergency service: in danger, call the emergency number.",
-        "How do quiet hours work?" to "During a period, $kid can read and listen, but not send. Anyone with \"Can talk in quiet hours\" in Contacts still gets through. You can pause a period without deleting it, for example on holiday.",
-        "Oiê got disconnected. What now?" to "Open Connection and tap Link again. Messages $kid sent in the meantime are kept and go out afterwards.",
+        "What is “I need you”?" to "A button on $kid's home screen that shows once you mark someone in Contacts (tap the person and turn on “Gets 'I need you'”). $kid confirms, and each marked person gets “I need you.” on WhatsApp, even in quiet hours. It can be sent once every 5 minutes. It's a way to call you, not an emergency service: in danger, call the emergency number.",
+        "How do quiet hours work?" to "During a period, $kid can read and listen, but not send. Anyone with “Can talk in quiet hours” in Contacts still gets through. You can pause a period without deleting it, for example on holiday.",
+        "Oiê got disconnected. What now?" to "Open Connection and tap Link WhatsApp. Messages $kid sent in the meantime are kept and go out afterwards.",
         "How do I send stickers to $kid?" to "In your WhatsApp, send the sticker to yourself, in the chat with your own name. It shows for $kid under Stickers, in New from $parent, and $kid chooses whether to keep it. Only stickers from that chat reach Oiê; the rest of it stays with you. Works once the real WhatsApp is on.",
         "Can I change things from my WhatsApp?" to "Yes. In a chat on your WhatsApp, send /$kid (or /a nickname) and Oiê answers in your chat with yourself, with the list: stop, start, add and remove. The command works on the chat you sent it in. People in that chat see your command, but not the answers. Only your WhatsApp can use them.",
         "I forgot the PIN" to "On the PIN screen, tap I forgot the PIN and link the same WhatsApp again. That proves it's you. Then create a new PIN.",
@@ -607,12 +640,12 @@ object En : Strings {
     override val writeShort = "Write"
     override fun parentLineTitle(parent: String) = "You ($parent)"
     override fun parentLineCreate(kid: String) = "Create a chat with $kid"
-    override fun parentLineBody(kid: String) = "Creates a group with only you in your WhatsApp, called \"$kid\". What $kid sends you shows there, and what you write there reaches $kid."
+    override fun parentLineBody(kid: String) = "Creates a group with only you in your WhatsApp, called “$kid”. What $kid sends you shows there, and what you write there reaches $kid."
     override val parentLineNoNotify = "WhatsApp won't notify you of these messages, because they come from your own account. Pin the chat at the top to see when they arrive."
     override val parentLineCreating = "Creating…"
     override val parentLineNotNow = "Link WhatsApp to create the chat."
     override fun parentLineFallback(kid: String) = "WhatsApp didn't accept the group. $kid will write in your Message yourself chat; to answer, swipe to reply to his message or start with his name."
-    override fun parentLineInGroup(kid: String) = "Group \"$kid\" in your WhatsApp"
+    override fun parentLineInGroup(kid: String) = "Group “$kid” in your WhatsApp"
     override val parentLineInOwnChat = "Your Message yourself chat in WhatsApp"
     override val photoOrVideo = "Photo or video"; override val takePhoto = "Take a photo"; override val recordVideo = "Record a video"
     override fun videoFor(to: String) = "Video for $to"
@@ -635,7 +668,7 @@ object En : Strings {
     override val checksumFailed = "The download didn't match the release's checksum, so it wasn't installed."
     override val signatureFailed = "The download wasn't signed by Oiê, so it wasn't installed."
     override val allowInstalls = "Allow installs from this app, then tap Update again."
-    override fun releaseOnly(v: String, id: String) = "Self-update works in the release build only ($v / $id)."
+    override val releaseOnly = "Self-update works in the release build only."
     override val version = "Version"
     override fun versionLine(v: String, code: Long) = "Oiê v$v ($code)"
     override val decimalComma = false
@@ -664,7 +697,7 @@ object En : Strings {
     override val emojiLabel = "Emoji before the name"; override val emojiHelp = "Optional. Pick one on the keyboard."
     override val looksLikeOnWhatsApp = "On WhatsApp it looks like this:"; override val sampleMessage = "Hi, Grandma"
     override fun nicknamesLabel(kid: String) = "$kid's nicknames"
-    override fun nicknamesHelp(kid: String) = "Separated by commas. A message that starts with any of them, like \"Hi Chico\", reaches $kid."
+    override fun nicknamesHelp(kid: String) = "Separated by commas. A message that starts with any of them, like “Hi Chico”, reaches $kid."
     override val pausedLine = "Paused from your WhatsApp"; override val resumeChat = "Show it again"
     override fun cmdHelp(kid: String, cmd: String, here: String?) = listOfNotNull(
         "Oiê · commands for $kid", here,
@@ -685,7 +718,7 @@ object En : Strings {
     override fun cmdRemoved(chat: String, kid: String) = "Oiê · $chat left $kid's contacts."
     override fun cmdNotIn(kid: String, cmd: String) = "Oiê · this chat isn't in $kid's contacts. To add it: $cmd add"
     override fun cmdOwnChat(kid: String, cmd: String) = "Oiê · send the command in the chat you want to change, for example in the chat with grandma: $cmd stop"
-    override fun cmdUnknown(word: String, kid: String, cmd: String) = "Oiê · I didn't understand \"$word\".\n" + cmdHelp(kid, cmd, null)
+    override fun cmdUnknown(word: String, kid: String, cmd: String) = "Oiê · I didn't understand “$word”.\n" + cmdHelp(kid, cmd, null)
     override fun renameHint(kid: String) = "Tap someone to change the name $kid sees, or to remove them."
     override fun removeNamed(name: String) = "Remove $name from contacts"
     override val changeName = "Change name"; override val noNumber = "Number not available"; override val groupShort = "Group"
@@ -710,10 +743,10 @@ object En : Strings {
     override fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean) = "Tablet report · Oiê $version · %02d/%02d".format(day, month) + if (crashed) " · closed by itself" else ""
     override fun reportCut(kept: Int, total: Int) = "Only the last $kept of $total lines fit here. The whole report can be copied on the tablet."
 
-    override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean, time: String) = when (r) {
+    override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean) = when (r) {
         app.oie.logic.Receipt.READ -> if (group) "Someone saw it" else "$who saw it"
-        app.oie.logic.Receipt.DELIVERED -> "Delivered · $time"
-        else -> "Sent · $time"
+        app.oie.logic.Receipt.DELIVERED -> "Delivered"
+        else -> "Sent"
     }
     override val react = "React"; override val readAloud = "Listen"; override val stopReading = "Stop"
     override fun reactWith(emoji: String) = "React with $emoji"
@@ -722,13 +755,13 @@ object En : Strings {
     override val birthdayLabel = "Birthday (day/month)"
     override val birthdayInvalid = "That day doesn't exist. Write day/month, like 25/12."
     override fun birthdayHelp(kid: String) = "For example 25/12. On the day, $kid sees a reminder. The year isn't kept."
-    override val needYouLabel = "Gets \"I need you\""
+    override val needYouLabel = "Gets “I need you”"
     override fun needYouHelp(kid: String) = "When $kid taps I need you, this person gets a message."
     override val needYouButton = "I need you"; override val needYouSend = "Send"; override val needYouText = "I need you."
-    override val needYouWait = "It went. You can send it again in a little while."
-    override fun needYouAsk(names: String) = "Send \"I need you\" to $names?"
+    override fun needYouWait(minutes: Int) = if (minutes <= 1) "It went. You can send it again in 1 minute." else "It went. You can send it again in $minutes minutes."
+    override fun needYouAsk(names: String) = "Send “I need you” to $names?"
     override fun needYouSent(names: String) = "Sent to $names."
-    override fun nudgeLine(name: String) = "It's been a week since you talked to $name"
+    override fun nudgeLine(name: String) = "A week since you talked to $name"
     override val nudgeNotNow = "Not now"; override val nudgeTitle = "Family reminder"
     override fun nudgeSwitch(kid: String) = "Remind $kid to talk to family"
     override fun nudgeBody(kid: String) = "If $kid goes a week without writing to someone, Oiê shows a reminder on the home screen. One at a time, no counting days."
@@ -742,7 +775,27 @@ object En : Strings {
     override fun photosWith(name: String) = "Photos with $name"
     override fun noPhotos(name: String) = "No photos with $name yet."
     override fun and(names: List<String>) = if (names.size < 2) names.joinToString() else names.dropLast(1).joinToString(", ") + " and " + names.last()
-    override val editContact = "Edit contact"
+    override val editContact = "Edit contact"; override val noPhotosHow = "The chat's photos, videos and GIFs show here. To send one, tap Photo."
+    override fun mediaFrom(what: String, who: String) = "$what from $who"
+    override val newMessages = "New"; override val reactHint = "Hold a message to react or listen."
+    override val releaseToCancel = "Release to cancel"; override val holdToRecord = "Hold the button while you talk."
+    override val photoShort = "Photo"; override val stickerShort = "Sticker"; override val pauseA11y = "Pause"; override val close = "Close"
+    override fun downloading(length: String) = "A $length video, on its way…"
+    override val linkPreparing = "Preparing the code…"; override val linkSlow = "This can take up to a minute."
+    override val whatCanHappen = "What could happen to my WhatsApp?"
+    override val offlineHome = "No internet right now. Your messages go when it's back."
+    override val you = "You"; override val why = "Why?"; override val drawUse = "Use drawing"
+    override fun recordingEnds(seconds: Int) = "Ends in $seconds s"
+    override val ok = "Use"; override val arriving = "On its way…"
+    override val welcomeTitle = "Family, within reach."
+    override val sectionQuietShort = "Quiet"; override val sectionHelpShort = "Settings"; override val expanded = "Open"; override val collapsed = "Closed"
+    override val reportCleared = "Report deleted."
+    override val linkFailed = "Couldn't link. Check the phone's internet and try again."
+    override val linkOffline = "No internet on the tablet. When it's back, try again."
+    // The presets are stored in Portuguese; shown in English when the app is.
+    override fun periodName(name: String) = when (name) { "Escola" -> "School"; "Dormir" -> "Sleep"; else -> name }
+    override val forgotTitle = "Make a new PIN"; override val forgotShowCode = "Show the code"
+    override fun forgotBody(kid: String) = "To prove it's you, link Oiê to your WhatsApp again. The tablet leaves WhatsApp and shows a code to scan with your phone, like at the start. $kid's contacts and chats stay here. Then you choose the new PIN."
 }
 
 val LocalStrings = staticCompositionLocalOf<Strings> { Pt }

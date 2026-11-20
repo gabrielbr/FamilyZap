@@ -29,6 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.semantics.Role
@@ -69,8 +74,10 @@ fun ParentPin(state: AppState) {
             QuietButton(null, { state.route = Route.KidHome }, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
             Text(tx.parentArea, style = OieType.title, color = c.ink)
         }
-        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4, Alignment.CenterVertically)) {
-            Text(message, style = OieType.body, color = c.muted)
+        // v0.34 audit: it scrolls (a phone held sideways), and a wrong PIN is in the error colour and announced.
+        Column(Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(vertical = OTokens.Spacing.space8), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4, Alignment.CenterVertically)) {
+            Text(message, style = OieType.body, color = if (message == tx.enterPin) c.muted else c.coralText,
+                modifier = Modifier.semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
             PinPad(entered) { v ->
                 entered = v
                 if (v.length == Pin.LENGTH) {
@@ -83,8 +90,8 @@ fun ParentPin(state: AppState) {
                     entered = ""
                 }
             }
-            // v0.1: forgetting the PIN means relinking WhatsApp (flow), which the sample link can't do yet.
-            TextLink(tx.forgotPin, { state.route = Route.Setup(2) })
+            // v0.34 audit (P0): a new PIN only after the same WhatsApp links again; it never goes through setup.
+            TextLink(tx.forgotPin, { state.route = Route.ForgotPin(0) })
         }
     }
 }
@@ -96,7 +103,22 @@ fun ParentArea(state: AppState, section: Int) {
     val tx = str
     var lastTouch by remember { mutableStateOf(System.currentTimeMillis()) }
     LaunchedEffect(lastTouch) { delay(IDLE_MS); state.route = Route.KidHome }
-    Column(Modifier.fillMaxSize().clickable(enabled = false) {}) {
+    val touched = { lastTouch = System.currentTimeMillis() }
+    // v0.34 audit: one undo snackbar for the whole area, pinned to the bottom (it was inline, off screen on a phone).
+    // v0.34 audit round 2: what's undone is put back; what isn't is committed when the undo goes (its 5 s run
+    // out, another undo replaces it, or the parent leaves the area), so "deleted" is always true.
+    var undo by remember { mutableStateOf<Offer?>(null) }
+    LaunchedEffect(undo) { val u = undo ?: return@LaunchedEffect; delay(UNDO_MS); u.commit(); undo = null }
+    val latest by androidx.compose.runtime.rememberUpdatedState(undo)
+    androidx.compose.runtime.DisposableEffect(Unit) { onDispose { latest?.commit?.invoke() } }
+    val offerUndo: Undo = { text, restore, commit -> undo?.commit?.invoke(); undo = Offer(text, restore, commit) }
+    // Round 3: the report's "deleted" state lives here, so switching sections during the undo can't bring it back.
+    val report = remember { ReportView() }
+    Box(Modifier.fillMaxSize()) {
+    // v0.34 audit: any touch anywhere in the area (scrolling too) keeps it open; typing counts through touched().
+    Column(Modifier.fillMaxSize().pointerInput(Unit) {
+        awaitPointerEventScope { while (true) { awaitPointerEvent(androidx.compose.ui.input.pointer.PointerEventPass.Initial); touched() } }
+    }) {
         Bar {
             Text(tx.parentArea, style = OieType.title, color = c.ink)
             Box(Modifier.weight(1f))
@@ -104,44 +126,43 @@ fun ParentArea(state: AppState, section: Int) {
         }
         val sectionContent: @Composable () -> Unit = {
             when (section) {
-                0 -> Contacts(state) { lastTouch = System.currentTimeMillis() }
-                1 -> QuietSection(state) { lastTouch = System.currentTimeMillis() }
+                0 -> Contacts(state, touched, offerUndo)
+                1 -> QuietSection(state, touched, offerUndo)
                 2 -> Connection(state)
-                else -> AboutAndHelp(state)
+                else -> AboutAndHelp(state, touched, offerUndo, report)
             }
         }
-        val sections = listOf(tx.sectionContacts to R.drawable.gg_ic_people, tx.sectionQuiet to R.drawable.gg_ic_clock, tx.sectionConnection to R.drawable.gg_ic_link, tx.sectionHelp to R.drawable.gg_ic_info)
+        val compact = app.oie.ui.common.isCompact
+        // v0.34 audit: on a phone the four sections are a 2 x 2 grid with short names, all in view at once.
+        val sections = listOf(tx.sectionContacts to R.drawable.gg_ic_people, (if (compact) tx.sectionQuietShort else tx.sectionQuiet) to R.drawable.gg_ic_clock,
+            tx.sectionConnection to R.drawable.gg_ic_link, (if (compact) tx.sectionHelpShort else tx.sectionHelp) to R.drawable.gg_ic_info)
         @Composable
         fun tab(i: Int, label: String, ic: Int, modifier: Modifier) {
             val on = i == section
             Row(
                 modifier.height(OTokens.Size.rowMin).clip(RoundedCornerShape(OTokens.Radius.radiusS))
                     .background(if (on) c.selected else c.page)
-                    .clickable(role = Role.Tab) { lastTouch = System.currentTimeMillis(); state.route = Route.Parent(i) }
+                    .selectable(on, role = Role.Tab) { touched(); state.route = Route.Parent(i) }
                     .padding(horizontal = OTokens.Spacing.space4),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
             ) { OIcon(ic, tint = if (on) c.onSelected else c.ink); Text(label, style = OieType.label, color = if (on) c.onSelected else c.ink, maxLines = 1) }
         }
-        val compact = app.oie.ui.common.isCompact
-        // A tablet: sections on the left, the section on the right. A phone (v0.13 audit): the sections in a
-        // scrolling row on top, the section below, full width.
+        // A tablet: sections on the left, the section on the right. A phone: the sections on top, the section below.
         val body: @Composable (Modifier) -> Unit = { m ->
             Column(
                 m.verticalScroll(rememberScrollState())
-                    .padding(horizontal = if (compact) OTokens.Spacing.space4 else OTokens.Spacing.space12, vertical = if (compact) OTokens.Spacing.space6 else OTokens.Spacing.space8),
+                    .padding(horizontal = if (compact) OTokens.Spacing.space4 else OTokens.Spacing.space12, vertical = if (compact) OTokens.Spacing.space6 else OTokens.Spacing.space8)
+                    .padding(bottom = OTokens.Spacing.space16), // room for the undo snackbar
                 verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
             ) { sectionContent() }
         }
         if (compact) Column(Modifier.fillMaxSize()) {
-            // The open section is always in view (v0.14 audit: it could sit scrolled off the edge).
-            val tabs = androidx.compose.foundation.lazy.rememberLazyListState(initialFirstVisibleItemIndex = section)
-            LaunchedEffect(section) { tabs.animateScrollToItem(section) }
-            androidx.compose.foundation.lazy.LazyRow(
-                Modifier.fillMaxWidth(), state = tabs,
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(OTokens.Spacing.space2),
-                horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1),
-            ) {
-                items(sections.size) { i -> tab(i, sections[i].first, sections[i].second, Modifier) }
+            Column(Modifier.fillMaxWidth().padding(OTokens.Spacing.space2), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
+                listOf(0, 2).forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
+                        (row..row + 1).forEach { i -> tab(i, sections[i].first, sections[i].second, Modifier.weight(1f)) }
+                    }
+                }
             }
             Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
             body(Modifier.fillMaxWidth())
@@ -150,23 +171,46 @@ fun ParentArea(state: AppState, section: Int) {
                 sections.forEachIndexed { i, (label, ic) -> tab(i, label, ic, Modifier.fillMaxWidth()) }
             }
             Box(Modifier.width(OTokens.Size.hairline).fillMaxHeight().background(c.line))
-            body(Modifier.widthIn(max = OTokens.Size.contentMax * 3 / 2))
+            // v0.34 audit: one column up to 600dp (README §6), so help lines stay readable.
+            body(Modifier.widthIn(max = OTokens.Size.contentMax + OTokens.Spacing.space12 * 2))
         }
     }
+    undo?.let { u ->
+        app.oie.ui.common.Snackbar(u.text, Modifier.align(Alignment.BottomCenter), action = tx.undo) { u.restore(); undo = null }
+    }
+    }
 }
+
+/** The problem report as the parent area shows it: hidden while its delete can still be undone, and re-read after. */
+private class ReportView {
+    var hidden by mutableStateOf(false)
+    var version by mutableStateOf(0)
+}
+
+/** How long an undo stays offered. */
+private const val UNDO_MS = 5_000L
+
+/** An undo on offer: its line, how to put the thing back, and what to finish if nobody undoes it. */
+private class Offer(val text: String, val restore: () -> Unit, val commit: () -> Unit)
+
+/** Offers an undo: the line, the restore, and the commit (default: nothing left to do). */
+private typealias Undo = (String, () -> Unit, () -> Unit) -> Unit
 @Composable
-private fun Contacts(state: AppState, touched: () -> Unit) {
+private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: Undo) {
     val c = OieTheme.colors
     val tx = str
-    var removed by remember { mutableStateOf<Pair<Int, Contact>?>(null) }
-    LaunchedEffect(removed) { if (removed != null) { delay(5_000); removed = null } }
     // v0.19: the name the kid sees, edited in place of the list, like a quiet period.
     var editing by remember { mutableStateOf<String?>(null) }
     val fresh = state.wa.contacts()
+    // Whole-app review: one set of letters for everyone on this screen (allowed and addable), as in setup.
+    val letters = remember(state.allowed.toList(), fresh) { app.oie.logic.Initials.of((state.allowed + fresh).map { it.name }) }
     state.allowed.indexOfFirst { it.id == editing }.takeIf { it >= 0 }?.let { i ->
         ContactEditor(state.allowed[i], state.kidName.ifBlank { tx.theKid }, fresh,
             onSave = { touched(); state.allowed[i] = it; editing = null }, onCancel = { editing = null },
-            onRemove = { touched(); val ct = state.allowed.removeAt(i); removed = i to ct; editing = null }, touched = touched)
+            onRemove = {
+                touched(); val ct = state.allowed.removeAt(i); editing = null
+                offerUndo(tx.leftTheList(ct.name), { state.allowed.add(i.coerceAtMost(state.allowed.size), ct) }, {})
+            }, touched = touched)
         return
     }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
@@ -192,7 +236,7 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
                 Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.changeNameA11y(ct.name)) { touched(); editing = ct.id; state.contactTipUsed = true },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
-            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar)
+            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters[ct.name])
             // The switch is always labelled, on or off, right under the name, so it fits a phone too (v0.13 audit).
             Column(Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2)) {
                 Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -201,27 +245,19 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
                 // The line says the current setting, so it's true whichever way the switch is.
                 // v0.21: a chat paused from the parent's WhatsApp says so, in ink, instead of the quiet-hours line.
                 if (ct.paused) Text(tx.pausedLine, style = OieType.caption, color = c.ink, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                else Text(if (ct.quietException) tx.canTalkInQuiet else tx.onlyOutsideQuiet, style = OieType.caption, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                // v0.34 audit: with no quiet period on, the line (like the switch) would say nothing.
+                else if (state.periods.any { it.on }) Text(if (ct.quietException) tx.canTalkInQuiet else tx.onlyOutsideQuiet, style = OieType.caption, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
             }
-            Switch(
+            // v0.34 audit: the switch shows only when there's a quiet period to talk through; with none, a column
+            // of "off" switches read as "blocked".
+            if (state.periods.any { it.on }) Switch(
                 modifier = Modifier.semantics { contentDescription = tx.canTalkInQuietA11y(ct.name) },
                 checked = ct.quietException,
                 onCheckedChange = { touched(); state.allowed[i] = ct.copy(quietException = it) },
                 colors = SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
             )
             // v0.19 audit: Remover moved into the contact's editor (undo instead of confirm, flow step 6), so a phone row fits the number.
-        }
-    }
-    removed?.let { (i, ct) ->
-        Row(
-            Modifier.padding(top = OTokens.Spacing.space4).clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.snackbar).padding(start = OTokens.Spacing.space6),
-            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6),
-        ) {
-            Text(tx.leftTheList(ct.name), style = OieType.body, color = c.page)
-            Box(Modifier.height(OTokens.Spacing.space12).clickable(role = Role.Button) { state.allowed.add(i.coerceAtMost(state.allowed.size), ct); removed = null }.padding(horizontal = OTokens.Spacing.space3), contentAlignment = Alignment.Center) {
-                Text(tx.undo, style = OieType.label, color = c.page)
-            }
         }
     }
     // v0.12: the parent's contacts arrive a little after linking; reload them each time Contatos opens.
@@ -247,7 +283,7 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
                 Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button) { touched(); state.allowed.add(ct) },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
-                Initial(ct.name, OTokens.Size.avatar)
+                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters[ct.name])
                 // The group note under the name, so it fits a phone (v0.17 audit).
                 Column(Modifier.weight(1f)) {
                     Text(ct.name, style = OieType.label, color = c.ink)
@@ -267,19 +303,21 @@ private fun Contacts(state: AppState, touched: () -> Unit) {
 
 /** Quiet hours in the parent area: the periods, add/edit, delete with undo, and who can talk anyway. */
 @Composable
-private fun QuietSection(state: AppState, touched: () -> Unit) {
+private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: Undo) {
     val c = OieTheme.colors
     val tx = str
     var editing by remember { mutableStateOf<Int?>(null) } // -1 = new
-    var deleted by remember { mutableStateOf<Pair<Int, app.oie.logic.QuietPeriod>?>(null) }
-    LaunchedEffect(deleted) { if (deleted != null) { delay(5_000); deleted = null } }
     val e = editing
     if (e != null) {
         PeriodEditor(
             initial = state.periods.getOrNull(e),
             onSave = { p -> touched(); if (e == -1) state.periods.add(p) else state.periods[e] = p; editing = null },
-            onDelete = if (e >= 0) ({ touched(); deleted = e to state.periods.removeAt(e); editing = null }) else null,
+            onDelete = if (e >= 0) ({
+                touched(); val p = state.periods.removeAt(e); editing = null
+                offerUndo(tx.deleted(p.name), { state.periods.add(e.coerceAtMost(state.periods.size), p) }, {})
+            }) else null,
             onCancel = { editing = null },
+            touched = touched,
         )
         return
     }
@@ -298,11 +336,15 @@ private fun QuietSection(state: AppState, touched: () -> Unit) {
     if (state.periods.isEmpty()) Text(tx.noQuiet(state.kidName), style = OieType.body, color = c.muted)
     state.periods.forEachIndexed { i, p ->
         Row(
-            Modifier.fillMaxWidth().height(OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.editA11y(p.name)) { touched(); editing = i },
+            Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.editA11y(p.name)) { touched(); editing = i },
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
         ) {
-            Text(p.name, style = OieType.label, color = c.ink)
-            Text(if (p.on) "${daysLabel(tx, p.days)} · ${hoursLabel(tx, p)}" else tx.paused, style = OieType.bodySmall, color = c.muted, modifier = Modifier.weight(1f))
+            // v0.34 audit: the name over its days and hours, so a phone at large text keeps both readable.
+            Column(Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2)) {
+                Text(tx.periodName(p.name), style = OieType.label, color = c.ink)
+                // Fresh review: the schedule always shows (the switch says on or off; "Pausado" is a contact's word).
+                Text("${daysLabel(tx, p.days)} · ${hoursLabel(tx, p)}", style = OieType.bodySmall, color = c.muted)
+            }
             Switch(
                 modifier = Modifier.semantics { contentDescription = tx.switchA11y(p.name, p.on) },
                 checked = p.on, onCheckedChange = { touched(); state.periods[i] = p.copy(on = it) },
@@ -310,51 +352,50 @@ private fun QuietSection(state: AppState, touched: () -> Unit) {
             )
         }
     }
-    deleted?.let { (i, p) ->
-        Row(
-            Modifier.padding(top = OTokens.Spacing.space4).clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.snackbar).padding(start = OTokens.Spacing.space6),
-            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6),
-        ) {
-            Text(tx.deleted(p.name), style = OieType.body, color = c.page)
-            Box(Modifier.height(OTokens.Spacing.space12).clickable(role = Role.Button) { state.periods.add(i.coerceAtMost(state.periods.size), p); deleted = null }.padding(horizontal = OTokens.Spacing.space3), contentAlignment = Alignment.Center) {
-                Text(tx.undo, style = OieType.label, color = c.page)
-            }
-        }
-    }
-    Text(tx.talkAnyway(state.allowed.filter { it.quietException }.joinToString { it.name }.ifEmpty { tx.nobodyChooseInContacts }),
+    // v0.34 audit round 2: only while a period is on (otherwise Contatos has nothing to choose).
+    if (state.periods.any { it.on }) Text(tx.talkAnyway(state.allowed.filter { it.quietException }.joinToString { it.name }.ifEmpty { tx.nobodyChooseInContacts }),
         style = OieType.body, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space4))
 }
 
 
 /** Ajustes e ajuda (was Ajuda e sobre): the names (v0.9), short answers to the questions the flows raise, the risk said again, version and licences. */
 @Composable
-private fun AboutAndHelp(state: AppState) {
+private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: Undo, report: ReportView) {
     val c = OieTheme.colors
     val tx = str
     var open by remember { mutableStateOf<Int?>(null) }
     val help = tx.helpItems(state.kidName.ifBlank { tx.theKid }, state.parentName)
     // v0.14: after Oiê closed by itself, the report leads the section (it's what the parent needs now); otherwise it sits at the end.
     val crashed = remember { app.oie.data.Diagnostics.lastCrashAt() != null }
-    if (crashed) Problems(first = true)
+    if (crashed) Problems(first = true, offerUndo, report)
     // v0.9: the names from setup can be fixed here. A blank field keeps the last name, so nothing is ever left nameless.
     Text(tx.names, style = OieType.title, color = c.ink, modifier = if (crashed) Modifier.padding(top = OTokens.Spacing.space6) else Modifier)
     var parent by remember { mutableStateOf(state.parentName) }
     var kid by remember { mutableStateOf(state.kidName) }
-    app.oie.ui.setup.Field(tx.yourName, parent, { parent = it; if (it.isNotBlank()) state.parentName = it.trim() }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName))
-    app.oie.ui.setup.Field(tx.kidNameLabel, kid, { kid = it; if (it.isNotBlank()) state.kidName = it.trim() }, tx.kidNameHelp(state.kidName.ifBlank { tx.theKid }))
-    // v0.21: as many names as the family uses ("Tito, Chico, Fran"); any of them reaches the kid and works in commands.
     var nicks by remember { mutableStateOf(state.kidNicknames.joinToString(", ")) }
-    app.oie.ui.setup.Field(tx.nicknamesLabel(state.kidName.ifBlank { tx.theKid }), nicks, {
-        nicks = it; state.kidNicknames.clear(); state.kidNicknames.addAll(app.oie.logic.KidNames.parse(it))
-    }, tx.nicknamesHelp(state.kidName.ifBlank { tx.theKid }))
-    // v0.22: the kid's name goes out in WhatsApp's bold, after an emoji the parent may choose; the line below shows the result.
-    app.oie.ui.setup.Field(tx.emojiLabel, state.kidEmoji, { state.kidEmoji = app.oie.logic.Signature.emojiOf(it) }, tx.emojiHelp)
-    SignaturePreview(state.kidName.ifBlank { tx.theKid }, state.kidEmoji)
+    // Fresh review: the fields stand apart like in setup (24dp), so each help line belongs to its own field.
+    Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
+        app.oie.ui.setup.Field(tx.yourName, parent, { parent = it; touched(); if (it.isNotBlank()) state.parentName = it.trim() }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName), names = true)
+        app.oie.ui.setup.Field(tx.kidNameLabel, kid, { kid = it; touched(); if (it.isNotBlank()) state.kidName = it.trim() }, tx.kidNameHelp(state.kidName.ifBlank { tx.theKid }), names = true)
+        // v0.21: as many names as the family uses ("Tito, Chico, Fran"); any of them reaches the kid and works in commands.
+        app.oie.ui.setup.Field(tx.nicknamesLabel(state.kidName.ifBlank { tx.theKid }), nicks, {
+            nicks = it; touched(); state.kidNicknames.clear(); state.kidNicknames.addAll(app.oie.logic.KidNames.parse(it))
+        }, tx.nicknamesHelp(state.kidName.ifBlank { tx.theKid }), names = true)
+        // v0.22: the kid's name goes out in WhatsApp's bold, after an emoji the parent may choose; the line below shows the result.
+        Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+            app.oie.ui.setup.Field(tx.emojiLabel, state.kidEmoji, { touched(); state.kidEmoji = app.oie.logic.Signature.emojiOf(it) }, tx.emojiHelp)
+            SignaturePreview(state.kidName.ifBlank { tx.theKid }, state.kidEmoji)
+        }
+    }
     BubbleSetting(state)
     NudgeSetting(state)
     Text(tx.help, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     help.forEachIndexed { i, (q, a) ->
-        Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { open = if (open == i) null else i }.padding(vertical = OTokens.Spacing.space3)) {
+        // v0.34 audit: a 56dp row, and TalkBack hears whether it's open.
+        Column(Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)
+            .clickable(role = Role.Button) { open = if (open == i) null else i }
+            .semantics { stateDescription = if (open == i) tx.expanded else tx.collapsed }
+            .padding(vertical = OTokens.Spacing.space3), verticalArrangement = Arrangement.Center) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                 Text(q, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
                 OIcon(R.drawable.gg_ic_chevron, tint = c.muted, modifier = Modifier.rotate(if (open == i) 90f else 0f))
@@ -362,10 +403,12 @@ private fun AboutAndHelp(state: AppState) {
             if (open == i) Text(a, style = OieType.body, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space2))
         }
     }
-    if (!crashed) Problems(first = false)
+    if (!crashed) Problems(first = false, offerUndo, report)
     Text(tx.about, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
-    Text(tx.aboutVersion(BuildConfigInfo.VERSION), style = OieType.body, color = c.ink)
-    app.oie.LocalUpdater.current?.let { app.oie.update.UpdateAboutRows(it) }
+    // v0.34 audit round 2: the version once (the update rows carry it when there's an updater).
+    val updater = app.oie.LocalUpdater.current
+    if (updater == null) Text(tx.aboutVersion(BuildConfigInfo.VERSION), style = OieType.body, color = c.ink)
+    else app.oie.update.UpdateAboutRows(updater)
     Text(tx.notWhatsApp, style = OieType.body, color = c.ink)
     Text(tx.credits, style = OieType.caption, color = c.muted)
 }
@@ -379,11 +422,16 @@ private fun Connection(state: AppState) {
     Text(tx.connection, style = OieType.title, color = c.ink)
     // v0.24: "Conectando…" while the link comes back by itself, with no button to press for nothing.
     val link = app.oie.ui.common.linkShown(state)
-    Text(when (link) {
-        app.oie.logic.LinkView.Shown.CONNECTED -> tx.connectedTo(state.parentName)
-        app.oie.logic.LinkView.Shown.CONNECTING -> tx.connectingTo(state.parentName)
-        app.oie.logic.LinkView.Shown.DOWN -> tx.disconnected
-    }, style = OieType.body, color = c.ink)
+    // v0.34 audit round 2: "Conectando…" with the spinner (when animations are on), like every other wait.
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
+        if (link == app.oie.logic.LinkView.Shown.CONNECTING && app.oie.ui.common.animationsOn())
+            androidx.compose.material3.CircularProgressIndicator(Modifier.size(app.oie.ui.common.ICON), color = c.ink, trackColor = c.line, strokeWidth = OTokens.Size.hairline * 2)
+        Text(when (link) {
+            app.oie.logic.LinkView.Shown.CONNECTED -> tx.connectedTo(state.parentName)
+            app.oie.logic.LinkView.Shown.CONNECTING -> tx.connectingTo(state.parentName)
+            app.oie.logic.LinkView.Shown.DOWN -> tx.disconnected
+        }, style = OieType.body, color = c.ink)
+    }
     if (link == app.oie.logic.LinkView.Shown.DOWN) PrimaryButton(tx.linkConnect, { state.route = Route.Pair })
     // v0.14: a parent who saw Oiê close comes here first; point to the report while there is one.
     if (remember { app.oie.data.Diagnostics.lastCrashAt() != null }) {
@@ -397,8 +445,9 @@ private fun Connection(state: AppState) {
         else {
             Text(tx.unlinkConfirm(state.kidName.ifBlank { tx.theKid }), style = OieType.body, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space4))
             app.oie.ui.setup.ButtonRow {
-                QuietButton(tx.unlinkReal, { confirming = false; real?.unlink() })
-                TextLink(tx.cancel, { confirming = false })
+                // v0.34 audit: the one destructive action wears the stop fill, with a word (README §3).
+                app.oie.ui.common.StopButton(tx.unlinkReal, { confirming = false; real?.unlink() })
+                QuietButton(tx.cancel, { confirming = false })
             }
         }
     }
@@ -406,18 +455,19 @@ private fun Connection(state: AppState) {
 
 /** Problemas (docs/flows/problem-report.md, v0.14): when Oiê last closed by itself, and the report to copy. */
 @Composable
-private fun Problems(first: Boolean) {
+private fun Problems(first: Boolean, offerUndo: Undo, report: ReportView) {
     val c = OieTheme.colors
     val tx = str
     val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
-    var version by remember { mutableStateOf(0) } // re-reads after Apagar
+
     var copied by remember { mutableStateOf(false) }
     LaunchedEffect(copied) { if (copied) { delay(2_000); copied = false } }
-    val crashAt = remember(version) { app.oie.data.Diagnostics.lastCrashAt() }
-    val empty = remember(version) { app.oie.data.Diagnostics.isEmpty() }
+    val crashAt = remember(report.version) { app.oie.data.Diagnostics.lastCrashAt() }
+    val hidden = report.hidden
+    val empty = remember(report.version, hidden) { app.oie.data.Diagnostics.isEmpty() } || hidden
     Text(tx.problems, style = OieType.title, color = c.ink, modifier = if (first) Modifier else Modifier.padding(top = OTokens.Spacing.space6))
     when {
-        crashAt != null -> {
+        crashAt != null && !hidden -> {
             val t = java.time.Instant.ofEpochMilli(crashAt).atZone(java.time.ZoneId.systemDefault())
             Text(tx.closedByItself(t.dayOfMonth, t.monthValue, tx.clock(t.hour, t.minute)), style = OieType.body, color = c.ink)
         }
@@ -436,7 +486,11 @@ private fun Problems(first: Boolean) {
             QuietButton(if (copied) tx.copied else tx.copyReport, {
                 clipboard.setText(androidx.compose.ui.text.AnnotatedString(app.oie.data.Diagnostics.report())); copied = true
             })
-            TextLink(tx.clearReport, { app.oie.data.Diagnostics.clear(); version++ })
+            // v0.34 audit: the report is hidden at once and deleted only once the undo is gone.
+            TextLink(tx.clearReport, {
+                report.hidden = true
+                offerUndo(tx.reportCleared, { report.hidden = false }, { app.oie.data.Diagnostics.clear(); report.hidden = false; report.version++ })
+            })
         }
         Text(tx.reportPrivacy, style = OieType.caption, color = c.muted)
     }
@@ -467,15 +521,7 @@ internal fun NudgeSetting(state: AppState) {
     val kid = state.kidName.ifBlank { tx.theKid }
     Text(tx.nudgeTitle, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     Text(tx.nudgeBody(kid), style = OieType.caption, color = c.muted)
-    Row(Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically) {
-        Text(tx.nudgeSwitch(kid), style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
-        Switch(
-            modifier = Modifier.semantics { contentDescription = tx.nudgeSwitch(kid) },
-            checked = state.nudgeOn,
-            onCheckedChange = { state.nudgeOn = it },
-            colors = SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
-        )
-    }
+    app.oie.ui.common.SwitchRow(tx.nudgeSwitch(kid), state.nudgeOn, { state.nudgeOn = it })
 }
 
 /**
@@ -500,19 +546,19 @@ internal fun BubbleSetting(state: AppState) {
     Text(tx.bubbleTitle, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     Text(tx.bubbleBody, style = OieType.caption, color = c.muted)
     if (shown == app.oie.logic.BubblePolicy.State.UNSUPPORTED) { Text(tx.bubbleUnsupported, style = OieType.body, color = c.ink); return }
-    Row(Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically) {
-        Text(tx.bubbleSwitch, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
-        Switch(
-            modifier = Modifier.semantics { contentDescription = tx.bubbleSwitch },
-            checked = state.bubbleOn,
-            onCheckedChange = { on -> state.bubbleOn = on; if (on) app.oie.data.Bubble.show(context, tx) else app.oie.data.Bubble.hide(context) },
-            colors = SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
-        )
-    }
+    // v0.34 audit: the whole row toggles; while Android still has to allow it, the row says so (it's on, not showing yet).
+    val waiting = shown == app.oie.logic.BubblePolicy.State.NEEDS_NOTIFICATIONS || shown == app.oie.logic.BubblePolicy.State.NEEDS_PERMISSION
+    app.oie.ui.common.SwitchRow(tx.bubbleSwitch, state.bubbleOn,
+        { on -> state.bubbleOn = on; if (on) app.oie.data.Bubble.show(context, tx) else app.oie.data.Bubble.hide(context) },
+        help = when (shown) {
+            app.oie.logic.BubblePolicy.State.NEEDS_NOTIFICATIONS -> tx.bubbleNeedsNotifications
+            app.oie.logic.BubblePolicy.State.NEEDS_PERMISSION -> tx.bubbleNeedsPermission
+            else -> null
+        })
     when (shown) {
         app.oie.logic.BubblePolicy.State.NEEDS_NOTIFICATIONS, app.oie.logic.BubblePolicy.State.NEEDS_PERMISSION -> {
             val forNotifications = shown == app.oie.logic.BubblePolicy.State.NEEDS_NOTIFICATIONS
-            Text(if (forNotifications) tx.bubbleNeedsNotifications else tx.bubbleNeedsPermission, style = OieType.body, color = c.ink)
+            // v0.34 audit round 2: the reason is the switch row's own line now (it was said twice).
             QuietButton(tx.bubbleAllow, { runCatching { context.startActivity(app.oie.data.Bubble.settingsIntent(context, notifications)) } })
             // Samsung tablets hide bubbles behind their own "floating notifications" setting.
             if (!forNotifications && android.os.Build.MANUFACTURER.equals("samsung", ignoreCase = true)) Text(tx.bubbleSamsung, style = OieType.caption, color = c.muted)
@@ -539,9 +585,14 @@ private fun ParentLineCard(state: AppState, touched: () -> Unit) {
             .background(c.surface).padding(OTokens.Spacing.space4),
         verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
     ) {
-        Text(tx.parentLineTitle(state.parentName.ifBlank { tx.theKid }), style = OieType.label, color = c.ink)
+        // v0.34 audit round 2: "Você" alone when the parent's name isn't set (it read "Você (a criança)").
+        Text(if (state.parentName.isBlank()) tx.you else tx.parentLineTitle(state.parentName), style = OieType.label, color = c.ink)
         Text(tx.parentLineBody(kid), style = OieType.body, color = c.ink)
-        Text(tx.parentLineNoNotify, style = OieType.caption, color = c.muted)
+        // On a phone the second note is one tap away, so the contacts start higher (less-is-more Q3).
+        // Fresh review: folded on the tablet too (three paragraphs were a lot to read before the contacts).
+        var whyOpen by remember { mutableStateOf(false) }
+        if (whyOpen) Text(tx.parentLineNoNotify, style = OieType.caption, color = c.muted)
+        else TextLink(tx.why, { whyOpen = true })
         note?.let { Text(it, style = OieType.body, color = c.ink) }
         QuietButton(if (creating) tx.parentLineCreating else tx.parentLineCreate(kid), {
             if (creating) return@QuietButton

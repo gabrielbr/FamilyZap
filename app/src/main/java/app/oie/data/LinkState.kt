@@ -31,6 +31,18 @@ class LinkState {
     var linkedAt by mutableStateOf(0L)
     /** When the link last stopped being up: an attempt started, or it dropped (v0.24, for LinkView's grace). */
     var downSince by mutableStateOf(0L)
+    /**
+     * A link that's down needs the parent only when it can't come back by itself (v0.34 audit): not
+     * linked (or the parent stopped it), logged out, banned, unavailable, or waiting for a QR. A dropped
+     * internet is retried. Exhaustive, so a new status has to be placed here.
+     */
+    fun needsParent(real: Boolean): Boolean = !real || !on || when (status) {
+        Status.LoggedOut, is Status.Banned, is Status.Qr, Status.Unavailable -> true
+        Status.Off, Status.Connecting, Status.Connected, Status.Disconnected -> false
+    }
 
-    fun clear() { on = false; status = Status.Off; available.clear(); contactsSynced = false; linkedAt = 0L; downSince = 0L }
+    /** The last pairing attempt failed (v0.34): the link screen says so above the button. */
+    var pairFailed by mutableStateOf(false)
+
+    fun clear() { on = false; status = Status.Off; available.clear(); contactsSynced = false; linkedAt = 0L; downSince = 0L; pairFailed = false }
 }

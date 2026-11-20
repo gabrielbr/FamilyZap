@@ -66,6 +66,7 @@ import app.oie.logic.Kind
 import app.oie.logic.Message
 import app.oie.logic.Reactions
 import app.oie.ui.common.Bar
+import app.oie.ui.common.pressable
 import app.oie.ui.common.OIcon
 import app.oie.ui.common.PrimaryButton
 import app.oie.ui.common.QuietButton
@@ -79,27 +80,16 @@ import kotlinx.coroutines.withContext
 
 /** The v0.33 family features on the kid's side (docs/flows/family-features.md). */
 
-/** A bottom sheet: the scrim and the surface with the large top radius, as the photo and sticker sheets. */
+/** v0.34: the shared bottom sheet (Components.BottomSheet), so every sheet closes with Back and darkens in both themes. */
 @Composable
-private fun Sheet(onClose: () -> Unit, content: @Composable () -> Unit) {
-    val c = OieTheme.colors
-    androidx.activity.compose.BackHandler(onBack = onClose)
-    Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(onClick = onClose), contentAlignment = Alignment.BottomCenter) {
-        Column(
-            Modifier.widthIn(max = OTokens.Size.contentMax)
-                .clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
-                .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),
-            verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
-        ) { content() }
-    }
-}
+private fun Sheet(onClose: () -> Unit, content: @Composable () -> Unit) = app.oie.ui.common.BottomSheet(onClose) { content() }
 
 /**
  * A long press on a message: six reactions, the one the kid already picked shown as picked (tapping it
  * again takes it away), and Ouvir for a text.
  */
 @Composable
-internal fun ReactionSheet(m: Message, onReact: (String) -> Unit, onRead: (() -> Unit)?, onClose: () -> Unit) {
+internal fun ReactionSheet(m: Message, onReact: (String) -> Unit, onRead: (() -> Unit)?, onClose: () -> Unit, lastUsed: String? = null) {
     val c = OieTheme.colors
     val tx = str
     Sheet(onClose) {
@@ -110,7 +100,8 @@ internal fun ReactionSheet(m: Message, onReact: (String) -> Unit, onRead: (() ->
             if (compact) Modifier.fillMaxWidth() else Modifier,
             horizontalArrangement = if (compact) Arrangement.SpaceBetween else Arrangement.spacedBy(OTokens.Spacing.space2),
         ) {
-            Reactions.CHOICES.forEach { e ->
+            // v0.34 audit round 2: the kid's last reaction first (a shortcut for the one they use most).
+            (listOfNotNull(lastUsed) + Reactions.CHOICES.filter { it != lastUsed }).forEach { e ->
                 val picked = m.reactions[Reactions.KID] == e
                 Box(
                     Modifier.size(OTokens.Spacing.space12).clip(CircleShape).background(if (picked) c.selected else c.surface)
@@ -160,7 +151,12 @@ internal fun PhotosScreen(state: AppState, contact: Contact, onOpen: (Message) -
             Text(tx.photosWith(contact.name), style = OieType.title, color = c.ink)
         }
         if (media.isEmpty()) {
-            Text(tx.noPhotos(contact.name), style = OieType.body, color = c.muted, modifier = Modifier.padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space6))
+            // Fresh review: an empty state like the home's, with the brand's rounds, and the way to add one.
+            Column(Modifier.padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space8), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
+                app.oie.ui.common.Rounds()
+                Text(tx.noPhotos(contact.name), style = OieType.body, color = c.ink)
+                Text(tx.noPhotosHow, style = OieType.body, color = c.muted)
+            }
             return@Column
         }
         LazyVerticalGrid(
@@ -189,13 +185,19 @@ private fun MediaTile(m: Message, onOpen: () -> Unit) {
     ) {
         if (m.kind == Kind.PHOTO) {
             var bmp by remember(m.media) { mutableStateOf<android.graphics.Bitmap?>(null) }
-            LaunchedEffect(m.media) { bmp = withContext(Dispatchers.IO) { m.media?.let { Photos.load(context, it, Photos.MAX_SIDE / 4) } } }
+            LaunchedEffect(m.media) { bmp = withContext(app.oie.data.Background.dispatcher) { m.media?.let { Photos.load(context, it, Photos.MAX_SIDE / 4) } } }
             bmp?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
         } else {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
-                OIcon(R.drawable.gg_ic_play)
-                Text(label, style = OieType.caption, color = c.muted)
-            }
+            // v0.34 audit: a video or GIF shows its first picture, with ▶ on it, like in the chat.
+            val frame = rememberVideoFrame(m.media)
+            frame?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
+            Box(Modifier.size(OTokens.Spacing.space12).clip(CircleShape).background(c.surface), contentAlignment = Alignment.Center) { OIcon(R.drawable.gg_ic_play) }
+            // A GIF says so, as in the chat (videos and GIFs looked the same).
+            if (m.kind == Kind.GIF) Text(
+                tx.gifLabel, style = OieType.caption, color = c.ink,
+                modifier = Modifier.align(Alignment.TopStart).padding(OTokens.Spacing.space2)
+                    .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.surface).padding(horizontal = OTokens.Spacing.space2),
+            )
         }
     }
 }
@@ -208,11 +210,11 @@ internal fun PhotoScreen(media: String, from: String, onBack: () -> Unit) {
     val context = LocalContext.current
     androidx.activity.compose.BackHandler(onBack = onBack)
     var bmp by remember(media) { mutableStateOf<android.graphics.Bitmap?>(null) }
-    LaunchedEffect(media) { bmp = withContext(Dispatchers.IO) { Photos.load(context, media, Photos.MAX_SIDE) } }
+    LaunchedEffect(media) { bmp = withContext(app.oie.data.Background.dispatcher) { Photos.load(context, media, Photos.MAX_SIDE) } }
     Column(Modifier.fillMaxSize().background(c.page)) {
         Bar {
             QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
-            Text(from, style = OieType.title, color = c.ink)
+            Text(tx.mediaFrom(tx.photo, from), style = OieType.title, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
         Box(Modifier.fillMaxSize().padding(OTokens.Spacing.space6), contentAlignment = Alignment.Center) {
             bmp?.let { Image(it.asImageBitmap(), tx.photo, Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)), contentScale = ContentScale.Fit) }
@@ -237,7 +239,17 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
     val colors = listOf(c.drawInk, c.drawCoral, c.drawSun, c.drawLeaf, c.drawSky)
     var color by remember { mutableStateOf(0) }
     var thick by remember { mutableStateOf(false) }
+    val compactPad = app.oie.ui.common.isCompact
     val strokes = remember { mutableStateListOf<Stroke2>() }
+    var cleared by remember { mutableStateOf<List<Stroke2>?>(null) }
+    // v0.34 audit: Limpar can be undone too (Desfazer right after brings the whole drawing back).
+    val editLinks: @Composable () -> Unit = {
+        TextLink(tx.undo, {
+            val back = cleared
+            if (strokes.isEmpty() && back != null) { strokes.addAll(back); cleared = null } else strokes.removeLastOrNull()
+        })
+        TextLink(tx.drawClear, { if (strokes.isNotEmpty()) { cleared = strokes.toList(); strokes.clear() } })
+    }
     var tick by remember { mutableStateOf(0) } // a point added: draw again
     var size by remember { mutableStateOf(IntSize.Zero) }
     val thin = with(density) { OTokens.Spacing.space2.toPx() }
@@ -246,8 +258,9 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
         Bar {
             QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
             // v0.33 audit: on a phone, the name alone, so Pronto has room.
-            Text(if (app.oie.ui.common.isCompact) to else tx.drawFor(to), style = OieType.title, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            PrimaryButton(tx.drawDone, {
+            Text(tx.drawFor(to), style = OieType.title, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            // Round 3: on a phone the button goes under the pad, full width, so the bar keeps who it's for.
+            if (!compactPad) PrimaryButton(tx.drawUse, {
                 if (strokes.isEmpty() || size.width == 0) return@PrimaryButton
                 onDone(render(strokes, size, c.drawPaper))
             }, enabled = strokes.isNotEmpty(), icon = R.drawable.gg_ic_check)
@@ -289,16 +302,23 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
                 ) {
                     Box(
                         Modifier.size(OTokens.Spacing.space10).clip(CircleShape).background(col)
-                            .border(if (color == i) OTokens.Size.hairline * 3 else OTokens.Size.hairline, if (color == i) c.ink else c.line, CircleShape),
+                            // v0.34 audit: the swatch edge is `muted` (3:1 in both themes), and ink, thicker, when picked.
+                            .border(if (color == i) OTokens.Size.hairline * 3 else OTokens.Size.hairline, if (color == i) c.ink else c.muted, CircleShape),
                         contentAlignment = Alignment.Center,
-                    ) { if (color == i) OIcon(R.drawable.gg_ic_check, tint = if (i == 2) c.ink else c.drawPaper) }
+                    ) { if (color == i) OIcon(R.drawable.gg_ic_check, tint = if (i == 2) c.drawInk else c.drawPaper) }
                 }
             }
             Toggle(tx.drawThin, !thick) { thick = false }
             Toggle(tx.drawThick, thick) { thick = true }
-            TextLink(tx.undo, { strokes.removeLastOrNull() })
-            TextLink(tx.drawClear, { strokes.clear() })
+            if (!compactPad) editLinks()
         }
+        // Round 4: on a phone, Desfazer and Limpar share their own row (Limpar wrapped alone).
+        if (compactPad) Row(Modifier.padding(horizontal = app.oie.ui.common.sideMargin), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) { editLinks() }
+        if (compactPad) PrimaryButton(tx.drawUse, {
+            if (strokes.isEmpty() || size.width == 0) return@PrimaryButton
+            onDone(render(strokes, size, c.drawPaper))
+        }, Modifier.fillMaxWidth().padding(start = app.oie.ui.common.sideMargin, end = app.oie.ui.common.sideMargin, bottom = OTokens.Spacing.space4),
+            enabled = strokes.isNotEmpty(), icon = R.drawable.gg_ic_check)
     }
 }
 
@@ -342,16 +362,18 @@ private fun render(strokes: List<Stroke2>, size: IntSize, paper: Color): android
 internal fun HomeReminders(state: AppState, birthdays: Boolean) {
     val today = java.time.Instant.ofEpochMilli(state.clock()).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
     val tx = str
+    // The same letters as on the person's tile (round 3: "V" here, "Vó" there).
+    val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
     if (birthdays) app.oie.logic.Birthdays.today(state.reachable, today).forEach { ct ->
-        Reminder(ct, tx.birthdayToday(ct.name), onOpen = { state.route = Route.Conversation(ct.id) })
+        Reminder(ct, tx.birthdayToday(ct.name), onOpen = { state.route = Route.Conversation(ct.id) }, letters = letters[ct.name])
     }
     if (!birthdays) app.oie.logic.Nudge.pick(state.nudgeOn, state.reachable, state.messages, state.nudgeDismissed, state.clock())?.let { ct ->
-        Reminder(ct, tx.nudgeLine(ct.name), onOpen = { state.route = Route.Conversation(ct.id) }, onDismiss = { state.nudgeDismissed[ct.id] = state.clock() })
+        Reminder(ct, tx.nudgeLine(ct.name), onOpen = { state.route = Route.Conversation(ct.id) }, onDismiss = { state.nudgeDismissed[ct.id] = state.clock() }, letters = letters[ct.name])
     }
 }
 
 @Composable
-private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (() -> Unit)? = null) {
+private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (() -> Unit)? = null, letters: String? = null) {
     val c = OieTheme.colors
     val tx = str
     Row(
@@ -361,17 +383,17 @@ private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
-            Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClick = onOpen)
+            Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).pressable(onClick = onOpen)
                 .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space2),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
         ) {
-            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar)
+            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters)
             Text(text, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
             OIcon(R.drawable.gg_ic_chevron, tint = c.muted)
         }
     }
     // v0.33 audit: "Agora não" under the line, not beside it, so the line has the width on a phone.
-    if (onDismiss != null) TextLink(tx.nudgeNotNow, onDismiss, Modifier.offset(x = -OTokens.Spacing.space3))
+    if (onDismiss != null) TextLink(tx.nudgeNotNow, onDismiss)
 }
 
 /**
@@ -379,31 +401,24 @@ private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (
  * someone. It asks once before sending; then it says who got it.
  */
 @Composable
-internal fun NeedYou(state: AppState) {
-    val c = OieTheme.colors
+internal fun NeedYou(state: AppState, onSaid: (String) -> Unit) {
     val tx = str
     val to = app.oie.logic.NeedYou.to(state.reachable)
     if (to.isEmpty()) return
     val names = tx.and(to.map { it.name })
     var asking by remember { mutableStateOf(false) }
-    var said by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(said) { if (said != null) { kotlinx.coroutines.delay(8_000); said = null } }
+    // v0.34 audit: "wait" says how many minutes are left, so the kid knows when to try again.
+    fun waitLine() = tx.needYouWait(((app.oie.logic.NeedYou.waitMs(state.needYouAt, state.clock()) + 59_999) / 60_000).toInt().coerceAtLeast(1))
     QuietButton(tx.needYouButton, {
-        said = null
-        if (app.oie.logic.NeedYou.waitMs(state.needYouAt, state.clock()) > 0) said = tx.needYouWait else asking = true
-    }, Modifier.padding(top = OTokens.Spacing.space8).height(OTokens.Size.button), icon = R.drawable.gg_ic_people)
-    said?.let { Text(it, style = OieType.body, color = c.ink) }
-    if (asking) NeedYouSheet(names, onSend = {
-        asking = false
-        said = if (state.sendNeedYou(tx.needYouText)) tx.needYouSent(names) else tx.needYouWait
-    }, onClose = { asking = false })
-}
-
-@Composable
-private fun NeedYouSheet(names: String, onSend: () -> Unit, onClose: () -> Unit) {
-    val c = OieTheme.colors
-    val tx = str
-    androidx.compose.ui.window.Dialog(onDismissRequest = onClose) { NeedYouCard(names, onSend, onClose) }
+        if (app.oie.logic.NeedYou.waitMs(state.needYouAt, state.clock()) > 0) onSaid(waitLine()) else asking = true
+    }, Modifier.padding(top = OTokens.Spacing.space8), icon = R.drawable.gg_ic_people)
+    // v0.34 audit: a bottom sheet like every other kid sheet (it was a centred dialog).
+    if (asking) Sheet({ asking = false }) {
+        NeedYouCard(names, onSend = {
+            asking = false
+            onSaid(if (state.sendNeedYou(tx.needYouText)) tx.needYouSent(names) else waitLine())
+        }, onClose = { asking = false })
+    }
 }
 
 /** The question before "Preciso de você" goes: who gets it, Mandar or Cancelar. */
@@ -412,10 +427,7 @@ internal fun NeedYouCard(names: String, onSend: () -> Unit, onClose: () -> Unit)
     val c = OieTheme.colors
     val tx = str
     run {
-        Column(
-            Modifier.widthIn(max = OTokens.Size.contentMax).clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(c.surface).padding(OTokens.Spacing.space8),
-            verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6),
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
             Text(tx.needYouAsk(names), style = OieType.title, color = c.ink)
             app.oie.ui.setup.ButtonRow {
                 PrimaryButton(tx.needYouSend, onSend, icon = R.drawable.gg_ic_send)

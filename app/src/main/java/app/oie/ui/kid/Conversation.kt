@@ -45,6 +45,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.layout.heightIn
 import app.oie.data.Diagnostics
 import kotlinx.coroutines.withContext
@@ -94,7 +99,10 @@ val STICKERS = linkedMapOf(
 // v0.31: receiving GIFs and stickers from the keyboard uses Compose's content receiver, still marked experimental.
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun Conversation(state: AppState, contactId: String, openStickers: Boolean = false, inBubble: Boolean = false, onLeave: (() -> Unit)? = null, pendingPreview: Message? = null) {
+fun Conversation(
+    state: AppState, contactId: String, openStickers: Boolean = false, inBubble: Boolean = false, onLeave: (() -> Unit)? = null,
+    pendingPreview: Message? = null, recordingPreviewSec: Int = -1, slipPreview: Boolean = false,
+) {
     val c = OieTheme.colors
     val tx = str
     // v0.21: paused or removed while open (a command from the parent's WhatsApp): back to the home screen.
@@ -112,7 +120,10 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
     // pendingPreview: the screenshot tests show the undo bar (v0.33: with Ouvir for a voice message).
     var pending by remember { mutableStateOf(pendingPreview) }
     var stickers by remember { mutableStateOf(openStickers) }
-    var recordingSince by remember { mutableLongStateOf(0L) }
+    // The *Preview parameters let the screenshot tests show the recording and slip states.
+    var recordingSince by remember { mutableLongStateOf(if (recordingPreviewSec >= 0) state.clock() - recordingPreviewSec * 1000L else 0L) }
+    /** The kid slid off the record button: releasing now cancels (v0.34). */
+    var away by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var choosingPhoto by remember { mutableStateOf(false) }
     var preview by remember { mutableStateOf<String?>(null) }
@@ -218,11 +229,28 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
             gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
         }
     }
-    val visible = state.visible(contactId)
+    // v0.34 audit: the visible list is worked out when messages change, not on every keystroke.
+    val visible by remember(contactId) { androidx.compose.runtime.derivedStateOf { state.visible(contactId) } }
+    // v0.34 audit (P1): what was unread when the chat opened, for the "Novas" line and where the chat opens.
+    val seenAtOpen = remember(contactId) { state.lastSeen[contactId] ?: 0L }
+    val firstUnread = remember(contactId, visible.size) { visible.indexOfFirst { !it.fromKid && it.at > seenAtOpen } }
     LaunchedEffect(contactId, visible.size) { state.lastSeen[contactId] = state.clock() }
+    var slip by remember { mutableStateOf(slipPreview) }
+    LaunchedEffect(slip) { if (slip) { delay(NOTE_MS); slip = false } }
+    LaunchedEffect(micError, photoError) { if (micError || photoError) { delay(NOTE_MS); micError = false; photoError = false } }
 
     fun queue(m: Message) { pending = m }
-    // v0.33: listening to a voice message before it goes pauses the 5 seconds; they start again when it ends.
+    /** Ends a recording: sends it (if it's a second or more) or throws it away. */
+    fun stopRecording(send: Boolean) {
+        if (recordingSince == 0L) return
+        val secs = ((state.clock() - recordingSince) / 1000).toInt()
+        recordingSince = 0; away = false
+        // Under 1 s is a slip, not a message (flow branch 3a); v0.34 audit: it says how to record.
+        if (send && secs < 1) slip = true
+        val media = app.oie.data.Voice.stop(context, keep = send && secs >= 1)
+        if (media != null) queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.VOICE, durationSec = secs, media = media))
+    }
+    // v0.33: listening to a voice message before it goes (its ▶ in the chat) pauses the 5 seconds; they start again when it ends.
     val hearing = pending?.let { app.oie.data.Voice.playing == it.id } ?: false
     LaunchedEffect(pending, hearing) {
         val m = pending ?: return@LaunchedEffect
@@ -237,19 +265,51 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
         Column(Modifier.fillMaxSize()) {
             Bar {
                 QuietButton(null, { state.drafts[contactId] = draft; if (onLeave != null) onLeave() else state.route = Route.KidHome }, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
-                app.oie.ui.common.Avatar(contact, OTokens.Size.avatar)
+                // Fresh review: the same letters as on the home tile ("Vó", "Vô").
+                app.oie.ui.common.Avatar(contact, OTokens.Size.avatar, letters = app.oie.logic.Initials.of(state.reachable.map { it.name })[contact.name])
                 Text(contact.name, style = OieType.title, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 // v0.33: the photos, videos and GIFs in this chat. A word on the tablet, the icon alone on a phone.
-                QuietButton(if (app.oie.ui.common.isCompact) null else tx.photos, { showPhotos = true }, icon = R.drawable.gg_ic_image, contentDescription = tx.photosWith(contact.name))
+                // v0.34 audit round 2: "Fotos" keeps its word on a phone too (README §9; decision 0010 covers the composer only).
+                QuietButton(tx.photos, { showPhotos = true }, icon = R.drawable.gg_ic_image, contentDescription = tx.photosWith(contact.name))
             }
             val list = rememberLazyListState()
+            // v0.34 audit (P1): the chat opens on the first unread message (under a "Novas" line), else on the newest;
+            // a new message or the kid's own send brings the newest into view.
+            LaunchedEffect(contactId) {
+                androidx.compose.runtime.withFrameNanos { }
+                list.scrollToItem(if (firstUnread >= 0) firstUnread + 1 else (list.layoutInfo.totalItemsCount - 1).coerceAtLeast(0))
+            }
+            LaunchedEffect(visible.size, pending) {
+                androidx.compose.runtime.withFrameNanos { }
+                val last = list.layoutInfo.totalItemsCount - 1
+                val nearEnd = (list.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) >= last - 3
+                if (last >= 0 && pending != null) list.scrollToItem(last) else if (last >= 0 && nearEnd) list.animateScrollToItem(last)
+            }
+            // v0.34 audit round 2: while the kid is at the end, the end stays in view as pictures arrive and grow.
+            // Round 3: a chat that opened on "Novas" keeps its place; only the kid's own drag decides whether to follow the end.
+            var atEnd by remember { mutableStateOf(firstUnread < 0) }
+            LaunchedEffect(list) {
+                list.interactionSource.interactions.collect { i ->
+                    if (i is androidx.compose.foundation.interaction.DragInteraction.Stop || i is androidx.compose.foundation.interaction.DragInteraction.Cancel) {
+                        kotlinx.coroutines.delay(MOTION_SETTLE_MS); atEnd = !list.canScrollForward
+                    }
+                }
+            }
+            LaunchedEffect(list) {
+                androidx.compose.runtime.snapshotFlow { list.canScrollForward }.collect { more ->
+                    if (more && atEnd && !list.isScrollInProgress) list.scrollToItem((list.layoutInfo.totalItemsCount - 1).coerceAtLeast(0), Int.MAX_VALUE / 2)
+                }
+            }
             LazyColumn(
                 Modifier.weight(1f).fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin),
                 state = list, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
+                // Room under the last message for the undo snackbar, so it never covers what's being sent.
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = if (pending != null) OTokens.Spacing.space16 + OTokens.Spacing.space12 else OTokens.Spacing.space4),
             ) {
                 item { Box(Modifier.height(OTokens.Spacing.space6)) }
                 if (visible.isEmpty() && pending == null) item { Text(tx.firstHi(contact.name), style = OieType.body, color = c.muted) }
-                items(visible, key = { it.id }) { m ->
+                itemsIndexed(visible, key = { _, m -> m.id }) { i, m ->
+                    if (i == firstUnread) NewLine()
                     val failed = m.id in state.failed
                     Bubble(m, contact.name, status = if (failed) tx.notSent else null, parent = state.parentName,
                         onMenu = { menuFor = m }, onPhoto = { bigPhoto = it }) { watching = it }
@@ -262,14 +322,24 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                         TextLink(tx.tryAgain, { state.failed.remove(m.id); state.wa.send(m) })
                     }
                 }
-                pending?.let { p -> item(key = "pending") { Bubble(p, contact.name, status = tx.sending) } }
+                // v0.34 audit: the snackbar says "Enviando para…", so the message itself keeps just its time.
+                pending?.let { p -> item(key = "pending") { Bubble(p, contact.name) } }
                 visible.lastOrNull { it.fromKid }?.takeIf { pending == null && visible.last().fromKid && it.id !in state.failed }?.let { last ->
                     // v0.33: "Enviada", then "Entregue", then "Vovó viu" (in a group, "Alguém viu").
                     val group = contact.isGroup && !contact.parentLine
-                    item { Text(tx.receiptLine(last.receipt, contact.name, group, hour(tx, last.at)), style = OieType.caption, color = c.muted, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth()) }
+                    item { Text(tx.receiptLine(last.receipt, contact.name, group), style = OieType.caption, color = c.muted, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth()) }
+                }
+                // v0.34 audit: reactions were found only by chance; a one-line hint until the kid has reacted once,
+                // at the end of the chat (round 2: not between messages).
+                if (!state.reactTipUsed && visible.any { !it.fromKid && it.kind != Kind.DELETED }) item(key = "react-tip") {
+                    Text(tx.reactHint, style = OieType.caption, color = c.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                 }
             }
             Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
+            // Round 4: the slip line sits above the composer, so the kid can still type or tap meanwhile.
+            if (slip) Text(tx.holdToRecord, style = OieType.body, color = c.ink,
+                modifier = Modifier.fillMaxWidth().padding(start = app.oie.ui.common.sideMargin, end = app.oie.ui.common.sideMargin, top = OTokens.Spacing.space3)
+                    .semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space4),
                 verticalAlignment = Alignment.CenterVertically,
@@ -282,15 +352,34 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                         style = OieType.body, color = c.muted,
                     )
                 } else if (recordingSince > 0) {
-                    Text(tx.recording, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
-                    Text(tx.releaseToSend, style = OieType.bodySmall, color = c.muted)
+                    // v0.34 audit: a running clock while recording, and what releasing will do (send, or cancel when slid away).
+                    var now by remember { mutableLongStateOf(state.clock()) }
+                    LaunchedEffect(recordingSince) {
+                        while (true) {
+                            now = state.clock()
+                            // The flow's limit: 2 minutes, then it goes by itself.
+                            if (now - recordingSince >= MAX_RECORDING_MS) { stopRecording(send = true); break }
+                            delay(TICK_MS)
+                        }
+                    }
+                    val left = ((MAX_RECORDING_MS - (now - recordingSince)) / 1000).toInt()
+                    // The last 10 seconds count down, in the error colour (with the word, never colour alone).
+                    Text(if (left <= 10) tx.recordingEnds(left.coerceAtLeast(0)) else tx.recording + " · " + clockOf(((now - recordingSince) / 1000).toInt().coerceAtLeast(0)),
+                        style = OieType.label, color = if (left <= 10) c.coralText else c.ink, modifier = Modifier.weight(1f))
+                    // Round 3: on a phone the hint shows only when it matters (slid off), so the clock and Cancelar fit.
+                    if (away || !app.oie.ui.common.isCompact) Text(if (away) tx.releaseToCancel else tx.releaseToSend, style = OieType.bodySmall, color = if (away) c.coralText else c.muted)
+                    // v0.34 audit round 2: a recording started by a tap (TalkBack) has a way out; with a finger on
+                    // the button, sliding off cancels.
+                    QuietButton(tx.cancel, { app.oie.data.Voice.stop(context, keep = false); recordingSince = 0; away = false })
                 } else {
                     // v0.29 audit: on a narrow screen (a phone, a bubble) the camera and stickers step aside while the
                     // kid types, so the field has room; they come back when it's empty.
                     val compact = app.oie.ui.common.isCompact
                     if (!compact || draft.isBlank()) {
-                        QuietButton(null, { choosingPhoto = true }, icon = R.drawable.gg_ic_camera, contentDescription = tx.photoButton)
-                        QuietButton(null, { stickers = true }, icon = R.drawable.gg_ic_sticker, contentDescription = tx.stickerButton)
+                        // v0.34 audit: with a word on the tablet (README §9: icons with labels on the kid side); a phone
+                        // keeps the icons alone for the field's room (decision 0010), labelled for TalkBack.
+                        QuietButton(if (compact) null else tx.photoShort, { choosingPhoto = true }, icon = R.drawable.gg_ic_camera, contentDescription = tx.photoButton)
+                        QuietButton(if (compact) null else tx.stickerShort, { stickers = true }, icon = R.drawable.gg_ic_sticker, contentDescription = tx.stickerButton)
                     }
                     // v0.29: in a chat's bubble the field is focused at once, so the keyboard comes up to answer.
                     val focus = remember { androidx.compose.ui.focus.FocusRequester() }
@@ -327,59 +416,37 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                 }
                 if (canSend && draft.isBlank()) RecordButton(
                     recording = recordingSince > 0,
+                    onAway = { away = it },
                     onStart = {
                         // v0.11: a real recording. Without the microphone permission, ask for it (the parent was asked at setup).
                         if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                             if (app.oie.data.Voice.start(context)) { micError = false; recordingSince = state.clock() } else micError = true
                         } else askMic.launch(android.Manifest.permission.RECORD_AUDIO)
                     },
-                    onStop = { send ->
-                        val secs = ((state.clock() - recordingSince) / 1000).toInt()
-                        recordingSince = 0
-                        // Under 1 s is a slip, not a message (flow branch 3a).
-                        val media = app.oie.data.Voice.stop(context, keep = send && secs >= 1)
-                        if (media != null) queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.VOICE, durationSec = secs, media = media))
-                    },
+                    onStop = { send -> stopRecording(send) },
                 )
             }
         }
+        // v0.34 audit: the design system's snackbar, one action (Desfazer). Hearing a voice message before it goes
+        // is its ▶ in the chat (it was a second action here, a duplicate).
         pending?.let {
-            Row(
-                Modifier.align(Alignment.BottomCenter).padding(bottom = OTokens.Size.record + OTokens.Spacing.space12)
-                    .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.snackbar)
-                    .padding(start = OTokens.Spacing.space6, end = OTokens.Spacing.space2),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6),
-            ) {
-                // v0.33 audit: with Ouvir on a phone, the line gives way so Desfazer always shows.
-                Text(tx.sendingTo(contact.name), style = OieType.body, color = c.page, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                // v0.33: hear a voice message before it goes. No extra tap on the usual path: it still goes by itself.
-                if (it.kind == Kind.VOICE && it.media != null) Box(
-                    Modifier.height(OTokens.Spacing.space12).clickable(role = Role.Button) { app.oie.data.Voice.toggle(context, it.id, it.media) }
-                        .padding(horizontal = OTokens.Spacing.space3),
-                    contentAlignment = Alignment.Center,
-                ) { Text(if (hearing) tx.stopReading else tx.readAloud, style = OieType.label, color = c.page) }
-                Box(
-                    Modifier.height(OTokens.Spacing.space12).clickable(role = Role.Button) {
-                        // Undo puts the content back, so nothing is lost.
-                        if (it.kind == Kind.TEXT) field.edit { replace(0, length, it.text) }
-                        if (it.kind == Kind.PHOTO) preview = it.media // back to the preview, nothing lost
-                        if (it.kind == Kind.VOICE) app.oie.data.Voice.stopPlaying()
-                        pending = null
-                    }.padding(horizontal = OTokens.Spacing.space3),
-                    contentAlignment = Alignment.Center,
-                ) { Text(tx.undo, style = OieType.label, color = c.page) }
+            app.oie.ui.common.Snackbar(tx.sendingTo(contact.name), Modifier.align(Alignment.BottomCenter).padding(bottom = OTokens.Size.record + OTokens.Spacing.space8), action = tx.undo) {
+                // Undo puts the content back, so nothing is lost; for a voice message, undoing is not sending it.
+                if (it.kind == Kind.TEXT) field.edit { replace(0, length, it.text) }
+                if (it.kind == Kind.PHOTO) preview = it.media
+                if (it.kind == Kind.VOICE) app.oie.data.Voice.stopPlaying()
+                pending = null
             }
         }
         if (choosingPhoto) PhotoSourceSheet(first = state.lastPhotoSource, onPick = ::open, onClose = { choosingPhoto = false })
-        if (micError) Text(
-            tx.micError, style = OieType.body, color = c.coralText,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = OTokens.Size.header + OTokens.Spacing.space4)
-                .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.coralSoft).padding(OTokens.Spacing.space3),
-        )
-        if (photoError) Text(
-            tx.photoError, style = OieType.body, color = c.coralText,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = OTokens.Size.header + OTokens.Spacing.space4)
-                .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.coralSoft).padding(OTokens.Spacing.space3),
+        // v0.34 audit: problems are announced, go by themselves, and a tap puts them away.
+        if (micError || photoError) Text(
+            if (micError) tx.micError else tx.photoError, style = OieType.body, color = c.coralText,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = OTokens.Size.header + OTokens.Spacing.space4, start = app.oie.ui.common.sideMargin, end = app.oie.ui.common.sideMargin)
+                .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.coralSoft)
+                .clickable(onClickLabel = tx.close) { micError = false; photoError = false }
+                .semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite }
+                .padding(OTokens.Spacing.space3),
         )
         preview?.let { name ->
             PhotoPreview(name, contact.name,
@@ -430,7 +497,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
             ReactionSheet(m,
                 onReact = { e -> state.react(m.id, e); menuFor = null },
                 onRead = if (m.kind == Kind.TEXT && m.text.isNotBlank()) ({ app.oie.data.ReadAloud.toggle(context, m.id, m.text); menuFor = null }) else null,
-                onClose = { menuFor = null })
+                onClose = { menuFor = null }, lastUsed = state.lastReaction)
         }
         if (showPhotos) PhotosScreen(state, contact, onOpen = { m -> if (m.kind == Kind.PHOTO) bigPhoto = m.media else watching = m }, onBack = { showPhotos = false })
         bigPhoto?.let { PhotoScreen(it, contact.name) { bigPhoto = null } }
@@ -447,28 +514,62 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
 
 /** Hold to record, release to send; tap to start and tap again to send for anyone who can't hold (WCAG 2.5.7). */
 @Composable
-private fun RecordButton(recording: Boolean, onStart: () -> Unit, onStop: (send: Boolean) -> Unit) {
+private fun RecordButton(recording: Boolean, onStart: () -> Unit, onStop: (send: Boolean) -> Unit, onAway: (Boolean) -> Unit) {
     val c = OieTheme.colors
     val tx = str
+    // v0.34 audit: one gesture for the whole press (it was restarted mid-press when recording began, which could
+    // lose the release). Hold to record, release to send, slide off the button to cancel (README §10); a second
+    // tap stops a recording started by TalkBack's tap.
+    val isRecording by androidx.compose.runtime.rememberUpdatedState(recording)
+    val start by androidx.compose.runtime.rememberUpdatedState(onStart)
+    val stop by androidx.compose.runtime.rememberUpdatedState(onStop)
+    val away by androidx.compose.runtime.rememberUpdatedState(onAway)
     Box(
         Modifier.size(OTokens.Size.record).scale(if (recording) 0.97f else 1f).clip(CircleShape).background(c.mint)
             .semantics {
+                role = Role.Button
                 contentDescription = if (recording) tx.recordingA11y else tx.recordA11y
                 onClick { if (recording) onStop(true) else onStart(); true }
             }
-            .pointerInput(recording) {
-                detectTapGestures(
-                    onPress = {
-                        if (recording) { onStop(true); return@detectTapGestures }
-                        onStart()
-                        val released = tryAwaitRelease()
-                        onStop(released)
-                    },
-                )
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+                    if (isRecording) { stop(true); return@awaitEachGesture }
+                    start()
+                    val slop = viewConfiguration.touchSlop * 2
+                    var off = false
+                    while (true) {
+                        val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                        if (!change.pressed) break
+                        val p = change.position
+                        val outside = p.x < -slop || p.y < -slop || p.x > size.width + slop || p.y > size.height + slop
+                        if (outside != off) { off = outside; away(off) }
+                    }
+                    stop(!off)
+                }
             },
         contentAlignment = Alignment.Center,
     ) { OIcon(R.drawable.gg_ic_mic, tint = c.onMint, size = OTokens.Spacing.space8) }
 }
+
+/** "Novas": where the unread messages start (v0.34 audit, flow kid-receives-messages.md). */
+@Composable
+private fun NewLine() {
+    val c = OieTheme.colors
+    Row(Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space2), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
+        Box(Modifier.weight(1f).height(OTokens.Size.hairline).background(c.line))
+        Text(str.newMessages, style = OieType.caption, color = c.muted)
+        Box(Modifier.weight(1f).height(OTokens.Size.hairline).background(c.line))
+    }
+}
+
+/** How long a short note (a slip, a problem) stays; and the recording clock's tick. */
+private const val NOTE_MS = 4_000L
+private const val TICK_MS = 500L
+/** A fling's settle time before reading where the list ended up. */
+private const val MOTION_SETTLE_MS = 600L
+/** The longest voice message (flow kid-sends-message, 3a). */
+private const val MAX_RECORDING_MS = 120_000L
 
 @Composable
 private fun Bubble(m: Message, name: String, status: String? = null, parent: String = "", onMenu: (() -> Unit)? = null, onPhoto: (String) -> Unit = {}, onWatch: (Message) -> Unit = {}) {
@@ -485,7 +586,8 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
                 .background(if (m.fromKid) c.selected else c.surface)
                 .then(if (m.fromKid) Modifier else Modifier.border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusM)))
                 .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
-            verticalAlignment = Alignment.CenterVertically,
+            // v0.34 audit: beside a picture or a video the time sits at the bottom, like a caption.
+            verticalAlignment = if (m.kind in setOf(Kind.PHOTO, Kind.VIDEO, Kind.GIF, Kind.STICKER)) Alignment.Bottom else Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
         ) {
             val ink = if (m.fromKid) c.onSelected else c.ink
@@ -498,7 +600,7 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
                         Modifier.size(OTokens.Spacing.space12).clip(androidx.compose.foundation.shape.CircleShape)
                             .clickable(enabled = m.media != null, role = Role.Button) { m.media?.let { app.oie.data.Voice.toggle(context, m.id, it) } },
                         contentAlignment = Alignment.Center,
-                    ) { OIcon(if (on) R.drawable.gg_ic_pause else R.drawable.gg_ic_play, tint = ink, contentDescription = tx.listenA11y(m.durationSec)) }
+                    ) { OIcon(if (on) R.drawable.gg_ic_pause else R.drawable.gg_ic_play, tint = ink, contentDescription = if (on) tx.pauseA11y else tx.listenA11y(m.durationSec)) }
                     Text("%d:%02d".format(m.durationSec / 60, m.durationSec % 60), style = OieType.caption, color = c.muted)
                 }
                 // A sticker from family's WhatsApp arrives as an image (media); Oiê's own are drawn from their word.
@@ -506,17 +608,18 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
                 Kind.STICKER -> if (m.media != null) MovingImage(m.media, OTokens.Size.contactTile + OTokens.Spacing.space8, tx.notifSticker) else STICKERS[m.text]?.let {
                     Image(painterResource(it), contentDescription = tx.stickerA11y(m.text), modifier = Modifier.size(OTokens.Size.contactTile + OTokens.Spacing.space8))
                 } ?: Text(m.text, style = OieType.title, color = ink)
-                Kind.PHOTO -> Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                // v0.34 audit round 2: media columns give way like text does, so the time beside them is never cut.
+                Kind.PHOTO -> Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                     // v0.33: tap to see it big.
                     Box(if (m.media != null) Modifier.clickable(role = Role.Button, onClickLabel = tx.photo) { onPhoto(m.media) } else Modifier) { PhotoThumb(m.media) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
                 // v0.27: videos (tap to watch) and GIFs (a silent loop).
-                Kind.VIDEO -> Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                Kind.VIDEO -> Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                     VideoBubble(m.media, m.durationSec, tooBig = !app.oie.logic.Moving.download(m.kind, m.size), parent = parent) { onWatch(m) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
-                Kind.GIF -> Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                Kind.GIF -> Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                     GifBubble(m.media) { onWatch(m) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
@@ -533,13 +636,9 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
 private fun StickerSheet(state: AppState, onMake: () -> Unit, onPick: (String) -> Unit, onPickFamily: (app.oie.logic.FamilySticker) -> Unit, onClose: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
-    Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(onClick = onClose), contentAlignment = Alignment.BottomCenter) {
-        Column(
-            Modifier.widthIn(max = OTokens.Size.contentMax + OTokens.Spacing.space16 * 4)
-                .clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
-                .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),
-            verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
-        ) {
+    // v0.34 audit: the shared sheet (Back closes it, the scrim darkens in both themes, one 600dp column).
+    app.oie.ui.common.BottomSheet(onClose) {
+        run {
             Text(tx.stickers, style = OieType.title, color = c.ink)
             val tile = OTokens.Size.contactTile + OTokens.Spacing.space6
             val saved = state.stickers.filter { it.saved }
@@ -604,17 +703,14 @@ internal fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: 
     // v0.28: a photo, a video, or the gallery (photos, videos and GIFs); the last one used first.
     // v0.33: Desenhar comes last, after the usual ones.
     val options = listOf("camera" to tx.takePhoto, "video" to tx.recordVideo, "gallery" to tx.gallery).sortedBy { if (it.first == first) 0 else 1 } + ("draw" to tx.draw)
-    Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(onClick = onClose), contentAlignment = Alignment.BottomCenter) {
-        Column(
-            Modifier.widthIn(max = OTokens.Size.contentMax)
-                .clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
-                .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),
-            verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
-        ) {
+    app.oie.ui.common.BottomSheet(onClose) {
+        run {
             Text(tx.photoOrVideo, style = OieType.title, color = c.ink)
             app.oie.ui.setup.ButtonRow {
                 options.forEach { (key, label) ->
-                    QuietButton(label, { onPick(key) }, Modifier.height(OTokens.Size.button), icon = when (key) { "gallery" -> R.drawable.gg_ic_image; "draw" -> null; else -> R.drawable.gg_ic_camera })
+                    // v0.34 audit round 2: words only, the same for all four (the set has no video or pencil icon,
+                    // and a camera on "Gravar vídeo" misled).
+                    QuietButton(label, { onPick(key) })
                 }
             }
         }
@@ -627,7 +723,7 @@ private fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: (
     val c = OieTheme.colors
     val tx = str
     val context = LocalContext.current
-    val bmp = remember(name) { Photos.load(context, name, Photos.MAX_SIDE) }
+    val bmp = rememberPhoto(name, Photos.MAX_SIDE)
     androidx.activity.compose.BackHandler(onBack = onBack)
     Column(Modifier.fillMaxSize().background(c.page)) {
         Bar {
@@ -644,9 +740,10 @@ private fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: (
                 modifier = Modifier.weight(1f, fill = false).clip(RoundedCornerShape(OTokens.Radius.radiusM)),
                 contentScale = ContentScale.Fit,
             )
+            // Fresh review: the main button first, as on every other screen.
             Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                QuietButton(tx.swap, onSwap, Modifier.height(OTokens.Size.button))
                 PrimaryButton(tx.send, onSend, icon = R.drawable.gg_ic_send)
+                QuietButton(tx.swap, onSwap)
             }
         }
     }
@@ -657,8 +754,11 @@ private fun PhotoThumb(media: String?) {
     val c = OieTheme.colors
     val tx = str
     val context = LocalContext.current
-    val bmp = remember(media) { media?.let { Photos.load(context, it, Photos.MAX_SIDE / 4) } }
-    if (bmp == null) {
+    val bmp = rememberPhoto(media, Photos.MAX_SIDE / 4)
+    // v0.34 audit round 2: while it loads, a tile of the photo's size holds its place (so the chat doesn't jump).
+    if (bmp == null && media != null) {
+        Box(Modifier.size(OTokens.Size.contactTile * 2).clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.line).semantics { contentDescription = tx.photo })
+    } else if (bmp == null) {
         Text(tx.photo, style = OieType.body, color = c.muted)
     } else {
         Image(
