@@ -155,4 +155,16 @@ class FamilyTest {
         assertEquals(Receipt.NONE, back.messages[0].receipt); assertTrue(back.messages[0].reactions.isEmpty())
         assertFalse(back.nudgeOn)
     }
+
+    /** v0.34: the forgot-PIN proof and the reaction hint survive a restart; reacting once retires the hint. */
+    @Test fun pinResetAndReactHintAreSaved() {
+        val s = AppState(); s.allowed += Contact("vovo", "Vovó"); s.messages += Message("v1", "vovo", false, 1, Kind.TEXT, "oi"); s.finishSetup()
+        assertFalse(s.reactTipUsed)
+        s.react("v1", "❤️")
+        assertTrue(s.reactTipUsed)
+        s.pinResetFrom = "5511999990000@s.whatsapp.net"
+        val back = AppState(); Codec.decode(Codec.encode(s), back)
+        assertTrue(back.reactTipUsed)
+        assertEquals("5511999990000@s.whatsapp.net", back.pinResetFrom)
+    }
 }
