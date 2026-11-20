@@ -2,6 +2,10 @@
 
 ## Unreleased
 - **Website:** the landing page in `site/` (PT and EN). Its hero animates the family line: Tito's message goes from the tablet, through your WhatsApp, to Vovó. Every "Baixar" links to the latest release. It goes live when oie.app is registered.
+- **Website v2:** a scrolling story with people.
+  - **Your family:** pick son or daughter, mom or dad, and who they write to (grandma, grandpa, an aunt or a school friend), and the story uses your family.
+  - **The screens:** the message is shown on the tablet, then on your WhatsApp, then on theirs, and the reply comes back.
+  - **Not only grandma:** the copy and FAQ now say "family and friends you choose" (decision 0013).
 
 ## 0.37.0
 - **The kid posts updates.** Turn it on in Ajustes e ajuda › Novidades › "Tito pode postar novidades" (off until you do; Novidades must be on).
