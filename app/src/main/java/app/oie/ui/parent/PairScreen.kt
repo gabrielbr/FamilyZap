@@ -22,6 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.liveRegion
 import app.oie.R
 import app.oie.data.AppState
 import app.oie.data.LinkState
@@ -54,11 +55,26 @@ fun Pairing(state: AppState, onLinked: () -> Unit) {
             tx.linkSteps.forEachIndexed { i, step -> Text("${i + 1}. $step", style = OieType.body, color = c.ink) }
             Qr(s.code, tx.linkQrA11y)
         }
-        LinkState.Status.Connecting -> Text(tx.linkWaiting, style = OieType.body, color = c.muted)
+        // v0.34 audit: the wait shows it's working (a spinner, still with "Remove animations" on as a ring).
+        LinkState.Status.Connecting -> androidx.compose.foundation.layout.Row(
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
+        ) {
+            if (app.oie.ui.common.animationsOn()) androidx.compose.material3.CircularProgressIndicator(Modifier.size(app.oie.ui.common.ICON), color = c.ink, trackColor = c.line, strokeWidth = OTokens.Size.hairline * 2)
+            Text(tx.linkWaiting, style = OieType.body, color = c.ink)
+        }
         LinkState.Status.Connected -> LaunchedEffect(Unit) { onLinked() }
         LinkState.Status.Unavailable -> Text(tx.linkUnavailable, style = OieType.body, color = c.ink)
         is LinkState.Status.Banned -> Text(tx.bannedFor(s.hours), style = OieType.body, color = c.ink)
-        else -> PrimaryButton(tx.linkConnect, { link?.turnOn() })
+        else -> {
+            // v0.34 audit: a failed try or no internet says so, and the button tries again.
+            val why = when {
+                s == LinkState.Status.Disconnected -> tx.linkOffline
+                state.linkState.pairFailed -> tx.linkFailed
+                else -> null
+            }
+            if (why != null) Text(why, style = OieType.body, color = c.coralText, modifier = Modifier.semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
+            PrimaryButton(tx.linkConnect, { state.linkState.pairFailed = false; link?.turnOn() })
+        }
     }
 }
 
@@ -75,7 +91,8 @@ fun PairScreen(state: AppState) {
         }
         Column(Modifier.fillMaxWidth().padding(OTokens.Spacing.space8), horizontalAlignment = Alignment.CenterHorizontally) {
             Column(Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                Text(tx.riskBody, style = OieType.body, color = c.muted)
+                // v0.34 audit: the risk in ink, never softened (product law).
+                Text(tx.riskBody, style = OieType.body, color = c.ink)
                 Pairing(state) {
                     if (!state.realMode) real?.goReal() ?: state.goReal()
                     state.route = Route.Parent(if (state.allowed.isEmpty()) 0 else 2)

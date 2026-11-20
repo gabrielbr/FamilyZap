@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
@@ -59,7 +60,7 @@ fun hoursLabel(tx: Strings, p: QuietPeriod): String =
 /** Add or edit one quiet-hours period (flow: contacts-quiet-hours.md, step 8). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PeriodEditor(initial: QuietPeriod?, onSave: (QuietPeriod) -> Unit, onDelete: (() -> Unit)?, onCancel: () -> Unit) {
+fun PeriodEditor(initial: QuietPeriod?, onSave: (QuietPeriod) -> Unit, onDelete: (() -> Unit)?, onCancel: () -> Unit, touched: () -> Unit = {}) {
     val c = OieTheme.colors
     val tx = str
     var name by remember { mutableStateOf(initial?.name ?: "") }
@@ -67,12 +68,15 @@ fun PeriodEditor(initial: QuietPeriod?, onSave: (QuietPeriod) -> Unit, onDelete:
     var start by remember { mutableStateOf(initial?.start ?: LocalTime.of(13, 0)) }
     var end by remember { mutableStateOf(initial?.end ?: LocalTime.of(18, 0)) }
     var picking by remember { mutableStateOf<String?>(null) }
+    // v0.34 audit (P1): Back closes the editor, one level, instead of leaving the parent area and losing the period.
+    androidx.activity.compose.BackHandler(onBack = onCancel)
 
     Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
         Text(if (initial == null) tx.newPeriod else tx.editPeriod, style = OieType.title, color = c.ink)
-        Field(tx.name, name, { name = it }, tx.nameHelp)
+        Field(tx.name, tx.periodName(name), { name = it; touched() }, tx.nameHelp)
         Text(tx.days, style = OieType.label, color = c.ink)
-        Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+        // v0.34 audit: the days wrap on a narrow phone, and each is a real checkbox for TalkBack (checked or not).
+        app.oie.ui.setup.ButtonRow {
             DayOfWeek.entries.forEach { d ->
                 val on = d in days
                 Box(
@@ -80,24 +84,24 @@ fun PeriodEditor(initial: QuietPeriod?, onSave: (QuietPeriod) -> Unit, onDelete:
                         .clip(RoundedCornerShape(OTokens.Radius.radiusL))
                         .background(if (on) c.selected else c.surface)
                         .border(OTokens.Size.hairline, if (on) c.ink else c.line, RoundedCornerShape(OTokens.Radius.radiusL))
-                        .clickable(role = Role.Checkbox) { days = if (on) days - d else days + d }
-                        .semantics { selected = on },
+                        .toggleable(on, role = Role.Checkbox) { touched(); days = if (on) days - d else days + d },
                     contentAlignment = Alignment.Center,
                 ) { Text(tx.dayShort[d.value - 1], style = OieType.label, color = if (on) c.onSelected else c.ink) }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4), verticalAlignment = Alignment.CenterVertically) {
-            QuietButton(tx.startsAt(tx.clock(start.hour, start.minute)), { picking = "start" }, Modifier.height(OTokens.Size.button))
-            QuietButton(tx.endsAt(tx.clock(end.hour, end.minute)), { picking = "end" }, Modifier.height(OTokens.Size.button))
-            if (end < start) Text(tx.nextDay, style = OieType.caption, color = c.muted)
+        app.oie.ui.setup.ButtonRow {
+            QuietButton(tx.startsAt(tx.clock(start.hour, start.minute)), { touched(); picking = "start" })
+            QuietButton(tx.endsAt(tx.clock(end.hour, end.minute)), { touched(); picking = "end" })
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4), verticalAlignment = Alignment.CenterVertically) {
+        if (end < start) Text(tx.nextDay, style = OieType.caption, color = c.muted)
+        app.oie.ui.setup.ButtonRow {
             PrimaryButton(tx.save, {
                 onSave(QuietPeriod(name.trim(), days, start, end, on = initial?.on ?: true))
             }, enabled = name.isNotBlank() && days.isNotEmpty() && start != end)
-            QuietButton(tx.cancel, onCancel, Modifier.height(OTokens.Size.button))
-            if (onDelete != null) TextLink(tx.deletePeriod, onDelete)
+            QuietButton(tx.cancel, onCancel)
         }
+        // Deleting sits apart from Salvar (it's undoable, with a snackbar), so it's never hit by accident.
+        if (onDelete != null) TextLink(tx.deletePeriod, onDelete, Modifier.padding(top = OTokens.Spacing.space4))
     }
 
     picking?.let { which ->
@@ -105,7 +109,7 @@ fun PeriodEditor(initial: QuietPeriod?, onSave: (QuietPeriod) -> Unit, onDelete:
         val tp = rememberTimePickerState(initialHour = now.hour, initialMinute = now.minute, is24Hour = true)
         AlertDialog(
             onDismissRequest = { picking = null },
-            confirmButton = { TextLink("OK", { val t = LocalTime.of(tp.hour, tp.minute); if (which == "start") start = t else end = t; picking = null }) },
+            confirmButton = { TextLink(tx.ok, { val t = LocalTime.of(tp.hour, tp.minute); if (which == "start") start = t else end = t; picking = null }) },
             dismissButton = { TextLink(tx.cancel, { picking = null }) },
             containerColor = c.surface,
             text = {

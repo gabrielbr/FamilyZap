@@ -79,20 +79,9 @@ import kotlinx.coroutines.withContext
 
 /** The v0.33 family features on the kid's side (docs/flows/family-features.md). */
 
-/** A bottom sheet: the scrim and the surface with the large top radius, as the photo and sticker sheets. */
+/** v0.34: the shared bottom sheet (Components.BottomSheet), so every sheet closes with Back and darkens in both themes. */
 @Composable
-private fun Sheet(onClose: () -> Unit, content: @Composable () -> Unit) {
-    val c = OieTheme.colors
-    androidx.activity.compose.BackHandler(onBack = onClose)
-    Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(onClick = onClose), contentAlignment = Alignment.BottomCenter) {
-        Column(
-            Modifier.widthIn(max = OTokens.Size.contentMax)
-                .clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
-                .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),
-            verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
-        ) { content() }
-    }
-}
+private fun Sheet(onClose: () -> Unit, content: @Composable () -> Unit) = app.oie.ui.common.BottomSheet(onClose) { content() }
 
 /**
  * A long press on a message: six reactions, the one the kid already picked shown as picked (tapping it
@@ -371,7 +360,7 @@ private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (
         }
     }
     // v0.33 audit: "Agora não" under the line, not beside it, so the line has the width on a phone.
-    if (onDismiss != null) TextLink(tx.nudgeNotNow, onDismiss, Modifier.offset(x = -OTokens.Spacing.space3))
+    if (onDismiss != null) TextLink(tx.nudgeNotNow, onDismiss)
 }
 
 /**
@@ -379,31 +368,24 @@ private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (
  * someone. It asks once before sending; then it says who got it.
  */
 @Composable
-internal fun NeedYou(state: AppState) {
-    val c = OieTheme.colors
+internal fun NeedYou(state: AppState, onSaid: (String) -> Unit) {
     val tx = str
     val to = app.oie.logic.NeedYou.to(state.reachable)
     if (to.isEmpty()) return
     val names = tx.and(to.map { it.name })
     var asking by remember { mutableStateOf(false) }
-    var said by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(said) { if (said != null) { kotlinx.coroutines.delay(8_000); said = null } }
+    // v0.34 audit: "wait" says how many minutes are left, so the kid knows when to try again.
+    fun waitLine() = tx.needYouWait(((app.oie.logic.NeedYou.waitMs(state.needYouAt, state.clock()) + 59_999) / 60_000).toInt().coerceAtLeast(1))
     QuietButton(tx.needYouButton, {
-        said = null
-        if (app.oie.logic.NeedYou.waitMs(state.needYouAt, state.clock()) > 0) said = tx.needYouWait else asking = true
-    }, Modifier.padding(top = OTokens.Spacing.space8).height(OTokens.Size.button), icon = R.drawable.gg_ic_people)
-    said?.let { Text(it, style = OieType.body, color = c.ink) }
-    if (asking) NeedYouSheet(names, onSend = {
-        asking = false
-        said = if (state.sendNeedYou(tx.needYouText)) tx.needYouSent(names) else tx.needYouWait
-    }, onClose = { asking = false })
-}
-
-@Composable
-private fun NeedYouSheet(names: String, onSend: () -> Unit, onClose: () -> Unit) {
-    val c = OieTheme.colors
-    val tx = str
-    androidx.compose.ui.window.Dialog(onDismissRequest = onClose) { NeedYouCard(names, onSend, onClose) }
+        if (app.oie.logic.NeedYou.waitMs(state.needYouAt, state.clock()) > 0) onSaid(waitLine()) else asking = true
+    }, Modifier.padding(top = OTokens.Spacing.space8), icon = R.drawable.gg_ic_people)
+    // v0.34 audit: a bottom sheet like every other kid sheet (it was a centred dialog).
+    if (asking) Sheet({ asking = false }) {
+        NeedYouCard(names, onSend = {
+            asking = false
+            onSaid(if (state.sendNeedYou(tx.needYouText)) tx.needYouSent(names) else waitLine())
+        }, onClose = { asking = false })
+    }
 }
 
 /** The question before "Preciso de você" goes: who gets it, Mandar or Cancelar. */
@@ -412,10 +394,7 @@ internal fun NeedYouCard(names: String, onSend: () -> Unit, onClose: () -> Unit)
     val c = OieTheme.colors
     val tx = str
     run {
-        Column(
-            Modifier.widthIn(max = OTokens.Size.contentMax).clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(c.surface).padding(OTokens.Spacing.space8),
-            verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6),
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
             Text(tx.needYouAsk(names), style = OieType.title, color = c.ink)
             app.oie.ui.setup.ButtonRow {
                 PrimaryButton(tx.needYouSend, onSend, icon = R.drawable.gg_ic_send)

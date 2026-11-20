@@ -25,6 +25,7 @@
   --gds-draw-sun: #E0A100;
   --gds-draw-leaf: #2E9E5B;
   --gds-draw-sky: #2F7FD8;
+  --gds-scrim: #2A171473;
 }
 
 [data-theme="dark"] {
@@ -51,6 +52,7 @@
   --gds-draw-sun: #E0A100;
   --gds-draw-leaf: #2E9E5B;
   --gds-draw-sky: #2F7FD8;
+  --gds-scrim: #0E0807B3;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -77,6 +79,7 @@
     --gds-draw-sun: #E0A100;
     --gds-draw-leaf: #2E9E5B;
     --gds-draw-sky: #2F7FD8;
+    --gds-scrim: #0E0807B3;
   }
 }
 

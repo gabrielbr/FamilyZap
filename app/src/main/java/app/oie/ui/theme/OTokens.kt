@@ -34,6 +34,7 @@ object OTokens {
         val drawSun: Color,
         val drawLeaf: Color,
         val drawSky: Color,
+        val scrim: Color,
     )
 
     val Light = Palette(
@@ -60,6 +61,7 @@ object OTokens {
         drawSun = Color(0xFFE0A100), // Drawing colour: sun yellow. A swatch always has a hairline and a name, never colour alone.
         drawLeaf = Color(0xFF2E9E5B), // Drawing colour: leaf green.
         drawSky = Color(0xFF2F7FD8), // Drawing colour: sky blue.
+        scrim = Color(0x732A1714), // Behind a sheet or dialog (v0.34): warm ink at 45% by day, near-black at 70% at night, so it always darkens.
     )
 
     val Dark = Palette(
@@ -86,6 +88,7 @@ object OTokens {
         drawSun = Color(0xFFE0A100), // Drawing colour: sun yellow. A swatch always has a hairline and a name, never colour alone.
         drawLeaf = Color(0xFF2E9E5B), // Drawing colour: leaf green.
         drawSky = Color(0xFF2F7FD8), // Drawing colour: sky blue.
+        scrim = Color(0xB30E0807), // Behind a sheet or dialog (v0.34): warm ink at 45% by day, near-black at 70% at night, so it always darkens.
     )
 
     object Spacing {

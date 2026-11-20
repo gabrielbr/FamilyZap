@@ -31,6 +31,8 @@ class LinkState {
     var linkedAt by mutableStateOf(0L)
     /** When the link last stopped being up: an attempt started, or it dropped (v0.24, for LinkView's grace). */
     var downSince by mutableStateOf(0L)
+    /** The last pairing attempt failed (v0.34): the link screen says so above the button. */
+    var pairFailed by mutableStateOf(false)
 
-    fun clear() { on = false; status = Status.Off; available.clear(); contactsSynced = false; linkedAt = 0L; downSince = 0L }
+    fun clear() { on = false; status = Status.Off; available.clear(); contactsSynced = false; linkedAt = 0L; downSince = 0L; pairFailed = false }
 }

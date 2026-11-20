@@ -715,6 +715,15 @@ func (k *Link) OwnChat() string {
 	return ""
 }
 
+// OwnName is the WhatsApp profile name of the linked account (v0.34): setup fills in the parent's
+// name with it, so it isn't typed twice. Empty when WhatsApp hasn't said it yet.
+func (k *Link) OwnName() string {
+	if k.c == nil || k.c.Store == nil {
+		return ""
+	}
+	return k.c.Store.PushName
+}
+
 // SetParentLine tells the link which chat is the line between the kid and the parent who owns the
 // WhatsApp (v0.30, decision 0007). Only then may the parent's own chat receive the kid's messages.
 func (k *Link) SetParentLine(chat string) { k.mu.Lock(); k.parentLine = chat; k.mu.Unlock() }
