@@ -79,7 +79,7 @@
         <p class="hero__lede" data-t="lede">Do tablet, a criança conversa com a família e os amigos que você escolher, pelo seu WhatsApp.</p>
         <div class="hero__actions">
           <a class="btn btn--ink" href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener" data-t="cta">Baixar o Oiê</a>
-          <p class="hero__note"><span data-t="ctaNote">Para tablets Android 8 ou mais novos.</span> <a href="#baixar" data-t="ctaHow">Como instalar</a></p>
+          <p class="hero__note"><span data-t="ctaNote">Abra esta página no tablet Android da criança (Android 8 ou mais novo).</span> <a href="#baixar" data-t="ctaHow">Como instalar</a></p>
         </div>
       </div>
 
@@ -91,7 +91,7 @@
 <main>
   <section class="story" id="historia" aria-label="Como funciona" data-t-aria="storyA11y">
     <div class="stage" id="stage" data-step="0" data-focus="kid">
-      <p class="stage__tag" data-t="example">Exemplo</p>
+      <p class="stage__tag"><span id="tagText" data-t="example">Exemplo</span> <a class="stage__next" id="tagNext" href="#passo-1" hidden></a></p>
       <div class="cast">
         <!-- 1. The kid, holding the tablet (Oiê's own screen) -->
         <figure class="actor actor--kid" data-actor="kid">
@@ -195,19 +195,19 @@
         <h2 data-s="s1h">Tito quer falar com o Vô Zé.</h2>
         <p data-s="s1p">No tablet, Tito vê só as pessoas que você escolheu. Um toque na foto, e é só escrever, gravar um áudio ou mandar uma foto.</p>
       </article>
-      <article class="step" data-step="2" data-focus="parent">
+      <article class="step" id="passo-2" data-step="2" data-focus="parent">
         <h2 data-s="s2h">A mensagem sai do seu WhatsApp.</h2>
         <p data-s="s2p">O Oiê manda pelo WhatsApp do seu celular, com o nome de Tito na frente. Ela fica no seu celular também: você vê tudo o que sai.</p>
       </article>
-      <article class="step" data-step="3" data-focus="recv">
+      <article class="step" id="passo-3" data-step="3" data-focus="recv">
         <h2 data-s="s3h">E chega no WhatsApp do Vô Zé.</h2>
         <p data-s="s3p">Para o Vô Zé, é uma mensagem sua, como qualquer outra. Ninguém precisa baixar nada.</p>
       </article>
-      <article class="step" data-step="4" data-focus="recv">
+      <article class="step" id="passo-4" data-step="4" data-focus="recv">
         <h2 data-s="s4h">O Vô Zé responde como sempre.</h2>
         <p data-s="s4p">A resposta volta pelo seu WhatsApp e aparece no tablet, na conversa com o Vô Zé.</p>
       </article>
-      <article class="step" data-step="5" data-focus="recv">
+      <article class="step" id="passo-5" data-step="5" data-focus="recv">
         <h2 data-s="s5h">Não é só o Vô Zé.</h2>
         <p data-s="s5p">Avós, tios, primos e os amigos da escola. Qualquer pessoa que você aprovar, e mais ninguém.</p>
         <ul class="others" aria-hidden="true">
@@ -217,7 +217,7 @@
           <li><svg class="sil" viewBox="0 0 200 240" data-draw="friend"></svg><span data-t="friendName">Lucas, da escola</span></li>
         </ul>
       </article>
-      <article class="step" data-step="6" data-focus="kid">
+      <article class="step" id="passo-6" data-step="6" data-focus="kid">
         <h2 data-s="s6h">Você escolhe quem.</h2>
         <p data-s="s6p">Numa área com PIN, no próprio tablet: os contatos, o horário de silêncio e pausar uma conversa. No seu celular, você só lê um QR, uma vez.</p>
         <a class="family__go step__again" href="#historia" data-t="again">Trocar a família e ver de novo</a>
@@ -268,7 +268,7 @@
           </div>
           <ol class="steps-get">
             <li><span data-t="g1">No tablet da criança, toque em Baixar o Oiê e abra o arquivo.</span></li>
-            <li><span data-t="g2">Se o Android pedir, permita instalar apps do navegador.</span></li>
+            <li><span data-t="g2">Se o Android pedir, permita instalar apps do navegador. Se ele não deixar, o tablet pode ter um controle dos pais ou da escola: quem cuida dele pode liberar.</span></li>
             <li><span data-t="g3">Abra o Oiê: seu nome, o da criança, e um QR que você lê no seu WhatsApp.</span></li>
             <li><span data-t="g4">Escolha os contatos, da família ou amigos. A criança já pode mandar o primeiro oi.</span></li>
           </ol>

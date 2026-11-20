@@ -124,7 +124,7 @@ img, svg { display: block; }
 .stage > :is(.cast, .wire) { transition: transform var(--t-scene) var(--ease); }
 .stage.is-pinned > :is(.cast, .wire) { transform: translateY(max(0px, calc(50svh - 300px - 3vh))); }
 .steps { grid-column: 1; grid-row: 1; padding: var(--s8) 0 30vh; }
-.step { min-height: 78vh; display: flex; flex-direction: column; justify-content: center; transition: color var(--t-scene) var(--ease); }
+.step { min-height: 78vh; scroll-margin-top: calc(11vh - var(--s16)); /* a jump lands with the words mid-screen */ display: flex; flex-direction: column; justify-content: center; transition: color var(--t-scene) var(--ease); }
 /* Only with JavaScript running does the story fade the steps not being read. */
 .js .step { color: var(--gds-muted); }
 .js .step h2 { color: var(--gds-muted); }
@@ -132,7 +132,8 @@ img, svg { display: block; }
 .step--intro, .js .step--intro { min-height: 0; padding-bottom: 30vh; opacity: 1; justify-content: flex-start; }
 .step h2 { font-weight: 800; font-size: clamp(1.75rem, 3.4vw, 2.75rem); line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 var(--s4); text-wrap: balance; }
 .step p { font-size: 1.1875rem; line-height: 1.55; margin: 0; max-width: 34ch; }
-.stage__tag { position: absolute; top: var(--s6); right: 0; margin: 0; font-size: 0.8125rem; font-weight: 800; color: var(--gds-muted); }
+.stage__tag { position: absolute; top: var(--s6); right: 0; z-index: 3; margin: 0; display: flex; align-items: center; gap: var(--s3); font-size: 0.8125rem; font-weight: 800; color: var(--gds-muted); }
+.stage__next { display: inline-flex; align-items: center; min-height: 44px; color: var(--gds-ink); }
 
 .cast { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: var(--s2); position: relative; z-index: 1; }
 .actor { margin: 0; display: grid; justify-items: center; position: relative; }
@@ -348,10 +349,11 @@ footer { border-top: 1px solid var(--gds-line); }
   /* The stage pins as soon as the form's end slides under it, and step 1 follows right after. */
   .step--intro, .js .step--intro { padding-bottom: var(--s6); }
   /* "Ver a história" lands with step 1's heading just under the pinned stage. */
-  #passo-1 { scroll-margin-top: calc(62svh - var(--s16) + var(--s2)); } /* the page's 64px scroll-padding adds to it */
+  .step { scroll-margin-top: calc(62svh - var(--s16) - var(--s4)); } /* lands just under the stage; the page's 64px scroll-padding adds to it */
   /* The stage is already at the top on a phone: no centring shift (it would push the drawing over the words). */
   .stage.is-pinned > :is(.cast, .wire) { transform: none; }
-  .step { min-height: 62vh; justify-content: flex-start; padding-top: var(--s8); }
+  /* A step is as tall as the band under the stage: the next words arrive as the last ones leave. */
+  .step { min-height: 38svh; justify-content: flex-start; padding-top: var(--s4); }
   .step p { max-width: none; }
   .cast { grid-template-columns: minmax(0, 1fr); justify-items: center; }
   .actor { grid-area: 1 / 1; }

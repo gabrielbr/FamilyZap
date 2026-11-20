@@ -61,7 +61,7 @@
     skip: "Skip to the story", langGroup: "Language", navGet: "Download",
     h1: "Family, within reach.",
     lede: "From a tablet, your kid talks with the family and friends you choose, through your WhatsApp.",
-    cta: "Download Oiê", ctaNote: "For Android tablets, version 8 or newer.", ctaHow: "How to install",
+    cta: "Download Oiê", ctaNote: "Open this page on your kid’s Android tablet (Android 8 or newer).", ctaHow: "How to install",
     familyTitle: "Build your family and see how it works", lgKid: "Who writes", kidSon: "Son", kidDaughter: "Daughter",
     lgParent: "Whose WhatsApp", parMother: "Mom", parFather: "Dad",
     lgRecv: "To whom", rcvGrandma: "Grandma Rosa", rcvGrandpa: "Grandpa Zé", rcvAunt: "Aunt Bia", rcvFriend: "Lucas, from school", familyGo: "See the story",
@@ -87,7 +87,7 @@
     q7: "Can they make calls?", a7: "Not yet. For now: messages, voice notes, photos, videos and stickers.",
     q8: "Why isn’t it on the Play Store?", a8: "For now Oiê is downloaded straight from its releases page. Each release comes with a code (SHA-256) to check the file is the original, and the app tells you when there’s a new version.",
     getH: "Ready for the first hello?",
-    g1: "On your kid’s tablet, tap Download Oiê and open the file.", g2: "If Android asks, allow installing apps from the browser.",
+    g1: "On your kid’s tablet, tap Download Oiê and open the file.", g2: "If Android asks, allow installing apps from the browser. If it won’t let you, the tablet may have parental or school controls: whoever manages it can allow it.",
     g3: "Open Oiê: your name, your kid’s, and a QR code you scan in your WhatsApp.", g4: "Choose the contacts, family or friends. Your kid can send the first hello.",
     getSmall: "For Android 8 or newer. The file comes from Oiê’s releases page on GitHub, with a code (SHA-256) to check the file is the original.",
     navSafety: "Safety", footSafety: "Why Oiê, and kids safe online", navSafetyHref: "safety/",
@@ -177,7 +177,8 @@
   const stage = $("#stage");
   const dot = $("#dot");
   const run = $("#run");
-  const tag = $(".stage__tag");
+  const tagText = $("#tagText");
+  const tagNext = $("#tagNext");
   const composeKid = $("#composeKid");
   const composeRecv = $("#composeRecv");
   const waTyping = $("#waTyping");
@@ -240,7 +241,11 @@
     stage.dataset.focus = focus || "kid";
     all(".step").forEach((s) => s.classList.toggle("is-on", Number(s.dataset.step) === n));
     // Where the reader is in the story: "Exemplo · 2 de 6".
-    tag.textContent = dict().example + (n > 0 ? " · " + n + " " + (lang === "en" ? "of" : "de") + " 6" : "");
+    tagText.textContent = dict().example + (n > 0 ? " · " + n + " " + (lang === "en" ? "of" : "de") + " 6" : "");
+    // The count is also the way on: "Próximo" goes to the next step (until the last).
+    tagNext.hidden = n < 1 || n > 5;
+    tagNext.href = "#passo-" + (n + 1);
+    tagNext.textContent = lang === "en" ? "Next" : "Próximo";
     clearInterval(typer); clearInterval(cycler);
     later.forEach(clearTimeout); later = [];
     stage.removeAttribute("data-replied");
@@ -304,7 +309,7 @@
       });
       // On a phone the stage would pin over the family form: while the form still shows below where the stage
       // would sit, the story waits at step 0 (the stage scrolls with the page); then it pins and step 1 follows.
-      if (narrow.matches && family.getBoundingClientRect().bottom > stage.offsetHeight) best = steps[0];
+      if (narrow.matches && family.getBoundingClientRect().bottom > stage.offsetHeight - 24) best = steps[0];
       if (best && !heroShows) setStep(Number(best.dataset.step), best.dataset.focus);
     }
     const ask = () => { if (!frame) frame = requestAnimationFrame(pick); };
