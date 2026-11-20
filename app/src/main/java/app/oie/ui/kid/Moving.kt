@@ -85,6 +85,20 @@ fun MovingImage(media: String, side: Dp, contentDescription: String?, modifier: 
     val context = LocalContext.current
     val animate = app.oie.ui.common.animationsOn()
     val bytes = rememberBytes(media)
+    // v0.31: WhatsApp's own animated stickers are Lottie animations (a zip), drawn with Lottie (decision 0008).
+    if (bytes != null && app.oie.logic.Moving.isLottie(bytes)) {
+        val composition = remember(media) {
+            runCatching { com.airbnb.lottie.LottieCompositionFactory.fromZipStreamSync(java.util.zip.ZipInputStream(bytes.inputStream()), "sticker-$media").value }
+                .getOrNull().also { if (it == null) Diagnostics.log("sticker: lottie couldn't be read") }
+        }
+        if (composition != null) {
+            com.airbnb.lottie.compose.LottieAnimation(
+                composition, isPlaying = animate, iterations = com.airbnb.lottie.compose.LottieConstants.IterateForever,
+                modifier = modifier.size(side).semantics { if (contentDescription != null) this.contentDescription = contentDescription },
+            )
+            return
+        }
+    }
     val moving = bytes != null && Build.VERSION.SDK_INT >= 28 && (app.oie.logic.Moving.isAnimatedWebp(bytes) || app.oie.logic.Moving.isGif(bytes))
     if (moving && Build.VERSION.SDK_INT >= 28) {
         val drawable = remember(bytes) {

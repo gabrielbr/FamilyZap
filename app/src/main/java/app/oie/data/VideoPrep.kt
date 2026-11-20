@@ -64,10 +64,11 @@ object VideoPrep {
     private fun work(context: Context): File = File(context.cacheDir, "video").apply { mkdirs() }
 
     /** A gallery pick or a camera recording. [progress] gets 0..1 while it's being shrunk. */
-    suspend fun prepare(context: Context, uri: Uri, progress: (Float) -> Unit): Result {
-        val type = runCatching { context.contentResolver.getType(uri) }.getOrNull().orEmpty()
+    suspend fun prepare(context: Context, uri: Uri, isGif: Boolean? = null, progress: (Float) -> Unit): Result {
+        // [isGif] when the caller knows (v0.31: a copy of a pasted or keyboard GIF has no content type).
+        val gif = isGif ?: (runCatching { context.contentResolver.getType(uri) }.getOrNull() == "image/gif")
         return try {
-            if (type == "image/gif") gif(context, uri) else video(context, uri, progress)
+            if (gif) gif(context, uri) else video(context, uri, progress)
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Throwable) {

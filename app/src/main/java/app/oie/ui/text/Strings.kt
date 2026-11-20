@@ -306,7 +306,7 @@ object Pt : Strings {
     )
     override fun aboutVersion(v: String) = "Oiê $v, versão de teste. Usa o seu WhatsApp de verdade."
     override val notWhatsApp = "O Oiê não é feito nem aprovado pelo WhatsApp ou pela Meta."
-    override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System. Conexão com o WhatsApp feita com whatsmeow, Mozilla Public License 2.0, código em github.com/tulir/whatsmeow. QR com ZXing, Apache License 2.0. Vídeos preparados com Media3, Apache License 2.0."
+    override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System. Conexão com o WhatsApp feita com whatsmeow, Mozilla Public License 2.0, código em github.com/tulir/whatsmeow. QR com ZXing, Apache License 2.0. Vídeos preparados com Media3, Apache License 2.0. Figurinhas animadas com Lottie, Apache License 2.0."
     override val theKid = "a criança"
     override val notifChannel = "Mensagens da família"; override val notifVoice = "Mandou um áudio"
     override val notifPhoto = "Mandou uma foto"; override val notifSticker = "Mandou uma figurinha"
@@ -533,7 +533,7 @@ object En : Strings {
     )
     override fun aboutVersion(v: String) = "Oiê $v, a test version. It uses your real WhatsApp."
     override val notWhatsApp = "Oiê isn't made or approved by WhatsApp or Meta."
-    override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System. WhatsApp link built with whatsmeow, Mozilla Public License 2.0, source at github.com/tulir/whatsmeow. QR codes with ZXing, Apache License 2.0. Videos prepared with Media3, Apache License 2.0."
+    override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System. WhatsApp link built with whatsmeow, Mozilla Public License 2.0, source at github.com/tulir/whatsmeow. QR codes with ZXing, Apache License 2.0. Videos prepared with Media3, Apache License 2.0. Animated stickers with Lottie, Apache License 2.0."
     override val theKid = "your child"
     override val notifChannel = "Messages from family"; override val notifVoice = "Sent a voice message"
     override val notifPhoto = "Sent a photo"; override val notifSticker = "Sent a sticker"

@@ -148,6 +148,25 @@ WhatsApp shows a GIF as a short silent video that loops. Oiê turns the GIF file
 - **Storage:** the prepared file is sealed on the tablet like photos; the camera's temporary file is deleted.
 - **Quiet hours, the allowed list, the pace (L3) and one retry (L4)** apply as for every send.
 
+## v0.31: GIFs, stickers and pictures from the keyboard, or pasted
+_The owner's test (2026-11-20): GIFs from Gboard, and pasted media, couldn't be put in the text field._
+
+- **What works now:** in the chat's text field the kid can
+  - pick a **GIF** or a **sticker** in Gboard (or another keyboard that offers them),
+  - **paste** a picture, a GIF or a video copied elsewhere,
+  - drag one in, on a tablet with split screen.
+- **Where it goes:**
+
+| Comes in as | Goes to | Sent as |
+|---|---|---|
+| A GIF | the GIF preview (v0.28): "Preparando…", then Enviar | WhatsApp's GIF (loops) |
+| A picture or a keyboard sticker | the photo preview: Trocar / Enviar | a photo |
+| A video | the video preview (v0.28) | a video (3-minute limit) |
+| Text | the field, as before | text |
+
+- **Nothing is sent without Enviar**, the same as for the camera and the gallery. Quiet hours and the allowed list apply.
+- **Not supported** (says "Não deu para abrir…" like any unreadable file): anything that isn't a picture, a GIF or a video.
+
 ## Flow review (ux-user-flows §13)
 | # | Question | Result |
 |---|---|---|

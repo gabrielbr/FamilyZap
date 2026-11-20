@@ -204,6 +204,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         // v0.27: videos and GIFs too; a video over the limit stays in WhatsApp (the chat says so).
         if (kept && app.oie.logic.Moving.download(kind, o.optLong("size"))) bg {
             val bytes = runCatching { link?.download(m.id) }.getOrNull() ?: return@bg
+            if (kind == Kind.STICKER) Diagnostics.log("sticker: ${app.oie.logic.Moving.kindOf(bytes)}")
             val name = Photos.keepBytes(context, bytes)
             main.post {
                 val i = state.messages.indexOfFirst { it.id == m.id }
