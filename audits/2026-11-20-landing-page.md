@@ -156,3 +156,28 @@
 
   These two were checked by me, not re-scored by the reviewer (the round budget was spent).
 - **Result:** no open P0, P1 or P2.
+
+## v3 polish (owner's feedback round 3)
+- **Feedback:**
+  - silhouettes with more personality;
+  - text that lands exactly when the animation does;
+  - typing that is clearly visible.
+- **Personality:** the eight silhouettes were redrawn with clothes and accessories in page-coloured details:
+  - Ana: ponytail, hoop, V-neck;
+  - Paulo: side part, beard, collar;
+  - Tito: hoodie with drawstrings;
+  - Lia: puffs with ties, overalls;
+  - Vó Rosa: hairpin, glasses, beads, cardigan;
+  - Vô Zé: cap, glasses, moustache, buttons;
+  - Tia Bia: headband, hoops, scarf;
+  - Lucas: backwards cap, number 10 shirt.
+
+  The stage figures are drawn inline, so the head moves on its own. The person in focus breathes; a reader nods; the kid hops when the answer lands. None of this runs under reduced motion.
+- **Sync:** the active step is the one whose heading sits on the reading line (mid-screen beside the stage; 80% down on a phone, under the pinned stage), worked out on scroll. Before, a step's box crossing a band started it while its words were still low on the screen. The captures log the stage's step for each heading on the line: all matched, desktop and phone.
+- **Typing:**
+  - a keyboard rises in the typer's screen, with a key flashing per letter (coral on the tablet, green on WhatsApp);
+  - the thumbs tap and the head tips down;
+  - when the receiver types, the parent's WhatsApp shows "digitando…" and the three dots.
+
+  The kid's typing is not shown to others, because Oiê sends no typing presence (rule L7).
+- **Detector:** pulsing-dot (the typing dots, asked for), plus the earlier device/bubble/label findings. All intended.

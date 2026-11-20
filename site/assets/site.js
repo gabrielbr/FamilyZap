@@ -136,9 +136,9 @@
     };
     ORDER.forEach((k, i) => { v["tile" + i] = P.recv[k].init; v["tile" + i + "n"] = P.recv[k].name; });
     all("[data-v]").forEach((el) => { if (el.dataset.v in v && el.id !== "composeKid") el.textContent = v[el.dataset.v]; });
-    $("#silKid").setAttribute("href", "#p-" + (step === 6 ? parent.sil : kid.sil));
-    $("#silParent").setAttribute("href", "#p-" + parent.sil);
-    $("#silRecv").setAttribute("href", "#p-" + shownRecv);
+    drawPerson($("#silKid"), step === 6 ? parent.sil : kid.sil);
+    drawPerson($("#silParent"), parent.sil);
+    drawPerson($("#silRecv"), shownRecv);
     // The story's words follow the family the visitor built (the chosen receiver, not the one cycling in step 5).
     const words = { Kid: kid.name, rThe: chosen.the, RThe: cap1(chosen.the), rOf: chosen.of };
     all("[data-s]").forEach((el) => { el.textContent = P.story[el.dataset.s].replace(/\{(\w+)\}/g, (m, k) => (k in words ? words[k] : m)); });
@@ -148,27 +148,71 @@
     kidCap.querySelector("span").textContent = step === 6 ? P.story.capKid6 : dict().capKid;
   }
 
+  // The three people are drawn inline (copied from the page's symbols) so each head can move on its own.
+  function drawPerson(svg, key) {
+    if (svg.dataset.person === key && svg.childElementCount) return;
+    svg.dataset.person = key;
+    svg.innerHTML = document.getElementById("p-" + key).innerHTML;
+  }
+
+  // A keyboard in each screen: it rises while someone types, and a key flashes for every letter.
+  all(".oie, .wa").forEach((screen) => {
+    const k = document.createElement("div");
+    k.className = "kbd";
+    k.setAttribute("aria-hidden", "true");
+    [10, 9, 7].forEach((n) => { const row = document.createElement("span"); row.className = "kbd__row"; for (let i = 0; i < n; i++) row.appendChild(document.createElement("i")); k.appendChild(row); });
+    const space = document.createElement("span"); space.className = "kbd__row"; const bar = document.createElement("i"); bar.className = "kbd__space"; space.appendChild(bar); k.appendChild(space);
+    screen.appendChild(k);
+  });
+
   /* ---------- The story ---------- */
   const stage = $("#stage");
   const dot = $("#dot");
   const composeKid = $("#composeKid");
   const composeRecv = $("#composeRecv");
   const waTyping = $("#waTyping");
+  const waDots = $("#waDots");
   const still = window.matchMedia("(prefers-reduced-motion: reduce)");
   let typer = null;
   let cycler = null;
-  const CHAR_MS = 70;
+  const CHAR_MS = 90;
 
+  // Someone types: their keyboard rises, their thumbs tap, a key flashes for each letter, and the words appear.
   function type(el, text, done) {
     clearInterval(typer);
+    const actor = el.closest(".actor");
+    const device = el.closest(".device");
     if (still.matches) { el.textContent = text; if (done) done(); return; }
+    const keys = Array.from(device.querySelectorAll(".kbd i"));
     let n = 0;
     el.classList.add("is-typing");
+    actor.classList.add("is-typing");
+    device.classList.add("is-typing");
+    el.innerHTML = '<span class="caret"></span>';
     typer = setInterval(() => {
       n += 1;
       el.innerHTML = esc(text.slice(0, n)) + '<span class="caret"></span>';
-      if (n >= text.length) { clearInterval(typer); el.textContent = text; if (done) done(); }
+      const key = text[n - 1] === " " ? device.querySelector(".kbd__space") : keys[(text.charCodeAt(n - 1) * 7) % (keys.length - 1)];
+      if (key) { key.classList.add("is-hit"); setTimeout(() => key.classList.remove("is-hit"), 120); }
+      if (n >= text.length) {
+        clearInterval(typer);
+        setTimeout(() => {
+          el.textContent = text;
+          actor.classList.remove("is-typing");
+          device.classList.remove("is-typing");
+          if (done) done();
+        }, 500);
+      }
     }, CHAR_MS);
+  }
+
+  // A small, once-only reaction from someone in the story (a nod as they read, a hop as the answer lands).
+  function react(who, kind) {
+    if (still.matches) return;
+    const actor = $(".actor--" + who);
+    actor.classList.remove("is-nod", "is-hop");
+    void actor.offsetWidth;
+    actor.classList.add(kind);
   }
 
   // Where the message is on the wire: 0 the kid, 0.5 the parent, 1 the receiver; null hides it.
@@ -187,6 +231,8 @@
     clearInterval(typer); clearInterval(cycler);
     stage.removeAttribute("data-replied");
     waTyping.hidden = true;
+    waDots.classList.remove("is-on");
+    all(".actor, .device").forEach((el) => el.classList.remove("is-typing", "is-nod", "is-hop"));
     composeRecv.classList.remove("is-typing");
     composeRecv.textContent = dict().waField;
     shownRecv = pick.recv;
@@ -194,17 +240,21 @@
     const r = PEOPLE[lang].recv[pick.recv];
     composeKid.textContent = "";
     if (n === 1) { moveDot(0); type(composeKid, r.msg); }
-    else if (n === 2) { moveDot(0.5); }
-    else if (n === 3) { moveDot(1); }
+    else if (n === 2) { moveDot(0.5); react("parent", "is-nod"); }
+    else if (n === 3) { moveDot(1); react("recv", "is-nod"); }
     else if (n === 4) {
       moveDot(1);
+      // WhatsApp shows the parent that the other person is typing: "digitando…" and the three dots.
       waTyping.hidden = false;
+      waDots.classList.add("is-on");
       type(composeRecv, r.reply, () => {
         waTyping.hidden = true;
+        waDots.classList.remove("is-on");
         composeRecv.classList.remove("is-typing");
         composeRecv.textContent = dict().waField;
         stage.setAttribute("data-replied", "");
         moveDot(0);
+        setTimeout(() => react("kid", "is-hop"), 900);
       });
     } else if (n === 5) {
       moveDot(null);
@@ -217,18 +267,34 @@
 
   // On a phone the stage pins over the top 62% of the screen; the step being read is the one in the band below it.
   const narrow = window.matchMedia("(max-width: 899px)");
+  let heroShows = true;
+  // The step being read is the one whose words sit on the reading line: the middle of the screen beside the
+  // stage on a desktop, the band under the pinned stage on a phone. The stage changes exactly as the words arrive.
   function watchSteps() {
-    if (!("IntersectionObserver" in window)) { setStep(4, "recv", true); return; }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) setStep(Number(e.target.dataset.step), e.target.dataset.focus); });
-    }, { rootMargin: narrow.matches ? "-72% 0px -18% 0px" : "-45% 0px -45% 0px" });
-    all(".step").forEach((s) => io.observe(s));
+    const steps = Array.from(all(".step"));
+    let frame = 0;
+    function pick() {
+      frame = 0;
+      const line = narrow.matches ? innerHeight * 0.8 : innerHeight * 0.5;
+      let best = null, gap = Infinity;
+      steps.forEach((s) => {
+        const r = s.firstElementChild.getBoundingClientRect();
+        const d = Math.abs((r.top + r.bottom) / 2 - line);
+        if (d < gap) { gap = d; best = s; }
+      });
+      if (best && !heroShows) setStep(Number(best.dataset.step), best.dataset.focus);
+    }
+    const ask = () => { if (!frame) frame = requestAnimationFrame(pick); };
+    addEventListener("scroll", ask, { passive: true });
+    addEventListener("resize", ask);
+    ask();
     // Back at the top (the hero), the stage rests at step 0: everyone standing, nothing sent.
     // Once the hero is gone, the stage is pinned and centres itself.
+    if (!("IntersectionObserver" in window)) return;
     new IntersectionObserver((entries) => {
-      const heroShows = entries[0].isIntersecting;
+      heroShows = entries[0].isIntersecting;
       stage.classList.toggle("is-pinned", !heroShows);
-      if (heroShows) setStep(0, "kid");
+      if (heroShows) setStep(0, "kid"); else ask();
     }).observe($(".hero"));
   }
 
