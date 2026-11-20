@@ -294,4 +294,16 @@ class ScreensTest {
         Conversation(family(), "vovo", pendingPreview = Message("kv", "vovo", true, now, Kind.VOICE, durationSec = 8, media = "missing.sealed"))
     }
     @Test fun kidHomeFamilyEnglish() = shot("41-kid-home-family-en", false, english = true) { KidHome(family()) }
+
+    // v0.34: the screens that had no screenshot yet, so the design pass can see them.
+    @Test fun setupWelcome() = shot("50-setup-welcome", false) { Setup(AppState(), 0, onClose = {}) }
+    @Test fun setupWelcomeDark() = shot("50-setup-welcome", true) { Setup(AppState(), 0, onClose = {}) }
+    @Test fun setupQuiet() = shot("51-setup-quiet", false) { Setup(ready(), 6, onClose = {}) }
+    @Test fun setupDone() = shot("52-setup-done", false) { Setup(ready(), 7, onClose = {}) }
+    @Test fun setupDoneDark() = shot("52-setup-done", true) { Setup(ready(), 7, onClose = {}) }
+    @Test fun periodEditor() = shot("53-period-editor", false) {
+        val s = ready(); Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.PeriodEditor(s.periods[0], {}, {}, {}) }
+    }
+    @Test fun periodEditorNew() = shot("53-period-editor-new", true) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.PeriodEditor(null, {}, null, {}) } }
+    @Test fun connectionConnected() = shot("54-connection-connected", false) { ParentArea(ready(), 2) }
 }

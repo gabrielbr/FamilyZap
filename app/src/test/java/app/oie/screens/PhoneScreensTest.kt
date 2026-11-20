@@ -163,4 +163,13 @@ class PhoneScreensTest {
         Conversation(family(), "vovo", pendingPreview = app.oie.logic.Message("kv", "vovo", true, now, app.oie.logic.Kind.VOICE, durationSec = 8, media = "missing.sealed"))
     }
     @Test fun photosGrid() = shot("p33-photos", bigText = true) { val s = family(); app.oie.ui.kid.PhotosScreen(s, s.allowed[0], {}, {}) }
+
+    @Test fun setupWelcome() = shot("p34-setup-welcome", bigText = true) { app.oie.ui.setup.Setup(AppState(), 0, onClose = {}) }
+    @Test fun setupQuiet() = shot("p35-setup-quiet", bigText = true) { app.oie.ui.setup.Setup(ready(), 6, onClose = {}) }
+    @Test fun setupDone() = shot("p36-setup-done", bigText = true) { app.oie.ui.setup.Setup(ready(), 7, onClose = {}) }
+    @Test fun periodEditor() = shot("p37-period-editor", bigText = true) { val s = ready(); androidx.compose.foundation.layout.Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.PeriodEditor(s.periods[0], {}, {}, {}) } }
+    @Test fun parentPin() = shot("p38-parent-pin", bigText = true) { app.oie.ui.parent.ParentPin(ready()) }
+    @Test fun pairQr() = shot("p39-pair", bigText = true) { app.oie.ui.parent.PairScreen(ready().apply { linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Qr("2@sample-code-for-the-screenshot,abc,def,ghi") }) }
+    @Test fun videoScreen() = shot("p40-video-screen", bigText = true) { app.oie.ui.kid.VideoScreen(null, gif = false, from = "Vovó", onBack = {}) }
+    @Test fun needYouAsk() = shot("p41-need-you-ask", bigText = true) { androidx.compose.foundation.layout.Box(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.kid.NeedYouCard("Mãe e Vovô", {}, {}) } }
 }
