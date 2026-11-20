@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.33.0
+Ten things for the family, in one update:
+- **"Vovó viu".** Under the kid's last message: Enviada, then Entregue, then "Vovó viu" (in a group, "Alguém viu").
+- **Reactions.** The family's reactions show under the message. The kid holds a message to react with ❤️ 😂 😮 😢 👍 🙏; the same one again takes it away.
+- **Ouvir.** In the same place, the tablet reads a message aloud with its own voice. Nothing is sent anywhere.
+- **Listen before it goes.** After recording, the undo bar has Ouvir; the 5 seconds wait while it plays.
+- **Desenhar.** The camera button offers a drawing pad. Pronto sends the drawing as a picture.
+- **Criar figurinha.** In the stickers, a photo becomes a round sticker, kept with the family ones.
+- **Fotos.** In a chat's header, all the photos, videos and GIFs with that person.
+- **Birthdays.** In a contact (parent area), set the day and month. On the day, the kid's home says so.
+- **"Preciso de você".** In a contact, turn on "Recebe 'Preciso de você'". The kid's home then has that button: it asks once, then sends "Preciso de você." to the people you marked, at most once every 5 minutes, even in quiet hours. It's a way to call you, not an emergency service.
+- **Family reminder** (off until you turn it on, in Ajustes e ajuda): if the kid goes a week without writing to someone, the home shows one gentle reminder. "Agora não" hides it for a week.
+
 ## 0.32.0
 - **Fixed: voice messages arrived broken for the family.** Android's way of saving the recording wasn't one WhatsApp could play. Oiê now re-packs each voice message into the same form WhatsApp's own voice notes use, without changing the sound. If a recording can't be read, it shows as not sent, with Tentar de novo, instead of reaching the family broken.
 

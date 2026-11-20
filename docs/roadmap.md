@@ -14,6 +14,8 @@ Ideas and planned work. When something ships, move it into the docs.
 ## Next
 
 ## Later
+- "Escrevendo…" while family types: left out in v0.33, because it needs the parent to show as online (rule L7).
+- A family reaction could notify the kid (v0.33 keeps them quiet).
 - Calls from the tablet (not possible through the linked-device bridge; decision 0001).
 - A "for family" page on oie.app (how to start a message to the kid).
 

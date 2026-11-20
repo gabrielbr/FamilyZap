@@ -109,6 +109,30 @@ object Photos {
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
     }
 
+    /** WhatsApp's sticker side, in px. */
+    const val STICKER_SIDE = 512
+
+    /**
+     * A round sticker from the middle of a stored photo (v0.33): a 512 px WebP with a clear outside,
+     * the form WhatsApp takes. Returns the stored file name, or null when the photo can't be read.
+     */
+    fun stickerFrom(context: Context, photo: String): String? = runCatching {
+        val src = load(context, photo, MAX_SIDE / 2) ?: return null
+        val side = minOf(src.width, src.height)
+        val square = Bitmap.createBitmap(src, (src.width - side) / 2, (src.height - side) / 2, side, side)
+        val out = Bitmap.createBitmap(STICKER_SIDE, STICKER_SIDE, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(out)
+        val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG or android.graphics.Paint.FILTER_BITMAP_FLAG)
+        val r = STICKER_SIDE / 2f
+        canvas.drawCircle(r, r, r, paint)
+        paint.xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.SRC_IN)
+        canvas.drawBitmap(square, null, android.graphics.Rect(0, 0, STICKER_SIDE, STICKER_SIDE), paint)
+        @Suppress("DEPRECATION")
+        val format = if (android.os.Build.VERSION.SDK_INT >= 30) Bitmap.CompressFormat.WEBP_LOSSY else Bitmap.CompressFormat.WEBP
+        val bytes = java.io.ByteArrayOutputStream().use { out.compress(format, 80, it); it.toByteArray() }
+        keepBytes(context, bytes)
+    }.getOrElse { Diagnostics.log("sticker: failed: ${it.javaClass.simpleName}"); null }
+
     /** Removes a stored photo (when the kid undoes a send). */
     fun forget(context: Context, name: String) { File(dir(context), name).delete() }
 

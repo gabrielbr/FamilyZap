@@ -28,6 +28,12 @@ object OTokens {
         val snackbar: Color,
         val qrGround: Color,
         val qrInk: Color,
+        val drawPaper: Color,
+        val drawInk: Color,
+        val drawCoral: Color,
+        val drawSun: Color,
+        val drawLeaf: Color,
+        val drawSky: Color,
     )
 
     val Light = Palette(
@@ -48,6 +54,12 @@ object OTokens {
         snackbar = Color(0xFF2A1714), // Snackbar ground (ink); its text is page.
         qrGround = Color(0xFFFFFFFF), // The QR code's ground: always white, in both themes, so the phone's camera reads it.
         qrInk = Color(0xFF2A1714), // The QR code's modules: always dark on qr-ground. Also the caption on the QR card.
+        drawPaper = Color(0xFFFFFFFF), // The drawing pad's paper (v0.33): always white, in both themes, so the picture the family gets looks the same.
+        drawInk = Color(0xFF2A1714), // Drawing colour: ink. The pad's colours are fixed in both themes because the drawing is sent as a picture.
+        drawCoral = Color(0xFFE8573C), // Drawing colour: the brand coral.
+        drawSun = Color(0xFFE0A100), // Drawing colour: sun yellow. A swatch always has a hairline and a name, never colour alone.
+        drawLeaf = Color(0xFF2E9E5B), // Drawing colour: leaf green.
+        drawSky = Color(0xFF2F7FD8), // Drawing colour: sky blue.
     )
 
     val Dark = Palette(
@@ -68,6 +80,12 @@ object OTokens {
         snackbar = Color(0xFFFBEFE6), // Snackbar ground (ink); its text is page.
         qrGround = Color(0xFFFFFFFF), // The QR code's ground: always white, in both themes, so the phone's camera reads it.
         qrInk = Color(0xFF2A1714), // The QR code's modules: always dark on qr-ground. Also the caption on the QR card.
+        drawPaper = Color(0xFFFFFFFF), // The drawing pad's paper (v0.33): always white, in both themes, so the picture the family gets looks the same.
+        drawInk = Color(0xFF2A1714), // Drawing colour: ink. The pad's colours are fixed in both themes because the drawing is sent as a picture.
+        drawCoral = Color(0xFFE8573C), // Drawing colour: the brand coral.
+        drawSun = Color(0xFFE0A100), // Drawing colour: sun yellow. A swatch always has a hairline and a name, never colour alone.
+        drawLeaf = Color(0xFF2E9E5B), // Drawing colour: leaf green.
+        drawSky = Color(0xFF2F7FD8), // Drawing colour: sky blue.
     )
 
     object Spacing {

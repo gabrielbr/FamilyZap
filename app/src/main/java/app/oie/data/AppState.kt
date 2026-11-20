@@ -39,6 +39,12 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var kidEmoji by mutableStateOf("")
     /** The parent turned on "Bolha na tela" (v0.25). */
     var bubbleOn by mutableStateOf(false)
+    /** The gentle nudge (v0.33): off until the parent turns it on in Ajustes e ajuda. */
+    var nudgeOn by mutableStateOf(false)
+    /** "Agora não" on a nudge: the contact id and when (v0.33). That person isn't nudged again for a week. */
+    val nudgeDismissed = mutableStateMapOf<String, Long>()
+    /** When the kid last sent "Preciso de você" (v0.33), for the 5-minute gap. */
+    var needYouAt by mutableStateOf(0L)
     /** The kid's name first, then the nicknames. */
     fun kidNames(): List<String> = app.oie.logic.KidNames.all(kidName, kidNicknames)
     /** When this run of the app started: right after an update the link is still on its way (v0.24). */
@@ -89,6 +95,46 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     fun saveSticker(id: String) {
         val i = stickers.indexOfFirst { it.id == id }
         if (i >= 0) { val s = stickers.removeAt(i).copy(saved = true); stickers.add(stickers.count { !it.saved }, s) }
+    }
+
+    /** The kid taps a reaction on [id] (v0.33): it shows at once and goes to WhatsApp; the same one again takes it away. */
+    fun react(id: String, emoji: String) {
+        val i = messages.indexOfFirst { it.id == id }
+        if (i < 0) return
+        val (send, after) = app.oie.logic.Reactions.kidTaps(messages[i].reactions, emoji)
+        messages[i] = messages[i].copy(reactions = after)
+        wa.react(messages[i], send)
+    }
+
+    /** A family member's reaction from WhatsApp (v0.33). Only on a message the kid already has. */
+    fun reacted(targetId: String, chatId: String, who: String, emoji: String) {
+        val i = messages.indexOfFirst { it.id == targetId && it.chatId == chatId }
+        if (i >= 0) messages[i] = messages[i].copy(reactions = app.oie.logic.Reactions.set(messages[i].reactions, who, emoji))
+    }
+
+    /** Receipts from WhatsApp (v0.33): the kid's messages move to delivered or read, never back. */
+    fun heard(ids: Collection<String>, r: app.oie.logic.Receipt) {
+        for (i in messages.indices) {
+            val m = messages[i]
+            if (m.fromKid && m.id in ids) app.oie.logic.Receipts.raise(m.receipt, r).let { if (it != m.receipt) messages[i] = m.copy(receipt = it) }
+        }
+    }
+
+    /**
+     * "Preciso de você" (v0.33): "Preciso de você." to every marked person, as the kid's own message, so
+     * it shows in each chat. Returns false while the 5-minute gap runs, or with nobody marked. It goes
+     * in quiet hours too: the parent chose these people for this.
+     */
+    fun sendNeedYou(text: String, now: Long = clock()): Boolean {
+        val to = app.oie.logic.NeedYou.to(allowed)
+        if (to.isEmpty() || app.oie.logic.NeedYou.waitMs(needYouAt, now) > 0) return false
+        needYouAt = now
+        to.forEachIndexed { n, c ->
+            val m = Message("n${System.nanoTime()}$n", c.id, true, now, Kind.TEXT, text)
+            messages += m
+            wa.send(m)
+        }
+        return true
     }
 
     /** Messages the kid sent that didn't go out (rule L4: one retry, then the kid is told). */

@@ -65,4 +65,18 @@ class PhotosKeepTest {
         val f = File(context.cacheDir, "not.jpg").apply { writeText("hello") }
         assertNull(Photos.keep(context, Uri.fromFile(f)))
     }
+
+    /** v0.33: "Criar figurinha": the middle of a photo, round, 512 px, clear outside, as WhatsApp takes it. */
+    @Test fun aPhotoBecomesARoundSticker() {
+        val photo = Photos.keep(context, jpeg(1200, 800))!!
+        val sticker = Photos.stickerFrom(context, photo)
+        assertNotNull(sticker)
+        val bytes = Photos.openBytes(context, sticker!!)!!
+        assertEquals("RIFF", String(bytes.copyOfRange(0, 4))) // WebP
+        val b = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        assertEquals(512, b.width); assertEquals(512, b.height)
+        assertEquals(0, android.graphics.Color.alpha(b.getPixel(2, 2))) // a corner is outside the circle
+        assertEquals(255, android.graphics.Color.alpha(b.getPixel(256, 256)))
+        assertNull(Photos.stickerFrom(context, "missing.sealed"))
+    }
 }

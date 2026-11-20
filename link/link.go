@@ -370,6 +370,16 @@ func (k *Link) handle(e interface{}) {
 		k.contactsChanged()
 	case *events.Contact, *events.PushName:
 		k.contactsChanged()
+	case *events.Receipt:
+		// v0.33: "Entregue" and "Vovó viu" under the kid's message. Only the family's receipts for
+		// messages; the parent's own devices ("read-self") and retries say nothing to the kid.
+		if r := ReceiptOf(v); r != "" {
+			ids := make([]string, len(v.MessageIDs))
+			for i, id := range v.MessageIDs {
+				ids[i] = string(id)
+			}
+			k.emit("receipt", map[string]any{"ids": ids, "chat": v.Chat.ToNonAD().String(), "state": r})
+		}
 	case *events.Disconnected:
 		k.emit("disconnected", map[string]any{})
 	case *events.KeepAliveTimeout:
@@ -519,6 +529,45 @@ func (k *Link) SendImage(chat string, jpeg []byte, caption, id string) (sent str
 		}
 		return m
 	}, jpeg, whatsmeow.MediaImage)
+}
+
+// SendReaction puts the kid's reaction on a message (v0.33); an empty emoji takes it away. sender is
+// who wrote that message in a group ("" for the kid's own, or in a one-to-one chat the other person).
+// Same rules as every send: allowed chats only (the app checks), read-only off, the pace.
+func (k *Link) SendReaction(chat, targetID, sender, emoji, id string) (sent string, err error) {
+	defer k.guard("SendReaction", &err)
+	to, err := k.target(chat)
+	if err != nil {
+		return "", err
+	}
+	if err := k.maySend(); err != nil {
+		return "", err
+	}
+	// An empty sender marks the message as ours (the kid's); whatsmeow builds the key from it.
+	who := types.EmptyJID
+	if sender != "" {
+		if who, err = types.ParseJID(sender); err != nil {
+			return "", err
+		}
+	}
+	msg := k.c.BuildReaction(to, who, types.MessageID(targetID), emoji)
+	_, err = k.c.SendMessage(context.Background(), to, msg, whatsmeow.SendRequestExtra{ID: types.MessageID(id)})
+	return id, err
+}
+
+// ReceiptOf reads a receipt as the kid sees it: "delivered", "read", or "" for one that says nothing
+// to the kid (the parent's own devices, retries, server notes). A played voice note counts as read.
+func ReceiptOf(r *events.Receipt) string {
+	if r == nil || r.IsFromMe {
+		return ""
+	}
+	switch r.Type {
+	case types.ReceiptTypeDelivered:
+		return "delivered"
+	case types.ReceiptTypeRead, types.ReceiptTypePlayed:
+		return "read"
+	}
+	return ""
 }
 
 // SendVideo sends an MP4 the app prepared (720p at most, v0.28), or a GIF in WhatsApp's form when gif
@@ -860,7 +909,7 @@ type Incoming struct {
 }
 
 // ToIncoming translates a whatsmeow message for the app. ok is false for what the app never needs
-// (reactions, edits, receipts-like protocol messages, status updates).
+// (edits, receipts-like protocol messages, status updates). Reactions come as Kind "REACTION" (v0.33).
 func ToIncoming(info types.MessageInfo, m *waE2E.Message) (Incoming, bool) {
 	if m == nil || info.Chat.Server == types.BroadcastServer {
 		return Incoming{}, false
@@ -908,7 +957,13 @@ func ToIncoming(info types.MessageInfo, m *waE2E.Message) (Incoming, bool) {
 		if v.GetGifPlayback() {
 			in.Kind = "GIF"
 		}
-	case m.GetReactionMessage() != nil, m.GetEditedMessage() != nil, keysOnly(m):
+	case m.GetReactionMessage() != nil:
+		// v0.33: a reaction from the family shows under the message it's on. ReplyTo is that message;
+		// an empty Text takes the reaction away.
+		r := m.GetReactionMessage()
+		in.Kind, in.Text, in.ReplyTo = "REACTION", r.GetText(), r.GetKey().GetID()
+		return in, true
+	case m.GetEditedMessage() != nil, keysOnly(m):
 		return Incoming{}, false
 	default:
 		in.Kind = "UNSUPPORTED" // a document, a location, a poll: "só abre no WhatsApp"

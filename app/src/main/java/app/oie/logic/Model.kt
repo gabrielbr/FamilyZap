@@ -32,10 +32,17 @@ data class Contact(
      * or the parent's own chat when WhatsApp refused the group.
      */
     val parentLine: Boolean = false,
+    /** The birthday as "MM-dd", no year (v0.33: no age is kept). "" = not set. */
+    val birthday: String = "",
+    /** Gets "Preciso de você" from the kid (v0.33): only people the parent marks. */
+    val needYou: Boolean = false,
 )
 
 /** DELETED is WhatsApp's "delete for everyone": [Message.replyTo] names the message it removes. VIDEO and GIF since v0.27 (a GIF is a short silent video). */
-enum class Kind { TEXT, VOICE, PHOTO, STICKER, UNSUPPORTED, DELETED, VIDEO, GIF }
+enum class Kind { TEXT, VOICE, PHOTO, STICKER, UNSUPPORTED, DELETED, VIDEO, GIF, REACTION }
+
+/** How far the kid's message got (v0.33): it only ever moves forward. */
+enum class Receipt { NONE, SENT, DELIVERED, READ }
 
 /** One message in a chat with an allowed contact, as the WhatsApp link reports it. */
 data class Message(
@@ -53,6 +60,12 @@ data class Message(
     val media: String? = null,
     /** The file's size in bytes as WhatsApp said (v0.27): a video over the limit isn't downloaded. */
     val size: Long = 0,
+    /** Who wrote it in a group (their WhatsApp id), so the kid's reaction finds it (v0.33). "" otherwise. */
+    val sender: String = "",
+    /** The kid's own messages: sent, delivered, read (v0.33). */
+    val receipt: Receipt = Receipt.NONE,
+    /** Reactions on it (v0.33): who ("kid", or a family member's WhatsApp id) to their emoji. */
+    val reactions: Map<String, String> = emptyMap(),
 )
 
 /** One quiet-hours period (docs/flows/contacts-quiet-hours.md). End before start means overnight. */

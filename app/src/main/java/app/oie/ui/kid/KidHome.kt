@@ -68,6 +68,8 @@ fun KidHome(state: AppState) {
                     else QuietButton(tx.askToAdd, { state.addRequested = true }, Modifier.padding(top = OTokens.Spacing.space4).height(OTokens.Size.button))
                 } else {
                     Text(tx.whoToTalk, style = OieType.body, color = c.muted)
+                    // v0.33: today's birthdays first: they're once a year.
+                    HomeReminders(state, birthdays = true)
                     FlowRow(
                         Modifier.padding(top = OTokens.Spacing.space8),
                         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space8),
@@ -95,6 +97,10 @@ fun KidHome(state: AppState) {
                             }
                         }
                     }
+                    // v0.33 audit: the gentle nudge after the people, so it never pushes them down (calm, not a nag).
+                    HomeReminders(state, birthdays = false)
+                    // v0.33: only when the parent marked someone to get it.
+                    NeedYou(state)
                 }
             }
         }
