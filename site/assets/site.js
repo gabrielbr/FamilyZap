@@ -1,283 +1,263 @@
-/* Oiê landing page: the family line (hero animation), the PT/EN switch, and section entrances. */
+/* Oiê landing page v2: the visitor's family, the scrolling story, and the PT/EN switch (decision 0013). */
 (function () {
   "use strict";
 
-  /* ---------- Language ---------- */
+  /* ---------- People: many receivers, friends too ---------- */
+  const PEOPLE = {
+    pt: {
+      kid: { son: { name: "Tito", sil: "son" }, daughter: { name: "Lia", sil: "daughter" } },
+      parent: { mother: { name: "Ana", sil: "mother" }, father: { name: "Paulo", sil: "father" } },
+      recv: {
+        grandma: { name: "Vovó", init: "Vó", the: "a Vovó", of: "da Vovó", cap: "no WhatsApp dela", msg: "Oi vó, tô com saudade", reply: "Também, meu amor. Domingo tem bolo." },
+        grandpa: { name: "Vovô", init: "Vô", the: "o Vovô", of: "do Vovô", cap: "no WhatsApp dele", msg: "Oi vô, me ensina a pescar?", reply: "Ensino sim. Domingo bem cedo." },
+        aunt: { name: "Tia Bia", init: "T", the: "a Tia Bia", of: "da Tia Bia", cap: "no WhatsApp dela", msg: "Tia, vem no meu aniversário?", reply: "Vou sim, e levo o bolo." },
+        friend: { name: "Lucas", init: "L", the: "o Lucas", of: "do Lucas", cap: "amigo da escola", msg: "Bora jogar depois da aula?", reply: "Bora. Te espero na quadra." },
+      },
+      story: {
+        s1h: "{Kid} quer falar com {rThe}.",
+        s1p: "No tablet, {Kid} vê só as pessoas que você escolheu. Um toque na foto, e é só escrever, gravar um áudio ou mandar uma foto.",
+        s2h: "A mensagem sai do seu WhatsApp.",
+        s2p: "O Oiê manda pelo WhatsApp do seu celular, com o nome de {Kid} na frente. Ela fica no seu celular também: você vê tudo o que sai.",
+        s3h: "E chega no WhatsApp {rOf}.",
+        s3p: "Para {rThe}, é uma mensagem sua, como qualquer outra. Ninguém precisa baixar nada.",
+        s4h: "{RThe} responde como sempre.",
+        s4p: "A resposta volta pelo seu WhatsApp e aparece no tablet de {Kid}, na conversa com {rThe}.",
+        s5h: "Não é só {rThe}.",
+        s5p: "Avós, tios, primos e os amigos da escola. Qualquer pessoa que você aprovar, e mais ninguém.",
+        s6h: "Você escolhe quem.",
+        s6p: "Numa área com PIN, no próprio tablet: os contatos, o horário de silêncio e pausar uma conversa. No seu celular, você só lê um QR, uma vez.",
+        capKid6: "na área dos pais",
+      },
+    },
+    en: {
+      kid: { son: { name: "Tito", sil: "son" }, daughter: { name: "Lia", sil: "daughter" } },
+      parent: { mother: { name: "Ana", sil: "mother" }, father: { name: "Paulo", sil: "father" } },
+      recv: {
+        grandma: { name: "Grandma", init: "G", the: "Grandma", of: "Grandma’s", cap: "in her WhatsApp", msg: "Hi Grandma, I miss you", reply: "Me too, sweetheart. There’s cake on Sunday." },
+        grandpa: { name: "Grandpa", init: "Gp", the: "Grandpa", of: "Grandpa’s", cap: "in his WhatsApp", msg: "Grandpa, will you teach me to fish?", reply: "I will. Sunday, bright and early." },
+        aunt: { name: "Aunt Bia", init: "B", the: "Aunt Bia", of: "Aunt Bia’s", cap: "in her WhatsApp", msg: "Will you come to my birthday?", reply: "I will, and I’ll bring the cake." },
+        friend: { name: "Lucas", init: "L", the: "Lucas", of: "Lucas’s", cap: "a school friend", msg: "Want to play after school?", reply: "Sure. See you at the court." },
+      },
+      story: {
+        s1h: "{Kid} wants to talk to {rThe}.",
+        s1p: "On the tablet, {Kid} sees only the people you chose. One tap on a face, then write, record a voice note or send a photo.",
+        s2h: "The message goes out from your WhatsApp.",
+        s2p: "Oiê sends it through the WhatsApp on your phone, with {Kid}’s name in front. It stays on your phone too: you see everything that goes out.",
+        s3h: "And it arrives in {rOf} WhatsApp.",
+        s3p: "To {rThe}, it’s a message from you, like any other. Nobody needs to install anything.",
+        s4h: "{RThe} replies as usual.",
+        s4p: "The reply comes back through your WhatsApp and shows on {Kid}’s tablet, in the chat with {rThe}.",
+        s5h: "It’s not only {rThe}.",
+        s5p: "Grandparents, uncles and aunts, cousins and school friends. Anyone you approve, and no one else.",
+        s6h: "You choose who.",
+        s6p: "In a PIN-protected area on the tablet itself: contacts, quiet hours and pausing a chat. On your phone, you only scan a QR code, once.",
+        capKid6: "in the parents’ area",
+      },
+    },
+  };
+  const ORDER = ["grandma", "grandpa", "aunt", "friend"];
+
   const EN = {
-    skip: "Skip to the content", langGroup: "Language", navGet: "Download",
+    skip: "Skip to the story", langGroup: "Language", navGet: "Download",
     h1: "Family, within reach.",
-    lede: "From a tablet, your kid sends messages, voice notes and photos to the family through your WhatsApp. Only to the people you choose.",
+    lede: "From a tablet, your kid talks with the family and friends you choose, through your WhatsApp.",
     cta: "Download Oiê", ctaNote: "For Android tablets, version 8 or newer.", ctaHow: "How to install",
-    routeA11y: "Example of how it works: Tito writes “Hi Grandma, I miss you” on the tablet. The message goes out from your WhatsApp, with Tito’s name, and reaches Grandma’s WhatsApp. Grandma replies, and the reply comes back to the tablet.",
-    st0: "writes on the tablet", st1name: "Your WhatsApp", st1: "sends it, with Tito’s name", st2name: "Grandma", st2: "gets it in her WhatsApp",
-    example: "Example", pause: "Pause", play: "Play",
-    kidH: "Your kid taps a face and talks.",
-    kidLede: "The tablet shows only the people you chose. One tap opens the chat, like any family chat.",
-    w1: "Voice", w2: "Text", w3: "Photo and video", w4: "Stickers", w5: "Updates (status)",
-    exKid: "Example: Tito’s tablet", n1: "Grandma", n2: "Mom", n3: "Grandpa", n4: "Aunt Bia", new3: "3 new",
-    youH: "You choose who.",
-    youLede: "On your phone you scan a QR code, once. Everything else you set on the tablet, behind a PIN.",
-    c1h: "Only the people you choose", c1: "Your kid talks to no one else, and no one else can reach them.",
-    c2h: "Quiet hours", c2: "School and bedtime, with exceptions for whoever you want.",
-    c3h: "Pause a chat", c3: "When you need a break, without deleting anything.",
-    c4h: "Settings behind a PIN", c4: "Contacts and settings sit behind a 6-digit PIN.",
-    famH: "The family doesn’t install anything.",
-    famLede: "To Grandma it’s a message from your number, with Tito’s name in front. She replies as usual, and the reply arrives on the tablet.",
-    exFam: "Example: what Grandma gets", ana: "Ana (you)",
-    m1: "<b>Tito</b>: Hi Grandma, I miss you", m2: "Me too, sweetheart. There’s cake on Sunday.", m2meta: "Grandma · 4:32 pm",
+    familyTitle: "Build your family and see how it works", lgKid: "Who writes", kidSon: "Son", kidDaughter: "Daughter",
+    lgParent: "Whose WhatsApp", parMother: "Mom", parFather: "Dad",
+    lgRecv: "To whom", rcvGrandma: "Grandma", rcvGrandpa: "Grandpa", rcvAunt: "Aunt", rcvFriend: "Friend", familyGo: "See the story",
+    storyA11y: "How it works", example: "Example", sent: "Sent", parentArea: "Contacts", waField: "Message", typing: "typing…",
+    capKid: "on the tablet, with Oiê", capParent: "your WhatsApp, the bridge",
+    auntName: "Aunt Bia", friendName: "Lucas, from school",
     honH: "No fine print.", honBox: "Before linking, Oiê tells you:",
     risk: "Oiê uses your WhatsApp in a way WhatsApp doesn’t officially offer. WhatsApp may limit or block your number. If it does, you lose access until you sort it out with WhatsApp.",
     riskWhy: "To lower that risk, Oiê sends at a person’s pace and never sends in bulk.",
-    f1: "<b>Nothing is kept by us.</b> Messages and contacts stay on the tablet. No ads, and no tracking of kids.",
+    f1: "<b>Only the people you approve.</b> Family or friends: your kid talks to no one else, and no one else reaches them through Oiê.",
     f2: "<b>You see what goes out.</b> Messages go out from your WhatsApp, so they’re on your phone too. Your kid is told this the first time.",
-    f3: "<b>Not made by WhatsApp.</b> Oiê isn’t made or approved by WhatsApp or Meta.",
-    f4: "<b>It doesn’t replace you.</b> Oiê helps the family talk. Your attention is still what matters most.",
+    f3: "<b>Nothing is kept by us.</b> Messages and contacts stay on the tablet. No ads, and no tracking of kids.",
+    f4: "<b>Not made by WhatsApp.</b> Oiê isn’t made or approved by WhatsApp or Meta. And it doesn’t replace your attention.",
     faqH: "Questions from the family",
-    q1: "Does Grandma need to install anything?", a1: "No. She gets it in her WhatsApp, like any message from you, with your kid’s name in front.",
-    q2: "Does my kid need a phone?", a2: "No. Oiê runs on an Android tablet you already have and uses your WhatsApp.",
-    q3: "Can WhatsApp block my number?", a3: "It can. Oiê uses your WhatsApp in a way WhatsApp doesn’t officially offer. That’s why we tell you before linking. Oiê sends at a person’s pace and never in bulk.",
-    q4: "Do I see what my kid sends?", a4: "Yes. Messages go out from your WhatsApp, so they’re on your phone too. Your kid is told this the first time.",
-    q5: "Can they see and post status updates?", a5: "Yes, if you turn it on in settings. Your kid sees updates from their contacts, and only those people see what your kid posts.",
-    q6: "Can they make calls?", a6: "Not yet. For now: messages, voice notes, photos, videos and stickers.",
-    q7: "Why isn’t it on the Play Store?", a7: "For now Oiê is downloaded straight from its releases page. Each release comes with a SHA-256 sum to check the file, and the app tells you when there’s a new version.",
+    q1: "Does the person receiving need to install anything?", a1: "No. Grandparents, aunts or friends get it in their WhatsApp, like any message from you, with your kid’s name in front.",
+    q2: "Can my kid talk to friends?", a2: "Yes, if you add the contact. The friend gets it from your number, with your kid’s name in front. Your kid only talks to people you approve, and no one else reaches them through Oiê.",
+    q3: "Does my kid need a phone?", a3: "No. Oiê runs on an Android tablet you already have and uses your WhatsApp.",
+    q4: "Can WhatsApp block my number?", a4: "It can. Oiê uses your WhatsApp in a way WhatsApp doesn’t officially offer. That’s why we tell you before linking. Oiê sends at a person’s pace and never in bulk.",
+    q5: "Do I see what my kid sends?", a5: "Yes. Messages go out from your WhatsApp, so they’re on your phone too. Your kid is told this the first time.",
+    q6: "Can they see and post status updates?", a6: "Yes, if you turn it on in settings. Your kid sees updates from their contacts, and only those people see what your kid posts.",
+    q7: "Can they make calls?", a7: "Not yet. For now: messages, voice notes, photos, videos and stickers.",
+    q8: "Why isn’t it on the Play Store?", a8: "For now Oiê is downloaded straight from its releases page. Each release comes with a SHA-256 sum to check the file, and the app tells you when there’s a new version.",
     getH: "Ready for the first hello?",
-    s1: "On your kid’s tablet, tap Download Oiê and open the file.", s2: "If Android asks, allow installing apps from the browser.",
-    s3: "Open Oiê: your name, your kid’s, and a QR code you scan in your WhatsApp.", s4: "Choose the contacts. Your kid can send the first hello.",
+    g1: "On your kid’s tablet, tap Download Oiê and open the file.", g2: "If Android asks, allow installing apps from the browser.",
+    g3: "Open Oiê: your name, your kid’s, and a QR code you scan in your WhatsApp.", g4: "Choose the contacts, family or friends. Your kid can send the first hello.",
     getSmall: "For Android 8 or newer. The file comes from Oiê’s releases page on GitHub, with each release’s SHA-256 sum.",
     footLine: "Family, within reach.", footAll: "All releases", footLib: "whatsmeow (MPL-2.0)", footPatch: "The whatsmeow file Oiê modifies",
-    footLegal: "Oiê isn’t made or approved by WhatsApp or Meta. WhatsApp is a trademark of Meta.",
+    footLegal: "Oiê isn’t made or approved by WhatsApp or Meta. WhatsApp is a trademark of Meta. The WhatsApp screens on this page are example drawings.",
     title: "Oiê: family within reach, from your kid’s tablet",
-    desc: "From a tablet, your kid sends messages, voice notes and photos to the family through your WhatsApp, only to the people you choose. For Android tablets.",
+    desc: "From a tablet, your kid talks with the family and friends you choose, through your WhatsApp. For Android tablets.",
   };
-  // The story, beat by beat. Tito's message stays on top; Vovó's reply types in under it.
-  const STORY = {
-    pt: {
-      tito: "Oi vó, tô com saudade", reply: "Também, meu amor. Domingo tem bolo.", who: "Vovó", seen: "Vovó viu",
-      heads: ["Tito escreve no tablet", "Sai do seu WhatsApp", "Chega para a Vovó", "Vovó está respondendo…", "Volta pelo seu WhatsApp", "Chega no tablet do Tito"],
-      replied: "Vovó respondeu",
-    },
-    en: {
-      tito: "Hi Grandma, I miss you", reply: "Me too, sweetheart. There’s cake on Sunday.", who: "Grandma", seen: "Grandma saw it",
-      heads: ["Tito types on the tablet", "Goes out from your WhatsApp", "Reaches Grandma", "Grandma is replying…", "Back through your WhatsApp", "Reaches Tito’s tablet"],
-      replied: "Grandma replied",
-    },
-  };
-  // at: the station; signed: "Tito:" in front (added as it leaves your WhatsApp); type: who is typing in this beat.
-  const BEATS = [
-    { at: 0, signed: false, type: "tito" },
-    { at: 1, signed: true },
-    { at: 2, signed: true, seen: true },
-    { at: 2, signed: true, seen: true, reply: true, type: "reply" },
-    { at: 1, signed: true, seen: true, reply: true },
-    { at: 0, signed: true, seen: true, reply: true },
-  ];
-  // How long each beat stays once it's fully shown (travel takes 1.8 s of it).
-  const HOLD = [1800, 3400, 3600, 2600, 3400, 4200];
-  const CHAR_MS = 85;
 
   const PT = {};
-  document.querySelectorAll("[data-i18n]").forEach((el) => (PT[el.dataset.i18n] = el.textContent));
-  document.querySelectorAll("[data-i18n-html]").forEach((el) => (PT[el.dataset.i18nHtml] = el.innerHTML));
-  document.querySelectorAll("[data-i18n-aria]").forEach((el) => (PT[el.dataset.i18nAria] = el.getAttribute("aria-label")));
+  document.querySelectorAll("[data-t]").forEach((el) => (PT[el.dataset.t] = el.textContent));
+  document.querySelectorAll("[data-t-html]").forEach((el) => (PT[el.dataset.tHtml] = el.innerHTML));
+  document.querySelectorAll("[data-t-aria]").forEach((el) => (PT[el.dataset.tAria] = el.getAttribute("aria-label")));
   PT.title = document.title;
   PT.desc = document.querySelector('meta[name="description"]').content;
-  PT.play = "Continuar";
 
   let lang = "pt";
-  function store(v) { try { localStorage.setItem("oie-lang", v); } catch (e) { /* private mode: fine */ } }
-  function stored() { try { return localStorage.getItem("oie-lang"); } catch (e) { return null; } }
+  const pick = { kid: "son", parent: "mother", recv: "grandma" };
+  let shownRecv = "grandma"; // who the receiver's phone shows right now (step 5 cycles through the others)
+  let step = 0;
 
-  function setLang(next, save) {
-    lang = next === "en" ? "en" : "pt";
-    const d = lang === "en" ? EN : PT;
-    document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
-    document.querySelectorAll("[data-i18n]").forEach((el) => { if (d[el.dataset.i18n] != null) el.textContent = d[el.dataset.i18n]; });
-    document.querySelectorAll("[data-i18n-html]").forEach((el) => { if (d[el.dataset.i18nHtml] != null) el.innerHTML = d[el.dataset.i18nHtml]; });
-    document.querySelectorAll("[data-i18n-aria]").forEach((el) => { if (d[el.dataset.i18nAria] != null) el.setAttribute("aria-label", d[el.dataset.i18nAria]); });
-    document.title = d.title;
-    document.querySelector('meta[name="description"]').content = d.desc;
-    document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
-    setPauseLabel();
-    if (save) { layout(); show(beat, false); store(lang); }
-  }
-
-  /* ---------- The family line ---------- */
-  const route = document.getElementById("route");
-  const plate = document.getElementById("plate");
-  const head = document.getElementById("plateFrom");
-  const text = document.getElementById("plateText");
-  const seen = document.getElementById("plateSeen");
-  const seenText = document.getElementById("plateSeenText");
-  const replyRow = document.getElementById("plateReply");
-  const replyWho = document.getElementById("replyWho");
-  const replyText = document.getElementById("replyText");
-  const track = route.querySelector(".route__track");
-  const stations = Array.from(route.querySelectorAll(".station"));
-  const pauseBtn = document.getElementById("pause");
-  const drop = document.getElementById("drop");
-  const still = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-  let beat = 0;
-  let typed = -1; // characters typed in this beat; -1 when the beat has no typing or it's done
-  let timer = null;
-  let userPaused = false;
-  let visible = true;
-
+  const $ = (s) => document.querySelector(s);
+  const all = (s) => document.querySelectorAll(s);
+  const cap1 = (t) => t.charAt(0).toUpperCase() + t.slice(1);
   const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  const sign = (t) => "<b>Tito</b>: " + esc(t);
-  const CARET = '<span class="caret"></span>';
+  const dict = () => (lang === "en" ? EN : PT);
+  function store(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode: fine */ } }
+  function stored(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 
-  function ringCenter(i) {
-    const r = stations[i].querySelector(".station__ring").getBoundingClientRect();
-    const box = route.getBoundingClientRect();
-    return { x: r.left - box.left + r.width / 2, y: r.top - box.top + r.height / 2, top: r.top - box.top, r };
+  /* ---------- Filling the page ---------- */
+  function fillStatic() {
+    const d = dict();
+    document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
+    all("[data-t]").forEach((el) => { if (d[el.dataset.t] != null) el.textContent = d[el.dataset.t]; });
+    all("[data-t-html]").forEach((el) => { if (d[el.dataset.tHtml] != null) el.innerHTML = d[el.dataset.tHtml]; });
+    all("[data-t-aria]").forEach((el) => { if (d[el.dataset.tAria] != null) el.setAttribute("aria-label", d[el.dataset.tAria]); });
+    document.title = d.title;
+    $('meta[name="description"]').content = d.desc;
+    all(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
   }
 
-  // Draws one beat. n = characters typed so far (only for the beat's typing row).
-  function render(i, n) {
-    const st = STORY[lang], b = BEATS[i];
-    const typingTito = b.type === "tito" && n >= 0;
-    const typingReply = b.type === "reply" && n >= 0;
-    head.textContent = typingReply || b.type !== "reply" ? st.heads[i] : st.replied;
-    text.innerHTML = typingTito ? esc(st.tito.slice(0, n)) + CARET : b.signed ? sign(st.tito) : esc(st.tito);
-    seen.hidden = !b.seen;
-    seenText.textContent = st.seen;
-    replyRow.hidden = !b.reply;
-    replyWho.textContent = st.who;
-    replyText.innerHTML = typingReply ? esc(st.reply.slice(0, n)) + CARET : esc(st.reply);
-    stations.forEach((s, k) => s.classList.toggle("is-on", k === b.at));
+  function fillPeople() {
+    const P = PEOPLE[lang];
+    const kid = P.kid[pick.kid], parent = P.parent[pick.parent], r = P.recv[shownRecv], chosen = P.recv[pick.recv];
+    const v = {
+      kidName: kid.name, parentName: parent.name, parentInitial: parent.name.charAt(0),
+      recvName: r.name, recvInitial: r.init, recvCap: r.cap, msg: r.msg, reply: r.reply,
+    };
+    ORDER.forEach((k, i) => { v["tile" + i] = P.recv[k].init; v["tile" + i + "n"] = P.recv[k].name; });
+    all("[data-v]").forEach((el) => { if (el.dataset.v in v && el.id !== "composeKid") el.textContent = v[el.dataset.v]; });
+    $("#silKid").setAttribute("href", "#p-" + (step === 6 ? parent.sil : kid.sil));
+    $("#silParent").setAttribute("href", "#p-" + parent.sil);
+    $("#silRecv").setAttribute("href", "#p-" + shownRecv);
+    // The story's words follow the family the visitor built (the chosen receiver, not the one cycling in step 5).
+    const words = { Kid: kid.name, rThe: chosen.the, RThe: cap1(chosen.the), rOf: chosen.of };
+    all("[data-s]").forEach((el) => { el.textContent = P.story[el.dataset.s].replace(/\{(\w+)\}/g, (m, k) => (k in words ? words[k] : m)); });
+    // In step 6 the parent holds the tablet (the parents' area).
+    const kidCap = $(".actor--kid figcaption");
+    kidCap.querySelector("b").textContent = step === 6 ? parent.name : kid.name;
+    kidCap.querySelector("span").textContent = step === 6 ? P.story.capKid6 : dict().capKid;
   }
 
-  // The route leaves room above the line for the tallest plate (both messages), at this width and language.
-  function roomForPlate() {
-    const keep = { beat, typed };
-    render(4, -1);
-    const h = plate.offsetHeight;
-    render(keep.beat, keep.typed);
-    route.style.paddingTop = h + 48 + "px";
+  /* ---------- The story ---------- */
+  const stage = $("#stage");
+  const dot = $("#dot");
+  const composeKid = $("#composeKid");
+  const composeRecv = $("#composeRecv");
+  const waTyping = $("#waTyping");
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let typer = null;
+  let cycler = null;
+  const CHAR_MS = 70;
+
+  function type(el, text, done) {
+    clearInterval(typer);
+    if (still.matches) { el.textContent = text; if (done) done(); return; }
+    let n = 0;
+    el.classList.add("is-typing");
+    typer = setInterval(() => {
+      n += 1;
+      el.innerHTML = esc(text.slice(0, n)) + '<span class="caret"></span>';
+      if (n >= text.length) { clearInterval(typer); el.textContent = text; if (done) done(); }
+    }, CHAR_MS);
   }
 
-  function layout() {
-    roomForPlate();
-    const a = ringCenter(0), c = ringCenter(2);
-    const line = parseFloat(getComputedStyle(track).height) || 6;
-    track.style.top = a.y - line / 2 + "px";
-    track.style.left = a.x + "px";
-    track.style.width = c.x - a.x + "px";
-    // The line drops from Tito's station to the bottom of the coral field, where the page's spine starts.
-    const hero = drop.parentElement.getBoundingClientRect();
-    drop.style.left = a.r.left - hero.left + a.r.width / 2 - line / 2 + "px";
-    drop.style.top = a.r.bottom - hero.top + "px";
-    drop.style.height = hero.bottom - a.r.bottom + "px";
+  // Where the message is on the wire: 0 the kid, 0.5 the parent, 1 the receiver; null hides it.
+  function moveDot(to) {
+    if (to == null) { dot.style.opacity = "0"; return; }
+    dot.style.opacity = "1";
+    dot.style.left = to * 100 + "%";
   }
 
-  function place(i, animate) {
-    const c = ringCenter(i);
-    const w = plate.offsetWidth, h = plate.offsetHeight;
-    const max = route.clientWidth - w;
-    const x = Math.max(0, Math.min(max, c.x - w / 2));
-    const y = c.top - h - 16;
-    if (!animate) plate.style.transition = "none";
-    plate.style.transform = `translate(${x}px, ${y}px)`;
-    if (!animate) { void plate.offsetWidth; plate.style.transition = ""; }
+  function setStep(n, focus, force) {
+    if (!force && n === step && stage.dataset.focus === focus) return;
+    step = n;
+    stage.dataset.step = String(n);
+    stage.dataset.focus = focus || "kid";
+    all(".step").forEach((s) => s.classList.toggle("is-on", Number(s.dataset.step) === n));
+    clearInterval(typer); clearInterval(cycler);
+    stage.removeAttribute("data-replied");
+    waTyping.hidden = true;
+    composeRecv.classList.remove("is-typing");
+    composeRecv.textContent = dict().waField;
+    shownRecv = pick.recv;
+    fillPeople();
+    const r = PEOPLE[lang].recv[pick.recv];
+    composeKid.textContent = "";
+    if (n === 1) { moveDot(0); type(composeKid, r.msg); }
+    else if (n === 2) { moveDot(0.5); }
+    else if (n === 3) { moveDot(1); }
+    else if (n === 4) {
+      moveDot(1);
+      waTyping.hidden = false;
+      type(composeRecv, r.reply, () => {
+        waTyping.hidden = true;
+        composeRecv.classList.remove("is-typing");
+        composeRecv.textContent = dict().waField;
+        stage.setAttribute("data-replied", "");
+        moveDot(0);
+      });
+    } else if (n === 5) {
+      moveDot(null);
+      if (!still.matches) {
+        let i = ORDER.indexOf(pick.recv);
+        cycler = setInterval(() => { i = (i + 1) % ORDER.length; shownRecv = ORDER[i]; fillPeople(); }, 2200);
+      }
+    } else { moveDot(null); }
   }
 
-  function show(i, animate) {
-    render(i, typed);
-    place(BEATS[i].at, animate);
-  }
-
-  // Starts a beat: travel there, and start its typing if it has some.
-  function enter(i, animate) {
-    beat = i;
-    typed = BEATS[i].type ? 0 : -1;
-    show(i, animate);
-    schedule();
-  }
-
-  function tick() {
-    const st = STORY[lang], b = BEATS[beat];
-    const full = (b.type === "tito" ? st.tito : st.reply).length;
-    typed += 1;
-    if (typed >= full) typed = -1;
-    render(beat, typed);
-    place(b.at, false); // the plate grows as the words come; it stays on its station
-    schedule();
-  }
-
-  function step() {
-    const next = (beat + 1) % BEATS.length;
-    if (next === 0) {
-      // The story starts again: fade, reset without travelling, fade back in.
-      plate.classList.add("is-fading");
-      timer = setTimeout(() => { plate.classList.remove("is-fading"); enter(0, false); }, 300);
-      return;
-    }
-    enter(next, BEATS[next].at !== BEATS[beat].at);
-  }
-
-  function schedule() {
-    clearTimeout(timer);
-    if (userPaused || !visible || still.matches) return;
-    timer = typed >= 0 ? setTimeout(tick, typed === 0 && BEATS[beat].type === "reply" ? 900 : CHAR_MS) : setTimeout(step, HOLD[beat]);
-  }
-
-  function setPauseLabel() {
-    const d = lang === "en" ? EN : PT;
-    pauseBtn.querySelector("span").textContent = userPaused ? d.play : d.pause;
-    pauseBtn.querySelector("use").setAttribute("href", userPaused ? "#i-play" : "#i-pause");
-    pauseBtn.setAttribute("aria-pressed", String(userPaused));
-  }
-
-  pauseBtn.addEventListener("click", () => { userPaused = !userPaused; setPauseLabel(); schedule(); });
-
-  function applyMotionPreference() {
-    pauseBtn.hidden = still.matches;
-    // Reduced motion: the end of the story, still: Tito's message on top, Vovó's answer under it.
-    if (still.matches) { clearTimeout(timer); beat = 3; typed = -1; show(beat, false); } else schedule();
-  }
-  still.addEventListener("change", applyMotionPreference);
-
-  if ("IntersectionObserver" in window) {
-    new IntersectionObserver((entries) => {
-      visible = entries[0].isIntersecting;
-      if (visible) schedule(); else clearTimeout(timer);
-    }, { threshold: 0.1 }).observe(route);
-  }
-
-  // Lay the line out again whenever the hero changes size: a resize, the web font arriving, a language switch.
-  let resizeFrame = 0;
-  function relayout() {
-    cancelAnimationFrame(resizeFrame);
-    resizeFrame = requestAnimationFrame(() => { layout(); show(beat, false); });
-  }
-  window.addEventListener("resize", relayout);
-  if ("ResizeObserver" in window) new ResizeObserver(relayout).observe(document.querySelector(".hero__copy"));
-
-  /* ---------- Section entrances (content is visible without JS) ---------- */
-  function reveals() {
-    const items = document.querySelectorAll(".reveal");
-    if (still.matches || !("IntersectionObserver" in window)) { items.forEach((el) => el.classList.add("is-in")); return; }
+  // On a phone the stage pins over the top 62% of the screen; the step being read is the one in the band below it.
+  const narrow = window.matchMedia("(max-width: 899px)");
+  function watchSteps() {
+    if (!("IntersectionObserver" in window)) { setStep(4, "recv", true); return; }
     const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); } });
-    }, { threshold: 0.15 });
-    items.forEach((el) => {
-      const r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight) el.classList.add("is-in"); else io.observe(el);
-    });
+      entries.forEach((e) => { if (e.isIntersecting) setStep(Number(e.target.dataset.step), e.target.dataset.focus); });
+    }, { rootMargin: narrow.matches ? "-72% 0px -18% 0px" : "-45% 0px -45% 0px" });
+    all(".step").forEach((s) => io.observe(s));
+    // Back at the top (the hero), the stage rests at step 0: everyone standing, nothing sent.
+    new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) setStep(0, "kid");
+    }).observe($(".hero"));
   }
-  // Without JS the sections are simply there; with it they rise in once.
-  document.documentElement.classList.add("js");
 
-  document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang, true)));
+  /* ---------- Controls ---------- */
+  const family = $("#family");
+  family.addEventListener("change", (e) => {
+    const t = e.target;
+    if (!(t.name in pick)) return;
+    pick[t.name] = t.value;
+    store("oie-family", JSON.stringify(pick));
+    setStep(step, stage.dataset.focus, true);
+  });
+  family.addEventListener("submit", (e) => e.preventDefault());
+  all(".lang button").forEach((b) => b.addEventListener("click", () => {
+    lang = b.dataset.lang === "en" ? "en" : "pt";
+    store("oie-lang", lang);
+    fillStatic();
+    setStep(step, stage.dataset.focus, true);
+  }));
 
   function start() {
-    const wanted = new URLSearchParams(location.search).get("lang") || stored() || ((navigator.language || "").toLowerCase().startsWith("pt") ? "pt" : "pt");
-    setLang(wanted, false);
-    layout();
-    enter(0, false);
-    applyMotionPreference();
-    reveals();
+    try {
+      const saved = JSON.parse(stored("oie-family") || "null");
+      if (saved) Object.keys(pick).forEach((k) => {
+        const input = saved[k] && family.querySelector(`input[name="${k}"][value="${saved[k]}"]`);
+        if (input) { pick[k] = saved[k]; input.checked = true; }
+      });
+    } catch (e) { /* fine */ }
+    const wanted = new URLSearchParams(location.search).get("lang") || stored("oie-lang");
+    lang = wanted === "en" ? "en" : "pt";
+    fillStatic();
+    setStep(0, "kid", true);
+    watchSteps();
   }
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(start); else window.addEventListener("load", start);
+  start();
 })();
