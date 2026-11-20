@@ -167,6 +167,19 @@ _The owner's test (2026-11-20): GIFs from Gboard, and pasted media, couldn't be 
 - **Nothing is sent without Enviar**, the same as for the camera and the gallery. Quiet hours and the allowed list apply.
 - **Not supported** (says "Não deu para abrir…" like any unreadable file): anything that isn't a picture, a GIF or a video.
 
+## v0.32: voice messages play for the family
+_The owner's test (2026-11-20): the kid can record and listen in Oiê, but the family receives an empty or broken audio._
+
+- **Cause:** Android records Opus in Ogg with its own Ogg writer. Oiê plays that file, but WhatsApp didn't.
+- **Now:** before sending, the recording is re-packed into a standard Ogg Opus stream:
+  - the same Opus audio, untouched;
+  - clean OpusHead and OpusTags headers;
+  - pages with correct positions and checksums;
+  - the length taken from the audio itself.
+  The family's WhatsApp gets the same kind of file its own voice notes are.
+- **If a recording can't be read** as Ogg Opus, it isn't sent broken: it shows "Não enviada · Tentar de novo" and the report says why.
+- **Nothing changes for the kid:** record, release, send.
+
 ## Flow review (ux-user-flows §13)
 | # | Question | Result |
 |---|---|---|

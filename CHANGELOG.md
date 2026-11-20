@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 0.32.0
+- **Fixed: voice messages arrived broken for the family.** Android's way of saving the recording wasn't one WhatsApp could play. Oiê now re-packs each voice message into the same form WhatsApp's own voice notes use, without changing the sound. If a recording can't be read, it shows as not sent, with Tentar de novo, instead of reaching the family broken.
+
 ## 0.31.0
 - **WhatsApp's own animated stickers move.** The ones from WhatsApp's sticker store are a different kind of animation (Lottie); now they move in the chat and in the sticker sheet, and a saved one goes back out animated.
 - **GIFs and stickers from the keyboard.** In the text field, a GIF or sticker picked in Gboard, or a picture, GIF or video pasted in, goes to its preview: GIFs to the GIF preview, pictures and stickers to the photo preview, videos to the video preview. Nothing is sent until Enviar.
