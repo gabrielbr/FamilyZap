@@ -335,6 +335,10 @@ fun Conversation(
                 }
             }
             Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
+            // Round 4: the slip line sits above the composer, so the kid can still type or tap meanwhile.
+            if (slip) Text(tx.holdToRecord, style = OieType.body, color = c.ink,
+                modifier = Modifier.fillMaxWidth().padding(start = app.oie.ui.common.sideMargin, end = app.oie.ui.common.sideMargin, top = OTokens.Spacing.space3)
+                    .semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space4),
                 verticalAlignment = Alignment.CenterVertically,
@@ -366,8 +370,6 @@ fun Conversation(
                     // v0.34 audit round 2: a recording started by a tap (TalkBack) has a way out; with a finger on
                     // the button, sliding off cancels.
                     QuietButton(tx.cancel, { app.oie.data.Voice.stop(context, keep = false); recordingSince = 0; away = false })
-                } else if (slip) {
-                    Text(tx.holdToRecord, style = OieType.body, color = c.ink, modifier = Modifier.weight(1f).semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
                 } else {
                     // v0.29 audit: on a narrow screen (a phone, a bubble) the camera and stickers step aside while the
                     // kid types, so the field has room; they come back when it's empty.

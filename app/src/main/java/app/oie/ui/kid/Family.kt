@@ -237,6 +237,14 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
     val compactPad = app.oie.ui.common.isCompact
     val strokes = remember { mutableStateListOf<Stroke2>() }
     var cleared by remember { mutableStateOf<List<Stroke2>?>(null) }
+    // v0.34 audit: Limpar can be undone too (Desfazer right after brings the whole drawing back).
+    val editLinks: @Composable () -> Unit = {
+        TextLink(tx.undo, {
+            val back = cleared
+            if (strokes.isEmpty() && back != null) { strokes.addAll(back); cleared = null } else strokes.removeLastOrNull()
+        })
+        TextLink(tx.drawClear, { if (strokes.isNotEmpty()) { cleared = strokes.toList(); strokes.clear() } })
+    }
     var tick by remember { mutableStateOf(0) } // a point added: draw again
     var size by remember { mutableStateOf(IntSize.Zero) }
     val thin = with(density) { OTokens.Spacing.space2.toPx() }
@@ -297,13 +305,10 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
             }
             Toggle(tx.drawThin, !thick) { thick = false }
             Toggle(tx.drawThick, thick) { thick = true }
-            // v0.34 audit: Limpar can be undone too (Desfazer right after brings the whole drawing back).
-            TextLink(tx.undo, {
-                val back = cleared
-                if (strokes.isEmpty() && back != null) { strokes.addAll(back); cleared = null } else strokes.removeLastOrNull()
-            })
-            TextLink(tx.drawClear, { if (strokes.isNotEmpty()) { cleared = strokes.toList(); strokes.clear() } })
+            if (!compactPad) editLinks()
         }
+        // Round 4: on a phone, Desfazer and Limpar share their own row (Limpar wrapped alone).
+        if (compactPad) Row(Modifier.padding(horizontal = app.oie.ui.common.sideMargin), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) { editLinks() }
         if (compactPad) PrimaryButton(tx.drawUse, {
             if (strokes.isEmpty() || size.width == 0) return@PrimaryButton
             onDone(render(strokes, size, c.drawPaper))

@@ -18,6 +18,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.layout.size
 import app.oie.R
 import app.oie.data.AppState
 import app.oie.data.Route
@@ -68,7 +71,11 @@ fun ForgotPin(state: AppState, stage: Int) {
                 val stale = status == app.oie.data.LinkState.Status.Connected && !sawQr
                 // Round 3: while the tablet is getting ready (after the tap), the wait shows, not the button again.
                 if (state.pinResetFrom.isEmpty() && status == app.oie.data.LinkState.Status.Connecting) {
-                    Text(tx.linkPreparing, style = OieType.body, color = c.ink)
+                    // The same wait as the link screen: a spinner (when animations are on), announced.
+                    androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
+                        if (app.oie.ui.common.animationsOn()) androidx.compose.material3.CircularProgressIndicator(Modifier.size(app.oie.ui.common.ICON), color = c.ink, trackColor = c.line, strokeWidth = OTokens.Size.hairline * 2)
+                        Text(tx.linkPreparing, style = OieType.body, color = c.ink, modifier = Modifier.semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
+                    }
                 } else if (state.pinResetFrom.isEmpty() || stale) {
                     if (state.linkState.pairFailed) Text(tx.linkFailed, style = OieType.body, color = c.coralText)
                     app.oie.ui.setup.ButtonRow {
@@ -82,7 +89,8 @@ fun ForgotPin(state: AppState, stage: Int) {
                         real?.ownChat { now ->
                             if (now.isNotEmpty() && now == before) state.route = Route.ForgotPin(1)
                             // Round 3: not knowing which WhatsApp linked is a failed try, never "another account".
-                            else if (now.isEmpty()) state.linkState.pairFailed = true
+                            // Round 4: and the screen goes back to "Mostrar o código" with the failed line, never blank.
+                            else if (now.isEmpty()) { state.linkState.pairFailed = true; sawQr = false }
                             else {
                                 // Another WhatsApp: its owner sets Oiê up from the start; nothing of the old account stays.
                                 state.pinResetFrom = ""

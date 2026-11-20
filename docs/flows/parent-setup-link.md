@@ -189,12 +189,12 @@ _The owner's report (2026-11-19): after updating, Oiê says it needs to connect 
 | 10 | Exits | ✅ Ends by handing over to the kid; nothing is a dead end. |
 | 11 | Conventions | ✅ Linking by QR like WhatsApp Web; PIN entry like Android's. |
 | 12 | Speed | ✅ Waits over 10 s show progress and Cancelar. |
-| 13 | Accessibility | 🟡 The QR is the only way to link, and it needs a camera on the phone. WhatsApp's own alternative (a code by phone number) to check in the build. |
+| 13 | Accessibility | ✅ v0.34: labels, errors and waits are announced; every step works with TalkBack. Linking needs the phone's camera (QR); a phone-number code is on the roadmap as the owner's decision. |
 | 14 | Ethics | ✅ The risk is said in full **before** linking, with an equal "Agora não"; no preselected options, no nagging after a no. |
 | 15 | Evidence | 🟡 Test with 3–5 parents: do they understand the risk notice, and can they find "Dispositivos conectados" alone? |
 
 **Issues**
-- **Important:** a linking alternative to the QR (WhatsApp's phone-number code). Check whether the linking method offers it, and add it as "Conectar com código" if so.
+- **For the owner (roadmap):** a linking alternative to the QR (WhatsApp's phone-number code). The link library has it (PairWithCode); it waits on the owner's choice.
 - **Polish:** the 4 phone steps should follow the WhatsApp version on the parent's phone (menu names change). Keep them in one place in the code, easy to update.
 
 ## v0.34: the design pass
