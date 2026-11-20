@@ -74,7 +74,7 @@ Line length 45–70 characters (`content-max` 600dp on the tablet).
 - **Radii (core):** 4 controls, 8 cards, 16 pills and sheets, round for photos.
 - **App:** 16dp side margins on the phone and 24 on the tablet; one column up to 600dp.
 - **Social:** 4:5 posts on a 6-column grid with 64 px margins.
-- **Web:** 12 columns, max width 1200 px.
+- **Web:** 12 columns, max width 1200 px. The website (`site/`, since 2026-11-20) is the coral hero field carrying **the family line**: an ink line with cream station rings (the touching rounds) from the kid to the parent's WhatsApp to the family, which continues down the page as a coral spine with each section as a station. Its message is the app's message row on cream, never a bubble.
 
 ## 7. Graphic device
 **Touching rounds**, taken from the logo's "Close" letters: the o's ring, the i's dot and stem, the ê's hat, set so they touch each other. Coral and cream only. Use them in empty states, the splash, social backgrounds and the website hero. At most one cluster per screen, never behind text you must read, and never made into a face, a heart, a bubble or a house.

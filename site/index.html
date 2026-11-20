@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oiê: a família ao alcance, do tablet da criança</title>
+<meta name="description" content="Do tablet, a criança manda mensagem, áudio e foto para a família pelo seu WhatsApp, só para quem você escolher. Para tablets Android.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Oiê: a família ao alcance">
+<meta property="og:description" content="Do tablet, a criança manda mensagem, áudio e foto para a família pelo seu WhatsApp, só para quem você escolher.">
+<meta name="theme-color" content="#E8573C">
+<link rel="icon" href="assets/favicon.ico" sizes="48x48">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/site.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"Organization","name":"Oiê"},
+ {"@type":"SoftwareApplication","name":"Oiê","operatingSystem":"Android 8+","applicationCategory":"CommunicationApplication","description":"Do tablet, a criança manda mensagem, áudio e foto para a família pelo WhatsApp de um responsável, só para os contatos que ele escolheu."},
+ {"@type":"FAQPage","mainEntity":[
+  {"@type":"Question","name":"A Vovó precisa instalar alguma coisa?","acceptedAnswer":{"@type":"Answer","text":"Não. Ela recebe no WhatsApp dela, como qualquer mensagem sua, com o nome da criança na frente."}},
+  {"@type":"Question","name":"A criança precisa de um celular?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê fica num tablet Android que vocês já têm e usa o seu WhatsApp."}},
+  {"@type":"Question","name":"O WhatsApp pode bloquear o meu número?","acceptedAnswer":{"@type":"Answer","text":"Pode. O Oiê usa o seu WhatsApp de um jeito que o WhatsApp não oferece oficialmente. Por isso avisamos antes de conectar. O Oiê manda no ritmo de uma pessoa e nunca manda em massa."}},
+  {"@type":"Question","name":"Eu vejo o que a criança manda?","acceptedAnswer":{"@type":"Answer","text":"Vê. As mensagens saem do seu WhatsApp, então também ficam no seu celular. A criança fica sabendo disso no primeiro uso."}},
+  {"@type":"Question","name":"Dá para ver e postar status?","acceptedAnswer":{"@type":"Answer","text":"Dá, se você ligar nos ajustes. A criança vê as novidades de quem está nos contatos dela, e o que ela posta só essas pessoas veem."}},
+  {"@type":"Question","name":"Dá para fazer ligação?","acceptedAnswer":{"@type":"Answer","text":"Ainda não. Por enquanto: mensagens, áudios, fotos, vídeos e figurinhas."}},
+  {"@type":"Question","name":"Por que não está na Play Store?","acceptedAnswer":{"@type":"Answer","text":"Por enquanto o Oiê é baixado direto da página de versões. Cada versão traz a soma SHA-256 para conferir o arquivo, e o app avisa quando tem versão nova."}}
+ ]}
+]}
+</script>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-people" viewBox="0 0 24 24"><path d="M17,21v-2a4,4 0,0 0,-4,-4H5a4,4 0,0 0,-4,4v2"/><path d="M9,11a4,4 0,1 0,0,-8a4,4 0,1 0,0,8z"/><path d="M23,21v-2a4,4 0,0 0,-3,-3.87"/><path d="M16,3.13a4,4 0,0 1,0,7.75"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12,3a9,9 0,1 0,0 18a9,9 0,1 0,0 -18z"/><path d="M12,7.5V12l3,2"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7,4h3v16H7z"/><path d="M14,4h3v16h-3z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6,4l14,8l-14,8z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20,6L9,17l-5,-5"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12,2a3,3 0,0 0,-3,3v7a3,3 0,0 0,6,0V5a3,3 0,0 0,-3,-3z"/><path d="M19,10v2a7,7 0,0 1,-14,0v-2"/><path d="M12,19v3"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4,7h3l1.6,-2.4A1.5,1.5 0,0 1,9.9,4h4.2a1.5,1.5 0,0 1,1.3,0.6L17,7h3a2,2 0,0 1,2,2v9a2,2 0,0 1,-2,2H4a2,2 0,0 1,-2,-2V9a2,2 0,0 1,2,-2z"/><path d="M12,9.5a3.5,3.5 0,1 0,0 7a3.5,3.5 0,1 0,0 -7z"/></symbol>
+  <symbol id="i-sticker" viewBox="0 0 24 24"><path d="M14,21H5a2,2 0,0 1,-2,-2V5a2,2 0,0 1,2,-2h14a2,2 0,0 1,2,2v9"/><path d="M21,14l-7,7"/><path d="M14,21v-4a3,3 0,0 1,3,-3h4"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M21,3L10,14"/><path d="M21,3l-6.5,18l-4.5,-7l-7,-4.5z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><path d="M12,3a9,9 0,1 1,0 18a9,9 0,1 1,0 -18z"/><path d="M12,11v6"/><path d="M12,7.5v0.01"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><path d="M5,3h14a2,2 0,0 1,2,2v14a2,2 0,0 1,-2,2H5a2,2 0,0 1,-2,-2V5a2,2 0,0 1,2,-2z"/><path d="M9,7a2,2 0,1 0,0 4a2,2 0,1 0,0 -4z"/><path d="M21,15l-4.6,-4.6a1.5,1.5 0,0 0,-2.1,0L5,20"/></symbol>
+</svg>
+
+<a class="skip" href="#conteudo" data-i18n="skip">Pular para o conteúdo</a>
+
+<header class="hero">
+  <div class="wrap">
+    <nav class="nav" aria-label="Oiê">
+      <a class="nav__logo" href="#" aria-label="Oiê"><img src="assets/oie-wordmark-white.svg" alt="Oiê" width="92" height="84"></a>
+      <div class="nav__right">
+        <div class="lang" role="group" aria-label="Idioma" data-i18n-aria="langGroup">
+          <button type="button" data-lang="pt" aria-pressed="true" lang="pt-BR">PT</button>
+          <button type="button" data-lang="en" aria-pressed="false" lang="en">EN</button>
+        </div>
+        <a class="btn btn--ink nav__get" href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener" data-i18n="navGet">Baixar</a>
+      </div>
+    </nav>
+
+    <div class="hero__copy">
+      <h1 data-i18n="h1">A família ao alcance.</h1>
+      <p class="hero__lede" data-i18n="lede">Do tablet, a criança manda mensagem, áudio e foto para a família pelo seu WhatsApp. Só para quem você escolher.</p>
+      <div class="hero__actions">
+        <a class="btn btn--ink" href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener" data-i18n="cta">Baixar o Oiê</a>
+        <p class="hero__note"><span data-i18n="ctaNote">Para tablets Android 8 ou mais novos.</span> <a href="#baixar" data-i18n="ctaHow">Como instalar</a></p>
+      </div>
+    </div>
+
+    <div class="route" id="route" role="img" data-i18n-aria="routeA11y"
+         aria-label="Exemplo de como funciona: Tito escreve “Oi vó, tô com saudade” no tablet. A mensagem sai do seu WhatsApp, com o nome do Tito, e chega no WhatsApp da Vovó. A Vovó responde, e a resposta volta para o tablet.">
+      <div class="route__track" aria-hidden="true"></div>
+      <ol class="stations" aria-hidden="true">
+        <li class="station" data-at="0"><span class="station__ring"></span><span class="station__name">Tito</span><span class="station__where" data-i18n="st0">escreve no tablet</span></li>
+        <li class="station" data-at="1"><span class="station__ring"></span><span class="station__name" data-i18n="st1name">Seu WhatsApp</span><span class="station__where" data-i18n="st1">manda, com o nome do Tito</span></li>
+        <li class="station" data-at="2"><span class="station__ring"></span><span class="station__name" data-i18n="st2name">Vovó</span><span class="station__where" data-i18n="st2">recebe no WhatsApp dela</span></li>
+      </ol>
+      <div class="plate" id="plate" aria-hidden="true"><span class="plate__head"><span class="plate__from" id="plateFrom">Tito</span><span class="plate__tag" data-i18n="example">Exemplo</span></span><span class="plate__text" id="plateText">Oi vó, tô com saudade</span><span class="plate__seen" id="plateSeen" hidden><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span id="plateSeenText">Vovó viu</span></span></div>
+    </div>
+    <button type="button" class="btn btn--quiet route__pause" id="pause" aria-controls="route">
+      <svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg><span data-i18n="pause">Pausar</span>
+    </button>
+  </div>
+  <span class="hero__drop" id="drop" aria-hidden="true"></span>
+</header>
+
+<main id="conteudo">
+  <div class="line">
+
+    <section class="stop reveal" aria-labelledby="kid">
+      <span class="stop__ring" aria-hidden="true"></span>
+      <div class="stop__body">
+        <h2 id="kid" data-i18n="kidH">A criança toca na foto e fala.</h2>
+        <div class="split">
+          <div>
+            <p class="stop__lede" data-i18n="kidLede">No tablet aparecem só as pessoas que você escolheu. Um toque abre a conversa, como em qualquer conversa de família.</p>
+            <ul class="ways">
+              <li><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg><span data-i18n="w1">Áudio</span></li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg><span data-i18n="w2">Texto</span></li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg><span data-i18n="w3">Foto e vídeo</span></li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-sticker"/></svg><span data-i18n="w4">Figurinha</span></li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg><span data-i18n="w5">Novidades (status)</span></li>
+            </ul>
+          </div>
+          <figure class="example">
+            <figcaption class="example__tag" data-i18n="exKid">Exemplo: o tablet do Tito</figcaption>
+            <div class="tiles">
+              <div class="tile"><span class="tile__face" aria-hidden="true">Vó</span><span data-i18n="n1">Vovó</span><span class="tile__new" data-i18n="new3">3 novas</span></div>
+              <div class="tile"><span class="tile__face" aria-hidden="true">M</span><span data-i18n="n2">Mãe</span></div>
+              <div class="tile"><span class="tile__face" aria-hidden="true">Vô</span><span data-i18n="n3">Vovô</span></div>
+              <div class="tile"><span class="tile__face" aria-hidden="true">T</span><span data-i18n="n4">Tia Bia</span></div>
+            </div>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="stop reveal" aria-labelledby="you">
+      <span class="stop__ring" aria-hidden="true"></span>
+      <div class="stop__body">
+        <h2 id="you" data-i18n="youH">Você escolhe com quem.</h2>
+        <p class="stop__lede" data-i18n="youLede">No seu celular você só lê um QR, uma vez. O resto você ajusta no tablet, numa área com PIN.</p>
+        <ul class="controls">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-people"/></svg><div><h3 data-i18n="c1h">Só quem você escolher</h3><p data-i18n="c1">A criança não fala com mais ninguém, e ninguém de fora fala com ela.</p></div></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><div><h3 data-i18n="c2h">Horário de silêncio</h3><p data-i18n="c2">Escola e hora de dormir, com exceções para quem você quiser.</p></div></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg><div><h3 data-i18n="c3h">Pausar uma conversa</h3><p data-i18n="c3">Quando precisar de um tempo, sem apagar nada.</p></div></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><div><h3 data-i18n="c4h">Ajustes com PIN</h3><p data-i18n="c4">Contatos e ajustes ficam atrás de um PIN de 6 números.</p></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="stop reveal" aria-labelledby="family">
+      <span class="stop__ring" aria-hidden="true"></span>
+      <div class="stop__body">
+        <h2 id="family" data-i18n="famH">A família não precisa baixar nada.</h2>
+        <div class="split">
+          <p class="stop__lede" data-i18n="famLede">Para a Vovó, é uma mensagem do seu número, com o nome do Tito na frente. Ela responde como sempre, e a resposta chega no tablet.</p>
+          <figure class="example">
+            <figcaption class="example__tag" data-i18n="exFam">Exemplo: o que a Vovó recebe</figcaption>
+            <div class="chat__head"><span class="chat__face" aria-hidden="true">A</span><span data-i18n="ana">Ana (você)</span></div>
+            <p class="msg msg--in"><span data-i18n-html="m1"><b>Tito</b>: Oi vó, tô com saudade</span><span class="msg__meta">16h30</span></p>
+            <p class="msg msg--out"><span data-i18n="m2">Também, meu amor. Domingo tem bolo.</span><span class="msg__meta" data-i18n="m2meta">Vovó · 16h32</span></p>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="stop reveal" aria-labelledby="honest">
+      <span class="stop__ring" aria-hidden="true"></span>
+      <div class="stop__body">
+        <h2 id="honest" data-i18n="honH">Sem letra miúda.</h2>
+        <div class="honest">
+          <h3 data-i18n="honBox">Antes de conectar, o Oiê avisa:</h3>
+          <blockquote data-i18n="risk">O Oiê usa o seu WhatsApp de um jeito que o WhatsApp não oferece oficialmente. Ele pode limitar ou bloquear o seu número. Se isso acontecer, você perde o acesso até resolver com o WhatsApp.</blockquote>
+          <p class="honest__why" data-i18n="riskWhy">Para diminuir esse risco, o Oiê manda no ritmo de uma pessoa e nunca manda em massa.</p>
+        </div>
+        <ul class="facts">
+          <li><span class="facts__dot" aria-hidden="true"></span><span data-i18n-html="f1"><b>Nada fica guardado com a gente.</b> Mensagens e contatos ficam no tablet. Sem anúncios, e nada de rastrear crianças.</span></li>
+          <li><span class="facts__dot" aria-hidden="true"></span><span data-i18n-html="f2"><b>Você vê o que sai.</b> As mensagens saem do seu WhatsApp, então ficam no seu celular também. A criança fica sabendo disso no primeiro uso.</span></li>
+          <li><span class="facts__dot" aria-hidden="true"></span><span data-i18n-html="f3"><b>Não é do WhatsApp.</b> O Oiê não é feito nem aprovado pelo WhatsApp ou pela Meta.</span></li>
+          <li><span class="facts__dot" aria-hidden="true"></span><span data-i18n-html="f4"><b>Não substitui você.</b> O Oiê ajuda a família a conversar. A sua atenção continua sendo a parte mais importante.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="stop reveal" aria-labelledby="faq">
+      <span class="stop__ring" aria-hidden="true"></span>
+      <div class="stop__body">
+        <h2 id="faq" data-i18n="faqH">Perguntas da família</h2>
+        <div class="faq">
+          <details><summary data-i18n="q1">A Vovó precisa instalar alguma coisa?</summary><p data-i18n="a1">Não. Ela recebe no WhatsApp dela, como qualquer mensagem sua, com o nome da criança na frente.</p></details>
+          <details><summary data-i18n="q2">A criança precisa de um celular?</summary><p data-i18n="a2">Não. O Oiê fica num tablet Android que vocês já têm e usa o seu WhatsApp.</p></details>
+          <details><summary data-i18n="q3">O WhatsApp pode bloquear o meu número?</summary><p data-i18n="a3">Pode. O Oiê usa o seu WhatsApp de um jeito que o WhatsApp não oferece oficialmente. Por isso avisamos antes de conectar. O Oiê manda no ritmo de uma pessoa e nunca manda em massa.</p></details>
+          <details><summary data-i18n="q4">Eu vejo o que a criança manda?</summary><p data-i18n="a4">Vê. As mensagens saem do seu WhatsApp, então também ficam no seu celular. A criança fica sabendo disso no primeiro uso.</p></details>
+          <details><summary data-i18n="q5">Dá para ver e postar status?</summary><p data-i18n="a5">Dá, se você ligar nos ajustes. A criança vê as novidades de quem está nos contatos dela, e o que ela posta só essas pessoas veem.</p></details>
+          <details><summary data-i18n="q6">Dá para fazer ligação?</summary><p data-i18n="a6">Ainda não. Por enquanto: mensagens, áudios, fotos, vídeos e figurinhas.</p></details>
+          <details><summary data-i18n="q7">Por que não está na Play Store?</summary><p data-i18n="a7">Por enquanto o Oiê é baixado direto da página de versões. Cada versão traz a soma SHA-256 para conferir o arquivo, e o app avisa quando tem versão nova.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="stop reveal" id="baixar" aria-labelledby="get">
+      <span class="stop__ring" aria-hidden="true"></span>
+      <div class="stop__body">
+        <h2 id="get" data-i18n="getH">Pronto para mandar o primeiro oi?</h2>
+        <div class="get">
+          <div>
+            <a class="btn btn--coral" href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener" data-i18n="cta">Baixar o Oiê</a>
+            <p class="get__small" data-i18n="getSmall">Para Android 8 ou mais novo. O arquivo vem da página de versões do Oiê no GitHub, com a soma SHA-256 de cada versão.</p>
+          </div>
+          <ol class="steps">
+            <li><span data-i18n="s1">No tablet da criança, toque em Baixar o Oiê e abra o arquivo.</span></li>
+            <li><span data-i18n="s2">Se o Android pedir, permita instalar apps do navegador.</span></li>
+            <li><span data-i18n="s3">Abra o Oiê: seu nome, o da criança, e um QR que você lê no seu WhatsApp.</span></li>
+            <li><span data-i18n="s4">Escolha os contatos. A criança já pode mandar o primeiro oi.</span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="foot">
+    <div>
+      <img src="assets/oie-wordmark-coral.svg" alt="Oiê" width="72" height="66">
+      <p data-i18n="footLine">A família ao alcance.</p>
+    </div>
+    <ul>
+      <li><a href="https://github.com/gabrielbr/oie-releases/releases" rel="noopener" data-i18n="footAll">Todas as versões</a></li>
+      <li><a href="https://github.com/tulir/whatsmeow" rel="noopener" data-i18n="footLib">whatsmeow (MPL-2.0)</a></li>
+      <li><a href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener" data-i18n="footPatch">O arquivo do whatsmeow que o Oiê modifica</a></li>
+    </ul>
+    <p data-i18n="footLegal">O Oiê não é feito nem aprovado pelo WhatsApp ou pela Meta. WhatsApp é uma marca da Meta.</p>
+  </div>
+</footer>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

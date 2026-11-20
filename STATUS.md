@@ -74,6 +74,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] Website: the landing page in `site/`, PT and EN, with the animated family line (2026-11-20). Open: register oie.app and host it.
 - [x] v0.37: the kid posts a status (photo, video up to 1 min, text), only to the people in Contatos, through one modified whatsmeow file (decision 0003 update); off until the parent turns it on (2026-11-20). Open: the owner checks on a device that only Contatos sees it.
 - [x] v0.36: Novidades: the kid watches, reacts to and answers the family's statuses (allowed people only; off until the parent turns it on; views show as the parent) (2026-11-20). Open: the owner checks on a device that WhatsApp shows the reaction on the status.
 - [x] v0.35: the line to the parent marks itself unread after each message from the kid (2026-11-20). Open: the owner checks the unread dot on the phone.
