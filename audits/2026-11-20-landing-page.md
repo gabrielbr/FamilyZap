@@ -216,3 +216,30 @@
   - **Tia Bia:** her hoops sit beside her neck, and her scarf is a knot with two ends. Together, the hoops and the old scarf curve had read as a face.
 
   These were checked in fresh captures, but not re-scored: the two-round budget was spent.
+
+## /impeccable audit and polish (owner's request, after v3 merged)
+**Audit:** saved at `.impeccable/audit/2026-11-20T16-35-56Z__site-index-html.md`.
+- **Score:** 16/20 (Good). Accessibility 2, Performance 4, Theming 3, Responsive 3, Implementation Integrity 4.
+- **Checked with:**
+  - axe-core in light, dark, phone and reduced motion;
+  - target sizes, heading order, `lang`, tab order and focus rings;
+  - widths of 390, 768, 1024 and 1440, and 200% text;
+  - the detector.
+- **Findings:** P1 1, P2 4, P3 1.
+
+**Polish (all fixed):**
+| Finding | P | Fix |
+|---|---|---|
+| Steps not being read were faded to 2.17:1 (light) and 2.97:1 (dark) | P1 | They use the muted token (6.3:1 and 9.1:1); axe reports no contrast failures now |
+| The line under the people collapsed to 0px on phones | P2 | `flex: none`; phone figures smaller, so the cast fits the pinned stage |
+| At 900–1199px, Tito's hand covered Ana's phone | P2 | Smaller figures in that range |
+| At 200% text the picker card overflowed | P2 | `min-width: 0` on the card and its fieldsets |
+| Footer links were 20px tall | P2 | 44px-tall links |
+| Literal colours in the drawn screens | P3 | Named constants (`--wa-face`, `--wa-kbd`, `--oie-line`, `--oie-surface`, `--oie-kbd`); none are left outside the constants |
+| The oldest message was clipped hard on smaller phones | P3 | Chat text slightly smaller there, plus a short fade at the top of each chat, as a real chat scrolls |
+
+**Re-check:**
+- axe: no violations;
+- no targets under 44px;
+- no horizontal scroll at 390, 768, 1024 or 1440, or at 200% text;
+- the stage step matches the heading on the reading line at every step, on desktop and phone.
