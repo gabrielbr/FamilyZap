@@ -88,6 +88,7 @@
     g1: "On your kid’s tablet, tap Download Oiê and open the file.", g2: "If Android asks, allow installing apps from the browser.",
     g3: "Open Oiê: your name, your kid’s, and a QR code you scan in your WhatsApp.", g4: "Choose the contacts, family or friends. Your kid can send the first hello.",
     getSmall: "For Android 8 or newer. The file comes from Oiê’s releases page on GitHub, with each release’s SHA-256 sum.",
+    navSafety: "Safety", footSafety: "Why Oiê, and kids safe online", navSafetyHref: "safety/",
     footLine: "Family, within reach.", footAll: "All releases", footLib: "whatsmeow (MPL-2.0)", footPatch: "The whatsmeow file Oiê modifies",
     footLegal: "Oiê is an independent app, not affiliated with WhatsApp or Meta. WhatsApp is a trademark of Meta. The screens on this page are example drawings.",
     title: "Oiê: family within reach, from your kid’s tablet",
@@ -99,6 +100,7 @@
   document.querySelectorAll("[data-t]").forEach((el) => (PT[el.dataset.t] = el.textContent));
   document.querySelectorAll("[data-t-html]").forEach((el) => (PT[el.dataset.tHtml] = el.innerHTML));
   document.querySelectorAll("[data-t-aria]").forEach((el) => (PT[el.dataset.tAria] = el.getAttribute("aria-label")));
+  document.querySelectorAll("[data-t-href]").forEach((el) => (PT[el.dataset.tHref] = el.getAttribute("href")));
   PT.title = document.title;
   PT.desc = document.querySelector('meta[name="description"]').content;
 
@@ -122,6 +124,7 @@
     all("[data-t]").forEach((el) => { if (d[el.dataset.t] != null) el.textContent = d[el.dataset.t]; });
     all("[data-t-html]").forEach((el) => { if (d[el.dataset.tHtml] != null) el.innerHTML = d[el.dataset.tHtml]; });
     all("[data-t-aria]").forEach((el) => { if (d[el.dataset.tAria] != null) el.setAttribute("aria-label", d[el.dataset.tAria]); });
+    all("[data-t-href]").forEach((el) => { if (d[el.dataset.tHref] != null) el.setAttribute("href", d[el.dataset.tHref]); });
     document.title = d.title;
     $('meta[name="description"]').content = d.desc;
     all(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));

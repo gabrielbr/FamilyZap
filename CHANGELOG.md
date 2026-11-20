@@ -1,6 +1,14 @@
 # Changelog
 
 ## Unreleased
+- **Website: "Por que fizemos o Oiê" and a safety guide for parents** (`/seguranca/`, in English at `/safety/`). It explains why Oiê exists: the home phone of the 90s, which kids used to plan meeting friends in real life, without ads or data collection. Then a guide with sources:
+  - talking first;
+  - the tools you already have: Google Family Link, Google Play, SafeSearch and Chrome, Samsung Kids, Apple Screen Time, YouTube Kids, your WhatsApp's settings, and a family DNS;
+  - the risks at 9–12 and what to do about each;
+  - what Brazil's law says (ECA Digital, LGPD);
+  - where to get help (SaferNet, Disque 100, 190).
+
+  The landing page links to it.
 - **Website:** the landing page in `site/` (PT and EN). Its hero animates the family line: Tito's message goes from the tablet, through your WhatsApp, to Vovó. Every "Baixar" links to the latest release. It goes live when oie.app is registered.
 - **Website v2:** a scrolling story with people.
   - **Your family:** pick son or daughter, mom or dad, and who they write to (grandma, grandpa, an aunt or a school friend), and the story uses your family.
