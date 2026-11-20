@@ -665,7 +665,8 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
 private fun StickerRows(state: AppState, onMake: () -> Unit, onPick: (String) -> Unit, onPickFamily: (app.oie.logic.FamilySticker) -> Unit) {
     val c = OieTheme.colors
     val tx = str
-    Text(tx.stickers, style = OieType.label, color = c.ink)
+    // More space above the label than below it, so the stickers read as their own group (no divider).
+    Text(tx.stickers, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space4))
     val tile = OTokens.Size.contactTile + OTokens.Spacing.space6
     val saved = state.stickers.filter { it.saved }
     val fresh = state.stickers.filter { !it.saved }
