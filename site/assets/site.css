@@ -6,6 +6,7 @@
   --brand-coral: #E8573C;
   --brand-ink: #2A1714;
   --brand-cream: #FFF6EE;
+  --brand-selected: #FCE1D6; /* the light theme's selected token: the reply row, as in the app */
   --brand-muted: #6E5650; /* the light theme's muted token: secondary text on the cream plate */
 
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px; --s16: 64px;
@@ -115,7 +116,7 @@ img, svg { display: block; }
   border-radius: var(--r-card); padding: var(--s3) var(--s4);
   box-shadow: 0 6px 18px rgba(42, 23, 20, 0.22);
   font-weight: 600; line-height: 1.35;
-  transition: transform 1100ms var(--ease), opacity var(--t-emph) var(--ease);
+  transition: transform 1800ms var(--ease), opacity var(--t-emph) var(--ease);
   will-change: transform;
 }
 .plate__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s4); margin-bottom: var(--s1); }
@@ -125,6 +126,13 @@ img, svg { display: block; }
 .plate__text { display: block; font-size: 1rem; }
 .plate__text b { font-weight: 800; }
 .plate.is-fading { opacity: 0; }
+.plate__msg { display: block; }
+.plate__msg--reply { margin-top: var(--s3); background: var(--brand-selected); border-radius: var(--r-control); padding: var(--s2) var(--s3); }
+.plate__msg[hidden] { display: none; }
+.plate__who { display: block; font-size: 0.8125rem; font-weight: 800; margin-bottom: 2px; }
+/* The caret while someone types. */
+.caret { display: inline-block; width: 2px; height: 1.05em; margin-left: 1px; vertical-align: -0.15em; background: var(--brand-ink); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
 .plate__seen { display: flex; align-items: center; gap: var(--s1); margin-top: var(--s2); font-size: 0.8125rem; font-weight: 800; }
 .plate__seen[hidden] { display: none; }
 .plate__seen .icon { width: 16px; height: 16px; stroke-width: 2.5; }

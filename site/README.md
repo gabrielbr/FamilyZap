@@ -7,7 +7,7 @@ The landing page: one static page, no build step, no tracking.
 - `assets/`: the logo files and icons, copied from `01 Brand/logo/`. The line icons are the app's own set (`gg_ic_*`), inlined as an SVG sprite.
 - Nunito comes from Google Fonts.
 
-**The hero:** Tito's message goes from the tablet, through the parent's WhatsApp, to Vovó, and her answer comes back. It's labelled "Exemplo". It has a Pausar button, stops while off screen, and shows its end frame under "Remove animations" / reduced motion.
+**The hero:** Tito types his message on the tablet (letter by letter), it goes out from the parent's WhatsApp signed "Tito:", Vovó sees it, and her answer types in under it, with Tito's message kept on top. Both travel back to the tablet. One loop is about 25 seconds. It's labelled "Exemplo". It has a Pausar button, stops while off screen, and shows its end frame under "Remove animations" / reduced motion.
 
 **Download:** every "Baixar" links to the latest release in `gabrielbr/oie-releases`.
 

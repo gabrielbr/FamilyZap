@@ -88,3 +88,11 @@
 | Separate "how it works" section | 2 | Not added: the hero is the how-it-works |
 
 **Result:** no open P0, P1 or P2. Open for the owner: register oie.app, then add the canonical and an absolute share image.
+
+## Owner's feedback, round 1 (2026-11-20)
+- **"The animation can be slower; typing in the message rows of Tito and Grandma; make it clear Grandma is replying, keeping Tito's message on top."**
+  - **Done:** the travel takes 1.8 s (it was 1.1), and a loop is about 25 s (it was about 14).
+  - **Typing:** Tito's words appear letter by letter, with a caret, under "Tito escreve no tablet". Vovó's answer types in its own row (`selected` ground, "Vovó" label) under Tito's message, with "Vovó está respondendo…" while she types and "Vovó respondeu" after.
+  - **The message rows:** they stay the app's message rows, never bubbles (brand rule).
+  - **Layout:** the route reserves room for the tallest plate at every width and language, and lays out again when the font arrives or the size changes. Under reduced motion, the end frame is the full conversation, still.
+- **Checked:** desktop 1440 and phone 390 at five moments of the story, plus reduced motion. No horizontal scroll.

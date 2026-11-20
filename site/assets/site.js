@@ -49,25 +49,31 @@
     title: "Oiê: family within reach, from your kid’s tablet",
     desc: "From a tablet, your kid sends messages, voice notes and photos to the family through your WhatsApp, only to the people you choose. For Android tablets.",
   };
-  const PLATES = {
-    pt: [
-      { at: 0, from: "Tito", text: "Oi vó, tô com saudade" },
-      { at: 1, from: "Sai do seu WhatsApp", text: "<b>Tito</b>: Oi vó, tô com saudade" },
-      { at: 2, from: "Chega para a Vovó", text: "<b>Tito</b>: Oi vó, tô com saudade", seen: "Vovó viu" },
-      { at: 2, from: "Vovó responde", text: "Também, meu amor. Domingo tem bolo.", swap: true },
-      { at: 1, from: "Pelo seu WhatsApp", text: "Também, meu amor. Domingo tem bolo." },
-      { at: 0, from: "Chega no tablet do Tito", text: "Também, meu amor. Domingo tem bolo." },
-    ],
-    en: [
-      { at: 0, from: "Tito", text: "Hi Grandma, I miss you" },
-      { at: 1, from: "Goes out from your WhatsApp", text: "<b>Tito</b>: Hi Grandma, I miss you" },
-      { at: 2, from: "Reaches Grandma", text: "<b>Tito</b>: Hi Grandma, I miss you", seen: "Grandma saw it" },
-      { at: 2, from: "Grandma replies", text: "Me too, sweetheart. There’s cake on Sunday.", swap: true },
-      { at: 1, from: "Through your WhatsApp", text: "Me too, sweetheart. There’s cake on Sunday." },
-      { at: 0, from: "Reaches Tito’s tablet", text: "Me too, sweetheart. There’s cake on Sunday." },
-    ],
+  // The story, beat by beat. Tito's message stays on top; Vovó's reply types in under it.
+  const STORY = {
+    pt: {
+      tito: "Oi vó, tô com saudade", reply: "Também, meu amor. Domingo tem bolo.", who: "Vovó", seen: "Vovó viu",
+      heads: ["Tito escreve no tablet", "Sai do seu WhatsApp", "Chega para a Vovó", "Vovó está respondendo…", "Volta pelo seu WhatsApp", "Chega no tablet do Tito"],
+      replied: "Vovó respondeu",
+    },
+    en: {
+      tito: "Hi Grandma, I miss you", reply: "Me too, sweetheart. There’s cake on Sunday.", who: "Grandma", seen: "Grandma saw it",
+      heads: ["Tito types on the tablet", "Goes out from your WhatsApp", "Reaches Grandma", "Grandma is replying…", "Back through your WhatsApp", "Reaches Tito’s tablet"],
+      replied: "Grandma replied",
+    },
   };
-  const HOLD = [2400, 2400, 2800, 2200, 2000, 2600];
+  // at: the station; signed: "Tito:" in front (added as it leaves your WhatsApp); type: who is typing in this beat.
+  const BEATS = [
+    { at: 0, signed: false, type: "tito" },
+    { at: 1, signed: true },
+    { at: 2, signed: true, seen: true },
+    { at: 2, signed: true, seen: true, reply: true, type: "reply" },
+    { at: 1, signed: true, seen: true, reply: true },
+    { at: 0, signed: true, seen: true, reply: true },
+  ];
+  // How long each beat stays once it's fully shown (travel takes 1.8 s of it).
+  const HOLD = [1800, 3400, 3600, 2600, 3400, 4200];
+  const CHAR_MS = 85;
 
   const PT = {};
   document.querySelectorAll("[data-i18n]").forEach((el) => (PT[el.dataset.i18n] = el.textContent));
@@ -92,17 +98,19 @@
     document.querySelector('meta[name="description"]').content = d.desc;
     document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
     setPauseLabel();
-    show(beat, false);
-    if (save) store(lang);
+    if (save) { layout(); show(beat, false); store(lang); }
   }
 
   /* ---------- The family line ---------- */
   const route = document.getElementById("route");
   const plate = document.getElementById("plate");
-  const from = document.getElementById("plateFrom");
+  const head = document.getElementById("plateFrom");
   const text = document.getElementById("plateText");
   const seen = document.getElementById("plateSeen");
   const seenText = document.getElementById("plateSeenText");
+  const replyRow = document.getElementById("plateReply");
+  const replyWho = document.getElementById("replyWho");
+  const replyText = document.getElementById("replyText");
   const track = route.querySelector(".route__track");
   const stations = Array.from(route.querySelectorAll(".station"));
   const pauseBtn = document.getElementById("pause");
@@ -110,9 +118,14 @@
   const still = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   let beat = 0;
+  let typed = -1; // characters typed in this beat; -1 when the beat has no typing or it's done
   let timer = null;
   let userPaused = false;
   let visible = true;
+
+  const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const sign = (t) => "<b>Tito</b>: " + esc(t);
+  const CARET = '<span class="caret"></span>';
 
   function ringCenter(i) {
     const r = stations[i].querySelector(".station__ring").getBoundingClientRect();
@@ -120,7 +133,32 @@
     return { x: r.left - box.left + r.width / 2, y: r.top - box.top + r.height / 2, top: r.top - box.top, r };
   }
 
+  // Draws one beat. n = characters typed so far (only for the beat's typing row).
+  function render(i, n) {
+    const st = STORY[lang], b = BEATS[i];
+    const typingTito = b.type === "tito" && n >= 0;
+    const typingReply = b.type === "reply" && n >= 0;
+    head.textContent = typingReply || b.type !== "reply" ? st.heads[i] : st.replied;
+    text.innerHTML = typingTito ? esc(st.tito.slice(0, n)) + CARET : b.signed ? sign(st.tito) : esc(st.tito);
+    seen.hidden = !b.seen;
+    seenText.textContent = st.seen;
+    replyRow.hidden = !b.reply;
+    replyWho.textContent = st.who;
+    replyText.innerHTML = typingReply ? esc(st.reply.slice(0, n)) + CARET : esc(st.reply);
+    stations.forEach((s, k) => s.classList.toggle("is-on", k === b.at));
+  }
+
+  // The route leaves room above the line for the tallest plate (both messages), at this width and language.
+  function roomForPlate() {
+    const keep = { beat, typed };
+    render(4, -1);
+    const h = plate.offsetHeight;
+    render(keep.beat, keep.typed);
+    route.style.paddingTop = h + 48 + "px";
+  }
+
   function layout() {
+    roomForPlate();
     const a = ringCenter(0), c = ringCenter(2);
     const line = parseFloat(getComputedStyle(track).height) || 6;
     track.style.top = a.y - line / 2 + "px";
@@ -145,38 +183,43 @@
   }
 
   function show(i, animate) {
-    const b = PLATES[lang][i];
-    from.textContent = b.from;
-    text.innerHTML = b.text;
-    seen.hidden = !b.seen;
-    if (b.seen) seenText.textContent = b.seen;
-    stations.forEach((s, k) => s.classList.toggle("is-on", still.matches ? true : k === b.at));
-    place(b.at, animate);
+    render(i, typed);
+    place(BEATS[i].at, animate);
+  }
+
+  // Starts a beat: travel there, and start its typing if it has some.
+  function enter(i, animate) {
+    beat = i;
+    typed = BEATS[i].type ? 0 : -1;
+    show(i, animate);
+    schedule();
+  }
+
+  function tick() {
+    const st = STORY[lang], b = BEATS[beat];
+    const full = (b.type === "tito" ? st.tito : st.reply).length;
+    typed += 1;
+    if (typed >= full) typed = -1;
+    render(beat, typed);
+    place(b.at, false); // the plate grows as the words come; it stays on its station
+    schedule();
   }
 
   function step() {
-    const next = (beat + 1) % PLATES.pt.length;
-    const wrapAround = next === 0;
-    const swap = PLATES.pt[next].swap;
-    if (wrapAround || swap) {
-      // The message changes hands: fade, swap without travelling, fade back in.
+    const next = (beat + 1) % BEATS.length;
+    if (next === 0) {
+      // The story starts again: fade, reset without travelling, fade back in.
       plate.classList.add("is-fading");
-      timer = setTimeout(() => {
-        beat = next; show(beat, false);
-        plate.classList.remove("is-fading");
-        schedule();
-      }, 260);
+      timer = setTimeout(() => { plate.classList.remove("is-fading"); enter(0, false); }, 300);
       return;
     }
-    beat = next;
-    show(beat, true);
-    schedule();
+    enter(next, BEATS[next].at !== BEATS[beat].at);
   }
 
   function schedule() {
     clearTimeout(timer);
     if (userPaused || !visible || still.matches) return;
-    timer = setTimeout(step, HOLD[beat]);
+    timer = typed >= 0 ? setTimeout(tick, typed === 0 && BEATS[beat].type === "reply" ? 900 : CHAR_MS) : setTimeout(step, HOLD[beat]);
   }
 
   function setPauseLabel() {
@@ -190,7 +233,8 @@
 
   function applyMotionPreference() {
     pauseBtn.hidden = still.matches;
-    if (still.matches) { clearTimeout(timer); beat = 2; show(beat, false); } else schedule();
+    // Reduced motion: the end of the story, still: Tito's message on top, Vovó's answer under it.
+    if (still.matches) { clearTimeout(timer); beat = 3; typed = -1; show(beat, false); } else schedule();
   }
   still.addEventListener("change", applyMotionPreference);
 
@@ -201,11 +245,14 @@
     }, { threshold: 0.1 }).observe(route);
   }
 
+  // Lay the line out again whenever the hero changes size: a resize, the web font arriving, a language switch.
   let resizeFrame = 0;
-  window.addEventListener("resize", () => {
+  function relayout() {
     cancelAnimationFrame(resizeFrame);
     resizeFrame = requestAnimationFrame(() => { layout(); show(beat, false); });
-  });
+  }
+  window.addEventListener("resize", relayout);
+  if ("ResizeObserver" in window) new ResizeObserver(relayout).observe(document.querySelector(".hero__copy"));
 
   /* ---------- Section entrances (content is visible without JS) ---------- */
   function reveals() {
@@ -226,8 +273,9 @@
 
   function start() {
     const wanted = new URLSearchParams(location.search).get("lang") || stored() || ((navigator.language || "").toLowerCase().startsWith("pt") ? "pt" : "pt");
-    layout();
     setLang(wanted, false);
+    layout();
+    enter(0, false);
     applyMotionPreference();
     reveals();
   }

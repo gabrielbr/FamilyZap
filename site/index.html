@@ -80,7 +80,12 @@
         <li class="station" data-at="1"><span class="station__ring"></span><span class="station__name" data-i18n="st1name">Seu WhatsApp</span><span class="station__where" data-i18n="st1">manda, com o nome do Tito</span></li>
         <li class="station" data-at="2"><span class="station__ring"></span><span class="station__name" data-i18n="st2name">Vovó</span><span class="station__where" data-i18n="st2">recebe no WhatsApp dela</span></li>
       </ol>
-      <div class="plate" id="plate" aria-hidden="true"><span class="plate__head"><span class="plate__from" id="plateFrom">Tito</span><span class="plate__tag" data-i18n="example">Exemplo</span></span><span class="plate__text" id="plateText">Oi vó, tô com saudade</span><span class="plate__seen" id="plateSeen" hidden><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span id="plateSeenText">Vovó viu</span></span></div>
+      <div class="plate" id="plate" aria-hidden="true">
+        <span class="plate__head"><span class="plate__from" id="plateFrom">Tito escreve no tablet</span><span class="plate__tag" data-i18n="example">Exemplo</span></span>
+        <span class="plate__msg"><span class="plate__text" id="plateText">Oi vó, tô com saudade</span></span>
+        <span class="plate__seen" id="plateSeen" hidden><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span id="plateSeenText">Vovó viu</span></span>
+        <span class="plate__msg plate__msg--reply" id="plateReply" hidden><span class="plate__who" id="replyWho">Vovó</span><span class="plate__text" id="replyText"></span></span>
+      </div>
     </div>
     <button type="button" class="btn btn--quiet route__pause" id="pause" aria-controls="route">
       <svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg><span data-i18n="pause">Pausar</span>
