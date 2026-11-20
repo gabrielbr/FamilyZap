@@ -74,12 +74,12 @@
     f3: "<b>Everything stays on the tablet.</b> Messages and contacts stay on your own device. No ads and no tracking.",
     noticeH: "Notice",
     n1: "Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does. <b>It is not affiliated with WhatsApp or Meta.</b>",
-    n2: "Use at your own risk: linking a device to WhatsApp is subject to WhatsApp’s terms. Before you link, the app explains this calmly.",
+    n2: "Use at your own risk: linking a device is subject to WhatsApp’s terms, and WhatsApp may restrict numbers that use third-party apps. Oiê sends at a person’s pace, one message at a time, and explains this before you link.",
     faqH: "Questions from the family",
     q1: "Does the person receiving need to install anything?", a1: "No. Grandparents, aunts or friends get it in their WhatsApp, like any message from you, with your kid’s name in front.",
     q2: "Can my kid talk to friends?", a2: "Yes, if you add the contact. The friend gets it from your number, with your kid’s name in front. Your kid only talks to people you approve, and no one else reaches them through Oiê.",
     q3: "Does my kid need a phone?", a3: "No. Oiê runs on an Android tablet you already have and uses your WhatsApp.",
-    q4: "Is Oiê made by WhatsApp?", a4: "No. Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does, and it is not affiliated with WhatsApp or Meta. Use is subject to WhatsApp’s terms. Oiê sends messages at a person’s pace, one at a time.",
+    q4: "Is Oiê made by WhatsApp?", a4: "No. Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does, and it is not affiliated with WhatsApp or Meta. Use is subject to WhatsApp’s terms, and WhatsApp may restrict numbers that use third-party apps. That’s why Oiê sends at a person’s pace, one message at a time.",
     q5: "Do I see what my kid sends?", a5: "Yes. Messages go out from your WhatsApp, so they’re on your phone too. Your kid is told this the first time.",
     q6: "Can they see and post status updates?", a6: "Yes, if you turn it on in settings. Your kid sees updates from their contacts, and only those people see what your kid posts.",
     q7: "Can they make calls?", a7: "Not yet. For now: messages, voice notes, photos, videos and stickers.",
@@ -164,6 +164,9 @@
     const space = document.createElement("span"); space.className = "kbd__row"; const bar = document.createElement("i"); bar.className = "kbd__space"; space.appendChild(bar); k.appendChild(space);
     screen.appendChild(k);
   });
+
+  // The other people in step 5 get their full figures (details included), not a plain outline.
+  all("svg[data-draw]").forEach((svg) => drawPerson(svg, svg.dataset.draw));
 
   /* ---------- The story ---------- */
   const stage = $("#stage");

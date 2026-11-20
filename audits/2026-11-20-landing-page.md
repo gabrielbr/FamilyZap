@@ -199,3 +199,20 @@
   - a plain "Aviso" near the end ("O Oiê é um app independente que conecta ao seu WhatsApp como o WhatsApp Web faz. Não é afiliado ao WhatsApp nem à Meta. Use por sua conta: conectar um aparelho ao WhatsApp segue os termos do WhatsApp. Antes de conectar, o app explica isso com calma.");
   - the FAQ question "O Oiê é do WhatsApp?".
 - **Product law still holds:** the risk is stated and not hidden, and the app's own notice before linking is unchanged (`01 Brand/voice.md`).
+
+### v3 verdict pass, and its fixes
+- **The reviewer's verdict:**
+  - **Resolved:** stale timers, cut bubble, Vô Zé's cap, Paulo's beard.
+  - **Partial:**
+    - the clothes in the step-5 list: those figures were plain outlines;
+    - Ana's floating earring.
+  - **New:**
+    - **P0:** the calm Aviso had dropped the sentence that WhatsApp can restrict numbers, which the product law says is never hidden;
+    - **P3:** Tia Bia's hoops read as eyes.
+- **Fixed after the verdict pass:**
+  - **The risk:** one plain sentence in the Aviso, the FAQ, the JSON-LD and the English: "segue os termos do WhatsApp, que pode restringir números que usam apps de terceiros". Then: "O Oiê manda no ritmo de uma pessoa, uma mensagem de cada vez". wacli's calm tone stays, and the risk is said.
+  - **Step-5 figures:** drawn in full, with their details.
+  - **Ana's hoop:** hangs from the ear line.
+  - **Tia Bia:** her hoops sit beside her neck, and her scarf is a knot with two ends. Together, the hoops and the old scarf curve had read as a face.
+
+  These were checked in fresh captures, but not re-scored: the two-round budget was spent.
