@@ -74,7 +74,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
-- [x] Website: the landing page in `site/`, PT and EN, with the animated family line (2026-11-20). Open: register oie.app and host it.
+- [x] Website: the landing page in `site/`, PT and EN, with the animated family line (2026-11-20). Published from `gabrielbr/oie-releases` (gh-pages) at https://gabrielbr.github.io/oie-releases/; the font is self-hosted (2026-11-20). Open: register oie.app and point it there.
 - [x] Website: the safety page (why Oiê + a sourced guide for parents), PT and EN (2026-11-20). Re-check its sources whenever it changes.
 - [x] v0.38: the kid's home as a list (phone) or cards with Escrever and Gravar áudio (tablet), each with the last message and when; Anexar replaces Foto and Figurinha in the chat (owner, 2026-11-20). Open: try Gravar áudio's tap-to-send with the kid.
 - [x] v0.37: the kid posts a status (photo, video up to 1 min, text), only to the people in Contatos, through one modified whatsmeow file (decision 0003 update); off until the parent turns it on (2026-11-20). Open: the owner checks on a device that only Contatos sees it.

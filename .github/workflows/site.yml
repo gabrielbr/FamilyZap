@@ -1,6 +1,10 @@
 name: site
-# Publishes the landing page (site/) to GitHub Pages: https://gabrielbr.github.io/FamilyZap/
-# One-time setup by the owner: Settings > Pages > Build and deployment > Source: GitHub Actions.
+# Publishes the website (site/) to the public repo gabrielbr/oie-releases, branch gh-pages, served by
+# GitHub Pages at https://gabrielbr.github.io/oie-releases/ (owner's decision, 2026-11-20: the releases
+# repo is already public and holds the downloads). The source stays here, next to the design tokens.
+# Uses the OIE_RELEASES_TOKEN secret the release workflow already uses.
+# One-time setup in oie-releases: Settings > Pages > Source: Deploy from a branch > gh-pages, / (root).
+# The workflow also asks GitHub to turn that on; if the token can't, it says so and the step above does it.
 on:
   push:
     branches: [main]
@@ -8,24 +12,43 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-  pages: write
-  id-token: write
 concurrency:
-  group: pages
+  group: site
   cancel-in-progress: false
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      SITE_REPO: gabrielbr/oie-releases
+      GH_TOKEN: ${{ secrets.OIE_RELEASES_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: The site's tokens are the design system's (site/assets/tokens.css is a copy)
         run: cmp design/generated/tokens.css site/assets/tokens.css
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: The site asks no other site for anything (no fonts, scripts or styles from elsewhere)
+        run: |
+          if grep -rnE '(src|href)="https?://[^"]*\.(js|css|woff2?|ttf)"|fonts\.(googleapis|gstatic)\.com' site; then
+            echo "::error::An outside font, script or stylesheet is loaded. Serve it from site/assets instead."; exit 1
+          fi
+      - name: Publish site/ to oie-releases (gh-pages)
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "::error::Add the OIE_RELEASES_TOKEN secret first (docs/release.md)."; exit 1; fi
+          out="$RUNNER_TEMP/pages"
+          cp -r site "$out" && rm -f "$out/README.md" && touch "$out/.nojekyll"
+          cd "$out"
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Website from FamilyZap ${GITHUB_SHA::7}"
+          # One commit, replaced each time: the branch only ever holds the current site.
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${SITE_REPO}.git" gh-pages
+      - name: Make sure Pages serves gh-pages
+        run: |
+          if gh api "repos/$SITE_REPO/pages" > /dev/null 2>&1; then
+            echo "Pages is on: https://gabrielbr.github.io/oie-releases/"
+          elif gh api -X POST "repos/$SITE_REPO/pages" -f "source[branch]=gh-pages" -f "source[path]=/" > /dev/null 2>&1; then
+            echo "Pages turned on: https://gabrielbr.github.io/oie-releases/ (the first build takes a minute)"
+          else
+            echo "::warning::Couldn't turn on Pages with this token. In gabrielbr/oie-releases: Settings > Pages > Source: Deploy from a branch > gh-pages, / (root)."
+          fi
