@@ -50,6 +50,8 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
      * PIN, kept until the same WhatsApp links again (the proof it's the parent). "" when no reset is running.
      */
     var pinResetFrom by mutableStateOf("")
+    /** The kid has reacted once (v0.34): the "hold a message" hint goes. */
+    var reactTipUsed by mutableStateOf(false)
     /** When the kid last sent "Preciso de você" (v0.33), for the 5-minute gap. */
     var needYouAt by mutableStateOf(0L)
     /** The kid's name first, then the nicknames. */
@@ -108,6 +110,7 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     fun react(id: String, emoji: String) {
         val i = messages.indexOfFirst { it.id == id }
         if (i < 0) return
+        reactTipUsed = true
         val (send, after) = app.oie.logic.Reactions.kidTaps(messages[i].reactions, emoji)
         messages[i] = messages[i].copy(reactions = after)
         wa.react(messages[i], send)

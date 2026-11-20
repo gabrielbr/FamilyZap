@@ -181,10 +181,10 @@ private fun MediaTile(m: Message, onOpen: () -> Unit) {
             LaunchedEffect(m.media) { bmp = withContext(Dispatchers.IO) { m.media?.let { Photos.load(context, it, Photos.MAX_SIDE / 4) } } }
             bmp?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
         } else {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
-                OIcon(R.drawable.gg_ic_play)
-                Text(label, style = OieType.caption, color = c.muted)
-            }
+            // v0.34 audit: a video or GIF shows its first picture, with ▶ on it, like in the chat.
+            val frame = rememberFirstFrame(rememberBytes(m.media))
+            frame?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
+            Box(Modifier.size(OTokens.Spacing.space12).clip(CircleShape).background(c.surface), contentAlignment = Alignment.Center) { OIcon(R.drawable.gg_ic_play) }
         }
     }
 }
@@ -227,6 +227,7 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
     var color by remember { mutableStateOf(0) }
     var thick by remember { mutableStateOf(false) }
     val strokes = remember { mutableStateListOf<Stroke2>() }
+    var cleared by remember { mutableStateOf<List<Stroke2>?>(null) }
     var tick by remember { mutableStateOf(0) } // a point added: draw again
     var size by remember { mutableStateOf(IntSize.Zero) }
     val thin = with(density) { OTokens.Spacing.space2.toPx() }
@@ -278,15 +279,20 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
                 ) {
                     Box(
                         Modifier.size(OTokens.Spacing.space10).clip(CircleShape).background(col)
-                            .border(if (color == i) OTokens.Size.hairline * 3 else OTokens.Size.hairline, if (color == i) c.ink else c.line, CircleShape),
+                            // v0.34 audit: the swatch edge is `muted` (3:1 in both themes), and ink, thicker, when picked.
+                            .border(if (color == i) OTokens.Size.hairline * 3 else OTokens.Size.hairline, if (color == i) c.ink else c.muted, CircleShape),
                         contentAlignment = Alignment.Center,
-                    ) { if (color == i) OIcon(R.drawable.gg_ic_check, tint = if (i == 2) c.ink else c.drawPaper) }
+                    ) { if (color == i) OIcon(R.drawable.gg_ic_check, tint = if (i == 2) c.drawInk else c.drawPaper) }
                 }
             }
             Toggle(tx.drawThin, !thick) { thick = false }
             Toggle(tx.drawThick, thick) { thick = true }
-            TextLink(tx.undo, { strokes.removeLastOrNull() })
-            TextLink(tx.drawClear, { strokes.clear() })
+            // v0.34 audit: Limpar can be undone too (Desfazer right after brings the whole drawing back).
+            TextLink(tx.undo, {
+                val back = cleared
+                if (strokes.isEmpty() && back != null) { strokes.addAll(back); cleared = null } else strokes.removeLastOrNull()
+            })
+            TextLink(tx.drawClear, { if (strokes.isNotEmpty()) { cleared = strokes.toList(); strokes.clear() } })
         }
     }
 }

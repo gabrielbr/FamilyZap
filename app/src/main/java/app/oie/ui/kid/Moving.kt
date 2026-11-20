@@ -68,7 +68,7 @@ import kotlinx.coroutines.withContext
 
 /** A sealed file opened into memory, off the main thread. Null while loading or if missing. */
 @Composable
-private fun rememberBytes(media: String?): ByteArray? {
+internal fun rememberBytes(media: String?): ByteArray? {
     val context = LocalContext.current
     var bytes by remember(media) { mutableStateOf<ByteArray?>(null) }
     LaunchedEffect(media) { bytes = if (media == null) null else withContext(Dispatchers.IO) { Photos.openBytes(context, media) } }
@@ -118,7 +118,8 @@ fun MovingImage(media: String, side: Dp, contentDescription: String?, modifier: 
         }
     }
     val px = with(androidx.compose.ui.platform.LocalDensity.current) { side.roundToPx() }
-    val still = remember(media) { Photos.load(context, media, px) }
+    // v0.34 audit: decoded off the main thread.
+    val still = rememberPhoto(media, px)
     if (still != null) Image(still.asImageBitmap(), contentDescription = contentDescription, modifier = modifier.size(side))
     else Box(modifier.size(side))
 }
@@ -172,7 +173,7 @@ private fun VideoSurface(
 
 /** A video's first frame, from memory (null if Android can't read it). */
 @Composable
-private fun rememberFirstFrame(bytes: ByteArray?): android.graphics.Bitmap? {
+internal fun rememberFirstFrame(bytes: ByteArray?): android.graphics.Bitmap? {
     var frame by remember(bytes) { mutableStateOf<android.graphics.Bitmap?>(null) }
     LaunchedEffect(bytes) {
         val b = bytes ?: return@LaunchedEffect
@@ -196,9 +197,8 @@ fun VideoBubble(media: String?, seconds: Int, tooBig: Boolean, parent: String, o
     val tx = str
     if (media == null) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
-            // No ▶ on a video that can't play here (v0.27 audit): it would promise a tap that does nothing.
-            if (!tooBig) OIcon(R.drawable.gg_ic_play, tint = c.muted)
-            Text(if (tooBig) tx.videoTooBig(parent) else tx.video + " · " + clockOf(seconds), style = OieType.body, color = c.muted)
+            // No ▶ on a video that can't play yet (v0.34 audit): it says it's on its way instead.
+            Text(if (tooBig) tx.videoTooBig(parent) else tx.downloading(clockOf(seconds)), style = OieType.body, color = c.muted)
         }
         return
     }
@@ -350,4 +350,15 @@ fun VideoPreview(draft: VideoDraft, to: String, onSwap: () -> Unit, onSend: () -
             }
         }
     }
+}
+
+/** A stored picture, opened and decoded off the main thread at [maxSide] px (v0.34 audit); null until ready. */
+@Composable
+internal fun rememberPhoto(media: String?, maxSide: Int): android.graphics.Bitmap? {
+    val context = LocalContext.current
+    var bmp by remember(media, maxSide) { mutableStateOf<android.graphics.Bitmap?>(null) }
+    androidx.compose.runtime.LaunchedEffect(media, maxSide) {
+        bmp = media?.let { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { Photos.load(context, it, maxSide) } }
+    }
+    return bmp
 }

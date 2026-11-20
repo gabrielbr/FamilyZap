@@ -306,4 +306,8 @@ class ScreensTest {
     }
     @Test fun periodEditorNew() = shot("53-period-editor-new", true) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.PeriodEditor(null, {}, null, {}) } }
     @Test fun connectionConnected() = shot("54-connection-connected", false) { ParentArea(ready(), 2) }
+    // v0.34: Esqueci o PIN, the proof first (link WhatsApp again), then the new PIN.
+    @Test fun forgotPin() = shot("55-forgot-pin", false) { app.oie.ui.parent.ForgotPin(ready().apply { realMode = true }, 0) }
+    @Test fun forgotPinDark() = shot("55-forgot-pin", true) { app.oie.ui.parent.ForgotPin(ready().apply { realMode = true }, 0) }
+    @Test fun forgotPinNew() = shot("55-forgot-pin-new", false) { app.oie.ui.parent.ForgotPin(ready(), 1) }
 }

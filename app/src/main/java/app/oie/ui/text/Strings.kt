@@ -199,7 +199,7 @@ interface Strings {
     val decimalComma: Boolean
 
     // v0.33: family features (docs/flows/family-features.md)
-    fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean, time: String): String
+    fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean): String
     val react: String; val readAloud: String; val stopReading: String
     fun reactWith(emoji: String): String
     fun reactionsA11y(list: String): String
@@ -227,6 +227,9 @@ interface Strings {
     val editContact: String
     val forgotTitle: String; val forgotShowCode: String
     val ok: String; val bubbleWaiting: String
+    val newMessages: String; val reactHint: String; val releaseToCancel: String; val holdToRecord: String
+    val photoShort: String; val stickerShort: String; val pauseA11y: String; val close: String
+    fun downloading(length: String): String
     val welcomeTitle: String; val linkFailed: String; val linkOffline: String
     val sectionQuietShort: String; val sectionHelpShort: String; val expanded: String; val collapsed: String; val reportCleared: String
     fun periodName(name: String): String
@@ -455,10 +458,11 @@ object Pt : Strings {
     override fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean) = "Relatório do tablet · Oiê $version · %02d/%02d".format(day, month) + if (crashed) " · fechou sozinho" else ""
     override fun reportCut(kept: Int, total: Int) = "Só as últimas $kept de $total linhas cabem aqui. O relatório inteiro pode ser copiado no tablet."
 
-    override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean, time: String) = when (r) {
+    // v0.34 audit: no time here; the message already shows it.
+    override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean) = when (r) {
         app.oie.logic.Receipt.READ -> if (group) "Alguém viu" else "$who viu"
-        app.oie.logic.Receipt.DELIVERED -> "Entregue · $time"
-        else -> "Enviada · $time"
+        app.oie.logic.Receipt.DELIVERED -> "Entregue"
+        else -> "Enviada"
     }
     override val react = "Reagir"; override val readAloud = "Ouvir"; override val stopReading = "Parar"
     override fun reactWith(emoji: String) = "Reagir com $emoji"
@@ -488,6 +492,10 @@ object Pt : Strings {
     override fun noPhotos(name: String) = "Ainda não tem fotos com $name."
     override fun and(names: List<String>) = if (names.size < 2) names.joinToString() else names.dropLast(1).joinToString(", ") + " e " + names.last()
     override val editContact = "Editar contato"
+    override val newMessages = "Novas"; override val reactHint = "Segure uma mensagem para reagir ou ouvir."
+    override val releaseToCancel = "Solte para cancelar"; override val holdToRecord = "Segure o botão enquanto fala."
+    override val photoShort = "Foto"; override val stickerShort = "Figurinha"; override val pauseA11y = "Pausar"; override val close = "Fechar"
+    override fun downloading(length: String) = "Vídeo de $length, chegando…"
     override val ok = "OK"; override val bubbleWaiting = "Ligada. Falta o Android permitir (veja abaixo)."
     override val welcomeTitle = "A família ao alcance."
     override val sectionQuietShort = "Silêncio"; override val sectionHelpShort = "Ajustes"; override val expanded = "Aberto"; override val collapsed = "Fechado"
@@ -726,10 +734,10 @@ object En : Strings {
     override fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean) = "Tablet report · Oiê $version · %02d/%02d".format(day, month) + if (crashed) " · closed by itself" else ""
     override fun reportCut(kept: Int, total: Int) = "Only the last $kept of $total lines fit here. The whole report can be copied on the tablet."
 
-    override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean, time: String) = when (r) {
+    override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean) = when (r) {
         app.oie.logic.Receipt.READ -> if (group) "Someone saw it" else "$who saw it"
-        app.oie.logic.Receipt.DELIVERED -> "Delivered · $time"
-        else -> "Sent · $time"
+        app.oie.logic.Receipt.DELIVERED -> "Delivered"
+        else -> "Sent"
     }
     override val react = "React"; override val readAloud = "Listen"; override val stopReading = "Stop"
     override fun reactWith(emoji: String) = "React with $emoji"
@@ -759,6 +767,10 @@ object En : Strings {
     override fun noPhotos(name: String) = "No photos with $name yet."
     override fun and(names: List<String>) = if (names.size < 2) names.joinToString() else names.dropLast(1).joinToString(", ") + " and " + names.last()
     override val editContact = "Edit contact"
+    override val newMessages = "New"; override val reactHint = "Hold a message to react or listen."
+    override val releaseToCancel = "Release to cancel"; override val holdToRecord = "Hold the button while you talk."
+    override val photoShort = "Photo"; override val stickerShort = "Sticker"; override val pauseA11y = "Pause"; override val close = "Close"
+    override fun downloading(length: String) = "A $length video, on its way…"
     override val ok = "OK"; override val bubbleWaiting = "On. Android still has to allow it (see below)."
     override val welcomeTitle = "Family, within reach."
     override val sectionQuietShort = "Quiet"; override val sectionHelpShort = "Settings"; override val expanded = "Open"; override val collapsed = "Closed"

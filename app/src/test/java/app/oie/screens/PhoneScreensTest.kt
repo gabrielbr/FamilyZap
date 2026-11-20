@@ -172,4 +172,5 @@ class PhoneScreensTest {
     @Test fun pairQr() = shot("p39-pair", bigText = true) { app.oie.ui.parent.PairScreen(ready().apply { linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Qr("2@sample-code-for-the-screenshot,abc,def,ghi") }) }
     @Test fun videoScreen() = shot("p40-video-screen", bigText = true) { app.oie.ui.kid.VideoScreen(null, gif = false, from = "Vovó", onBack = {}) }
     @Test fun needYouAsk() = shot("p41-need-you-ask", bigText = true) { androidx.compose.foundation.layout.Box(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.kid.NeedYouCard("Mãe e Vovô", {}, {}) } }
+    @Test fun forgotPin() = shot("p42-forgot-pin", bigText = true) { app.oie.ui.parent.ForgotPin(ready().apply { realMode = true }, 0) }
 }

@@ -196,14 +196,14 @@ fun BottomSheet(onClose: () -> Unit, content: @Composable androidx.compose.found
 fun Snackbar(text: String, modifier: Modifier = Modifier, action: String? = null, onAction: () -> Unit = {}) {
     val c = OieTheme.colors
     Row(
-        modifier.padding(horizontal = sideMargin, vertical = OTokens.Spacing.space4).widthIn(max = OTokens.Size.contentMax)
+        modifier.padding(horizontal = sideMargin, vertical = OTokens.Spacing.space4).widthIn(max = OTokens.Size.contentMax).fillMaxWidth()
             .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.snackbar)
             .padding(start = OTokens.Spacing.space6, end = if (action == null) OTokens.Spacing.space6 else OTokens.Spacing.space2)
             .defaultMinSize(minHeight = OTokens.Spacing.space12)
             .semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite },
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
     ) {
-        Text(text, style = OieType.body, color = c.page, modifier = Modifier.weight(1f, fill = false).padding(vertical = OTokens.Spacing.space3))
+        Text(text, style = OieType.body, color = c.page, modifier = Modifier.weight(1f).padding(vertical = OTokens.Spacing.space3))
         if (action != null) Box(
             Modifier.defaultMinSize(minWidth = OTokens.Spacing.space12, minHeight = OTokens.Spacing.space12).pressable(onClick = onAction)
                 .padding(horizontal = OTokens.Spacing.space3),

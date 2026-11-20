@@ -40,7 +40,7 @@ fun UpdateSheet(updater: Updater) {
         is State.Failed -> st.offer
         else -> null
     } ?: return
-    Box(Modifier.fillMaxSize().background(c.ink.copy(alpha = 0.45f)).clickable(enabled = st !is State.Downloading) { if (st is State.Available) updater.later(offer) }, contentAlignment = Alignment.BottomCenter) {
+    Box(Modifier.fillMaxSize().background(c.scrim).clickable(enabled = st !is State.Downloading) { if (st is State.Available) updater.later(offer) }, contentAlignment = Alignment.BottomCenter) {
         Column(
             Modifier.width(OTokens.Size.contentMax).clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
                 .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),

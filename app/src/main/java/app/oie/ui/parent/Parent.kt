@@ -224,7 +224,8 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: (String, (
                 // The line says the current setting, so it's true whichever way the switch is.
                 // v0.21: a chat paused from the parent's WhatsApp says so, in ink, instead of the quiet-hours line.
                 if (ct.paused) Text(tx.pausedLine, style = OieType.caption, color = c.ink, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                else Text(if (ct.quietException) tx.canTalkInQuiet else tx.onlyOutsideQuiet, style = OieType.caption, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                // v0.34 audit: with no quiet period on, the line (like the switch) would say nothing.
+                else if (state.periods.any { it.on }) Text(if (ct.quietException) tx.canTalkInQuiet else tx.onlyOutsideQuiet, style = OieType.caption, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
             }
             // v0.34 audit: the switch shows only when there's a quiet period to talk through; with none, a column

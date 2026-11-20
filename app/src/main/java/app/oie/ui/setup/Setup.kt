@@ -134,7 +134,8 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
 fun Wordmark() {
     androidx.compose.foundation.Image(
         painterResource(R.drawable.oie_wordmark), contentDescription = "Oiê",
-        modifier = Modifier.height(OTokens.Spacing.space8),
+        // v0.34 audit: 40dp tall, about 88 px wide on the tablet, above the 64 px minimum.
+        modifier = Modifier.height(OTokens.Spacing.space10),
     )
 }
 
@@ -259,7 +260,8 @@ private fun ContactsStep(state: AppState, next: () -> Unit, back: () -> Unit) {
     if (all.size > SEARCH_FROM) Field(tx.search, query, { query = it }, tx.pickRealContacts(state.kidName))
     val shown = all.filter { it.id in picked || app.oie.logic.ContactNames.matches(it, query) }.take(if (all.size > SEARCH_FROM) SEARCH_MAX else all.size)
     // Plain rows (at most 30, see SEARCH_MAX) in the scrolling page, not a fixed-height box (v0.17 audit).
-    Column {
+    // v0.34 audit: a small gap, so two picked rows don't run together.
+    Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
         shown.forEach { ct ->
             val on = ct.id in picked
             // v0.34 audit: a picked row is `selected` (README: picked things), and TalkBack hears "checked".
