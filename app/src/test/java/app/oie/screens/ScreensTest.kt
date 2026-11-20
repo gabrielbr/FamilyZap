@@ -369,4 +369,26 @@ class ScreensTest {
     @Test fun conversationStatusReply() = shot("64-conversation-status-reply", false) {
         Conversation(statuses().apply { messages += Message("kr", "vovo", true, now - 60_000, Kind.TEXT, "Quero um pedaço", replyTo = "st1", statusQuote = "Resposta a uma novidade") }, "vovo")
     }
+
+    // v0.37: the kid posts a status.
+    private fun posting(failed: Boolean = false) = statuses().apply {
+        postingOn = true
+        statuses += app.oie.logic.Status("me1", app.oie.logic.Statuses.MINE, "", now - 30L * 60 * 1000, Kind.TEXT, "Fiz um desenho do Bento",
+            viewed = true, audience = listOf("vovo", "mae", "vovo2", "bia"), failed = failed)
+    }
+    @Test fun kidHomePosting() = shot("65-kid-home-posting", false) { KidHome(posting()) }
+    @Test fun kidHomePostingDark() = shot("65-kid-home-posting", true) { KidHome(posting()) }
+    @Test fun postSheet() = shot("66-post-sheet", false) { val s = posting(); app.oie.ui.kid.PostSheet(s, false, {}, {}) }
+    @Test fun postSheetDark() = shot("66-post-sheet", true) { val s = posting(); app.oie.ui.kid.PostSheet(s, false, {}, {}) }
+    @Test fun postSheetNobody() = shot("67-post-sheet-nobody", false) {
+        val s = posting().apply { for (k in allowed.indices) if (!allowed[k].isGroup) allowed[k] = allowed[k].copy(paused = true) }
+        app.oie.ui.kid.PostSheet(s, false, {}, {})
+    }
+    @Test fun statusWriter() = shot("68-status-writer", false) { app.oie.ui.kid.StatusWriter(posting(), {}, {}, start = "Fiz um desenho do Bento") }
+    @Test fun statusWriterDark() = shot("68-status-writer", true) { app.oie.ui.kid.StatusWriter(posting(), {}, {}) }
+    @Test fun ownStatus() = held("69-own-status", false) { app.oie.ui.kid.StatusViewer(posting(), app.oie.logic.Statuses.MINE, {}) }
+    @Test fun ownStatusDark() = held("69-own-status", true) { app.oie.ui.kid.StatusViewer(posting(), app.oie.logic.Statuses.MINE, {}) }
+    @Test fun ownStatusFailed() = held("69-own-status-failed", false) { app.oie.ui.kid.StatusViewer(posting(failed = true), app.oie.logic.Statuses.MINE, {}) }
+    @Test fun settingsPosting() = shot("70-settings-posting", false) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.StatusSetting(posting()) } }
+    @Test fun settingsPostingDark() = shot("70-settings-posting", true) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.StatusSetting(posting().apply { postingOn = false }) } }
 }

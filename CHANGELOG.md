@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.37.0
+- **The kid posts updates.** Turn it on in Ajustes e ajuda › Novidades › "Tito pode postar novidades" (off until you do; Novidades must be on).
+- **What the kid can post:** a photo, a video (up to 1 minute) or a text. The home's Novidades row gets **Postar**, and once the kid has posted, **Você**.
+- **Who sees it:** only the people in Contatos, never groups or paused people. Oiê says who before posting ("Quem vê: Vovó, Mãe e Tia Bia").
+- **It goes out from your account,** signed with the kid's name. You see it on your phone in Meu status, and you can delete it there.
+- **The kid can take it back** with "Apagar para todos". A post that fails says so and offers Tentar de novo.
+- **How it stays private:** WhatsApp would send a status to your whole status audience. Oiê changes one file of its WhatsApp library so it goes only to Contatos. That file is published with every release (its licence, the MPL-2.0, asks for it).
+
 ## 0.36.0
 - **Novidades: the family's WhatsApp statuses.** Off until you turn it on in Ajustes e ajuda › Novidades. Then the kid's home shows a row of faces for the people in Contatos who posted in the last 24 hours, with a coral ring and "nova" until seen.
 - **Watching:** photos and texts stay 5 seconds, videos play to the end. Tap the right side for the next, the left for the previous; Pausar holds it.

@@ -67,6 +67,7 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 | L2 (v0.21) | **The parent's own chat gets only Oiê's answers to the parent's commands** ("/Tito parar"), never anything from the kid (decision 0005). | `SendSelfNote`; `ParentCommand` reads commands only from the parent's own account |
 | L2 (v0.30) | **The parent's own chat may receive the kid's messages only when the parent made it the line to the kid** (WhatsApp refused the one-person group; decision 0007). | `SetParentLine`, `target` |
 | L2 (v0.36) | **Statuses never go to the status broadcast.** A reaction or a reply to a family status goes to the poster's own chat (the broadcast would reach the parent's whole status audience). Only statuses from allowed, unpaused people are kept; never the parent's own, never other broadcast lists. | `ToIncoming`, `SendStatusReaction`, `SendStatusReply` (via `target`) |
+| L2 (v0.37) | **A kid's status goes only to the people in Contatos** (allowed, unpaused, people; not groups, not the parent line). The patched whatsmeow sends a status to a chosen list instead of the parent's status audience; the list is set and cleared around each post, and an empty list is refused, so it can never fall back. At most 64 people. | `StatusAudience`, `sendStatus`, `_whatsmeow-patch/broadcast.go` |
 | L3 | **Human pace.** At least 2 s between sends, at most 30 in 10 minutes. The app waits rather than refuses. | `SendPace` (tested) |
 | L4 | **No duplicates.** A send is retried at most once, with the same message ID, only after a reconnect. Other errors show "Não foi" with Tentar de novo for the kid. | whatsmeow `SendRequestExtra{ID}` |
 | L5 | **Bounded reconnects.** whatsmeow reconnects on its own, waiting 2 s longer each time, and stops after 8 tries. After that, the app tries again when the network or the app comes back. | `AutoReconnectHook`; `LinkService` network callback (v0.7) |
@@ -111,7 +112,11 @@ ships with it, we must:
 - say in Ajustes e ajuda › Sobre that it includes whatsmeow under MPL-2.0;
 - link to its source, github.com/tulir/whatsmeow, at the exact commit (`link/go.mod`).
 
-We don't modify whatsmeow; a change to its files would have to be published under MPL-2.0. Its
+**Since v0.37 Oiê modifies one whatsmeow file,** `broadcast.go` (kept in `link/_whatsmeow-patch/`, the owner's
+approval 2026-11-20), so a kid's status goes only to the people in Contatos. `link/patch-whatsmeow.sh`
+builds the pinned whatsmeow with it (`go.mod` replaces the module with `link/.whatsmeow`). The modified
+file stays MPL-2.0 and is published with every release in gabrielbr/oie-releases (`whatsmeow-broadcast.go`),
+and Sobre says where. Bumping whatsmeow means re-applying the change to the new `broadcast.go`. Its
 dependencies are BSD, MIT, Apache or ISC licensed, and a full list ships with the release.
 
 ## Spike results (2026-11-18)

@@ -90,4 +90,64 @@ class StatusesTest {
         assertEquals(s.statuses.toList(), back.statuses.toList())
         assertEquals("Resposta a uma novidade", back.messages.first { it.id == "k1" }.statusQuote)
     }
+
+    // v0.37: the kid posts.
+    @Test fun aPostGoesOnlyToThePeopleTheKidCanReach() {
+        val s = state()
+        assertNull(s.postStatus(Kind.TEXT, "Oi")) // posting off
+        s.postingOn = true
+        val p = s.postStatus(Kind.TEXT, "  Olha meu desenho ")!!
+        assertEquals(listOf(vovo.id), p.audience) // not the group, the paused, nor the parent line
+        assertTrue(p.mine && p.posting && p.viewed)
+        assertEquals("Olha meu desenho", p.text)
+        assertEquals(listOf(p), s.link.posted)
+        assertEquals(listOf(p), s.myStatuses())
+        assertTrue(Statuses.row(s.statuses, s.allowed, now).isEmpty()) // the kid's own aren't a family round
+        assertNull(s.postStatus(Kind.TEXT, " "))
+        assertNull(s.postStatus(Kind.TEXT, "x".repeat(Statuses.TEXT_MAX + 1)))
+        s.statusesOn = false
+        assertNull(s.postStatus(Kind.TEXT, "Oi")) // needs Novidades on too
+    }
+
+    @Test fun nobodyToSeeItMeansNothingIsPosted() {
+        val s = state().apply { postingOn = true; allowed.removeAll { it.id == vovo.id } }
+        assertNull(s.postStatus(Kind.PHOTO, media = "p.sealed"))
+        assertTrue(s.link.posted.isEmpty())
+    }
+
+    @Test fun aFailedPostCanBeTriedAgainAndAnyCanBeDeleted() {
+        val s = state().apply { postingOn = true }
+        val p = s.postStatus(Kind.PHOTO, media = "p.sealed")!!
+        s.statusPosted(p.id, ok = false)
+        assertTrue(s.myStatuses().single().failed)
+        s.retryStatus(p.id)
+        assertTrue(s.myStatuses().single().posting)
+        assertEquals(2, s.link.posted.size)
+        s.statusPosted(p.id, ok = true)
+        assertFalse(s.myStatuses().single().failed)
+        assertEquals("p.sealed", s.deleteMyStatus(p.id))
+        assertEquals(listOf(p.id), s.link.deleted)
+        assertTrue(s.myStatuses().isEmpty())
+        // A post that never went isn't taken back from anyone.
+        val q = s.postStatus(Kind.TEXT, "oi")!!
+        s.statusPosted(q.id, ok = false)
+        s.deleteMyStatus(q.id)
+        assertEquals(listOf(p.id), s.link.deleted)
+    }
+
+    @Test fun theKidsOwnStayUntilTheyEndAndAreSaved() {
+        val s = state().apply { postingOn = true }
+        val p = s.postStatus(Kind.TEXT, "oi")!!
+        s.statusesOn = false; s.postingOn = false
+        assertTrue(s.expireStatuses().isEmpty()) // live on WhatsApp: kept
+        assertEquals(1, s.myStatuses().size)
+        s.finishSetup()
+        val back = AppState(); Codec.decode(Codec.encode(s), back)
+        val b = back.statuses.single()
+        assertEquals(p.audience, b.audience)
+        assertTrue(b.mine && b.failed && !b.posting) // closed mid-post: shown as not posted, to try again
+        val later = AppState(clock = { now + 25 * hour }).apply { statuses += b }
+        later.expireStatuses()
+        assertTrue(later.statuses.isEmpty()) // a day later it goes
+    }
 }

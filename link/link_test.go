@@ -2,6 +2,7 @@ package oielink
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -515,5 +516,64 @@ func TestStatusReactionAndReplyPointAtTheStatus(t *testing.T) {
 	c := StatusReply(poster, "st1", "Que lindo").GetExtendedTextMessage()
 	if c.GetText() != "Que lindo" || c.GetContextInfo().GetStanzaID() != "st1" || c.GetContextInfo().GetRemoteJID() != "status@broadcast" || c.GetContextInfo().GetParticipant() != poster.String() {
 		t.Fatalf("reply context: %+v", c.GetContextInfo())
+	}
+}
+
+func TestAStatusGoesOnlyToPeople(t *testing.T) {
+	own := types.NewJID("5511900000000", types.DefaultUserServer)
+	got, err := StatusAudience(" 5511999990000@s.whatsapp.net,5511999990001:3@s.whatsapp.net, 5511999990000@s.whatsapp.net ,123@lid", own)
+	if err != nil || len(got) != 3 || got[1].Device != 0 {
+		t.Fatalf("got %v %v", got, err)
+	}
+	for _, bad := range []string{"", " , ", "120363000000000000@g.us", "status@broadcast", "5511900000000@s.whatsapp.net", "x@y@z"} {
+		if _, err := StatusAudience(bad, own); err == nil {
+			t.Fatalf("%q must be refused", bad)
+		}
+	}
+	many := make([]string, MaxStatusAudience+1)
+	for i := range many {
+		many[i] = fmt.Sprintf("55119999%05d@s.whatsapp.net", i)
+	}
+	if _, err := StatusAudience(strings.Join(many, ","), own); err == nil {
+		t.Fatal("too many must be refused")
+	}
+}
+
+// The patch (_whatsmeow-patch/broadcast.go): a status goes to the chosen people and the account's own
+// devices, and nothing else; clearing the choice goes back to whatsmeow's own behaviour.
+func TestThePatchSendsAStatusOnlyToTheChosen(t *testing.T) {
+	k, err := Open(filepath.Join(t.TempDir(), "s.db"), nl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	own := types.NewJID("5511900000000", types.DefaultUserServer)
+	k.c.Store.ID = &own
+	vo := types.NewJID("5511999990000", types.DefaultUserServer)
+	k.c.SetStatusRecipients([]types.JID{vo})
+	got, err := k.c.StatusRecipientsFor(context.Background())
+	if err != nil || len(got) != 2 || got[0] != vo || got[1].User != own.User {
+		t.Fatalf("got %v %v", got, err)
+	}
+	k.c.SetStatusRecipients(nil)
+	if _, err := k.c.StatusRecipientsFor(context.Background()); err == nil {
+		t.Fatal("without a choice it asks WhatsApp for the privacy list (offline here: an error), never the old list")
+	}
+}
+
+func TestStatusPostsFollowTheSendRules(t *testing.T) {
+	k, err := Open(filepath.Join(t.TempDir(), "s.db"), nl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := k.PostStatusText("", "oi", 0, 0, "s1"); err == nil {
+		t.Fatal("nobody: refused")
+	}
+	k.SetReadOnly(true)
+	if _, err := k.PostStatusText("5511999990000@s.whatsapp.net", "oi", 0, 0, "s1"); !errors.Is(err, ErrReadOnly) {
+		t.Fatalf("read-only: %v", err)
+	}
+	m := TextStatus("*Tito*: oi", 0xFFE8573C, 0xFF2A1A14).GetExtendedTextMessage()
+	if m.GetBackgroundArgb() != 0xFFE8573C || m.GetTextArgb() != 0xFF2A1A14 || m.GetText() != "*Tito*: oi" {
+		t.Fatalf("got %+v", m)
 	}
 }

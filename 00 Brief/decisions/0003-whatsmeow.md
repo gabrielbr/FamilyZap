@@ -36,3 +36,9 @@ connection and the ban risk.
 - **The build needs Go and the Android NDK** (CI too, once the link ships).
 - **Each whatsmeow update is a pinned commit,** read before bumping, because WhatsApp changes the protocol without notice.
 - **Licence:** Sobre › Licenças names whatsmeow (MPL-2.0) and where its source is.
+
+## Update, 2026-11-20 (v0.37): one modified file
+- **Why:** WhatsApp sends a status to the account's whole status audience. Oiê must send the kid's status only to the people in Contatos (product law: the kid reaches only allowed people).
+- **What:** `broadcast.go` gains `SetStatusRecipients`: while a list is set, a status goes to that list (and the account's own devices) instead of the privacy list. Nothing else changes. The file is in `link/_whatsmeow-patch/`; `link/patch-whatsmeow.sh` builds the pinned commit with it.
+- **Approved by** the owner on 2026-11-20 ("Yes, patch it"), with publishing the modified file under the MPL-2.0. It ships with every release in the public releases repo, and Sobre says so.
+- **Cost:** a whatsmeow bump re-applies a small, documented change to one file.

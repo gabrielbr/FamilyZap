@@ -58,3 +58,56 @@ _Designed with `ux-user-flows` on 2026-11-20. Decided with the owner:_
 | 13 | Accessibility | ✅ The tap halves are also "Anterior" and "Próxima" for TalkBack; the ring has the word; reactions are labelled. |
 | 14 | Ethics | ✅ No counts, no streaks, nothing from anyone else; the parent knows views show as them. |
 | 15 | Evidence | 🟡 To check on the device: WhatsApp shows the kid's reaction on the poster's status. |
+
+# v0.37: the kid posts a status
+
+_Designed with `ux-user-flows` on 2026-11-20. The owner asked: "Kid can publish status, the same way as WhatsApp, but they can only be visible for the contacts they can talk." The owner approved patching the link library for it (the modified file is published under the MPL-2.0)._
+
+**Job:** _When Tito draws something he's proud of, he wants to post it like the grown-ups do, so the family sees it, and nobody else._
+
+## Product law
+- **Only the people in Contatos see it:** allowed, not paused, people (not groups, not the line to the parent). WhatsApp would send a status to the parent's whole status audience; Oiê's patch to the link library sends it only to that list (`_whatsmeow-patch/broadcast.go`, rule L2 v0.37). With nobody on the list, nothing is posted: it never falls back to the parent's audience.
+- **It's the parent's account.** The family sees the status as the parent's, so it's signed with the kid's name ("*Tito* 😎"), like every message. The parent sees it on their phone, in "Meu status", and can delete it there too.
+- **Off until the parent turns it on:** "Tito pode postar novidades", under Novidades (which must be on).
+- **Quiet hours and a dropped link stop posting,** as they stop sending.
+- **No view counts.** WhatsApp tells the poster who viewed; Oiê doesn't show it (no pressure, no popularity).
+
+## Entries
+- The Novidades row on the home. With posting on, it always shows, and its first round is **Postar** (a +). Once the kid has posted, **Você** comes before it.
+
+## Steps
+| # | Screen | Kid does | Oiê does |
+|---|---|---|---|
+| 1 | Home | Taps **Postar** | A sheet: "Postar uma novidade", the line "Quem vê: Vovó, Mãe e Tia Bia", and Tirar foto · Gravar vídeo · Galeria · Escrever. |
+| 2a | Photo or video | Takes or picks one | The preview, "Novidade para a família", with **Postar** (the one coral action) and Trocar. A video is up to 1 minute (WhatsApp's limit for statuses). |
+| 2b | Text | Taps **Escrever**, types | The text shows as it will look, on the `selected` ground, with **Postar** (off while empty) and Cancelar. At most 700 characters. |
+| 3 | Home | Taps **Postar** | Back home. **Você** appears first in the row, and "Postando…" shows in its viewer until WhatsApp takes it. |
+| 4 | Own viewer | Taps **Você** | Their statuses, as in the family's viewer, with "Quem vê: …" and **Apagar para todos** (no reactions or reply). |
+| 5 | Same | Taps **Apagar para todos** (a quiet button: deleting isn't what the screen is for) | It's taken back from everyone it went to. If others remain, a snackbar says "Novidade apagada"; if it was the last, the viewer closes and **Você** leaves the row. Off while the link is down (it couldn't reach anyone). |
+
+## Branches
+| At | If | Then |
+|---|---|---|
+| 1 | Nobody in Contatos can see it (only groups or paused people) | The sheet says "Ninguém em Contatos pode ver ainda" and has no options. |
+| 1 | Quiet hours or the link is down | As in a chat: the sheet says why, with no options. |
+| 2a | A video over 1 minute | "Vídeos nas novidades têm até 1 minuto." with Trocar. |
+| 2a | The photo can't be read | The chat's line, "Não deu para abrir essa foto". |
+| 3 | WhatsApp doesn't take it | Its viewer says "Não foi postada." with **Tentar de novo** and Apagar. |
+| any | 24 hours pass | It leaves the tablet (on WhatsApp it ends by itself). |
+| any | The parent turns posting off | The kid's live statuses stay until they end; the kid can still delete them. |
+
+## Parent
+- **Ajustes e ajuda › Novidades › "Tito pode postar novidades"**, off; shown only while Novidades is on.
+- Its line: "As novidades de Tito saem da sua conta, com o nome de Tito, só para quem está em Contatos. Você as vê no seu WhatsApp, em Meu status, e pode apagar por lá."
+
+## Flow review (ux-user-flows §13)
+| # | Question | Result |
+|---|---|---|
+| 1 | Job | ✅ One actor, one job. |
+| 3 | Happy path | ✅ Postar, a photo, Postar: three taps plus the camera. |
+| 4 | Branches | ✅ Nobody, quiet hours, offline, long video, unreadable, failed, expiry, switched off. |
+| 7 | Control | ✅ Trocar and Back before posting; Apagar para todos after; the parent can delete from the phone. |
+| 9 | Errors | ✅ Said in words, with the next step. |
+| 13 | Accessibility | ✅ "Postar" and "Você" are labelled rounds; "Quem vê" is text. |
+| 14 | Ethics | ✅ Only Contatos; no view counts; signed with the kid's name; the parent sees every post. |
+| 15 | Evidence | 🟡 To check on a device: the status reaches the people in Contatos and nobody else. |

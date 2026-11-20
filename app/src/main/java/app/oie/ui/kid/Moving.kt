@@ -305,7 +305,7 @@ data class VideoDraft(
  * Back drops it (docs/flows/kid-sends-message.md, v0.28).
  */
 @Composable
-fun VideoPreview(draft: VideoDraft, to: String, onSwap: () -> Unit, onSend: () -> Unit, onBack: () -> Unit) {
+fun VideoPreview(draft: VideoDraft, to: String, onSwap: () -> Unit, onSend: () -> Unit, onBack: () -> Unit, action: String? = null, maxSec: Int = Int.MAX_VALUE) {
     val c = OieTheme.colors
     val tx = str
     // v0.28 audit: the ▶ on the preview plays it, so the kid can watch before sending.
@@ -324,7 +324,13 @@ fun VideoPreview(draft: VideoDraft, to: String, onSwap: () -> Unit, onSend: () -
         ) {
             val ready = draft.ready
             val problem = draft.problem
+            // v0.37: a status video is a minute at most (WhatsApp's limit), said in words with Trocar.
+            val overLimit = ready != null && ready.seconds > maxSec
             when {
+                overLimit -> {
+                    Text(tx.statusVideoTooLong, style = OieType.body, color = c.ink, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    QuietButton(tx.swap, onSwap, Modifier.height(OTokens.Size.button))
+                }
                 problem != null -> {
                     Text(
                         when (problem) {
@@ -340,7 +346,7 @@ fun VideoPreview(draft: VideoDraft, to: String, onSwap: () -> Unit, onSend: () -
                     if (ready.gif) GifBubble(ready.media) { watch = true } else VideoBubble(ready.media, ready.seconds, tooBig = false, parent = "") { watch = true }
                     // Fresh review: the main button first, as on every other screen.
                     app.oie.ui.setup.ButtonRow {
-                        app.oie.ui.common.PrimaryButton(tx.send, onSend, icon = R.drawable.gg_ic_send)
+                        app.oie.ui.common.PrimaryButton(action ?: tx.send, onSend, icon = R.drawable.gg_ic_send)
                         QuietButton(tx.swap, onSwap)
                     }
                 }

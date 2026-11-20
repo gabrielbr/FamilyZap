@@ -85,6 +85,8 @@ type Link struct {
 	// parentLine is the chat where the kid writes to the parent who owns this WhatsApp (v0.30): a
 	// one-person group, or the parent's own chat when WhatsApp refused the group.
 	parentLine string
+	// statusMu holds one status post at a time, so the chosen audience can't leak into another send (v0.37).
+	statusMu sync.Mutex
 }
 
 // MaxPendingMedia is how many received photos, voice notes and stickers stay downloadable.
@@ -780,6 +782,132 @@ func (k *Link) MarkStatusViewed(poster, statusID string, atMillis int64) (err er
 		return err
 	}
 	return k.c.MarkRead(context.Background(), []types.MessageID{types.MessageID(statusID)}, time.UnixMilli(atMillis), types.StatusBroadcastJID, from)
+}
+
+// MaxStatusAudience is the most people a kid's status can go to (Contatos is a family, not a crowd).
+const MaxStatusAudience = 64
+
+// StatusAudience reads the people a kid's status goes to (v0.37): JIDs, comma-separated, from the app's
+// allowed and unpaused people. Only people: never a group, a broadcast list or the parent's own number.
+// An empty list is refused, so a status can never fall back to the parent's whole status audience.
+func StatusAudience(csv string, own types.JID) ([]types.JID, error) {
+	seen := map[types.JID]bool{}
+	var out []types.JID
+	for _, part := range strings.Split(csv, ",") {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		jid, err := types.ParseJID(part)
+		if err != nil {
+			return nil, err
+		}
+		jid = jid.ToNonAD()
+		if jid.Server != types.DefaultUserServer && jid.Server != types.HiddenUserServer {
+			return nil, fmt.Errorf("a status goes only to people: %s", part)
+		}
+		if !own.IsEmpty() && jid.User == own.User {
+			return nil, errors.New("never to the parent's own number")
+		}
+		if !seen[jid] {
+			seen[jid] = true
+			out = append(out, jid)
+		}
+	}
+	if len(out) == 0 {
+		return nil, errors.New("nobody to show the status to")
+	}
+	if len(out) > MaxStatusAudience {
+		return nil, fmt.Errorf("at most %d people", MaxStatusAudience)
+	}
+	return out, nil
+}
+
+// TextStatus is a text status on a colour, as WhatsApp's own (the colours come from the app's tokens).
+func TextStatus(text string, background, foreground uint32) *waE2E.Message {
+	return &waE2E.Message{ExtendedTextMessage: &waE2E.ExtendedTextMessage{
+		Text:           proto.String(text),
+		BackgroundArgb: proto.Uint32(background),
+		TextArgb:       proto.Uint32(foreground),
+		Font:           waE2E.ExtendedTextMessage_SYSTEM.Enum(),
+	}}
+}
+
+func (k *Link) ownJID() types.JID {
+	if id := k.c.Store.ID; id != nil {
+		return id.ToNonAD()
+	}
+	return types.EmptyJID
+}
+
+// sendStatus posts to status@broadcast for the chosen audience only (the whatsmeow patch,
+// _whatsmeow-patch/broadcast.go). The audience is set and cleared around this one send.
+func (k *Link) sendStatus(audience, id string, build func() (*waE2E.Message, error)) (string, error) {
+	people, err := StatusAudience(audience, k.ownJID())
+	if err != nil {
+		return "", err
+	}
+	if err := k.maySend(); err != nil {
+		return "", err
+	}
+	msg, err := build()
+	if err != nil {
+		return "", err
+	}
+	k.statusMu.Lock()
+	defer k.statusMu.Unlock()
+	k.c.SetStatusRecipients(people)
+	defer k.c.SetStatusRecipients(nil)
+	_, err = k.c.SendMessage(context.Background(), types.StatusBroadcastJID, msg, whatsmeow.SendRequestExtra{ID: types.MessageID(id)})
+	return id, err
+}
+
+// PostStatusText posts the kid's text status (v0.37) to the people in audience only.
+func (k *Link) PostStatusText(audience, text string, background, foreground int64, id string) (sent string, err error) {
+	defer k.guard("PostStatusText", &err)
+	return k.sendStatus(audience, id, func() (*waE2E.Message, error) {
+		return TextStatus(text, uint32(background), uint32(foreground)), nil
+	})
+}
+
+// PostStatusImage posts the kid's photo status (a JPEG the app re-encoded) to the people in audience only.
+func (k *Link) PostStatusImage(audience string, jpeg []byte, caption, id string) (sent string, err error) {
+	defer k.guard("PostStatusImage", &err)
+	return k.sendStatus(audience, id, func() (*waE2E.Message, error) {
+		up, err := k.c.Upload(context.Background(), jpeg, whatsmeow.MediaImage)
+		if err != nil {
+			return nil, err
+		}
+		m := ImageMessage(up, caption)
+		if w, h, thumb := jpegInfo(jpeg); w > 0 {
+			m.ImageMessage.Width, m.ImageMessage.Height = proto.Uint32(uint32(w)), proto.Uint32(uint32(h))
+			if len(thumb) > 0 {
+				m.ImageMessage.JPEGThumbnail = thumb
+			}
+		}
+		return m, nil
+	})
+}
+
+// PostStatusVideo posts the kid's video status (prepared on the tablet, a minute at most) to audience only.
+func (k *Link) PostStatusVideo(audience string, mp4 []byte, seconds, width, height int, thumb []byte, caption, id string) (sent string, err error) {
+	defer k.guard("PostStatusVideo", &err)
+	return k.sendStatus(audience, id, func() (*waE2E.Message, error) {
+		up, err := k.c.Upload(context.Background(), mp4, whatsmeow.MediaVideo)
+		if err != nil {
+			return nil, err
+		}
+		return VideoMessage(up, seconds, width, height, thumb, false, caption), nil
+	})
+}
+
+// DeleteStatus takes the kid's status back, for the same people it went to ("Apagar para todos").
+func (k *Link) DeleteStatus(audience, id string) (err error) {
+	defer k.guard("DeleteStatus", &err)
+	_, err = k.sendStatus(audience, string(k.c.GenerateMessageID()), func() (*waE2E.Message, error) {
+		return k.c.BuildRevoke(types.StatusBroadcastJID, types.EmptyJID, types.MessageID(id)), nil
+	})
+	return err
 }
 
 // UnreadPatch is WhatsApp's own "mark as unread" for a chat, up to the message just sent from this

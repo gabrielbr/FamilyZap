@@ -12,7 +12,6 @@ Ideas and planned work. When something ships, move it into the docs.
 5. Decide distribution (Play or a direct APK with SHA256SUMS).
 
 ## Next
-- **v0.37: the kid posts a status,** seen only by the people in Contatos. Needs a patch to the link library so a status goes to a chosen list (owner approved, 2026-11-20; the modified file is published under MPL-2.0). Updates decision 0003.
 
 ## Later
 - The Oiê sticker words are drawn into each sticker; "Boa noite" sits smaller than the others. Redraw it at the same size (an asset change in 01 Brand/stickers).

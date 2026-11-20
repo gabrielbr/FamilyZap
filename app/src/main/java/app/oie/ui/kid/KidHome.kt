@@ -52,6 +52,8 @@ fun KidHome(state: AppState) {
     val notice = !state.kidNoticeSeen && state.allowed.isNotEmpty()
     // v0.36: the family's statuses: the row opens a person's statuses; a day later, or switched off, they go.
     var watching by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    // v0.37: the kid is posting a status.
+    var posting by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     androidx.compose.runtime.LaunchedEffect(state.statusesOn, state.statuses.size) {
         state.expireStatuses().forEach { app.oie.data.Photos.forget(context, it) }
@@ -96,7 +98,7 @@ fun KidHome(state: AppState) {
                     Text(tx.whoToTalk, style = OieType.body, color = c.muted)
                     // v0.33: today's birthdays first: they're once a year.
                     HomeReminders(state, birthdays = true)
-                    NovidadesRow(state) { watching = it }
+                    NovidadesRow(state, onOpen = { watching = it }, onPost = { posting = true })
                     // v0.34 audit: on a phone, two even columns filling the width; on the tablet, tiles a little wider
                     // than their photo (so long names fit), pulled left by the difference so the first photo starts on
                     // the greeting's edge. Rows sit close on a phone, so the next row peeks above the fold.
@@ -142,6 +144,7 @@ fun KidHome(state: AppState) {
         }
         said?.let { app.oie.ui.common.Snackbar(it, Modifier.align(Alignment.BottomCenter)) }
         watching?.let { StatusViewer(state, it, onClose = { watching = null }) }
+        if (posting) StatusPoster(state, onClose = { posting = false })
         if (notice) KidNotice(state)
     }
 }
