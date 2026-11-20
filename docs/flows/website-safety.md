@@ -15,7 +15,7 @@ _Designed with `ux-user-flows` on 2026-11-20, at the owner's request:_
 ```mermaid
 flowchart TD
   start([Landing page, a shared link or search]) --> page[Safety page]
-  page --> why[Why Oiê exists:<br/>the home phone of the 90s, no ads, no data on our servers]
+  page --> why[Why Oiê exists:<br/>the home phone of the 90s, no ads, no servers of ours]
   why --> honest['No app makes a kid 100% safe'<br/>+ the bridge notice link]
   honest --> toc[Contents: Converse · Ferramentas · Riscos · A lei · Ajuda]
   toc --> section[A section]
@@ -29,7 +29,7 @@ flowchart TD
 ## Steps
 | # | Part | What the parent does | What the page does |
 |---|---|---|---|
-| 1 | **Why Oiê exists** | Reads | The 90s home phone story, what Oiê is and isn't (no ads, no feed, only the people you chose, nothing kept on our servers), two numbers with sources. |
+| 1 | **Why Oiê exists** | Reads | The 90s home phone story, what Oiê is and isn't (no ads, no feed, only the people you chose, no servers of ours, no analytics or tracking), two numbers with sources. |
 | 2 | **Honesty** | Reads | No app or setting makes a kid 100% safe; what works is talking, family rules and the tools already on the device. A link to the landing page's notice about using WhatsApp unofficially (product law). |
 | 3 | **Contents** | Picks a section | Five anchors, each a plain question-like title. |
 | 4 | **Converse primeiro** | Reads | Six tips, each with its source. |

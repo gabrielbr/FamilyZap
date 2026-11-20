@@ -57,7 +57,7 @@ A fix found during the audit goes through the same steps.
 - Never skip or loosen a test to get green.
 
 ## Product law
-- **Data:** messages and contacts are never stored on our servers; the WhatsApp link runs on the kid's tablet. No ads, no tracking of kids.
+- **Data:** Oiê has no servers. The WhatsApp link runs on the kid's tablet, linked to the parent's WhatsApp like WhatsApp Web; messages go only through WhatsApp. No analytics, no ads, no tracking: nothing about the family reaches us. Never add a server, an analytics or crash-reporting SDK, or an ad library. Say it plainly and exactly ("o Oiê não tem servidor"); never "100% seguro".
 - **Honesty about the bridge:** Oiê uses WhatsApp unofficially (decision 0001). Parents are told before linking that their number could be restricted or banned. Never hide or soften this, and never bulk send.
 - **Contacts:** the kid can never reach, or be reached by, a contact the parent didn't allow.
 - **Claims:** never claim to make a child "100% safe" or to replace a parent's attention. Never imply it's made or endorsed by WhatsApp or Meta; no WhatsApp logo.

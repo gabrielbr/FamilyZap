@@ -105,7 +105,7 @@ _The owner's test (2026-11-20): animated stickers from WhatsApp's own packs show
 - The playback position of a long voice message.
 
 ## Notes
-- **Data:** received messages are stored on the tablet only, encrypted at rest **(proposed)**, and never on our servers.
+- **Data:** received messages are stored on the tablet only, encrypted at rest **(proposed)**, and nowhere else: Oiê has no servers.
 - **Notifications:** Oiê's own channel, so the parent can silence it in Android's settings too.
 - **Product law** is tested here: an automated test sends from an un-allowed number and checks that nothing appears.
 

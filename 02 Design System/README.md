@@ -18,7 +18,7 @@ _Stage 2 strategy, approved by the owner on 2026-11-18._
   - that a child is "100% safe", or that it replaces a parent's attention;
   - that the WhatsApp link is official or risk-free for the parent's number;
   - that it's a way to watch, track or read up on the kid.
-- **Scope:** Oiê is for talking with family: the people a parent chose. It is not social media, not a game and not a way to meet anyone new. It runs on the kid's tablet and stores nothing on our servers.
+- **Scope:** Oiê is for talking with family: the people a parent chose. It is not social media, not a game and not a way to meet anyone new. It runs on the kid's tablet and has no servers of its own: it links to the parent's WhatsApp the way WhatsApp Web does, with no analytics, ads or tracking.
 - **Name:** Oiê, said "oy-YEH" ([decision 0002](../00%20Brief/decisions/0002-name.md)). Never written like the telecom Oi's "Oi_e".
 - **Three words:** warm · simple · trustworthy (and close).
 

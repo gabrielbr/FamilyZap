@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **Website, privacy in plain words:** "Nada passa por nós" on the landing page, a new question "O Oiê guarda alguma coisa sobre a minha família?", and the safety page all now say that Oiê has no servers, links to your WhatsApp like WhatsApp Web, and has no analytics, ads or tracking.
 - **Website: "Por que fizemos o Oiê" and a safety guide for parents** (`/seguranca/`, in English at `/safety/`). It explains why Oiê exists: the home phone of the 90s, which kids used to plan meeting friends in real life, without ads or data collection. Then a guide with sources:
   - talking first;
   - the tools you already have: Google Family Link, Google Play, SafeSearch and Chrome, Samsung Kids, Apple Screen Time, YouTube Kids, your WhatsApp's settings, and a family DNS;
@@ -14,6 +15,9 @@
   - **Your family:** pick son or daughter, mom or dad, and who they write to (grandma, grandpa, an aunt or a school friend), and the story uses your family.
   - **The screens:** the message is shown on the tablet, then on your WhatsApp, then on theirs, and the reply comes back.
   - **Not only grandma:** the copy and FAQ now say "family and friends you choose" (decision 0013).
+
+## 0.38.1
+- **Clearer about privacy.** Ajuda now says it plainly: Oiê has no servers. The tablet links to your WhatsApp the way WhatsApp itself does (like WhatsApp Web), and messages go only through WhatsApp. There is no analytics, no ads and no tracking, so nothing about your kid or your family reaches us. The only other connection checks GitHub for a new version of Oiê. Nothing in how the app works changed.
 
 ## 0.38.0
 - **A new home for the kid.** Each person now shows what you last said and when ("Você: Também tô com saudade · 16h35", "Áudio · 1:12 · Ontem"), with "3 novas" and the line in bold when something is unread. People stay in the order you set, so Vovó is always in the same place.

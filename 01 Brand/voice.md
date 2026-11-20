@@ -23,7 +23,7 @@ _Stage 3. Approved by the owner on 2026-11-18._
 ## Never use
 - **Hype:** unlock, seamless, leverage, next-generation, game-changer, cutting-edge, revolucionário, incrível.
 - **WhatsApp-isms in Oiê's own text:** Zap, Zapzap, Wpp. Write "WhatsApp" only where it's needed to explain how Oiê works. Oiê is not a WhatsApp product.
-- **Tech words in the UI:** ponte/bridge, sincronizar/sync, sessão/session, servidor/server, API, "dispositivo vinculado"/linked device. Say what happens instead ("conectar ao seu WhatsApp" / "link to your WhatsApp").
+- **Tech words in the UI:** ponte/bridge, sincronizar/sync, sessão/session, servidor/server (one exception, owner 2026-11-20: the privacy line "O Oiê não tem servidor" / "Oiê has no servers"), API, "dispositivo vinculado"/linked device. Say what happens instead ("conectar ao seu WhatsApp" / "link to your WhatsApp").
 - **Claims (product law):** never say a child is "100% safe" (100% seguro), or that Oiê replaces a parent's attention. Never imply Oiê is made or approved by WhatsApp or Meta.
 
 ## Approved lines
