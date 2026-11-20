@@ -75,7 +75,10 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
 
     /** A day has passed (or statuses were turned off): they go. Returns their media files to delete. */
     fun expireStatuses(now: Long = clock()): List<String> {
-        val gone = statuses.filter { !statusesOn || !app.oie.logic.Statuses.alive(it, now) || allowed.none { c -> c.id == it.contactId && !c.paused } }
+        // v0.37: the kid's own stay until they end (they're live on WhatsApp), even if posting is turned off.
+        val gone = statuses.filter {
+            !app.oie.logic.Statuses.alive(it, now) || (!it.mine && (!statusesOn || allowed.none { c -> c.id == it.contactId && !c.paused }))
+        }
         statuses.removeAll(gone.toSet())
         return gone.mapNotNull { it.media }
     }
@@ -108,6 +111,53 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
         messages += m
         wa.send(m)
         return m
+    }
+
+    /** v0.37: the kid may post statuses (off until the parent turns it on; needs [statusesOn]). */
+    var postingOn by mutableStateOf(false)
+
+    /** Who sees the kid's statuses: the people in Contatos the kid can reach (Statuses.audience). */
+    fun statusAudience(): List<app.oie.logic.Contact> = app.oie.logic.Statuses.audience(allowed)
+
+    /** The kid's live statuses, oldest first. */
+    fun myStatuses(now: Long = clock()): List<app.oie.logic.Status> = app.oie.logic.Statuses.of(statuses, app.oie.logic.Statuses.MINE, now)
+
+    /**
+     * The kid posts a status (v0.37): kept as the kid's own, with the people it goes to, and handed to the
+     * link. Null when posting is off or nobody can see it (never the parent's whole audience).
+     */
+    fun postStatus(kind: Kind, text: String = "", media: String? = null, durationSec: Int = 0, now: Long = clock()): app.oie.logic.Status? {
+        val people = statusAudience()
+        if (!statusesOn || !postingOn || people.isEmpty()) return null
+        if (kind == Kind.TEXT && (text.isBlank() || text.length > app.oie.logic.Statuses.TEXT_MAX)) return null
+        val s = app.oie.logic.Status("k${System.nanoTime()}", app.oie.logic.Statuses.MINE, "", now, kind, text.trim(), media,
+            durationSec = durationSec, viewed = true, audience = people.map { it.id }, posting = true)
+        statuses += s
+        wa.postStatus(s)
+        return s
+    }
+
+    /** What the link says about a post: taken by WhatsApp, or not. */
+    fun statusPosted(id: String, ok: Boolean) {
+        val i = statuses.indexOfFirst { it.id == id }
+        if (i >= 0) statuses[i] = statuses[i].copy(posting = false, failed = !ok)
+    }
+
+    /** "Tentar de novo" on a post that failed: the same status, the same people. */
+    fun retryStatus(id: String) {
+        val i = statuses.indexOfFirst { it.id == id && it.mine && it.failed }
+        if (i < 0) return
+        statuses[i] = statuses[i].copy(posting = true, failed = false)
+        wa.postStatus(statuses[i])
+    }
+
+    /** "Apagar para todos": taken back from the people it went to. Returns its media file, for the caller to delete. */
+    fun deleteMyStatus(id: String): String? {
+        val i = statuses.indexOfFirst { it.id == id && it.mine }
+        if (i < 0) return null
+        val s = statuses.removeAt(i)
+        if (!s.failed) wa.deleteStatus(s)
+        return s.media
     }
 
     /** The reaction the kid used last (v0.34): shown first in the sheet. */

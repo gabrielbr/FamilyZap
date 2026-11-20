@@ -187,4 +187,16 @@ class PhoneScreensTest {
     @Test fun statusViewer() { compose.mainClock.autoAdvance = false; shot("p45-status-viewer", bigText = true) { app.oie.ui.kid.StatusViewer(statuses(), "vovo", {}) } }
     @Test fun statusReply() { compose.mainClock.autoAdvance = false; shot("p46-status-reply", bigText = true) { app.oie.ui.kid.StatusViewer(statuses(), "vovo", {}, startReplying = true) } }
     @Test fun settingsStatuses() = shot("p47-settings-statuses", bigText = true) { androidx.compose.foundation.layout.Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.StatusSetting(statuses()) } }
+
+    // v0.37: posting on a phone at 1.3x text.
+    private fun posting() = statuses().apply {
+        postingOn = true
+        statuses += app.oie.logic.Status("me1", app.oie.logic.Statuses.MINE, "", now - 30L * 60 * 1000, app.oie.logic.Kind.TEXT, "Fiz um desenho do Bento",
+            viewed = true, audience = listOf("vovo", "mae", "vovo2", "bia"))
+    }
+    @Test fun kidHomePosting() = shot("p48-kid-home-posting", bigText = true) { KidHome(posting()) }
+    @Test fun postSheet() = shot("p49-post-sheet", bigText = true) { val s = posting(); app.oie.ui.kid.PostSheet(s, false, {}, {}) }
+    @Test fun statusWriter() = shot("p50-status-writer", bigText = true) { app.oie.ui.kid.StatusWriter(posting(), {}, {}, start = "Fiz um desenho do Bento") }
+    @Test fun ownStatus() { compose.mainClock.autoAdvance = false; shot("p51-own-status", bigText = true) { app.oie.ui.kid.StatusViewer(posting(), app.oie.logic.Statuses.MINE, {}) } }
+    @Test fun settingsPosting() = shot("p52-settings-posting", bigText = true) { androidx.compose.foundation.layout.Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.StatusSetting(posting()) } }
 }

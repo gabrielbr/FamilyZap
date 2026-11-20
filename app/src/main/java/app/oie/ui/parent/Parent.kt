@@ -522,6 +522,8 @@ internal fun StatusSetting(state: AppState) {
     val kid = state.kidName.ifBlank { tx.theKid }
     Text(tx.statusesTitle, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     app.oie.ui.common.SwitchRow(tx.statusesSwitch(kid), state.statusesOn, { state.statusesOn = it }, help = tx.statusesBody(kid))
+    // v0.37: posting, only while Novidades is on.
+    if (state.statusesOn) app.oie.ui.common.SwitchRow(tx.postingSwitch(kid), state.postingOn, { state.postingOn = it }, help = tx.postingBody(kid))
 }
 
 /** The gentle nudge (v0.33, docs/flows/family-features.md): off until the parent turns it on. */

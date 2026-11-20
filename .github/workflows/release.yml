@@ -92,6 +92,8 @@ jobs:
           # The universal APK keeps the old name (older copies of Oiê look for it); each architecture gets its own.
           cp app/build/outputs/apk/release/app-universal-release.apk "dist/Oie-$V.apk"
           for abi in arm64-v8a armeabi-v7a; do cp "app/build/outputs/apk/release/app-$abi-release.apk" "dist/Oie_${abi}_$V.apk"; done
+          # v0.37: the one whatsmeow file Oiê modifies, published with every release (MPL-2.0, decision 0003).
+          cp link/_whatsmeow-patch/broadcast.go dist/whatsmeow-broadcast.go
           cd dist && sha256sum Oie*.apk > SHA256SUMS.txt && cat SHA256SUMS.txt
       - name: Publish to the public releases repo, and tag this commit
         if: steps.v.outputs.go == 'true'

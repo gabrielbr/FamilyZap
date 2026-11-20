@@ -235,6 +235,13 @@ interface Strings {
     fun statusTooBig(parent: String): String
     fun statusesSwitch(kid: String): String
     fun statusesBody(kid: String): String
+    // v0.37: the kid posts a status
+    val postStatus: String; val postTitle: String; val writeStatus: String; val statusLabel: String
+    val posting: String; val postFailed: String; val deleteForAll: String; val statusDeleted: String
+    val nobodyToSee: String; val statusVideoTooLong: String; val forFamily: String; val postA11y: String
+    fun whoSees(names: String): String
+    fun postingSwitch(kid: String): String
+    fun postingBody(kid: String): String
     val editContact: String; val noPhotosHow: String
     fun mediaFrom(what: String, who: String): String
     val forgotTitle: String; val forgotShowCode: String
@@ -349,6 +356,7 @@ object Pt : Strings {
         "$kid sabe que eu vejo as mensagens?" to "Sim. Na primeira vez, o Oiê diz a $kid: “${noticeBody(parent)}”",
         "Quem pode falar com $kid?" to "Só quem está em Contatos. Mensagens de qualquer outra pessoa não aparecem no tablet. Num grupo, todos do grupo veem o que $kid manda. Em Contatos, toque em alguém para mudar o nome que $kid vê (Vovó, por exemplo) ou para remover. O nome muda só no Oiê, não no seu WhatsApp.",
         "O que é o “Preciso de você”?" to "Um botão na tela inicial de $kid, que aparece quando você marca alguém em Contatos (toque na pessoa e ligue “Recebe 'Preciso de você'”). $kid confirma, e cada pessoa marcada recebe “Preciso de você.” no WhatsApp, até no horário de silêncio. Dá para mandar uma vez a cada 5 minutos. É um jeito de chamar vocês, não um serviço de emergência: em perigo, ligue 190 ou 192.",
+        "$kid pode postar novidades?" to "Se você ligar em Ajustes e ajuda › Novidades. A novidade sai da sua conta, com o nome de $kid, e só quem está em Contatos vê (não grupos, nem quem está pausado). Você a vê no seu WhatsApp, em Meu status, e pode apagar por lá; $kid também pode apagar. Vídeos têm até 1 minuto.",
         "O que são as Novidades?" to "São os status do WhatsApp de quem está em Contatos. Ligue em Ajustes e ajuda › Novidades. $kid vê as fotos, os vídeos e os textos, pode reagir e responder (a resposta vai para a conversa com a pessoa). Quando $kid vê uma novidade, a pessoa vê que você viu, porque é a sua conta. Os seus próprios status não aparecem, nem os de mais ninguém. Cada novidade some do tablet depois de 24 horas.",
         "Como funciona o horário de silêncio?" to "Durante um período, $kid lê e ouve, mas não manda mensagens. Quem tem “Pode falar no silêncio” em Contatos continua liberado. Dá para pausar um período sem apagar, por exemplo nas férias.",
         "O Oiê se desconectou. E agora?" to "Abra Conexão e toque em Conectar o WhatsApp. As mensagens que $kid mandou enquanto isso ficam guardadas e saem depois.",
@@ -359,7 +367,7 @@ object Pt : Strings {
     )
     override fun aboutVersion(v: String) = "Oiê $v, versão de teste. Usa o seu WhatsApp de verdade."
     override val notWhatsApp = "O Oiê não é feito nem aprovado pelo WhatsApp ou pela Meta."
-    override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System. Conexão com o WhatsApp feita com whatsmeow, Mozilla Public License 2.0, código em github.com/tulir/whatsmeow. QR com ZXing, Apache License 2.0. Vídeos preparados com Media3, Apache License 2.0. Figurinhas animadas com Lottie, Apache License 2.0."
+    override val credits = "Fonte Nunito, SIL Open Font License 1.1. Ícones do Gabriel Design System. Conexão com o WhatsApp feita com whatsmeow, Mozilla Public License 2.0, código em github.com/tulir/whatsmeow; o arquivo que o Oiê modifica (broadcast.go) acompanha cada versão em github.com/gabrielbr/oie-releases. QR com ZXing, Apache License 2.0. Vídeos preparados com Media3, Apache License 2.0. Figurinhas animadas com Lottie, Apache License 2.0."
     override val theKid = "a criança"
     override val notifChannel = "Mensagens da família"; override val notifVoice = "Mandou um áudio"
     override val notifPhoto = "Mandou uma foto"; override val notifSticker = "Mandou uma figurinha"
@@ -517,6 +525,14 @@ object Pt : Strings {
     override fun statusTooBig(parent: String) = "Essa novidade só abre no WhatsApp de $parent."
     override fun statusesSwitch(kid: String) = "Ver novidades da família"
     override fun statusesBody(kid: String) = "$kid vê as novidades (status) de quem está em Contatos e pode reagir e responder. Quando $kid vê uma, a pessoa vê que você viu, porque é a sua conta. Nada de outras pessoas chega."
+    override val postStatus = "Postar"; override val postTitle = "Postar uma novidade"; override val writeStatus = "Escrever"
+    override val statusLabel = "Sua novidade"; override val posting = "Postando…"; override val postFailed = "Não foi postada."
+    override val deleteForAll = "Apagar para todos"; override val statusDeleted = "Novidade apagada"
+    override val nobodyToSee = "Ninguém em Contatos pode ver ainda."; override val statusVideoTooLong = "Vídeos nas novidades têm até 1 minuto."
+    override val forFamily = "a família"; override val postA11y = "Postar uma novidade"
+    override fun whoSees(names: String) = "Quem vê: $names"
+    override fun postingSwitch(kid: String) = "$kid pode postar novidades"
+    override fun postingBody(kid: String) = "As novidades de $kid saem da sua conta, com o nome de $kid, só para quem está em Contatos. Você as vê no seu WhatsApp, em Meu status, e pode apagar por lá."
     override val editContact = "Editar contato"; override val noPhotosHow = "As fotos, os vídeos e os GIFs da conversa aparecem aqui. Para mandar um, toque em Foto."
     override fun mediaFrom(what: String, who: String) = "$what de $who"
     override val newMessages = "Novas"; override val reactHint = "Segure uma mensagem para reagir ou ouvir."
@@ -643,6 +659,7 @@ object En : Strings {
         "Does $kid know I can see the messages?" to "Yes. The first time, Oiê tells $kid: “${noticeBody(parent)}”",
         "Who can talk to $kid?" to "Only the people in Contacts. Messages from anyone else don't appear on the tablet. In a group, everyone in it sees what $kid sends. In Contacts, tap someone to change the name $kid sees (Grandma, for example) or to remove them. The name changes only in Oiê, not in your WhatsApp.",
         "What is “I need you”?" to "A button on $kid's home screen that shows once you mark someone in Contacts (tap the person and turn on “Gets 'I need you'”). $kid confirms, and each marked person gets “I need you.” on WhatsApp, even in quiet hours. It can be sent once every 5 minutes. It's a way to call you, not an emergency service: in danger, call the emergency number.",
+        "Can $kid post updates?" to "If you turn it on in Settings and help › Updates. The update goes out from your account, with $kid's name, and only the people in Contacts see it (not groups, nor anyone paused). You see it in your WhatsApp, under My status, and can delete it there; $kid can delete it too. Videos are up to 1 minute.",
         "What are Updates?" to "They're the WhatsApp statuses of the people in Contacts. Turn them on in Settings and help › Updates. $kid sees the photos, videos and texts, and can react and reply (the reply goes to the chat with that person). When $kid sees one, the person sees you viewed it, because it's your account. Your own statuses don't show, nor anyone else's. Each update leaves the tablet after 24 hours.",
         "How do quiet hours work?" to "During a period, $kid can read and listen, but not send. Anyone with “Can talk in quiet hours” in Contacts still gets through. You can pause a period without deleting it, for example on holiday.",
         "Oiê got disconnected. What now?" to "Open Connection and tap Link WhatsApp. Messages $kid sent in the meantime are kept and go out afterwards.",
@@ -653,7 +670,7 @@ object En : Strings {
     )
     override fun aboutVersion(v: String) = "Oiê $v, a test version. It uses your real WhatsApp."
     override val notWhatsApp = "Oiê isn't made or approved by WhatsApp or Meta."
-    override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System. WhatsApp link built with whatsmeow, Mozilla Public License 2.0, source at github.com/tulir/whatsmeow. QR codes with ZXing, Apache License 2.0. Videos prepared with Media3, Apache License 2.0. Animated stickers with Lottie, Apache License 2.0."
+    override val credits = "Nunito font, SIL Open Font License 1.1. Icons from the Gabriel Design System. WhatsApp link built with whatsmeow, Mozilla Public License 2.0, source at github.com/tulir/whatsmeow; the one file Oiê modifies (broadcast.go) comes with every release at github.com/gabrielbr/oie-releases. QR codes with ZXing, Apache License 2.0. Videos prepared with Media3, Apache License 2.0. Animated stickers with Lottie, Apache License 2.0."
     override val theKid = "your child"
     override val notifChannel = "Messages from family"; override val notifVoice = "Sent a voice message"
     override val notifPhoto = "Sent a photo"; override val notifSticker = "Sent a sticker"
@@ -810,6 +827,14 @@ object En : Strings {
     override fun statusTooBig(parent: String) = "This update only opens in $parent's WhatsApp."
     override fun statusesSwitch(kid: String) = "See the family's updates"
     override fun statusesBody(kid: String) = "$kid sees the updates (status) of the people in Contacts and can react and reply. When $kid sees one, the person sees you viewed it, because it's your account. Nothing from anyone else comes through."
+    override val postStatus = "Post"; override val postTitle = "Post an update"; override val writeStatus = "Write"
+    override val statusLabel = "Your update"; override val posting = "Posting…"; override val postFailed = "It wasn't posted."
+    override val deleteForAll = "Delete for everyone"; override val statusDeleted = "Update deleted"
+    override val nobodyToSee = "Nobody in Contacts can see it yet."; override val statusVideoTooLong = "Videos in updates are up to 1 minute."
+    override val forFamily = "the family"; override val postA11y = "Post an update"
+    override fun whoSees(names: String) = "Who sees it: $names"
+    override fun postingSwitch(kid: String) = "$kid can post updates"
+    override fun postingBody(kid: String) = "$kid's updates go out from your account, with $kid's name, only to the people in Contacts. You see them in your WhatsApp, under My status, and can delete them there."
     override val editContact = "Edit contact"; override val noPhotosHow = "The chat's photos, videos and GIFs show here. To send one, tap Photo."
     override fun mediaFrom(what: String, who: String) = "$what from $who"
     override val newMessages = "New"; override val reactHint = "Hold a message to react or listen."

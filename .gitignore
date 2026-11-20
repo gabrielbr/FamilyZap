@@ -5,3 +5,6 @@ local.properties
 *.apk
 *.aab
 .idea/
+
+# whatsmeow with Oiê's patch, made by link/patch-whatsmeow.sh
+link/.whatsmeow/

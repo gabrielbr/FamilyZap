@@ -1,5 +1,6 @@
 package app.oie.data
 
+import androidx.compose.ui.graphics.toArgb
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -434,6 +435,46 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         bg {
             val r = runCatching { link?.markStatusViewed(status.poster, status.id, System.currentTimeMillis()) }
             r.exceptionOrNull()?.let { Diagnostics.log("status viewed: failed: ${it.message}") }
+        }
+    }
+
+    /**
+     * v0.37: the kid's status, to [Status.audience] only (the link refuses an empty list, so it can't reach the
+     * parent's whole status audience), signed with the kid's name, at a person's pace (L3). A text goes on the
+     * `selected` ground with `ink`, as the tablet shows it.
+     */
+    override fun postStatus(status: app.oie.logic.Status) {
+        ours += status.id
+        bg {
+            val wait = app.oie.logic.SendPace.waitMs(sentAt, System.currentTimeMillis())
+            if (wait > 0) Thread.sleep(wait)
+            val who = status.audience.joinToString(",")
+            val r = runCatching {
+                val l = link ?: error("not linked")
+                when (status.kind) {
+                    Kind.TEXT -> l.postStatusText(who, signed(status.text),
+                        app.oie.ui.theme.OTokens.Light.selected.toArgb().toLong() and 0xFFFFFFFFL,
+                        app.oie.ui.theme.OTokens.Light.ink.toArgb().toLong() and 0xFFFFFFFFL, status.id)
+                    Kind.PHOTO -> l.postStatusImage(who, status.media?.let { Photos.openBytes(context, it) } ?: error("photo missing"), signed(""), status.id)
+                    Kind.VIDEO -> {
+                        val bytes = status.media?.let { Photos.openBytes(context, it) } ?: error("video missing")
+                        val meta = VideoPrep.meta(bytes)
+                        l.postStatusVideo(who, bytes, status.durationSec.toLong(), meta.width.toLong(), meta.height.toLong(), meta.thumb, signed(""), status.id)
+                    }
+                    else -> error("not a status")
+                }
+            }
+            sentAt += System.currentTimeMillis()
+            Diagnostics.log("post status ${status.kind} to ${status.audience.size}: ${r.exceptionOrNull()?.let { "failed: ${it.message}" } ?: "ok"}")
+            main.post { state.statusPosted(status.id, r.isSuccess) }
+        }
+    }
+
+    /** v0.37: "Apagar para todos": the status taken back from the same people. */
+    override fun deleteStatus(status: app.oie.logic.Status) {
+        bg {
+            val r = runCatching { link?.deleteStatus(status.audience.joinToString(","), status.id) ?: error("not linked") }
+            Diagnostics.log("delete status: ${r.exceptionOrNull()?.let { "failed: ${it.message}" } ?: "ok"}")
         }
     }
 

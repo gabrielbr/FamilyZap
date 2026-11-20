@@ -22,6 +22,10 @@ interface WhatsAppLink {
     fun markStatusViewed(status: app.oie.logic.Status) {}
     /** The kid's reaction to a status, sent to the poster's own chat; an empty [emoji] takes it away. */
     fun reactToStatus(status: app.oie.logic.Status, emoji: String) {}
+    /** v0.37: the kid's status, to [Status.audience] only; the link answers with AppState.statusPosted. */
+    fun postStatus(status: app.oie.logic.Status) {}
+    /** v0.37: the kid's status taken back from the people it went to. */
+    fun deleteStatus(status: app.oie.logic.Status) {}
 }
 
 /** Sample family data for the v0.1 shell. Names are examples. */
@@ -47,4 +51,8 @@ class SampleLink : WhatsAppLink {
     val statusViews = mutableListOf<String>()
     override fun markStatusViewed(status: app.oie.logic.Status) { statusViews += status.id }
     override fun reactToStatus(status: app.oie.logic.Status, emoji: String) { reacted += status.id to emoji }
+    val posted = mutableListOf<app.oie.logic.Status>()
+    val deleted = mutableListOf<String>()
+    override fun postStatus(status: app.oie.logic.Status) { posted += status }
+    override fun deleteStatus(status: app.oie.logic.Status) { deleted += status.id }
 }

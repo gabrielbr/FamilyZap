@@ -723,7 +723,7 @@ internal fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: 
 
 /** Prototype screen 17: the photo big, then Trocar or Enviar. Back drops it. */
 @Composable
-private fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: () -> Unit, onBack: () -> Unit) {
+internal fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: () -> Unit, onBack: () -> Unit, action: String? = null) {
     val c = OieTheme.colors
     val tx = str
     val context = LocalContext.current
@@ -746,7 +746,7 @@ private fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: (
             )
             // Fresh review: the main button first, as on every other screen.
             Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
-                PrimaryButton(tx.send, onSend, icon = R.drawable.gg_ic_send)
+                PrimaryButton(action ?: tx.send, onSend, icon = R.drawable.gg_ic_send)
                 QuietButton(tx.swap, onSwap)
             }
         }

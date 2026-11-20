@@ -39,7 +39,9 @@ object Codec {
             JSONObject().put("id", it.id).put("contact", it.contactId).put("poster", it.poster).put("at", it.at).put("kind", it.kind.name)
                 .put("text", it.text).put("media", it.media ?: JSONObject.NULL).put("size", it.size).put("dur", it.durationSec)
                 .put("viewed", it.viewed).put("reaction", it.reaction)
+                .put("audience", JSONArray(it.audience)).put("posting", it.posting).put("failed", it.failed)
         }))
+        put("postingOn", s.postingOn)
         put("nudgeOn", s.nudgeOn).put("nudgeDismissed", JSONObject(s.nudgeDismissed.toMap())).put("needYouAt", s.needYouAt)
         put("pinHash", s.pinHash ?: JSONObject.NULL)
         put("kidNoticeSeen", s.kidNoticeSeen)
@@ -83,13 +85,17 @@ object Codec {
         s.bubbleOn = o.optBoolean("bubbleOn")
         s.nudgeOn = o.optBoolean("nudgeOn")
         s.statusesOn = o.optBoolean("statusesOn")
+        s.postingOn = o.optBoolean("postingOn")
         s.linkedSince = o.optLong("linkedSince")
         s.statuses.clear()
         o.optJSONArray("statuses")?.let { a ->
             for (i in 0 until a.length()) a.getJSONObject(i).run {
                 s.statuses += app.oie.logic.Status(getString("id"), getString("contact"), optString("poster"), getLong("at"),
                     runCatching { Kind.valueOf(getString("kind")) }.getOrDefault(Kind.UNSUPPORTED), optString("text"),
-                    if (isNull("media")) null else getString("media"), optLong("size"), optInt("dur"), optBoolean("viewed"), optString("reaction"))
+                    if (isNull("media")) null else getString("media"), optLong("size"), optInt("dur"), optBoolean("viewed"), optString("reaction"),
+                    optJSONArray("audience")?.let { l -> List(l.length()) { k -> l.getString(k) } } ?: emptyList(),
+                    // A post the app was closed in the middle of is shown as not posted, with Tentar de novo.
+                    posting = false, failed = optBoolean("failed") || optBoolean("posting"))
             }
         }
         s.pinResetFrom = o.optString("pinResetFrom")

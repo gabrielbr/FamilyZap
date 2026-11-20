@@ -14,5 +14,5 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: link/go.mod
-      - run: go vet ./... && go test ./...
+      - run: ./patch-whatsmeow.sh && go vet ./... && go test ./...
         working-directory: link
