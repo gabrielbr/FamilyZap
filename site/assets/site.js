@@ -11,7 +11,7 @@
         grandma: { name: "Vó Rosa", init: "Vó", the: "a Vó Rosa", of: "da Vó Rosa", cap: "no WhatsApp dela", msg: "Oi vó, tô com saudade", reply: "Também, meu amor. Domingo tem bolo." },
         grandpa: { name: "Vô Zé", init: "Vô", the: "o Vô Zé", of: "do Vô Zé", cap: "no WhatsApp dele", msg: "Oi vô, me ensina a pescar?", reply: "Ensino sim. Domingo bem cedo." },
         aunt: { name: "Tia Bia", init: "T", the: "a Tia Bia", of: "da Tia Bia", cap: "no WhatsApp dela", msg: "Tia, vem no meu aniversário?", reply: "Vou sim, e levo o bolo." },
-        friend: { name: "Lucas", init: "L", the: "o Lucas", of: "do Lucas", cap: "amigo da escola", msg: "Bora jogar depois da aula?", reply: "Bora. Te espero na quadra." },
+        friend: { name: "Lucas", init: "L", the: "o Lucas", of: "do Lucas", cap: "da escola", msg: "Bora jogar depois da aula?", reply: "Bora. Te espero na quadra." },
       },
       story: {
         s1h: "{Kid} quer falar com {rThe}.",
@@ -36,7 +36,7 @@
         grandma: { name: "Grandma Rosa", init: "GR", the: "Grandma Rosa", of: "Grandma Rosa’s", cap: "in her WhatsApp", msg: "Hi Grandma, I miss you", reply: "Me too, sweetheart. There’s cake on Sunday." },
         grandpa: { name: "Grandpa Zé", init: "GZ", the: "Grandpa Zé", of: "Grandpa Zé’s", cap: "in his WhatsApp", msg: "Grandpa, will you teach me to fish?", reply: "I will. Sunday, bright and early." },
         aunt: { name: "Aunt Bia", init: "B", the: "Aunt Bia", of: "Aunt Bia’s", cap: "in her WhatsApp", msg: "Will you come to my birthday?", reply: "I will, and I’ll bring the cake." },
-        friend: { name: "Lucas", init: "L", the: "Lucas", of: "Lucas’s", cap: "a school friend", msg: "Want to play after school?", reply: "Sure. See you at the court." },
+        friend: { name: "Lucas", init: "L", the: "Lucas", of: "Lucas’s", cap: "from school", msg: "Want to play after school?", reply: "Sure. See you at the court." },
       },
       story: {
         s1h: "{Kid} wants to talk to {rThe}.",
@@ -64,7 +64,7 @@
     cta: "Download Oiê", ctaNote: "For Android tablets, version 8 or newer.", ctaHow: "How to install",
     familyTitle: "Build your family and see how it works", lgKid: "Who writes", kidSon: "Son", kidDaughter: "Daughter",
     lgParent: "Whose WhatsApp", parMother: "Mom", parFather: "Dad",
-    lgRecv: "To whom", rcvGrandma: "Grandma Rosa", rcvGrandpa: "Grandpa Zé", rcvAunt: "Aunt Bia", rcvFriend: "Lucas, a friend", familyGo: "See the story",
+    lgRecv: "To whom", rcvGrandma: "Grandma Rosa", rcvGrandpa: "Grandpa Zé", rcvAunt: "Aunt Bia", rcvFriend: "Lucas, from school", familyGo: "See the story",
     storyA11y: "How it works", example: "Example", sent: "Sent", parentArea: "Contacts", waField: "Message", typing: "typing…",
     capKid: "on the tablet, with Oiê", capParent: "your WhatsApp, the bridge",
     auntName: "Aunt Bia", friendName: "Lucas, from school",

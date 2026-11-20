@@ -144,3 +144,15 @@
 | The v1 kid-side, controls and family sections | 2 | Merged into steps 1, 3 and 6 |
 | A play/pause control | 1 | Not needed: scrolling drives the story; only step 5's cycle and the typing move, and both stop under reduced motion |
 | A picker for every family member | 4 | Only three choices; the fourth person (the receiver) cycles in step 5 |
+
+### Verdict pass (v2)
+- **Resolved:** 7 of the 8 fixes.
+- **Partial: the picker transition.**
+  - **Re-checked:** recaptured after the transition ends, the picker and the stage agree (`v2-d-dad-friend-0`).
+  - **Cause:** the "picker shows Vô Zé while the stage shows Lucas" mismatch was the capture landing mid-transition, not a desync.
+- **Fixed after the verdict pass:**
+  - Lucas has one label, "Lucas, da escola", in the chip, step 5 and the stage;
+  - the four "Para quem" chips sit two by two, so none wraps alone.
+
+  These two were checked by me, not re-scored by the reviewer (the round budget was spent).
+- **Result:** no open P0, P1 or P2.

@@ -85,6 +85,10 @@ img, svg { display: block; }
 .family fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s2); }
 .family legend { width: 100%; padding: 0; margin-bottom: var(--s2); font-size: 0.875rem; font-weight: 700; color: var(--gds-muted); }
 .family label { position: relative; }
+/* Four people to write to: two by two, so none sits alone on a line. */
+.family fieldset:last-of-type { display: grid; grid-template-columns: repeat(2, max-content); }
+.family fieldset:last-of-type legend { grid-column: 1 / -1; }
+.family fieldset:last-of-type label span { width: 100%; }
 .family input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
 .family label span {
   display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s4); border-radius: var(--r-pill);
