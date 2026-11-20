@@ -30,6 +30,7 @@ import (
 
 	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/appstate"
+	"go.mau.fi/whatsmeow/proto/waCommon"
 	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
@@ -713,6 +714,32 @@ func (k *Link) OwnChat() string {
 		return own.ToNonAD().String()
 	}
 	return ""
+}
+
+// UnreadPatch is WhatsApp's own "mark as unread" for a chat, up to the message just sent from this
+// account (v0.35). Kept separate from MarkUnread so it can be tested without a connection.
+func UnreadPatch(chat types.JID, lastID string, at time.Time) appstate.PatchInfo {
+	key := &waCommon.MessageKey{RemoteJID: proto.String(chat.String()), FromMe: proto.Bool(true), ID: proto.String(lastID)}
+	return appstate.BuildMarkChatAsRead(chat, false, at, key)
+}
+
+// MarkUnread marks the line to the parent unread on all of the account's devices (v0.35): WhatsApp never
+// notifies an account of its own messages, so the chat gets the unread dot and moves to the top instead.
+// Only the parent line may be marked (the app passes it; anything else is refused), and nothing is sent to
+// anyone: it's an app-state change, like "Marcar como não lida" on WhatsApp Web.
+func (k *Link) MarkUnread(chat, lastID string, atMillis int64) (err error) {
+	defer k.guard("MarkUnread", &err)
+	k.mu.Lock()
+	line := k.parentLine
+	k.mu.Unlock()
+	if line == "" || chat != line {
+		return errors.New("only the line to the parent is marked unread")
+	}
+	jid, err := types.ParseJID(chat)
+	if err != nil {
+		return err
+	}
+	return k.c.SendAppState(context.Background(), UnreadPatch(jid, lastID, time.UnixMilli(atMillis)))
 }
 
 // OwnName is the WhatsApp profile name of the linked account (v0.34): setup fills in the parent's

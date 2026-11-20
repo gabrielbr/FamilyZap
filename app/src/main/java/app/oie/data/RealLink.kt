@@ -83,7 +83,16 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         sentAt += System.currentTimeMillis()
         Diagnostics.log("send ${m.kind}${if (retried) " (retry)" else ""}: ${err?.let { "failed: ${it.message}" } ?: "ok"}")
         while (sentAt.size > app.oie.logic.SendPace.MAX_IN_WINDOW * 2) sentAt.removeAt(0)
-        if (err == null) { main.post { state.failed.remove(m.id); state.heard(listOf(m.id), app.oie.logic.Receipt.SENT) }; return }
+        if (err == null) {
+            main.post { state.failed.remove(m.id); state.heard(listOf(m.id), app.oie.logic.Receipt.SENT) }
+            // v0.35: on the line to the parent, the chat marks itself unread on the parent's phone (WhatsApp never
+            // notifies an account of its own messages). Nothing is sent to anyone; a failure doesn't touch the message.
+            if (state.allowed.any { it.parentLine && it.id == m.chatId }) {
+                val r = runCatching { l?.markUnread(m.chatId, m.id, System.currentTimeMillis()) }
+                Diagnostics.log("parent line: marked unread ${r.exceptionOrNull()?.let { "failed: ${it.message}" } ?: "ok"}")
+            }
+            return
+        }
         val wasDown = !connected || l == null
         if (!retried && wasDown) retryOnConnect += m else main.post { if (m.id !in state.failed) state.failed += m.id }
     }

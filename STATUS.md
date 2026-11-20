@@ -74,6 +74,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Update sheet only in the parent area (owner, 2026-11-18); recorded as divergence D-14 in the design system.
 - [ ] A native English reader check of `Strings.kt`.
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
+- [x] v0.35: the line to the parent marks itself unread after each message from the kid (2026-11-20). Open: the owner checks the unread dot on the phone.
 - [x] v0.34: full design pass (all screens, four skills + anti-slop, four review rounds to max); forgot-PIN made safe (2026-11-20). Open: the owner confirms decision 0012 (wordmark size in the bar).
 - [x] v0.33: ten family features: receipts, reactions, read aloud, listen before sending, drawing, stickers from photos, photos per person, birthdays, "Preciso de você", the gentle nudge (2026-11-20). Open: the owner's device test of receipts and reactions on real WhatsApp.
 - [x] v0.32: voice messages re-packed into standard Ogg Opus before sending, so WhatsApp plays them (2026-11-20). Open: the owner's device test.
