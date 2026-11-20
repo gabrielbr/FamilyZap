@@ -24,12 +24,15 @@ class LinkViewTest {
 
     /** v0.34: a dropped internet doesn't send the kid to the parent; a link only the parent can fix does. */
     @org.junit.Test fun onlyALinkThatNeedsTheParentAsksForThem() {
-        org.junit.Assert.assertFalse(LinkView.needsParent(real = true, wanted = true, status = "Disconnected"))
-        org.junit.Assert.assertFalse(LinkView.needsParent(real = true, wanted = true, status = "Connecting"))
-        org.junit.Assert.assertTrue(LinkView.needsParent(real = true, wanted = true, status = "LoggedOut"))
-        org.junit.Assert.assertTrue(LinkView.needsParent(real = true, wanted = true, status = "Banned(hours=3)"))
-        org.junit.Assert.assertTrue(LinkView.needsParent(real = true, wanted = true, status = "Qr(code=x)"))
-        org.junit.Assert.assertTrue(LinkView.needsParent(real = true, wanted = false, status = "Off"))
-        org.junit.Assert.assertTrue(LinkView.needsParent(real = false, wanted = false, status = "Off"))
+        val ls = app.oie.data.LinkState().apply { on = true }
+        fun with(s: app.oie.data.LinkState.Status) = ls.apply { status = s }.needsParent(real = true)
+        org.junit.Assert.assertFalse(with(app.oie.data.LinkState.Status.Disconnected))
+        org.junit.Assert.assertFalse(with(app.oie.data.LinkState.Status.Connecting))
+        org.junit.Assert.assertTrue(with(app.oie.data.LinkState.Status.LoggedOut))
+        org.junit.Assert.assertTrue(with(app.oie.data.LinkState.Status.Banned(3)))
+        org.junit.Assert.assertTrue(with(app.oie.data.LinkState.Status.Qr("x")))
+        org.junit.Assert.assertTrue(with(app.oie.data.LinkState.Status.Unavailable))
+        org.junit.Assert.assertTrue(app.oie.data.LinkState().needsParent(real = true)) // not linked
+        org.junit.Assert.assertTrue(ls.needsParent(real = false))
     }
 }

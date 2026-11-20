@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.error
 import androidx.compose.foundation.selection.toggleable
@@ -133,10 +134,12 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
 
 @Composable
 fun Wordmark() {
+    val mark = painterResource(R.drawable.oie_wordmark)
     androidx.compose.foundation.Image(
-        painterResource(R.drawable.oie_wordmark), contentDescription = "Oiê",
-        // v0.34 audit: the trimmed mark at 48dp tall is about 64dp wide, the logo's minimum, inside the 56dp bar.
-        modifier = Modifier.height(OTokens.Spacing.space12),
+        mark, contentDescription = "Oiê",
+        // v0.34 audit: the trimmed mark, 40dp tall and about 52dp wide (about 104 physical px on the tablet, above the
+        // logo's "64 px wide on screen"), with the i's dot of clear space in the 56dp bar (decision 0012).
+        modifier = Modifier.height(OTokens.Spacing.space10).aspectRatio(mark.intrinsicSize.width / mark.intrinsicSize.height),
     )
 }
 
@@ -295,7 +298,7 @@ private fun ContactsStep(state: AppState, next: () -> Unit, back: () -> Unit) {
                     if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted) else app.oie.ui.parent.ContactLines(ct, fresh)
                     // v0.19: a picked contact can get the name the kid will see. Its own target (the row picks), under
                     // the lines so a phone keeps the width for the name (v0.19 audit).
-                    if (on && ct.id == lastPicked) TextLink(tx.changeName, { editing = ct.id }, Modifier.semantics { contentDescription = tx.changeNameA11y(ct.name) })
+                    if (on && ct.id == (lastPicked ?: picked.firstOrNull())) TextLink(tx.changeName, { editing = ct.id }, Modifier.semantics { contentDescription = tx.changeNameA11y(ct.name) })
                 }
                 if (on) OIcon(R.drawable.gg_ic_check, contentDescription = tx.chosen)
             }

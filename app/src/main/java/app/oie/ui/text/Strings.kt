@@ -226,7 +226,7 @@ interface Strings {
     fun and(names: List<String>): String
     val editContact: String
     val forgotTitle: String; val forgotShowCode: String
-    val ok: String; val bubbleWaiting: String; val you: String; val why: String; val drawUse: String
+    val ok: String; val arriving: String; val you: String; val why: String; val drawUse: String
     fun recordingEnds(seconds: Int): String
     val linkPreparing: String; val linkSlow: String; val whatCanHappen: String; val offlineHome: String
     val newMessages: String; val reactHint: String; val releaseToCancel: String; val holdToRecord: String
@@ -503,7 +503,7 @@ object Pt : Strings {
     override val offlineHome = "Sem internet agora. Suas mensagens vão quando ela voltar."
     override val you = "Você"; override val why = "Por quê?"; override val drawUse = "Usar desenho"
     override fun recordingEnds(seconds: Int) = "Termina em $seconds s"
-    override val ok = "OK"; override val bubbleWaiting = "Ligada. Falta o Android permitir (veja abaixo)."
+    override val ok = "OK"; override val arriving = "Chegando…"
     override val welcomeTitle = "A família ao alcance."
     override val sectionQuietShort = "Silêncio"; override val sectionHelpShort = "Ajustes"; override val expanded = "Aberto"; override val collapsed = "Fechado"
     override val reportCleared = "Relatório apagado."
@@ -783,7 +783,7 @@ object En : Strings {
     override val offlineHome = "No internet right now. Your messages go when it's back."
     override val you = "You"; override val why = "Why?"; override val drawUse = "Use drawing"
     override fun recordingEnds(seconds: Int) = "Ends in $seconds s"
-    override val ok = "OK"; override val bubbleWaiting = "On. Android still has to allow it (see below)."
+    override val ok = "OK"; override val arriving = "On its way…"
     override val welcomeTitle = "Family, within reach."
     override val sectionQuietShort = "Quiet"; override val sectionHelpShort = "Settings"; override val expanded = "Open"; override val collapsed = "Closed"
     override val reportCleared = "Report deleted."

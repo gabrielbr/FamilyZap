@@ -236,7 +236,10 @@ fun GifBubble(media: String?, onWatch: () -> Unit) {
         Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.line)
             .clickable(role = Role.Button, onClick = onWatch).semantics(mergeDescendants = true) { contentDescription = tx.notifGif },
     ) {
-        if (bytes == null) Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f))
+        // Round 3: while it arrives, the placeholder says so (as a video does).
+        if (bytes == null) Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f), contentAlignment = Alignment.Center) {
+            Text(tx.arriving, style = OieType.body, color = c.muted)
+        }
         else if (animate) VideoSurface(bytes, loop = true, muted = true, play = true, modifier = Modifier.fillMaxWidth())
         else rememberFirstFrame(bytes)?.let { Image(it.asImageBitmap(), contentDescription = null, modifier = Modifier.fillMaxWidth(), contentScale = ContentScale.FillWidth) }
             ?: Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f))

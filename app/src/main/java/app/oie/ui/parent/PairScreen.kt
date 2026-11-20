@@ -63,8 +63,18 @@ fun Pairing(state: AppState, back: (() -> Unit)? = null, onLinked: () -> Unit) {
     val backButton: @Composable () -> Unit = { if (back != null) QuietButton(tx.back, back) }
     when (s) {
         is LinkState.Status.Qr -> {
-            tx.linkSteps.forEachIndexed { i, step -> Text("${i + 1}. $step", style = OieType.body, color = c.ink) }
-            Qr(s.code, tx.linkQrA11y)
+            // Round 3: the steps are one group (close together); on the tablet they sit beside the code, so the
+            // code and Voltar stay above the fold.
+            val steps: @Composable () -> Unit = {
+                Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                    tx.linkSteps.forEachIndexed { i, step -> Text("${i + 1}. $step", style = OieType.body, color = c.ink) }
+                }
+            }
+            if (app.oie.ui.common.isCompact) { steps(); Qr(s.code, tx.linkQrA11y) }
+            else androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
+                Box(Modifier.weight(1f)) { steps() }
+                Box(Modifier.weight(1f)) { Qr(s.code, tx.linkQrA11y) }
+            }
             backButton()
         }
         LinkState.Status.Connecting -> {

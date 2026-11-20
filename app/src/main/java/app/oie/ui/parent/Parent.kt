@@ -112,6 +112,8 @@ fun ParentArea(state: AppState, section: Int) {
     val latest by androidx.compose.runtime.rememberUpdatedState(undo)
     androidx.compose.runtime.DisposableEffect(Unit) { onDispose { latest?.commit?.invoke() } }
     val offerUndo: Undo = { text, restore, commit -> undo?.commit?.invoke(); undo = Offer(text, restore, commit) }
+    // Round 3: the report's "deleted" state lives here, so switching sections during the undo can't bring it back.
+    val report = remember { ReportView() }
     Box(Modifier.fillMaxSize()) {
     // v0.34 audit: any touch anywhere in the area (scrolling too) keeps it open; typing counts through touched().
     Column(Modifier.fillMaxSize().pointerInput(Unit) {
@@ -127,7 +129,7 @@ fun ParentArea(state: AppState, section: Int) {
                 0 -> Contacts(state, touched, offerUndo)
                 1 -> QuietSection(state, touched, offerUndo)
                 2 -> Connection(state)
-                else -> AboutAndHelp(state, touched, offerUndo)
+                else -> AboutAndHelp(state, touched, offerUndo, report)
             }
         }
         val compact = app.oie.ui.common.isCompact
@@ -177,6 +179,12 @@ fun ParentArea(state: AppState, section: Int) {
         app.oie.ui.common.Snackbar(u.text, Modifier.align(Alignment.BottomCenter), action = tx.undo) { u.restore(); undo = null }
     }
     }
+}
+
+/** The problem report as the parent area shows it: hidden while its delete can still be undone, and re-read after. */
+private class ReportView {
+    var hidden by mutableStateOf(false)
+    var version by mutableStateOf(0)
 }
 
 /** How long an undo stays offered. */
@@ -349,14 +357,14 @@ private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: Undo) 
 
 /** Ajustes e ajuda (was Ajuda e sobre): the names (v0.9), short answers to the questions the flows raise, the risk said again, version and licences. */
 @Composable
-private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: Undo) {
+private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: Undo, report: ReportView) {
     val c = OieTheme.colors
     val tx = str
     var open by remember { mutableStateOf<Int?>(null) }
     val help = tx.helpItems(state.kidName.ifBlank { tx.theKid }, state.parentName)
     // v0.14: after Oiê closed by itself, the report leads the section (it's what the parent needs now); otherwise it sits at the end.
     val crashed = remember { app.oie.data.Diagnostics.lastCrashAt() != null }
-    if (crashed) Problems(first = true, offerUndo)
+    if (crashed) Problems(first = true, offerUndo, report)
     // v0.9: the names from setup can be fixed here. A blank field keeps the last name, so nothing is ever left nameless.
     Text(tx.names, style = OieType.title, color = c.ink, modifier = if (crashed) Modifier.padding(top = OTokens.Spacing.space6) else Modifier)
     var parent by remember { mutableStateOf(state.parentName) }
@@ -387,7 +395,7 @@ private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: Undo) 
             if (open == i) Text(a, style = OieType.body, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space2))
         }
     }
-    if (!crashed) Problems(first = false, offerUndo)
+    if (!crashed) Problems(first = false, offerUndo, report)
     Text(tx.about, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     // v0.34 audit round 2: the version once (the update rows carry it when there's an updater).
     val updater = app.oie.LocalUpdater.current
@@ -439,19 +447,19 @@ private fun Connection(state: AppState) {
 
 /** Problemas (docs/flows/problem-report.md, v0.14): when Oiê last closed by itself, and the report to copy. */
 @Composable
-private fun Problems(first: Boolean, offerUndo: Undo) {
+private fun Problems(first: Boolean, offerUndo: Undo, report: ReportView) {
     val c = OieTheme.colors
     val tx = str
     val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
-    var version by remember { mutableStateOf(0) } // re-reads after Apagar
+
     var copied by remember { mutableStateOf(false) }
     LaunchedEffect(copied) { if (copied) { delay(2_000); copied = false } }
-    val crashAt = remember(version) { app.oie.data.Diagnostics.lastCrashAt() }
-    var hidden by remember { mutableStateOf(false) }
-    val empty = remember(version, hidden) { app.oie.data.Diagnostics.isEmpty() } || hidden
+    val crashAt = remember(report.version) { app.oie.data.Diagnostics.lastCrashAt() }
+    val hidden = report.hidden
+    val empty = remember(report.version, hidden) { app.oie.data.Diagnostics.isEmpty() } || hidden
     Text(tx.problems, style = OieType.title, color = c.ink, modifier = if (first) Modifier else Modifier.padding(top = OTokens.Spacing.space6))
     when {
-        crashAt != null -> {
+        crashAt != null && !hidden -> {
             val t = java.time.Instant.ofEpochMilli(crashAt).atZone(java.time.ZoneId.systemDefault())
             Text(tx.closedByItself(t.dayOfMonth, t.monthValue, tx.clock(t.hour, t.minute)), style = OieType.body, color = c.ink)
         }
@@ -472,8 +480,8 @@ private fun Problems(first: Boolean, offerUndo: Undo) {
             })
             // v0.34 audit: the report is hidden at once and deleted only once the undo is gone.
             TextLink(tx.clearReport, {
-                hidden = true
-                offerUndo(tx.reportCleared, { hidden = false }, { app.oie.data.Diagnostics.clear() })
+                report.hidden = true
+                offerUndo(tx.reportCleared, { report.hidden = false }, { app.oie.data.Diagnostics.clear(); report.hidden = false; report.version++ })
             })
         }
         Text(tx.reportPrivacy, style = OieType.caption, color = c.muted)

@@ -66,7 +66,10 @@ fun ForgotPin(state: AppState, stage: Int) {
                 app.oie.ui.common.TextLink(tx.whatCanHappen, { why = !why })
                 if (why) Text(tx.riskBody, style = OieType.body, color = c.ink)
                 val stale = status == app.oie.data.LinkState.Status.Connected && !sawQr
-                if (state.pinResetFrom.isEmpty() || stale) {
+                // Round 3: while the tablet is getting ready (after the tap), the wait shows, not the button again.
+                if (state.pinResetFrom.isEmpty() && status == app.oie.data.LinkState.Status.Connecting) {
+                    Text(tx.linkPreparing, style = OieType.body, color = c.ink)
+                } else if (state.pinResetFrom.isEmpty() || stale) {
                     if (state.linkState.pairFailed) Text(tx.linkFailed, style = OieType.body, color = c.coralText)
                     app.oie.ui.setup.ButtonRow {
                         PrimaryButton(tx.forgotShowCode, { sawQr = false; real?.relinkForPin() })
@@ -78,6 +81,8 @@ fun ForgotPin(state: AppState, stage: Int) {
                         val before = state.pinResetFrom
                         real?.ownChat { now ->
                             if (now.isNotEmpty() && now == before) state.route = Route.ForgotPin(1)
+                            // Round 3: not knowing which WhatsApp linked is a failed try, never "another account".
+                            else if (now.isEmpty()) state.linkState.pairFailed = true
                             else {
                                 // Another WhatsApp: its owner sets Oiê up from the start; nothing of the old account stays.
                                 state.pinResetFrom = ""

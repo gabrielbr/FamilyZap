@@ -336,4 +336,17 @@ class ScreensTest {
         t = now
         shot("57-kid-home-offline", false) { KidHome(s) }
     }
+    // v0.34 round 3: recording, its last 10 s, the slip line, and a long chat that opens on "Novas".
+    @Test fun recording() = shot("58-recording", false) { Conversation(family(), "vovo", recordingPreviewSec = 5) }
+    @Test fun recordingEnds() = shot("58-recording-ends", true) { Conversation(family(), "vovo", recordingPreviewSec = 115) }
+    @Test fun recordingSlip() = shot("58-recording-slip", false) { Conversation(family(), "vovo", slipPreview = true) }
+    @Test fun longChatOpensOnNew() = shot("59-long-chat-new", false) {
+        val s = ready().apply {
+            kidNoticeSeen = true
+            messages.removeAll { it.chatId == "mae" }
+            repeat(30) { k -> messages += Message("m$k", "mae", k % 3 == 0, now - (60 - k) * 60_000L, Kind.TEXT, "Mensagem ${k + 1}") }
+            lastSeen["mae"] = now - (60 - 24) * 60_000L - 1
+        }
+        Conversation(s, "mae")
+    }
 }

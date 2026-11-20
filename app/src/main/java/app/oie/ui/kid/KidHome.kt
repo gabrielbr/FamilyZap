@@ -66,7 +66,7 @@ fun KidHome(state: AppState) {
             // v0.34 audit: both can be true at once (the link down in quiet hours), and both are said.
             // v0.34 audit round 2: a dropped internet says so (it comes back by itself); only a link that needs
             // the parent (logged out, banned, never linked) asks for them.
-            if (link == app.oie.logic.LinkView.Shown.DOWN) Banner(R.drawable.gg_ic_link, if (app.oie.logic.LinkView.needsParent(state.realMode, state.linkState.on, state.linkState.status.toString())) tx.linkDropped(state.parentName) else tx.offlineHome)
+            if (link == app.oie.logic.LinkView.Shown.DOWN) Banner(R.drawable.gg_ic_link, if (state.linkState.needsParent(state.realMode)) tx.linkDropped(state.parentName) else tx.offlineHome)
             if (quiet != null) Banner(R.drawable.gg_ic_clock, tx.quietUntil(quiet.end.hour))
             // v0.34 audit (P0): the home scrolls, so every person is reachable on a phone and at large text.
             Column(
@@ -91,7 +91,7 @@ fun KidHome(state: AppState) {
                     // the greeting's edge. Rows sit close on a phone, so the next row peeks above the fold.
                     val compact = app.oie.ui.common.isCompact
                     // Two people with the same first letter ("Vovó", "Vovô") get two letters each, so they differ at a glance.
-                    val firsts = state.reachable.groupingBy { it.name.take(1).uppercase() }.eachCount()
+                    val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
                     androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
                     val tileW = if (compact) (maxWidth - OTokens.Spacing.space4) / 2 else OTokens.Size.contactTile + OTokens.Spacing.space8
                     FlowRow(
@@ -111,7 +111,7 @@ fun KidHome(state: AppState) {
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
                             ) {
-                                app.oie.ui.common.Avatar(ct, OTokens.Size.contactTile, letters = if ((firsts[ct.name.take(1).uppercase()] ?: 0) > 1) ct.name.take(2) else null)
+                                app.oie.ui.common.Avatar(ct, OTokens.Size.contactTile, letters = letters[ct.name])
                                 Text(ct.name, style = OieType.label, color = c.ink)
                                 if (unread > 0) Text(
                                     tx.newCount(unread), style = OieType.caption, color = c.page,

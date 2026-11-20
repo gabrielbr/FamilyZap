@@ -175,4 +175,5 @@ class PhoneScreensTest {
     @Test fun forgotPin() = shot("p42-forgot-pin", bigText = true) { app.oie.ui.parent.ForgotPin(ready().apply { realMode = true }, 0) }
     @Test fun linkQr() = shot("p43-link-qr", bigText = true) { app.oie.ui.setup.Setup(AppState(clock = { now }).apply { linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Qr("2@sample-code-for-the-screenshot,abc,def,ghi") }, 2, onClose = {}) }
     @Test fun setupPin() = shot("p44-setup-pin", bigText = true) { app.oie.ui.setup.Setup(AppState(), 4, onClose = {}) }
+    @Test fun recording() = shot("p45-recording", bigText = true) { Conversation(family(), "vovo", recordingPreviewSec = 115) }
 }

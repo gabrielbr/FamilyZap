@@ -51,7 +51,7 @@ fun PinPad(entered: String, onChange: (String) -> Unit) {
                     when (k) {
                         ' ' -> Spacer(Modifier.size(OTokens.Size.record))
                         // v0.34 audit round 2: the word, not the Back arrow (the same arrow sat in the bar on this screen).
-                        '<' -> Key(onClick = { onChange(entered.dropLast(1)) }, label = tx.erase) { Text(tx.erase, style = OieType.label, color = c.ink) }
+                        '<' -> Key(onClick = { onChange(entered.dropLast(1)) }, label = tx.erase) { Text(tx.erase, style = OieType.caption, color = c.ink, maxLines = 1) }
                         else -> Key(onClick = { if (entered.length < Pin.LENGTH) onChange(entered + k) }, label = k.toString()) {
                             Text(k.toString(), style = OieType.title, color = c.ink)
                         }

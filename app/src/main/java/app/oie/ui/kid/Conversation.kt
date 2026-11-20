@@ -99,7 +99,10 @@ val STICKERS = linkedMapOf(
 // v0.31: receiving GIFs and stickers from the keyboard uses Compose's content receiver, still marked experimental.
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
-fun Conversation(state: AppState, contactId: String, openStickers: Boolean = false, inBubble: Boolean = false, onLeave: (() -> Unit)? = null, pendingPreview: Message? = null) {
+fun Conversation(
+    state: AppState, contactId: String, openStickers: Boolean = false, inBubble: Boolean = false, onLeave: (() -> Unit)? = null,
+    pendingPreview: Message? = null, recordingPreviewSec: Int = -1, slipPreview: Boolean = false,
+) {
     val c = OieTheme.colors
     val tx = str
     // v0.21: paused or removed while open (a command from the parent's WhatsApp): back to the home screen.
@@ -117,7 +120,8 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
     // pendingPreview: the screenshot tests show the undo bar (v0.33: with Ouvir for a voice message).
     var pending by remember { mutableStateOf(pendingPreview) }
     var stickers by remember { mutableStateOf(openStickers) }
-    var recordingSince by remember { mutableLongStateOf(0L) }
+    // The *Preview parameters let the screenshot tests show the recording and slip states.
+    var recordingSince by remember { mutableLongStateOf(if (recordingPreviewSec >= 0) state.clock() - recordingPreviewSec * 1000L else 0L) }
     /** The kid slid off the record button: releasing now cancels (v0.34). */
     var away by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -231,7 +235,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
     val seenAtOpen = remember(contactId) { state.lastSeen[contactId] ?: 0L }
     val firstUnread = remember(contactId, visible.size) { visible.indexOfFirst { !it.fromKid && it.at > seenAtOpen } }
     LaunchedEffect(contactId, visible.size) { state.lastSeen[contactId] = state.clock() }
-    var slip by remember { mutableStateOf(false) }
+    var slip by remember { mutableStateOf(slipPreview) }
     LaunchedEffect(slip) { if (slip) { delay(NOTE_MS); slip = false } }
     LaunchedEffect(micError, photoError) { if (micError || photoError) { delay(NOTE_MS); micError = false; photoError = false } }
 
@@ -281,9 +285,14 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                 if (last >= 0 && pending != null) list.scrollToItem(last) else if (last >= 0 && nearEnd) list.animateScrollToItem(last)
             }
             // v0.34 audit round 2: while the kid is at the end, the end stays in view as pictures arrive and grow.
-            var atEnd by remember { mutableStateOf(true) }
+            // Round 3: a chat that opened on "Novas" keeps its place; only the kid's own drag decides whether to follow the end.
+            var atEnd by remember { mutableStateOf(firstUnread < 0) }
             LaunchedEffect(list) {
-                androidx.compose.runtime.snapshotFlow { list.isScrollInProgress }.collect { scrolling -> if (!scrolling) atEnd = !list.canScrollForward }
+                list.interactionSource.interactions.collect { i ->
+                    if (i is androidx.compose.foundation.interaction.DragInteraction.Stop || i is androidx.compose.foundation.interaction.DragInteraction.Cancel) {
+                        kotlinx.coroutines.delay(MOTION_SETTLE_MS); atEnd = !list.canScrollForward
+                    }
+                }
             }
             LaunchedEffect(list) {
                 androidx.compose.runtime.snapshotFlow { list.canScrollForward }.collect { more ->
@@ -352,7 +361,8 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                     // The last 10 seconds count down, in the error colour (with the word, never colour alone).
                     Text(if (left <= 10) tx.recordingEnds(left.coerceAtLeast(0)) else tx.recording + " · " + clockOf(((now - recordingSince) / 1000).toInt().coerceAtLeast(0)),
                         style = OieType.label, color = if (left <= 10) c.coralText else c.ink, modifier = Modifier.weight(1f))
-                    Text(if (away) tx.releaseToCancel else tx.releaseToSend, style = OieType.bodySmall, color = if (away) c.coralText else c.muted)
+                    // Round 3: on a phone the hint shows only when it matters (slid off), so the clock and Cancelar fit.
+                    if (away || !app.oie.ui.common.isCompact) Text(if (away) tx.releaseToCancel else tx.releaseToSend, style = OieType.bodySmall, color = if (away) c.coralText else c.muted)
                     // v0.34 audit round 2: a recording started by a tap (TalkBack) has a way out; with a finger on
                     // the button, sliding off cancels.
                     QuietButton(tx.cancel, { app.oie.data.Voice.stop(context, keep = false); recordingSince = 0; away = false })
@@ -553,6 +563,8 @@ private fun NewLine() {
 /** How long a short note (a slip, a problem) stays; and the recording clock's tick. */
 private const val NOTE_MS = 4_000L
 private const val TICK_MS = 500L
+/** A fling's settle time before reading where the list ended up. */
+private const val MOTION_SETTLE_MS = 600L
 /** The longest voice message (flow kid-sends-message, 3a). */
 private const val MAX_RECORDING_MS = 120_000L
 

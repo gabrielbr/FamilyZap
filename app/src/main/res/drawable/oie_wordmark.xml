@@ -1,4 +1,4 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="53dp" android:height="40dp" android:viewportWidth="252" android:viewportHeight="190">
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="69dp" android:height="52dp" android:viewportWidth="252" android:viewportHeight="190">
 <!-- v0.34: the same drawing, its viewport trimmed to the mark (it had empty edges), so the mark fills its size. -->
 <group android:translateX="-15" android:translateY="-20">
 <path android:fillColor="#E8573C" android:fillType="evenOdd" android:pathData="M72 93a57 57 0 1 1 0 114a57 57 0 1 1 0 -114zM72 125a25 25 0 1 0 0 50a25 25 0 1 0 0 -50z"/>

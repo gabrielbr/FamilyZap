@@ -167,4 +167,12 @@ class FamilyTest {
         assertTrue(back.reactTipUsed)
         assertEquals("5511999990000@s.whatsapp.net", back.pinResetFrom)
     }
+
+    /** v0.34: two people with the same first letter get letters that tell them apart. */
+    @Test fun initialsTellNamesApart() {
+        val m = Initials.of(listOf("Vovó", "Vovô", "Mãe", "Tia Bia", "Tio Zé"))
+        assertEquals("Vó", m["Vovó"]); assertEquals("Vô", m["Vovô"]); assertEquals("M", m["Mãe"])
+        assertEquals("Ta", m["Tia Bia"]); assertEquals("To", m["Tio Zé"])
+        assertEquals("A", Initials.of(listOf("Ana", "Ana"))["Ana"])
+    }
 }

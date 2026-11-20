@@ -234,6 +234,7 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
     val colors = listOf(c.drawInk, c.drawCoral, c.drawSun, c.drawLeaf, c.drawSky)
     var color by remember { mutableStateOf(0) }
     var thick by remember { mutableStateOf(false) }
+    val compactPad = app.oie.ui.common.isCompact
     val strokes = remember { mutableStateListOf<Stroke2>() }
     var cleared by remember { mutableStateOf<List<Stroke2>?>(null) }
     var tick by remember { mutableStateOf(0) } // a point added: draw again
@@ -244,8 +245,9 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
         Bar {
             QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
             // v0.33 audit: on a phone, the name alone, so Pronto has room.
-            Text(if (app.oie.ui.common.isCompact) to else tx.drawFor(to), style = OieType.title, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            PrimaryButton(tx.drawUse, {
+            Text(tx.drawFor(to), style = OieType.title, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            // Round 3: on a phone the button goes under the pad, full width, so the bar keeps who it's for.
+            if (!compactPad) PrimaryButton(tx.drawUse, {
                 if (strokes.isEmpty() || size.width == 0) return@PrimaryButton
                 onDone(render(strokes, size, c.drawPaper))
             }, enabled = strokes.isNotEmpty(), icon = R.drawable.gg_ic_check)
@@ -302,6 +304,11 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
             })
             TextLink(tx.drawClear, { if (strokes.isNotEmpty()) { cleared = strokes.toList(); strokes.clear() } })
         }
+        if (compactPad) PrimaryButton(tx.drawUse, {
+            if (strokes.isEmpty() || size.width == 0) return@PrimaryButton
+            onDone(render(strokes, size, c.drawPaper))
+        }, Modifier.fillMaxWidth().padding(start = app.oie.ui.common.sideMargin, end = app.oie.ui.common.sideMargin, bottom = OTokens.Spacing.space4),
+            enabled = strokes.isNotEmpty(), icon = R.drawable.gg_ic_check)
     }
 }
 
@@ -345,16 +352,18 @@ private fun render(strokes: List<Stroke2>, size: IntSize, paper: Color): android
 internal fun HomeReminders(state: AppState, birthdays: Boolean) {
     val today = java.time.Instant.ofEpochMilli(state.clock()).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
     val tx = str
+    // The same letters as on the person's tile (round 3: "V" here, "Vó" there).
+    val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
     if (birthdays) app.oie.logic.Birthdays.today(state.reachable, today).forEach { ct ->
-        Reminder(ct, tx.birthdayToday(ct.name), onOpen = { state.route = Route.Conversation(ct.id) })
+        Reminder(ct, tx.birthdayToday(ct.name), onOpen = { state.route = Route.Conversation(ct.id) }, letters = letters[ct.name])
     }
     if (!birthdays) app.oie.logic.Nudge.pick(state.nudgeOn, state.reachable, state.messages, state.nudgeDismissed, state.clock())?.let { ct ->
-        Reminder(ct, tx.nudgeLine(ct.name), onOpen = { state.route = Route.Conversation(ct.id) }, onDismiss = { state.nudgeDismissed[ct.id] = state.clock() })
+        Reminder(ct, tx.nudgeLine(ct.name), onOpen = { state.route = Route.Conversation(ct.id) }, onDismiss = { state.nudgeDismissed[ct.id] = state.clock() }, letters = letters[ct.name])
     }
 }
 
 @Composable
-private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (() -> Unit)? = null) {
+private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (() -> Unit)? = null, letters: String? = null) {
     val c = OieTheme.colors
     val tx = str
     Row(
@@ -368,7 +377,7 @@ private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (
                 .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space2),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
         ) {
-            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar)
+            app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters)
             Text(text, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
             OIcon(R.drawable.gg_ic_chevron, tint = c.muted)
         }
