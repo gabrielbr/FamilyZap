@@ -156,3 +156,63 @@
 
   These two were checked by me, not re-scored by the reviewer (the round budget was spent).
 - **Result:** no open P0, P1 or P2.
+
+## v3 polish (owner's feedback round 3)
+- **Feedback:**
+  - silhouettes with more personality;
+  - text that lands exactly when the animation does;
+  - typing that is clearly visible.
+- **Personality:** the eight silhouettes were redrawn with clothes and accessories in page-coloured details:
+  - Ana: ponytail, hoop, V-neck;
+  - Paulo: side part, beard, collar;
+  - Tito: hoodie with drawstrings;
+  - Lia: puffs with ties, overalls;
+  - Vó Rosa: hairpin, glasses, beads, cardigan;
+  - Vô Zé: cap, glasses, moustache, buttons;
+  - Tia Bia: headband, hoops, scarf;
+  - Lucas: backwards cap, number 10 shirt.
+
+  The stage figures are drawn inline, so the head moves on its own. The person in focus breathes; a reader nods; the kid hops when the answer lands. None of this runs under reduced motion.
+- **Sync:** the active step is the one whose heading sits on the reading line (mid-screen beside the stage; 80% down on a phone, under the pinned stage), worked out on scroll. Before, a step's box crossing a band started it while its words were still low on the screen. The captures log the stage's step for each heading on the line: all matched, desktop and phone.
+- **Typing:**
+  - a keyboard rises in the typer's screen, with a key flashing per letter (coral on the tablet, green on WhatsApp);
+  - the thumbs tap and the head tips down;
+  - when the receiver types, the parent's WhatsApp shows "digitando…" and the three dots.
+
+  The kid's typing is not shown to others, because Oiê sends no typing presence (rule L7).
+- **Detector:** pulsing-dot (the typing dots, asked for), plus the earlier device/bubble/label findings. All intended.
+
+### v3 review (fresh reviewer): fix, then a verdict pass
+| Finding | P | Fix |
+|---|---|---|
+| A typing timer from an old step could fire after the step changed (sent text back in the composer, a late hop) | P1 | Step-owned timers, cleared on every step change |
+| The tablet's sent bubble was cut off under its header | P2 | Unsent messages take no room; they appear with a short rise |
+| The clothes were hidden by the devices; the step-5 figures were too small | P2 | Devices held lower, so collars show; step-5 figures at 92×110 |
+| Vô Zé's cap read like Lucas's | P2 | A real flat cap |
+| Paulo's beard line read as a smile (a face) | P3 | Solid beard, no line |
+| Ana's earring read as a nick | P3 | An ink hoop below the ear |
+
+### The disclaimer, in the tone of wacli.sh (owner's request)
+- **Change:** the owner found the old copy too negative and pointed to wacli's site, where the disclaimer is three plain sentences near the bottom: third-party, not affiliated with WhatsApp or Meta, use at your own risk because linking follows WhatsApp's terms.
+- **The coral "Sem letra miúda" box is gone.** In its place:
+  - "O que fica com você", three positive facts;
+  - a plain "Aviso" near the end ("O Oiê é um app independente que conecta ao seu WhatsApp como o WhatsApp Web faz. Não é afiliado ao WhatsApp nem à Meta. Use por sua conta: conectar um aparelho ao WhatsApp segue os termos do WhatsApp. Antes de conectar, o app explica isso com calma.");
+  - the FAQ question "O Oiê é do WhatsApp?".
+- **Product law still holds:** the risk is stated and not hidden, and the app's own notice before linking is unchanged (`01 Brand/voice.md`).
+
+### v3 verdict pass, and its fixes
+- **The reviewer's verdict:**
+  - **Resolved:** stale timers, cut bubble, Vô Zé's cap, Paulo's beard.
+  - **Partial:**
+    - the clothes in the step-5 list: those figures were plain outlines;
+    - Ana's floating earring.
+  - **New:**
+    - **P0:** the calm Aviso had dropped the sentence that WhatsApp can restrict numbers, which the product law says is never hidden;
+    - **P3:** Tia Bia's hoops read as eyes.
+- **Fixed after the verdict pass:**
+  - **The risk:** one plain sentence in the Aviso, the FAQ, the JSON-LD and the English: "segue os termos do WhatsApp, que pode restringir números que usam apps de terceiros". Then: "O Oiê manda no ritmo de uma pessoa, uma mensagem de cada vez". wacli's calm tone stays, and the risk is said.
+  - **Step-5 figures:** drawn in full, with their details.
+  - **Ana's hoop:** hangs from the ear line.
+  - **Tia Bia:** her hoops sit beside her neck, and her scarf is a knot with two ends. Together, the hoops and the old scarf curve had read as a face.
+
+  These were checked in fresh captures, but not re-scored: the two-round budget was spent.

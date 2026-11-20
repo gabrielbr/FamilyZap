@@ -68,18 +68,18 @@
     storyA11y: "How it works", example: "Example", sent: "Sent", parentArea: "Contacts", waField: "Message", typing: "typing…",
     capKid: "on the tablet, with Oiê", capParent: "your WhatsApp, the bridge",
     auntName: "Aunt Bia", friendName: "Lucas, from school",
-    honH: "No fine print.", honBox: "Before linking, Oiê tells you:",
-    risk: "Oiê uses your WhatsApp in a way WhatsApp doesn’t officially offer. WhatsApp may limit or block your number. If it does, you lose access until you sort it out with WhatsApp.",
-    riskWhy: "To lower that risk, Oiê sends at a person’s pace and never sends in bulk.",
-    f1: "<b>Only the people you approve.</b> Family or friends: your kid talks to no one else, and no one else reaches them through Oiê.",
-    f2: "<b>You see what goes out.</b> Messages go out from your WhatsApp, so they’re on your phone too. Your kid is told this the first time.",
-    f3: "<b>Nothing is kept by us.</b> Messages and contacts stay on the tablet. No ads, and no tracking of kids.",
-    f4: "<b>Not made by WhatsApp.</b> Oiê isn’t made or approved by WhatsApp or Meta. And it doesn’t replace your attention.",
+    yoursH: "What stays with you.",
+    f1: "<b>Only the people you approve.</b> Family or friends: your kid talks with the people on their list, and only those people reach them.",
+    f2: "<b>You see what goes out.</b> Messages go out from your WhatsApp, so they’re on your phone too. Your kid knows this from day one.",
+    f3: "<b>Everything stays on the tablet.</b> Messages and contacts stay on your own device. No ads and no tracking.",
+    noticeH: "Notice",
+    n1: "Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does. <b>It is not affiliated with WhatsApp or Meta.</b>",
+    n2: "Use at your own risk: linking a device is subject to WhatsApp’s terms, and WhatsApp may restrict numbers that use third-party apps. Oiê sends at a person’s pace, one message at a time, and explains this before you link.",
     faqH: "Questions from the family",
     q1: "Does the person receiving need to install anything?", a1: "No. Grandparents, aunts or friends get it in their WhatsApp, like any message from you, with your kid’s name in front.",
     q2: "Can my kid talk to friends?", a2: "Yes, if you add the contact. The friend gets it from your number, with your kid’s name in front. Your kid only talks to people you approve, and no one else reaches them through Oiê.",
     q3: "Does my kid need a phone?", a3: "No. Oiê runs on an Android tablet you already have and uses your WhatsApp.",
-    q4: "Can WhatsApp block my number?", a4: "It can. Oiê uses your WhatsApp in a way WhatsApp doesn’t officially offer. That’s why we tell you before linking. Oiê sends at a person’s pace and never in bulk.",
+    q4: "Is Oiê made by WhatsApp?", a4: "No. Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does, and it is not affiliated with WhatsApp or Meta. Use is subject to WhatsApp’s terms, and WhatsApp may restrict numbers that use third-party apps. That’s why Oiê sends at a person’s pace, one message at a time.",
     q5: "Do I see what my kid sends?", a5: "Yes. Messages go out from your WhatsApp, so they’re on your phone too. Your kid is told this the first time.",
     q6: "Can they see and post status updates?", a6: "Yes, if you turn it on in settings. Your kid sees updates from their contacts, and only those people see what your kid posts.",
     q7: "Can they make calls?", a7: "Not yet. For now: messages, voice notes, photos, videos and stickers.",
@@ -89,7 +89,7 @@
     g3: "Open Oiê: your name, your kid’s, and a QR code you scan in your WhatsApp.", g4: "Choose the contacts, family or friends. Your kid can send the first hello.",
     getSmall: "For Android 8 or newer. The file comes from Oiê’s releases page on GitHub, with each release’s SHA-256 sum.",
     footLine: "Family, within reach.", footAll: "All releases", footLib: "whatsmeow (MPL-2.0)", footPatch: "The whatsmeow file Oiê modifies",
-    footLegal: "Oiê isn’t made or approved by WhatsApp or Meta. WhatsApp is a trademark of Meta. The WhatsApp screens on this page are example drawings.",
+    footLegal: "Oiê is an independent app, not affiliated with WhatsApp or Meta. WhatsApp is a trademark of Meta. The screens on this page are example drawings.",
     title: "Oiê: family within reach, from your kid’s tablet",
     desc: "From a tablet, your kid talks with the family and friends you choose, through your WhatsApp. For Android tablets.",
   };
@@ -136,9 +136,9 @@
     };
     ORDER.forEach((k, i) => { v["tile" + i] = P.recv[k].init; v["tile" + i + "n"] = P.recv[k].name; });
     all("[data-v]").forEach((el) => { if (el.dataset.v in v && el.id !== "composeKid") el.textContent = v[el.dataset.v]; });
-    $("#silKid").setAttribute("href", "#p-" + (step === 6 ? parent.sil : kid.sil));
-    $("#silParent").setAttribute("href", "#p-" + parent.sil);
-    $("#silRecv").setAttribute("href", "#p-" + shownRecv);
+    drawPerson($("#silKid"), step === 6 ? parent.sil : kid.sil);
+    drawPerson($("#silParent"), parent.sil);
+    drawPerson($("#silRecv"), shownRecv);
     // The story's words follow the family the visitor built (the chosen receiver, not the one cycling in step 5).
     const words = { Kid: kid.name, rThe: chosen.the, RThe: cap1(chosen.the), rOf: chosen.of };
     all("[data-s]").forEach((el) => { el.textContent = P.story[el.dataset.s].replace(/\{(\w+)\}/g, (m, k) => (k in words ? words[k] : m)); });
@@ -148,27 +148,75 @@
     kidCap.querySelector("span").textContent = step === 6 ? P.story.capKid6 : dict().capKid;
   }
 
+  // The three people are drawn inline (copied from the page's symbols) so each head can move on its own.
+  function drawPerson(svg, key) {
+    if (svg.dataset.person === key && svg.childElementCount) return;
+    svg.dataset.person = key;
+    svg.innerHTML = document.getElementById("p-" + key).innerHTML;
+  }
+
+  // A keyboard in each screen: it rises while someone types, and a key flashes for every letter.
+  all(".oie, .wa").forEach((screen) => {
+    const k = document.createElement("div");
+    k.className = "kbd";
+    k.setAttribute("aria-hidden", "true");
+    [10, 9, 7].forEach((n) => { const row = document.createElement("span"); row.className = "kbd__row"; for (let i = 0; i < n; i++) row.appendChild(document.createElement("i")); k.appendChild(row); });
+    const space = document.createElement("span"); space.className = "kbd__row"; const bar = document.createElement("i"); bar.className = "kbd__space"; space.appendChild(bar); k.appendChild(space);
+    screen.appendChild(k);
+  });
+
+  // The other people in step 5 get their full figures (details included), not a plain outline.
+  all("svg[data-draw]").forEach((svg) => drawPerson(svg, svg.dataset.draw));
+
   /* ---------- The story ---------- */
   const stage = $("#stage");
   const dot = $("#dot");
   const composeKid = $("#composeKid");
   const composeRecv = $("#composeRecv");
   const waTyping = $("#waTyping");
+  const waDots = $("#waDots");
   const still = window.matchMedia("(prefers-reduced-motion: reduce)");
   let typer = null;
+  let later = []; // timers that belong to the current step; cleared when the step changes
   let cycler = null;
-  const CHAR_MS = 70;
+  const CHAR_MS = 90;
 
+  // Someone types: their keyboard rises, their thumbs tap, a key flashes for each letter, and the words appear.
   function type(el, text, done) {
     clearInterval(typer);
+    const actor = el.closest(".actor");
+    const device = el.closest(".device");
     if (still.matches) { el.textContent = text; if (done) done(); return; }
+    const keys = Array.from(device.querySelectorAll(".kbd i"));
     let n = 0;
     el.classList.add("is-typing");
+    actor.classList.add("is-typing");
+    device.classList.add("is-typing");
+    el.innerHTML = '<span class="caret"></span>';
     typer = setInterval(() => {
       n += 1;
       el.innerHTML = esc(text.slice(0, n)) + '<span class="caret"></span>';
-      if (n >= text.length) { clearInterval(typer); el.textContent = text; if (done) done(); }
+      const key = text[n - 1] === " " ? device.querySelector(".kbd__space") : keys[(text.charCodeAt(n - 1) * 7) % (keys.length - 1)];
+      if (key) { key.classList.add("is-hit"); setTimeout(() => key.classList.remove("is-hit"), 120); }
+      if (n >= text.length) {
+        clearInterval(typer);
+        later.push(setTimeout(() => {
+          el.textContent = text;
+          actor.classList.remove("is-typing");
+          device.classList.remove("is-typing");
+          if (done) done();
+        }, 500));
+      }
     }, CHAR_MS);
+  }
+
+  // A small, once-only reaction from someone in the story (a nod as they read, a hop as the answer lands).
+  function react(who, kind) {
+    if (still.matches) return;
+    const actor = $(".actor--" + who);
+    actor.classList.remove("is-nod", "is-hop");
+    void actor.offsetWidth;
+    actor.classList.add(kind);
   }
 
   // Where the message is on the wire: 0 the kid, 0.5 the parent, 1 the receiver; null hides it.
@@ -185,8 +233,11 @@
     stage.dataset.focus = focus || "kid";
     all(".step").forEach((s) => s.classList.toggle("is-on", Number(s.dataset.step) === n));
     clearInterval(typer); clearInterval(cycler);
+    later.forEach(clearTimeout); later = [];
     stage.removeAttribute("data-replied");
     waTyping.hidden = true;
+    waDots.classList.remove("is-on");
+    all(".actor, .device").forEach((el) => el.classList.remove("is-typing", "is-nod", "is-hop"));
     composeRecv.classList.remove("is-typing");
     composeRecv.textContent = dict().waField;
     shownRecv = pick.recv;
@@ -194,17 +245,21 @@
     const r = PEOPLE[lang].recv[pick.recv];
     composeKid.textContent = "";
     if (n === 1) { moveDot(0); type(composeKid, r.msg); }
-    else if (n === 2) { moveDot(0.5); }
-    else if (n === 3) { moveDot(1); }
+    else if (n === 2) { moveDot(0.5); react("parent", "is-nod"); }
+    else if (n === 3) { moveDot(1); react("recv", "is-nod"); }
     else if (n === 4) {
       moveDot(1);
+      // WhatsApp shows the parent that the other person is typing: "digitando…" and the three dots.
       waTyping.hidden = false;
+      waDots.classList.add("is-on");
       type(composeRecv, r.reply, () => {
         waTyping.hidden = true;
+        waDots.classList.remove("is-on");
         composeRecv.classList.remove("is-typing");
         composeRecv.textContent = dict().waField;
         stage.setAttribute("data-replied", "");
         moveDot(0);
+        later.push(setTimeout(() => react("kid", "is-hop"), 900));
       });
     } else if (n === 5) {
       moveDot(null);
@@ -217,18 +272,34 @@
 
   // On a phone the stage pins over the top 62% of the screen; the step being read is the one in the band below it.
   const narrow = window.matchMedia("(max-width: 899px)");
+  let heroShows = true;
+  // The step being read is the one whose words sit on the reading line: the middle of the screen beside the
+  // stage on a desktop, the band under the pinned stage on a phone. The stage changes exactly as the words arrive.
   function watchSteps() {
-    if (!("IntersectionObserver" in window)) { setStep(4, "recv", true); return; }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) setStep(Number(e.target.dataset.step), e.target.dataset.focus); });
-    }, { rootMargin: narrow.matches ? "-72% 0px -18% 0px" : "-45% 0px -45% 0px" });
-    all(".step").forEach((s) => io.observe(s));
+    const steps = Array.from(all(".step"));
+    let frame = 0;
+    function pick() {
+      frame = 0;
+      const line = narrow.matches ? innerHeight * 0.8 : innerHeight * 0.5;
+      let best = null, gap = Infinity;
+      steps.forEach((s) => {
+        const r = s.firstElementChild.getBoundingClientRect();
+        const d = Math.abs((r.top + r.bottom) / 2 - line);
+        if (d < gap) { gap = d; best = s; }
+      });
+      if (best && !heroShows) setStep(Number(best.dataset.step), best.dataset.focus);
+    }
+    const ask = () => { if (!frame) frame = requestAnimationFrame(pick); };
+    addEventListener("scroll", ask, { passive: true });
+    addEventListener("resize", ask);
+    ask();
     // Back at the top (the hero), the stage rests at step 0: everyone standing, nothing sent.
     // Once the hero is gone, the stage is pinned and centres itself.
+    if (!("IntersectionObserver" in window)) return;
     new IntersectionObserver((entries) => {
-      const heroShows = entries[0].isIntersecting;
+      heroShows = entries[0].isIntersecting;
       stage.classList.toggle("is-pinned", !heroShows);
-      if (heroShows) setStep(0, "kid");
+      if (heroShows) setStep(0, "kid"); else ask();
     }).observe($(".hero"));
   }
 
