@@ -43,3 +43,18 @@ _Designed with `ux-user-flows` on 2026-11-19 (v0.30). The owner: "the kid can't 
 | 7 | Control | ✅ Nothing is created without the tap; removing is the usual Remover with undo. |
 | 14 | Ethics | ✅ The notification limit is said before creating, not discovered later. |
 | 15 | Evidence | 🟡 Whether WhatsApp accepts a one-person group from a linked device: the owner's test. |
+
+## v0.35: the chat marks itself unread
+_The owner's report: the line works, but the parent's phone doesn't show it. WhatsApp never notifies an account about its own messages, and the kid writes from the parent's account._
+
+- **What changes:** after each message the kid sends on the line to the parent, the tablet uses WhatsApp's own **"Marcar como não lida"** on that chat. It syncs to the parent's phone like anything done on WhatsApp Web: the chat gets the unread dot and moves to the top of the list.
+- **What doesn't:** there's still no sound or banner. An unread mark isn't a notification, and WhatsApp doesn't let an account notify itself. The help says so.
+- **Only on the line to the parent.** Chats with anyone else are never touched; there, the family get WhatsApp's normal notification.
+- **When the parent opens the chat,** WhatsApp clears the mark as usual. The next message from the kid sets it again.
+- **If marking fails** (for example, right after linking, before WhatsApp has shared its settings with the tablet), the message has still gone. The report notes it, and the next message tries again.
+
+| # | Question | Result |
+|---|---|---|
+| 3 | Happy path | ✅ Nothing changes for the kid; nothing to do for the parent. |
+| 4 | Branches | ✅ Marking fails: the message is unaffected, the next one tries again. |
+| 14 | Ethics | ✅ It only touches the chat Oiê created for the kid; the parent's other chats are never changed. |

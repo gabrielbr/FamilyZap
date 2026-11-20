@@ -455,3 +455,37 @@ func TestReceiptOf(t *testing.T) {
 		t.Fatal("nil")
 	}
 }
+
+func TestUnreadPatchMarksTheChatUnreadUpToTheMessage(t *testing.T) {
+	chat := types.NewJID("120363000000000000", types.GroupServer)
+	p := UnreadPatch(chat, "k1", time.UnixMilli(1_795_020_000_000))
+	if len(p.Mutations) != 1 {
+		t.Fatalf("one mutation, got %d", len(p.Mutations))
+	}
+	m := p.Mutations[0]
+	if m.Index[1] != chat.String() {
+		t.Fatalf("wrong chat: %v", m.Index)
+	}
+	a := m.Value.GetMarkChatAsReadAction()
+	if a == nil || a.GetRead() {
+		t.Fatalf("must be marked unread: %+v", a)
+	}
+	last := a.GetMessageRange().GetMessages()
+	if len(last) != 1 || last[0].GetKey().GetID() != "k1" || !last[0].GetKey().GetFromMe() {
+		t.Fatalf("the range must end at the kid's message: %+v", last)
+	}
+}
+
+func TestMarkUnreadOnlyOnTheParentLine(t *testing.T) {
+	k, err := Open(filepath.Join(t.TempDir(), "s.db"), nl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := k.MarkUnread("5511999990000@s.whatsapp.net", "k1", 1); err == nil {
+		t.Fatal("no line set: must refuse")
+	}
+	k.SetParentLine("120363000000000000@g.us")
+	if err := k.MarkUnread("5511999990000@s.whatsapp.net", "k1", 1); err == nil {
+		t.Fatal("another chat: must refuse")
+	}
+}

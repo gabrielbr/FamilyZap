@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 0.35.0
+- **The line to you now shows up on your phone.** WhatsApp never notifies an account of its own messages, and Tito writes from yours. Now, after each message Tito sends you, Oiê uses WhatsApp's own "Marcar como não lida" on that chat: it gets the unread dot and moves to the top of your chats. There's still no sound (WhatsApp doesn't allow it for your own account). Only that chat is ever touched.
+
 ## 0.34.0
 A design pass over every screen, with the four design skills and anti-slop, in rounds until each area scored its maximum. What you'll notice:
 - **Fixed: "Esqueci o PIN" was not safe.** It could let anyone holding the tablet set a new PIN while WhatsApp was linked. Now a new PIN needs the same WhatsApp to link again (a fresh QR, scanned with your phone); the kid's contacts and chats stay. If another WhatsApp links, Oiê starts over.
