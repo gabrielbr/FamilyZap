@@ -3,7 +3,7 @@
 The landing page: static pages, no build step, no analytics, no tracking, no cookies.
 
 **v2 (2026-11-20, decision 0013):** a scrolling story told with people.
-- **Picking a family:** the visitor picks son or daughter (Tito or Lia), mother or father (Ana or Paulo), and who they write to: Vovó, Vovô, Tia Bia or Lucas, a school friend. The whole story uses those names.
+- **Picking a family:** the visitor picks son or daughter (Tito or Lia), mother or father (Ana or Paulo), and who they write to: Vó Rosa, Vô Zé, Tia Bia or Lucas, a school friend. The whole story uses those names.
 - **The stage:** it pins while the steps scroll past. It shows three silhouettes built from the logo's touching rounds, each holding a device:
   - the kid with the tablet (Oiê's own coral screen);
   - the parent with the phone (WhatsApp-like screen, the bridge);

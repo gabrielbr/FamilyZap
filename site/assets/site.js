@@ -33,8 +33,8 @@
       kid: { son: { name: "Tito", sil: "son" }, daughter: { name: "Lia", sil: "daughter" } },
       parent: { mother: { name: "Ana", sil: "mother" }, father: { name: "Paulo", sil: "father" } },
       recv: {
-        grandma: { name: "Grandma Rosa", init: "GR", the: "Grandma Rosa", of: "Grandma Rosa’s", cap: "in her WhatsApp", msg: "Hi Grandma, I miss you", reply: "Me too, sweetheart. There’s cake on Sunday." },
-        grandpa: { name: "Grandpa Zé", init: "GZ", the: "Grandpa Zé", of: "Grandpa Zé’s", cap: "in his WhatsApp", msg: "Grandpa, will you teach me to fish?", reply: "I will. Sunday, bright and early." },
+        grandma: { name: "Grandma Rosa", short: "Grandma", init: "GR", the: "Grandma Rosa", of: "Grandma Rosa’s", cap: "in her WhatsApp", msg: "Hi Grandma, I miss you", reply: "Me too, sweetheart. There’s cake on Sunday." },
+        grandpa: { name: "Grandpa Zé", short: "Grandpa", init: "GZ", the: "Grandpa Zé", of: "Grandpa Zé’s", cap: "in his WhatsApp", msg: "Grandpa, will you teach me to fish?", reply: "I will. Sunday, bright and early." },
         aunt: { name: "Aunt Bia", init: "B", the: "Aunt Bia", of: "Aunt Bia’s", cap: "in her WhatsApp", msg: "Will you come to my birthday?", reply: "I will, and I’ll bring the cake." },
         friend: { name: "Lucas", init: "L", the: "Lucas", of: "Lucas’s", cap: "from school", msg: "Want to play after school?", reply: "Sure. See you at the court." },
       },
@@ -65,7 +65,7 @@
     familyTitle: "Build your family and see how it works", lgKid: "Who writes", kidSon: "Son", kidDaughter: "Daughter",
     lgParent: "Whose WhatsApp", parMother: "Mom", parFather: "Dad",
     lgRecv: "To whom", rcvGrandma: "Grandma Rosa", rcvGrandpa: "Grandpa Zé", rcvAunt: "Aunt Bia", rcvFriend: "Lucas, from school", familyGo: "See the story",
-    storyA11y: "How it works", example: "Example", sent: "Sent", parentArea: "Contacts", waField: "Message", typing: "typing…",
+    again: "Change the family and watch again", stepOf: "of", storyA11y: "How it works", example: "Example", sent: "Sent", parentArea: "Contacts", waField: "Message", typing: "typing…",
     capKid: "on the tablet, with Oiê", capParent: "your WhatsApp, the bridge",
     auntName: "Aunt Bia", friendName: "Lucas, from school",
     yoursH: "What stays with you.",
@@ -74,21 +74,22 @@
     f3: "<b>Nothing goes through us.</b> Oiê has no servers: the tablet links to your WhatsApp like WhatsApp Web. Messages and contacts stay on your own devices. No analytics, no ads, no tracking.",
     noticeH: "Notice",
     n1: "Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does. <b>It is not affiliated with WhatsApp or Meta.</b>",
-    n2: "Use at your own risk: linking a device is subject to WhatsApp’s terms, and WhatsApp may restrict numbers that use third-party apps. Oiê sends at a person’s pace, one message at a time, and explains this before you link.",
+    n2: "Use at your own risk: linking a device is subject to WhatsApp’s terms, and WhatsApp may restrict or block numbers that use third-party apps. Oiê sends at a person’s pace, one message at a time, and explains this before you link.",
     faqH: "Questions from the family",
     q1: "Does the person receiving need to install anything?", a1: "No. Grandparents, aunts or friends get it in their WhatsApp, like any message from you, with your kid’s name in front.",
     q2: "Can my kid talk to friends?", a2: "Yes, if you add the contact. The friend gets it from your number, with your kid’s name in front. Your kid only talks to people you approve, and no one else reaches them through Oiê.",
     q3: "Does my kid need a phone?", a3: "No. Oiê runs on an Android tablet you already have and uses your WhatsApp.",
-    q4: "Is Oiê made by WhatsApp?", a4: "No. Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does, and it is not affiliated with WhatsApp or Meta. Use is subject to WhatsApp’s terms, and WhatsApp may restrict numbers that use third-party apps. That’s why Oiê sends at a person’s pace, one message at a time.",
+    q4: "Is Oiê made by WhatsApp?", a4: "No. Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does, and it is not affiliated with WhatsApp or Meta. Use is subject to WhatsApp’s terms, and WhatsApp may restrict or block numbers that use third-party apps. That’s why Oiê sends at a person’s pace, one message at a time.",
     q9: "Does Oiê keep anything about my family?", a9: "No. Oiê has no servers. The tablet links to your WhatsApp like WhatsApp Web, and messages go only through WhatsApp. There are no analytics, ads or tracking. The only other connection checks for a new version of Oiê on its public GitHub page.",
+    q10: "What if WhatsApp blocks my number?", a10: "Oiê stops at once, shows WhatsApp’s notice on the tablet with how long it lasts, and doesn’t try again on its own. On your phone, follow what WhatsApp shows you. Whenever you like, unlink Oiê in Linked devices, in your WhatsApp.",
     q5: "Do I see what my kid sends?", a5: "Yes. Messages go out from your WhatsApp, so they’re on your phone too. Your kid is told this the first time.",
     q6: "Can they see and post status updates?", a6: "Yes, if you turn it on in settings. Your kid sees updates from their contacts, and only those people see what your kid posts.",
     q7: "Can they make calls?", a7: "Not yet. For now: messages, voice notes, photos, videos and stickers.",
-    q8: "Why isn’t it on the Play Store?", a8: "For now Oiê is downloaded straight from its releases page. Each release comes with a SHA-256 sum to check the file, and the app tells you when there’s a new version.",
+    q8: "Why isn’t it on the Play Store?", a8: "For now Oiê is downloaded straight from its releases page. Each release comes with a code (SHA-256) to check the file is the original, and the app tells you when there’s a new version.",
     getH: "Ready for the first hello?",
     g1: "On your kid’s tablet, tap Download Oiê and open the file.", g2: "If Android asks, allow installing apps from the browser.",
     g3: "Open Oiê: your name, your kid’s, and a QR code you scan in your WhatsApp.", g4: "Choose the contacts, family or friends. Your kid can send the first hello.",
-    getSmall: "For Android 8 or newer. The file comes from Oiê’s releases page on GitHub, with each release’s SHA-256 sum.",
+    getSmall: "For Android 8 or newer. The file comes from Oiê’s releases page on GitHub, with a code (SHA-256) to check the file is the original.",
     navSafety: "Safety", footSafety: "Why Oiê, and kids safe online", navSafetyHref: "safety/",
     footLine: "Family, within reach.", footAll: "All releases", footLib: "whatsmeow (MPL-2.0)", footPatch: "The whatsmeow file Oiê modifies",
     footLegal: "Oiê is an independent app, not affiliated with WhatsApp or Meta. WhatsApp is a trademark of Meta. The screens on this page are example drawings.",
@@ -138,7 +139,7 @@
       kidName: kid.name, parentName: parent.name, parentInitial: parent.name.charAt(0),
       recvName: r.name, recvInitial: r.init, recvCap: r.cap, msg: r.msg, reply: r.reply,
     };
-    ORDER.forEach((k, i) => { v["tile" + i] = P.recv[k].init; v["tile" + i + "n"] = P.recv[k].name; });
+    ORDER.forEach((k, i) => { v["tile" + i] = P.recv[k].init; v["tile" + i + "n"] = P.recv[k].short || P.recv[k].name; });
     all("[data-v]").forEach((el) => { if (el.dataset.v in v && el.id !== "composeKid") el.textContent = v[el.dataset.v]; });
     drawPerson($("#silKid"), step === 6 ? parent.sil : kid.sil);
     drawPerson($("#silParent"), parent.sil);
@@ -175,6 +176,8 @@
   /* ---------- The story ---------- */
   const stage = $("#stage");
   const dot = $("#dot");
+  const run = $("#run");
+  const tag = $(".stage__tag");
   const composeKid = $("#composeKid");
   const composeRecv = $("#composeRecv");
   const waTyping = $("#waTyping");
@@ -227,7 +230,7 @@
   function moveDot(to) {
     if (to == null) { dot.style.opacity = "0"; return; }
     dot.style.opacity = "1";
-    dot.style.left = to * 100 + "%";
+    run.style.transform = "translateX(" + to * 100 + "%)";
   }
 
   function setStep(n, focus, force) {
@@ -236,6 +239,8 @@
     stage.dataset.step = String(n);
     stage.dataset.focus = focus || "kid";
     all(".step").forEach((s) => s.classList.toggle("is-on", Number(s.dataset.step) === n));
+    // Where the reader is in the story: "Exemplo · 2 de 6".
+    tag.textContent = dict().example + (n > 0 ? " · " + n + " " + (lang === "en" ? "of" : "de") + " 6" : "");
     clearInterval(typer); clearInterval(cycler);
     later.forEach(clearTimeout); later = [];
     stage.removeAttribute("data-replied");
@@ -263,13 +268,17 @@
         composeRecv.textContent = dict().waField;
         stage.setAttribute("data-replied", "");
         moveDot(0);
+        // On a phone one person shows at a time: once the answer is back, the tablet takes the stage.
+        if (narrow.matches) stage.dataset.focus = "kid";
         later.push(setTimeout(() => react("kid", "is-hop"), 900));
       });
     } else if (n === 5) {
       moveDot(null);
       if (!still.matches) {
         let i = ORDER.indexOf(pick.recv);
-        cycler = setInterval(() => { i = (i + 1) % ORDER.length; shownRecv = ORDER[i]; fillPeople(); }, 2200);
+        // Each of the others once, then back to the family's own choice, and it stops (nothing loops forever).
+        let left = ORDER.length;
+        cycler = setInterval(() => { i = (i + 1) % ORDER.length; shownRecv = ORDER[i]; fillPeople(); if (--left === 0) clearInterval(cycler); }, 2200);
       }
     } else { moveDot(null); }
   }
@@ -281,6 +290,7 @@
   // stage on a desktop, the band under the pinned stage on a phone. The stage changes exactly as the words arrive.
   function watchSteps() {
     const steps = Array.from(all(".step"));
+    const family = $(".family");
     let frame = 0;
     function pick() {
       frame = 0;
@@ -291,6 +301,9 @@
         const d = Math.abs((r.top + r.bottom) / 2 - line);
         if (d < gap) { gap = d; best = s; }
       });
+      // On a phone the stage would pin over the family form: while any of the form is still on screen, the
+      // story waits at step 0 (the stage scrolls with the page), and starts once the form has gone up.
+      if (narrow.matches && family.getBoundingClientRect().bottom > 0) best = steps[0];
       if (best && !heroShows) setStep(Number(best.dataset.step), best.dataset.focus);
     }
     const ask = () => { if (!frame) frame = requestAnimationFrame(pick); };
