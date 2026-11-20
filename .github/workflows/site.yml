@@ -1,0 +1,31 @@
+name: site
+# Publishes the landing page (site/) to GitHub Pages: https://gabrielbr.github.io/FamilyZap/
+# One-time setup by the owner: Settings > Pages > Build and deployment > Source: GitHub Actions.
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "design/generated/tokens.css", ".github/workflows/site.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: The site's tokens are the design system's (site/assets/tokens.css is a copy)
+        run: cmp design/generated/tokens.css site/assets/tokens.css
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

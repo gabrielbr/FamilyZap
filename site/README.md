@@ -28,8 +28,10 @@ The landing page: one static page, no build step, no tracking.
 - `assets/site.css`: colours from `assets/tokens.css`, a **copy** of `design/generated/tokens.css` (copy it again when the tokens change, and never edit it here). It also uses the logo's colours. The WhatsApp-like colours are named constants used only inside `.wa` screens, as decision 0013 allows. There is no WhatsApp logo or name mark anywhere.
 - **Download:** every "Baixar" links to the latest release in `gabrielbr/oie-releases`.
 
+**Published on GitHub Pages** at https://gabrielbr.github.io/FamilyZap/ by `.github/workflows/site.yml`, on every push to `main` that changes `site/` or the tokens. The workflow fails if `assets/tokens.css` has drifted from `design/generated/tokens.css`. One-time setup by the owner: Settings › Pages › Build and deployment › Source: **GitHub Actions**.
+
 **Before it goes live** (the domain isn't registered yet, STATUS.md):
 - add `<link rel="canonical">`, an absolute `og:image` and the Organization `url` once `oie.app` exists;
-- host `site/` at the root of any static host.
+- point oie.app at GitHub Pages (Settings › Pages › Custom domain), or host `site/` anywhere static.
 
 The direction is in `.impeccable/surfaces/site-index-html.md`, the audit in `audits/2026-11-20-landing-page.md`.
