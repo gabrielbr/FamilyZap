@@ -118,6 +118,8 @@ fun QuietButton(text: String?, onClick: () -> Unit, modifier: Modifier = Modifie
             .background(c.surface)
             .border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusS))
             .pressable(onClick = onClick)
+            // v0.38: a word with a fuller TalkBack name ("Escrever" → "Escrever para Vovó" on a card) says the fuller one.
+            .then(if (text != null && contentDescription != null) Modifier.semantics(mergeDescendants = true) { this.contentDescription = contentDescription } else Modifier)
             .padding(horizontal = if (text == null) OTokens.Spacing.space3 else OTokens.Spacing.space4),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2, Alignment.CenterHorizontally),

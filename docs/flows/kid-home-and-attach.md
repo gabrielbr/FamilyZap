@@ -1,0 +1,101 @@
+# Flow: The kid's home and Anexar (v0.38)
+
+_Designed with `ux-user-flows` on 2026-11-20. The owner asked for it on 2026-11-20:_
+- _the home lists people the way a chat app does, each with a short line about the last message;_
+- _on the tablet, people show as cards with actions: Escrever and Gravar áudio;_
+- _the chat's "Foto" button becomes "Anexar", with the stickers inside it._
+
+- **Actor and job story:** a kid aged 9–12 on the family's tablet (or, sometimes, a phone). *When I open Oiê, I want to see at a glance who wrote to me and what we last said, and start a message or a voice message in one tap, so I can answer the people I miss without hunting.*
+- **Success measure:** a voice message from the home in **1 tap + 1 tap** on the tablet (Gravar áudio, then the mic to send), down from tap, hold, release. Picking up a chat needs no opening of it just to see what was said.
+- **Entry points:**
+  - opening Oiê (the home);
+  - Back from any chat;
+  - a notification still opens the chat directly (flow "Kid receives messages"); the home is unchanged by it.
+- **Preconditions:** the parent allowed at least one person (else the empty home, unchanged).
+- **Taps on the common path:**
+  - voice message (tablet): before **tap the person, hold, release**; after **Gravar áudio, tap the mic**;
+  - text (tablet): before **tap the person, tap the field, type, Enviar**; after **Escrever, type, Enviar** (the keyboard is already up);
+  - sticker: before **Figurinha, tap a sticker**; after **Anexar, tap a sticker** (the same two taps).
+
+```mermaid
+flowchart TD
+  start([Open Oiê]) --> home{Phone or tablet}
+  home -- Phone --> rows[Rows: photo, name, when,<br/>last message, '2 novas']
+  home -- Tablet --> cards[Cards: photo, name, when,<br/>last message on 2 lines,<br/>Escrever · Gravar áudio]
+  rows -- tap a row --> chat[Chat]
+  cards -- tap the card --> chat
+  cards -- Escrever --> write[Chat, keyboard up]
+  cards -- Gravar áudio --> mic{Microphone allowed?}
+  mic -- Yes --> rec[Chat, recording:<br/>'Gravando · 0:03', 'Toque no microfone para enviar', Cancelar]
+  mic -- No --> ask[Android asks] -- Allow --> rec
+  ask -- Deny --> chat
+  rec -- tap the mic --> pending[Enviando…, Desfazer 5 s]
+  rec -- Cancelar --> chat
+  chat -- Anexar --> sheet[Anexar sheet:<br/>Tirar foto · Gravar vídeo · Galeria · Desenhar<br/>Figurinhas below]
+  sheet -- a sticker --> pending
+  sheet -- a source --> source[Camera, video, gallery or drawing<br/>then the preview, as before]
+  sheet -- Back / scrim / drag down --> chat
+```
+
+## Steps
+| # | Screen / step | What the kid does | What the system does |
+|---|---|---|---|
+| 1 | **Home, phone** | Reads the rows; taps one | One row per person, in the parent's order (v0.34: places don't move). Each row: the 48dp photo, the name, when the last message came ("16h35", "Ontem", "Domingo", "08/11"), the last message on one line, and "2 novas" when there are unread ones. An unread row's message is bold and in ink. |
+| 1t | **Home, tablet** | Reads the cards; taps one, or an action | Cards in even columns (3 across in landscape, 2 standing). Each card: the photo, the name (title), when, the last message on up to two lines, and two quiet buttons, **Escrever** and **Gravar áudio**. A card with unread messages has "3 novas" and its message in bold. |
+| 2 | **What the last message says** | — | Text: the text (one line, new lines joined). The kid's own: "Você: …". Voice: "Áudio · 1:12". Photo: "Foto", or "Foto · its words". Video, GIF, Figurinha, "Mensagem apagada", and "Algo que só abre no WhatsApp" for the rest. Reactions never count as the last message. A message that didn't go: "Não foi · Você: …" in the error colour. No messages yet: "Ainda sem mensagens". |
+| 3a | **Escrever** | Taps it | Opens the chat with the field focused, so the keyboard comes up (like a chat's bubble, v0.29). |
+| 3b | **Gravar áudio** | Taps it | Opens the chat already recording: the clock runs, "Toque no microfone para enviar" says what to do, **Cancelar** throws it away. A tap on the mic sends it, then the usual 5 s **Desfazer**. Coming back to the chat later doesn't record again. |
+| 4 | **Anexar** (chat) | Taps **Anexar** | One sheet: **Tirar foto**, **Gravar vídeo**, **Galeria** (the last used first), **Desenhar**; then **Figurinhas**: Oiê's set, the family ones kept, new ones from the parent to keep, and **Criar figurinha**. A sticker goes with one tap (5 s Desfazer). The sheet scrolls when it's taller than the screen. |
+
+## Branches
+| At step | If | Then |
+|---|---|---|
+| 1t | Quiet hours, or the link is down | The card's actions go (the chat's own controls are off then too); the card still opens the chat to read and listen. |
+| 3b | The microphone isn't allowed | Android asks. Allowed: recording starts. Denied: the chat, not recording; the mic in the chat asks again (as before). |
+| 3b | Recording can't start | "Não deu para gravar. Tente de novo." (as before). |
+| 3b | Back during the recording | Back leaves the chat; the recording isn't sent (as before for a held recording). |
+| 4 | Back, a tap on the scrim, a drag down | The sheet closes; nothing is sent. |
+| 4 | The kid types (phone) | Anexar steps aside so the field has room, and comes back when the field is empty (decision 0010). |
+
+## States per step
+| Step | Empty | Loading | Partial | Error | Success | Offline |
+|---|---|---|---|---|---|---|
+| Home | "Ainda não tem ninguém aqui…" (unchanged) | Photos as letters until they load | A person with no messages: "Ainda sem mensagens" | A message that didn't go: "Não foi · …" | Rows or cards | Banner as before; on the tablet the actions go while the link is down |
+| Gravar áudio | — | — | — | "Não deu para gravar" | "Gravando · 0:03" then Enviando… | Not offered while the link is down |
+| Anexar | Only Oiê's stickers when no family ones | — | — | The photo errors as before | Sticker or preview | Anexar isn't shown when the kid can't send (as before) |
+
+## Exits
+- From a row or card: the chat. Back from the chat: the home.
+- From Gravar áudio: the chat, with the voice message under Desfazer, or nothing if cancelled.
+- From Anexar: the chat (sticker sent, or a preview to send).
+
+## Remembers
+- The parent's order of people (unchanged).
+- The last photo source used comes first in Anexar (unchanged).
+- A draft stays in the chat and isn't shown on the home (the home shows what was said, not what's being typed).
+
+## Decisions taken here
+- **Order:** the parent's order stays, not most recent first. A chat app sorts by time; v0.34 chose places that never move so a 9-year-old finds Vovó in the same spot every day. Unread is shown by the bold line and the "novas" pill.
+- **Actions only on the tablet.** A phone row is one tap to the chat, as in chat apps; two buttons per row would crowd 360dp.
+- **The Anexar icon is the plus** from the line set. There is no paperclip in the set; adding one is a core change (Gabriel Design System) and the word "Anexar" carries the meaning on the tablet.
+
+## Flow review (ux-user-flows §13)
+| # | Question | Answer |
+|---|---|---|
+| 1 | Job | ✅ One actor (the kid), one job story, a measurable tap count. |
+| 2 | Entries | ✅ Open, Back, notification (unchanged, goes to the chat). |
+| 3 | Happy path | ✅ Shorter: voice 2 taps instead of tap + hold; text with the keyboard up. |
+| 4 | Branches | ✅ Quiet hours, link down, mic denied, recording fails, Back, scrim. |
+| 5 | States | ✅ Empty, no messages, failed, unread, offline. |
+| 6 | Errors | ✅ "Não foi" said in words on the home too, the same as the chat. |
+| 7 | Control | ✅ Cancelar while recording; Desfazer 5 s after sending; sheet closes four ways. |
+| 8 | Progress | ✅ The recording clock. |
+| 9 | Memory | ✅ The last message is on the home: nothing to remember between chats. |
+| 10 | Exits | ✅ No dead ends. |
+| 11 | Conventions | ✅ A chat list on the phone (Jakob's law); attach as one sheet. Order kept steady on purpose (above). |
+| 12 | Speed | ✅ All local; nothing waits. |
+| 13 | Accessibility | ✅ Each row and card is one TalkBack stop that says name, "3 novas", the last message and when; the card's buttons say whom they're for ("Escrever para Vovó"); recording by tap needs no hold (WCAG 2.5.7), now for everyone. |
+| 14 | Ethics | ✅ No nagging; unread is shown, never pushed. |
+| 15 | Evidence | 🟡 To try with the kid: does Gravar áudio's tap-to-send feel natural next to the chat's hold-to-record? If it confuses, the chat's mic can accept both (it already does for TalkBack). |
+
+Issues: none critical or important. Polish: the phone's unread line ellipsizes before the "novas" pill on long messages (accepted; the chat shows the rest).

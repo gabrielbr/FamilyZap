@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -101,7 +102,8 @@ val STICKERS = linkedMapOf(
 @Composable
 fun Conversation(
     state: AppState, contactId: String, openStickers: Boolean = false, inBubble: Boolean = false, onLeave: (() -> Unit)? = null,
-    pendingPreview: Message? = null, recordingPreviewSec: Int = -1, slipPreview: Boolean = false,
+    start: app.oie.data.Start = app.oie.data.Start.NONE,
+    pendingPreview: Message? = null, recordingPreviewSec: Int = -1, slipPreview: Boolean = false, tapPreview: Boolean = false,
 ) {
     val c = OieTheme.colors
     val tx = str
@@ -119,13 +121,17 @@ fun Conversation(
     LaunchedEffect(field) { androidx.compose.runtime.snapshotFlow { field.text.toString() }.collect { state.drafts[contactId] = it } }
     // pendingPreview: the screenshot tests show the undo bar (v0.33: with Ouvir for a voice message).
     var pending by remember { mutableStateOf(pendingPreview) }
-    var stickers by remember { mutableStateOf(openStickers) }
     // The *Preview parameters let the screenshot tests show the recording and slip states.
     var recordingSince by remember { mutableLongStateOf(if (recordingPreviewSec >= 0) state.clock() - recordingPreviewSec * 1000L else 0L) }
     /** The kid slid off the record button: releasing now cancels (v0.34). */
     var away by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    var choosingPhoto by remember { mutableStateOf(false) }
+    /** v0.38: the Anexar sheet (photo, video, gallery, drawing and the stickers) is open. */
+    var choosingPhoto by remember { mutableStateOf(openStickers) }
+    /** v0.38: a recording started by a tap (Gravar áudio on the home, or TalkBack): tap the button to send, no holding. */
+    var byTap by remember { mutableStateOf(tapPreview) }
+    /** v0.38: Gravar áudio on the home asked for the microphone; when it's allowed, recording starts. */
+    var recordWhenAllowed by remember { mutableStateOf(false) }
     var preview by remember { mutableStateOf<String?>(null) }
     var photoError by remember { mutableStateOf(false) }
     var micError by remember { mutableStateOf(false) }
@@ -137,7 +143,8 @@ fun Conversation(
     var bigPhoto by remember { mutableStateOf<String?>(null) }
     var drawing by remember { mutableStateOf(false) }
     var stickerNote by remember { mutableStateOf<String?>(null) }
-    androidx.compose.runtime.DisposableEffect(contactId) { onDispose { app.oie.data.ReadAloud.stop() } }
+    // v0.38: leaving the chat (Back, Home) mid-recording throws the recording away, so the microphone never stays on.
+    androidx.compose.runtime.DisposableEffect(contactId) { onDispose { app.oie.data.ReadAloud.stop(); app.oie.data.Voice.stop(context, keep = false) } }
     /** A video or GIF being prepared to send (v0.28); its preview shows over the chat. */
     var videoDraft by remember { mutableStateOf<VideoDraft?>(null) }
     fun received(uri: Uri?) {
@@ -187,7 +194,13 @@ fun Conversation(
             }
         }
     }
-    val askMic = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    val askMic = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        // v0.38: from the home's Gravar áudio, the recording starts once the microphone is allowed.
+        if (granted && recordWhenAllowed) {
+            if (app.oie.data.Voice.start(context)) { micError = false; byTap = true; recordingSince = state.clock() } else micError = true
+        }
+        recordWhenAllowed = false
+    }
     val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { received(it) }
     // v0.33: "Criar figurinha": a photo from the gallery becomes a round sticker with the family ones.
     val makeSticker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -199,7 +212,7 @@ fun Conversation(
             if (made == null) { stickerNote = tx.stickerError; return@launch }
             state.stickers.add(0, app.oie.logic.FamilySticker("own-${System.nanoTime()}", made, animated = false, saved = true, at = state.clock()))
             stickerNote = tx.stickerMade
-            stickers = true
+            choosingPhoto = true
         }
     }
     // v0.28: the camera app records a video, at most 3 minutes; it's shrunk before sending.
@@ -240,11 +253,21 @@ fun Conversation(
     LaunchedEffect(micError, photoError) { if (micError || photoError) { delay(NOTE_MS); micError = false; photoError = false } }
 
     fun queue(m: Message) { pending = m }
+    // v0.38: a card on the home opened this chat to record: it starts at once, by tap (the mic sends, Cancelar drops it).
+    // The route forgets the request, so coming back to the chat later doesn't record again.
+    LaunchedEffect(Unit) {
+        if (start != app.oie.data.Start.RECORD) return@LaunchedEffect
+        if (state.route == Route.Conversation(contactId, start)) state.route = Route.Conversation(contactId)
+        if (!canSend) return@LaunchedEffect
+        if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            if (app.oie.data.Voice.start(context)) { micError = false; byTap = true; recordingSince = state.clock() } else micError = true
+        } else { recordWhenAllowed = true; askMic.launch(android.Manifest.permission.RECORD_AUDIO) }
+    }
     /** Ends a recording: sends it (if it's a second or more) or throws it away. */
     fun stopRecording(send: Boolean) {
         if (recordingSince == 0L) return
         val secs = ((state.clock() - recordingSince) / 1000).toInt()
-        recordingSince = 0; away = false
+        recordingSince = 0; away = false; byTap = false
         // Under 1 s is a slip, not a message (flow branch 3a); v0.34 audit: it says how to record.
         if (send && secs < 1) slip = true
         val media = app.oie.data.Voice.stop(context, keep = send && secs >= 1)
@@ -367,24 +390,25 @@ fun Conversation(
                     Text(if (left <= 10) tx.recordingEnds(left.coerceAtLeast(0)) else tx.recording + " · " + clockOf(((now - recordingSince) / 1000).toInt().coerceAtLeast(0)),
                         style = OieType.label, color = if (left <= 10) c.coralText else c.ink, modifier = Modifier.weight(1f))
                     // Round 3: on a phone the hint shows only when it matters (slid off), so the clock and Cancelar fit.
-                    if (away || !app.oie.ui.common.isCompact) Text(if (away) tx.releaseToCancel else tx.releaseToSend, style = OieType.bodySmall, color = if (away) c.coralText else c.muted)
+                    // v0.38: started by a tap, nothing is held: the hint says to tap the button.
+                    if (away || !app.oie.ui.common.isCompact) Text(if (away) tx.releaseToCancel else if (byTap) tx.tapToSend else tx.releaseToSend, style = OieType.bodySmall, color = if (away) c.coralText else c.muted)
                     // v0.34 audit round 2: a recording started by a tap (TalkBack) has a way out; with a finger on
                     // the button, sliding off cancels.
-                    QuietButton(tx.cancel, { app.oie.data.Voice.stop(context, keep = false); recordingSince = 0; away = false })
+                    QuietButton(tx.cancel, { app.oie.data.Voice.stop(context, keep = false); recordingSince = 0; away = false; byTap = false })
                 } else {
-                    // v0.29 audit: on a narrow screen (a phone, a bubble) the camera and stickers step aside while the
-                    // kid types, so the field has room; they come back when it's empty.
+                    // v0.38: one Anexar button (photo, video, gallery, drawing, stickers) instead of Foto and Figurinha.
+                    // v0.29 audit: on a narrow screen (a phone, a bubble) it steps aside while the kid types, so the
+                    // field has room; it comes back when the field is empty. A word on the tablet; on a phone the icon
+                    // alone, labelled for TalkBack (decision 0010).
                     val compact = app.oie.ui.common.isCompact
                     if (!compact || draft.isBlank()) {
-                        // v0.34 audit: with a word on the tablet (README §9: icons with labels on the kid side); a phone
-                        // keeps the icons alone for the field's room (decision 0010), labelled for TalkBack.
-                        QuietButton(if (compact) null else tx.photoShort, { choosingPhoto = true }, icon = R.drawable.gg_ic_camera, contentDescription = tx.photoButton)
-                        QuietButton(if (compact) null else tx.stickerShort, { stickers = true }, icon = R.drawable.gg_ic_sticker, contentDescription = tx.stickerButton)
+                        QuietButton(if (compact) null else tx.attach, { choosingPhoto = true }, icon = R.drawable.gg_ic_plus, contentDescription = tx.attachA11y)
                     }
                     // v0.29: in a chat's bubble the field is focused at once, so the keyboard comes up to answer.
                     val focus = remember { androidx.compose.ui.focus.FocusRequester() }
                     val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-                    if (inBubble) LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+                    // v0.38: Escrever on the home's card opens the chat the same way.
+                    if (inBubble || start == app.oie.data.Start.WRITE) LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
                     val focused by interaction.collectIsFocusedAsState()
                     val shape = RoundedCornerShape(OTokens.Radius.radiusS)
                     androidx.compose.foundation.text.BasicTextField(
@@ -417,7 +441,8 @@ fun Conversation(
                 if (canSend && draft.isBlank()) RecordButton(
                     recording = recordingSince > 0,
                     onAway = { away = it },
-                    onStart = {
+                    onStart = { tap ->
+                        byTap = tap
                         // v0.11: a real recording. Without the microphone permission, ask for it (the parent was asked at setup).
                         if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                             if (app.oie.data.Voice.start(context)) { micError = false; recordingSince = state.clock() } else micError = true
@@ -438,7 +463,13 @@ fun Conversation(
                 pending = null
             }
         }
-        if (choosingPhoto) PhotoSourceSheet(first = state.lastPhotoSource, onPick = ::open, onClose = { choosingPhoto = false })
+        if (choosingPhoto) AttachSheet(state, first = state.lastPhotoSource, onPick = ::open, onMake = { makeSticker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, onSticker = { w ->
+            choosingPhoto = false
+            queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.STICKER, w))
+        }, onFamilySticker = { s ->
+            choosingPhoto = false
+            queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.STICKER, media = s.media))
+        }, onClose = { choosingPhoto = false })
         // v0.34 audit: problems are announced, go by themselves, and a tap puts them away.
         if (micError || photoError) Text(
             if (micError) tx.micError else tx.photoError, style = OieType.body, color = c.coralText,
@@ -486,13 +517,6 @@ fun Conversation(
                     .border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusS)).padding(OTokens.Spacing.space3),
             )
         }
-        if (stickers) StickerSheet(state, onMake = { makeSticker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, onPick = { w ->
-            stickers = false
-            queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.STICKER, w))
-        }, onPickFamily = { s ->
-            stickers = false
-            queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.STICKER, media = s.media))
-        }, onClose = { stickers = false })
         menuFor?.let { m ->
             ReactionSheet(m,
                 onReact = { e -> state.react(m.id, e); menuFor = null },
@@ -514,7 +538,7 @@ fun Conversation(
 
 /** Hold to record, release to send; tap to start and tap again to send for anyone who can't hold (WCAG 2.5.7). */
 @Composable
-private fun RecordButton(recording: Boolean, onStart: () -> Unit, onStop: (send: Boolean) -> Unit, onAway: (Boolean) -> Unit) {
+private fun RecordButton(recording: Boolean, onStart: (tap: Boolean) -> Unit, onStop: (send: Boolean) -> Unit, onAway: (Boolean) -> Unit) {
     val c = OieTheme.colors
     val tx = str
     // v0.34 audit: one gesture for the whole press (it was restarted mid-press when recording began, which could
@@ -529,13 +553,13 @@ private fun RecordButton(recording: Boolean, onStart: () -> Unit, onStop: (send:
             .semantics {
                 role = Role.Button
                 contentDescription = if (recording) tx.recordingA11y else tx.recordA11y
-                onClick { if (recording) onStop(true) else onStart(); true }
+                onClick { if (recording) onStop(true) else onStart(true); true }
             }
             .pointerInput(Unit) {
                 awaitEachGesture {
                     val down = awaitFirstDown()
                     if (isRecording) { stop(true); return@awaitEachGesture }
-                    start()
+                    start(false)
                     val slop = viewConfiguration.touchSlop * 2
                     var off = false
                     while (true) {
@@ -636,14 +660,13 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
     }
 }
 
+/** v0.38: the stickers, inside the Anexar sheet: Oiê's set, the family ones kept, new ones to keep, and making one. */
 @Composable
-private fun StickerSheet(state: AppState, onMake: () -> Unit, onPick: (String) -> Unit, onPickFamily: (app.oie.logic.FamilySticker) -> Unit, onClose: () -> Unit) {
+private fun StickerRows(state: AppState, onMake: () -> Unit, onPick: (String) -> Unit, onPickFamily: (app.oie.logic.FamilySticker) -> Unit) {
     val c = OieTheme.colors
     val tx = str
-    // v0.34 audit: the shared sheet (Back closes it, the scrim darkens in both themes, one 600dp column).
-    app.oie.ui.common.BottomSheet(onClose) {
         run {
-            Text(tx.stickers, style = OieType.title, color = c.ink)
+            Text(tx.stickers, style = OieType.label, color = c.ink)
             val tile = OTokens.Size.contactTile + OTokens.Spacing.space6
             val saved = state.stickers.filter { it.saved }
             val fresh = state.stickers.filter { !it.saved }
@@ -680,7 +703,6 @@ private fun StickerSheet(state: AppState, onMake: () -> Unit, onPick: (String) -
             // v0.33: a sticker from a photo, kept with the family ones.
             QuietButton(tx.makeSticker, onMake, Modifier.height(OTokens.Size.button), icon = R.drawable.gg_ic_plus)
         }
-    }
 }
 
 /** A family sticker on the tile Oiê's own use (page colour, large radius). Empty if the file is missing. */
@@ -701,15 +723,20 @@ private fun hour(tx: app.oie.ui.text.Strings, at: Long): String {
 
 /** "Câmera" or "Galeria", the last one used first (flow: Remembers). */
 @Composable
-internal fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: () -> Unit) {
+internal fun AttachSheet(
+    state: AppState, first: String, onPick: (String) -> Unit, onMake: () -> Unit, onSticker: (String) -> Unit,
+    onFamilySticker: (app.oie.logic.FamilySticker) -> Unit, onClose: () -> Unit,
+) {
     val c = OieTheme.colors
     val tx = str
     // v0.28: a photo, a video, or the gallery (photos, videos and GIFs); the last one used first.
     // v0.33: Desenhar comes last, after the usual ones.
-    val options = listOf("camera" to tx.takePhoto, "video" to tx.recordVideo, "gallery" to tx.gallery).sortedBy { if (it.first == first) 0 else 1 } + ("draw" to tx.draw)
+    // v0.38: one sheet for everything the kid can attach, the stickers below: a sticker is still two taps.
+    val options = listOf("camera" to tx.takePhoto, "video" to tx.recordVideo, "gallery" to tx.galleryShort).sortedBy { if (it.first == first) 0 else 1 } + ("draw" to tx.draw)
     app.oie.ui.common.BottomSheet(onClose) {
-        run {
-            Text(tx.photoOrVideo, style = OieType.title, color = c.ink)
+        // It scrolls: at large text, or with new family stickers, it can be taller than a phone.
+        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
+            Text(tx.attach, style = OieType.title, color = c.ink)
             app.oie.ui.setup.ButtonRow {
                 options.forEach { (key, label) ->
                     // v0.34 audit round 2: words only, the same for all four (the set has no video or pencil icon,
@@ -717,6 +744,8 @@ internal fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: 
                     QuietButton(label, { onPick(key) })
                 }
             }
+            // less-is-more: no line before the stickers; their "Figurinhas" label groups them.
+            StickerRows(state, onMake, onSticker, onFamilySticker)
         }
     }
 }
