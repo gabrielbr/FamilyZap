@@ -89,7 +89,7 @@ Recording is real: Opus in Ogg on Android 10 and newer (WhatsApp's own voice-not
 
 ## Notes
 - **Copy** follows `01 Brand/voice.md`: Enviar, Desfazer, Cancelar, Câmera, Galeria, Trocar, Entendi.
-- **Data:** messages go out from the tablet through the parent's WhatsApp link. Nothing is stored on our servers.
+- **Data:** messages go out from the tablet through the parent's WhatsApp link. Oiê has no servers; nothing reaches us.
 - **Product law:** the kid can only reach allowed contacts. No search, no new numbers, no forwarding to people outside the list.
 - **Open:** the Oiê sticker set still has to be drawn (Stage 5 assets); the 2-minute limit for voice messages is an assumption to test.
 

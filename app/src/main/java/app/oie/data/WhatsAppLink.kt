@@ -7,7 +7,7 @@ import app.oie.logic.Message
  * The link to the parent's WhatsApp (decision 0001: a linked device on the kid's tablet).
  * v0.1 ships only [SampleLink]: no real connection, no network. The real implementation comes after
  * the message rule is tested with real chats (STATUS.md). Whatever implements this keeps the product
- * law: nothing is stored on our servers, and only allowed chats ever reach the app.
+ * law: Oiê has no servers (the link talks only to WhatsApp), and only allowed chats ever reach the app.
  */
 interface WhatsAppLink {
     val connected: Boolean

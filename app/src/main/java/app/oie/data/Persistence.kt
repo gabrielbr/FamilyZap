@@ -18,7 +18,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Saving on the tablet (product law: nothing on our servers). The whole state is one JSON document,
+ * Saving on the tablet (product law: Oiê has no servers). The whole state is one JSON document,
  * sealed with AES-GCM under a key that never leaves the Android Keystore, written atomically to the
  * app's private files. The parent area is never restored open: it always asks for the PIN again.
  */

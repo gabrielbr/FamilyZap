@@ -169,7 +169,7 @@ _The owner's report (2026-11-19): after updating, Oiê says it needs to connect 
 - The last quiet hours used (for the parent area later).
 
 ## Notes
-- **Data:** the WhatsApp link, names, PIN (hashed) and settings live on the tablet only. Nothing goes to our servers.
+- **Data:** the WhatsApp link, names, PIN (hashed) and settings live on the tablet only. Oiê has no servers; nothing reaches us.
 - **Self-update** (the core rule) applies to the tablet app from the first release. The "Check for updates" row lives in the parent area's About.
 - **Distribution:** Play may not accept the app, so it may ship as a direct APK (open item in STATUS). Setup starts after install either way.
 - **Copy** follows `01 Brand/voice.md`. "Dispositivos conectados" and "Conectar um dispositivo" are WhatsApp's own menu names, used only to guide the parent there.

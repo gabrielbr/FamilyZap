@@ -1,6 +1,6 @@
 # Oiê website (oie.app)
 
-The landing page: one static page, no build step, no tracking.
+The landing page: static pages, no build step, no analytics, no tracking, no cookies.
 
 **v2 (2026-11-20, decision 0013):** a scrolling story told with people.
 - **Picking a family:** the visitor picks son or daughter (Tito or Lia), mother or father (Ana or Paulo), and who they write to: Vovó, Vovô, Tia Bia or Lucas, a school friend. The whole story uses those names.
@@ -17,6 +17,8 @@ The landing page: one static page, no build step, no tracking.
   6. The parent holds the tablet, in the parents' area.
 - **On a phone:** the stage pins over the top of the screen and shows one person at a time.
 - **Reduced motion:** nothing types or cycles; each step shows its end state.
+
+**The safety page (2026-11-20, flow `docs/flows/website-safety.md`):** `seguranca/` (PT) and `safety/` (EN), static pages with no script. At the top, why Oiê exists (the home phone of the 90s, no ads, no servers of ours, no analytics or tracking). Below it, a guide for parents: talking first, the tools parents already have (Family Link and others), the risks at 9–12, Brazil's rules and where to get help. Every item links to its official source, and the page shows the date it was last checked; **re-check the links and facts whenever the page changes**. Styles in `assets/read.css`. The landing page links to it from the nav ("Segurança") and the footer.
 
 **Files:**
 - `index.html`: the page, Portuguese first, with English through the switch or `?lang=en`. The silhouettes and line icons are inline SVG symbols.

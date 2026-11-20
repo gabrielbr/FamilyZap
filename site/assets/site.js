@@ -71,7 +71,7 @@
     yoursH: "What stays with you.",
     f1: "<b>Only the people you approve.</b> Family or friends: your kid talks with the people on their list, and only those people reach them.",
     f2: "<b>You see what goes out.</b> Messages go out from your WhatsApp, so they’re on your phone too. Your kid knows this from day one.",
-    f3: "<b>Everything stays on the tablet.</b> Messages and contacts stay on your own device. No ads and no tracking.",
+    f3: "<b>Nothing goes through us.</b> Oiê has no servers: the tablet links to your WhatsApp like WhatsApp Web. Messages and contacts stay on your own devices. No analytics, no ads, no tracking.",
     noticeH: "Notice",
     n1: "Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does. <b>It is not affiliated with WhatsApp or Meta.</b>",
     n2: "Use at your own risk: linking a device is subject to WhatsApp’s terms, and WhatsApp may restrict numbers that use third-party apps. Oiê sends at a person’s pace, one message at a time, and explains this before you link.",
@@ -80,6 +80,7 @@
     q2: "Can my kid talk to friends?", a2: "Yes, if you add the contact. The friend gets it from your number, with your kid’s name in front. Your kid only talks to people you approve, and no one else reaches them through Oiê.",
     q3: "Does my kid need a phone?", a3: "No. Oiê runs on an Android tablet you already have and uses your WhatsApp.",
     q4: "Is Oiê made by WhatsApp?", a4: "No. Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does, and it is not affiliated with WhatsApp or Meta. Use is subject to WhatsApp’s terms, and WhatsApp may restrict numbers that use third-party apps. That’s why Oiê sends at a person’s pace, one message at a time.",
+    q9: "Does Oiê keep anything about my family?", a9: "No. Oiê has no servers. The tablet links to your WhatsApp like WhatsApp Web, and messages go only through WhatsApp. There are no analytics, ads or tracking. The only other connection checks for a new version of Oiê on its public GitHub page.",
     q5: "Do I see what my kid sends?", a5: "Yes. Messages go out from your WhatsApp, so they’re on your phone too. Your kid is told this the first time.",
     q6: "Can they see and post status updates?", a6: "Yes, if you turn it on in settings. Your kid sees updates from their contacts, and only those people see what your kid posts.",
     q7: "Can they make calls?", a7: "Not yet. For now: messages, voice notes, photos, videos and stickers.",
@@ -88,6 +89,7 @@
     g1: "On your kid’s tablet, tap Download Oiê and open the file.", g2: "If Android asks, allow installing apps from the browser.",
     g3: "Open Oiê: your name, your kid’s, and a QR code you scan in your WhatsApp.", g4: "Choose the contacts, family or friends. Your kid can send the first hello.",
     getSmall: "For Android 8 or newer. The file comes from Oiê’s releases page on GitHub, with each release’s SHA-256 sum.",
+    navSafety: "Safety", footSafety: "Why Oiê, and kids safe online", navSafetyHref: "safety/",
     footLine: "Family, within reach.", footAll: "All releases", footLib: "whatsmeow (MPL-2.0)", footPatch: "The whatsmeow file Oiê modifies",
     footLegal: "Oiê is an independent app, not affiliated with WhatsApp or Meta. WhatsApp is a trademark of Meta. The screens on this page are example drawings.",
     title: "Oiê: family within reach, from your kid’s tablet",
@@ -99,6 +101,7 @@
   document.querySelectorAll("[data-t]").forEach((el) => (PT[el.dataset.t] = el.textContent));
   document.querySelectorAll("[data-t-html]").forEach((el) => (PT[el.dataset.tHtml] = el.innerHTML));
   document.querySelectorAll("[data-t-aria]").forEach((el) => (PT[el.dataset.tAria] = el.getAttribute("aria-label")));
+  document.querySelectorAll("[data-t-href]").forEach((el) => (PT[el.dataset.tHref] = el.getAttribute("href")));
   PT.title = document.title;
   PT.desc = document.querySelector('meta[name="description"]').content;
 
@@ -122,6 +125,7 @@
     all("[data-t]").forEach((el) => { if (d[el.dataset.t] != null) el.textContent = d[el.dataset.t]; });
     all("[data-t-html]").forEach((el) => { if (d[el.dataset.tHtml] != null) el.innerHTML = d[el.dataset.tHtml]; });
     all("[data-t-aria]").forEach((el) => { if (d[el.dataset.tAria] != null) el.setAttribute("aria-label", d[el.dataset.tAria]); });
+    all("[data-t-href]").forEach((el) => { if (d[el.dataset.tHref] != null) el.setAttribute("href", d[el.dataset.tHref]); });
     document.title = d.title;
     $('meta[name="description"]').content = d.desc;
     all(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));

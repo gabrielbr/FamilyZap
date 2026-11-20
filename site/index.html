@@ -26,6 +26,7 @@
   {"@type":"Question","name":"A criança pode falar com os amigos?","acceptedAnswer":{"@type":"Answer","text":"Pode, se você adicionar o contato. O amigo recebe do seu número, com o nome da criança na frente. A criança só fala com quem você aprovar, e ninguém de fora fala com ela pelo Oiê."}},
   {"@type":"Question","name":"A criança precisa de um celular?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê fica num tablet Android que vocês já têm e usa o seu WhatsApp."}},
   {"@type":"Question","name":"O Oiê é do WhatsApp?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê é um app independente, que conecta ao seu WhatsApp como o WhatsApp Web faz, e não é afiliado ao WhatsApp nem à Meta. O uso segue os termos do WhatsApp, que pode restringir números que usam apps de terceiros. Por isso o Oiê manda no ritmo de uma pessoa, uma mensagem de cada vez."}},
+  {"@type":"Question","name":"O Oiê guarda alguma coisa sobre a minha família?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê não tem servidor. O tablet conecta ao seu WhatsApp como o WhatsApp Web, e as mensagens vão só pelo WhatsApp. Não tem análise de uso, anúncio nem rastreamento. A única outra conexão é para ver se há versão nova do Oiê, na página pública dele no GitHub."}},
   {"@type":"Question","name":"Eu vejo o que a criança manda?","acceptedAnswer":{"@type":"Answer","text":"Vê. As mensagens saem do seu WhatsApp, então também ficam no seu celular. A criança fica sabendo disso no primeiro uso."}},
   {"@type":"Question","name":"Dá para ver e postar status?","acceptedAnswer":{"@type":"Answer","text":"Dá, se você ligar nos ajustes. A criança vê as novidades de quem está nos contatos dela, e o que ela posta só essas pessoas veem."}},
   {"@type":"Question","name":"Dá para fazer ligação?","acceptedAnswer":{"@type":"Answer","text":"Ainda não. Por enquanto: mensagens, áudios, fotos, vídeos e figurinhas."}},
@@ -64,6 +65,7 @@
     <nav class="nav" aria-label="Oiê">
       <a class="nav__logo" href="#" aria-label="Oiê"><img src="assets/oie-wordmark-white.svg" alt="Oiê" width="92" height="84"></a>
       <div class="nav__right">
+        <a class="nav__link" href="seguranca/" data-t="navSafety" data-t-href="navSafetyHref">Segurança</a>
         <div class="lang" role="group" aria-label="Idioma" data-t-aria="langGroup">
           <button type="button" data-lang="pt" aria-pressed="true" lang="pt-BR">PT</button>
           <button type="button" data-lang="en" aria-pressed="false" lang="en">EN</button>
@@ -231,7 +233,7 @@
         <ul class="facts">
           <li><span class="facts__dot" aria-hidden="true"></span><span data-t-html="f1"><b>Só quem você aprovar.</b> Família ou amigos: a criança fala com quem está na lista dela, e só essas pessoas chegam até ela.</span></li>
           <li><span class="facts__dot" aria-hidden="true"></span><span data-t-html="f2"><b>Você vê o que sai.</b> As mensagens saem do seu WhatsApp, então ficam no seu celular também. A criança sabe disso desde o primeiro dia.</span></li>
-          <li><span class="facts__dot" aria-hidden="true"></span><span data-t-html="f3"><b>Tudo fica no tablet.</b> Mensagens e contatos ficam no aparelho de vocês. Sem anúncios e sem rastreamento.</span></li>
+          <li><span class="facts__dot" aria-hidden="true"></span><span data-t-html="f3"><b>Nada passa por nós.</b> O Oiê não tem servidor: o tablet conecta ao seu WhatsApp como o WhatsApp Web. Mensagens e contatos ficam nos aparelhos de vocês. Sem análise de uso, sem anúncios, sem rastreamento.</span></li>
         </ul>
       </div>
     </section>
@@ -245,6 +247,7 @@
           <details><summary data-t="q2">A criança pode falar com os amigos?</summary><p data-t="a2">Pode, se você adicionar o contato. O amigo recebe do seu número, com o nome da criança na frente. A criança só fala com quem você aprovar, e ninguém de fora fala com ela pelo Oiê.</p></details>
           <details><summary data-t="q3">A criança precisa de um celular?</summary><p data-t="a3">Não. O Oiê fica num tablet Android que vocês já têm e usa o seu WhatsApp.</p></details>
           <details><summary data-t="q4">O Oiê é do WhatsApp?</summary><p data-t="a4">Não. O Oiê é um app independente, que conecta ao seu WhatsApp como o WhatsApp Web faz, e não é afiliado ao WhatsApp nem à Meta. O uso segue os termos do WhatsApp, que pode restringir números que usam apps de terceiros. Por isso o Oiê manda no ritmo de uma pessoa, uma mensagem de cada vez.</p></details>
+          <details><summary data-t="q9">O Oiê guarda alguma coisa sobre a minha família?</summary><p data-t="a9">Não. O Oiê não tem servidor. O tablet conecta ao seu WhatsApp como o WhatsApp Web, e as mensagens vão só pelo WhatsApp. Não tem análise de uso, anúncio nem rastreamento. A única outra conexão é para ver se há versão nova do Oiê, na página pública dele no GitHub.</p></details>
           <details><summary data-t="q5">Eu vejo o que a criança manda?</summary><p data-t="a5">Vê. As mensagens saem do seu WhatsApp, então também ficam no seu celular. A criança fica sabendo disso no primeiro uso.</p></details>
           <details><summary data-t="q6">Dá para ver e postar status?</summary><p data-t="a6">Dá, se você ligar nos ajustes. A criança vê as novidades de quem está nos contatos dela, e o que ela posta só essas pessoas veem.</p></details>
           <details><summary data-t="q7">Dá para fazer ligação?</summary><p data-t="a7">Ainda não. Por enquanto: mensagens, áudios, fotos, vídeos e figurinhas.</p></details>
@@ -289,6 +292,7 @@
       <p data-t="footLine">A família ao alcance.</p>
     </div>
     <ul>
+      <li><a href="seguranca/" data-t="footSafety" data-t-href="navSafetyHref">Por que o Oiê, e crianças seguras na internet</a></li>
       <li><a href="https://github.com/gabrielbr/oie-releases/releases" rel="noopener" data-t="footAll">Todas as versões</a></li>
       <li><a href="https://github.com/tulir/whatsmeow" rel="noopener" data-t="footLib">whatsmeow (MPL-2.0)</a></li>
       <li><a href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener" data-t="footPatch">O arquivo do whatsmeow que o Oiê modifica</a></li>

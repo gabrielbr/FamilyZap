@@ -76,6 +76,7 @@ img, svg { display: block; }
 .nav__logo img { width: 92px; height: auto; }
 .nav__right { display: flex; align-items: center; gap: var(--s4); }
 .nav__get { display: none; }
+.nav__link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--brand-ink); }
 .lang { display: inline-flex; border: 1.5px solid var(--brand-ink); border-radius: var(--r-pill); overflow: hidden; }
 .lang button { font: 700 0.875rem/1 "Nunito", sans-serif; color: var(--brand-ink); background: transparent; border: 0; min-height: 44px; min-width: 48px; padding: 0 var(--s3); cursor: pointer; }
 .lang button[aria-pressed="true"] { background: var(--brand-ink); color: var(--brand-cream); }

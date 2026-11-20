@@ -372,7 +372,7 @@ object Pt : Strings {
         "Como mando figurinhas para $kid?" to "No seu WhatsApp, mande a figurinha para você mesmo, na conversa com o seu próprio nome. Ela aparece para $kid em Figurinhas, em Novas de $parent, e $kid escolhe se guarda. Só as figurinhas dessa conversa chegam ao Oiê; o resto dela fica só com você. Funciona com o WhatsApp de verdade ligado.",
         "Posso mudar algo pelo meu WhatsApp?" to "Sim. Numa conversa do seu WhatsApp, mande /$kid (ou /um apelido) e o Oiê responde na sua conversa com você mesmo, com a lista: parar, voltar, adicionar e remover. O comando vale para a conversa onde você mandou. Quem está nela vê o seu comando, mas não as respostas. Só o seu WhatsApp pode usar.",
         "Esqueci o PIN" to "Na tela do PIN, toque em Esqueci o PIN e conecte o mesmo WhatsApp de novo. Isso prova que é você. Depois crie um PIN novo.",
-        "Onde ficam as mensagens e as fotos?" to "Só neste tablet, guardadas de forma protegida. Nada vai para um servidor nosso. O Oiê não tem anúncios e não acompanha o que $kid faz.",
+        "Onde ficam as mensagens e as fotos?" to "Só neste tablet, guardadas de forma protegida, e no seu WhatsApp. O Oiê não tem servidor: o tablet conecta ao seu WhatsApp do jeito do próprio WhatsApp, como o WhatsApp Web, e as mensagens vão só pelo WhatsApp. Sem análise de uso, sem anúncios, sem rastreamento: nada sobre $kid ou a família chega até nós. A única outra conexão é para ver se há versão nova do Oiê, na página pública dele no GitHub.",
     )
     override fun aboutVersion(v: String) = "Oiê $v, versão de teste. Usa o seu WhatsApp de verdade."
     override val notWhatsApp = "O Oiê não é feito nem aprovado pelo WhatsApp ou pela Meta."
@@ -684,7 +684,7 @@ object En : Strings {
         "How do I send stickers to $kid?" to "In your WhatsApp, send the sticker to yourself, in the chat with your own name. It shows for $kid under Stickers, in New from $parent, and $kid chooses whether to keep it. Only stickers from that chat reach Oiê; the rest of it stays with you. Works once the real WhatsApp is on.",
         "Can I change things from my WhatsApp?" to "Yes. In a chat on your WhatsApp, send /$kid (or /a nickname) and Oiê answers in your chat with yourself, with the list: stop, start, add and remove. The command works on the chat you sent it in. People in that chat see your command, but not the answers. Only your WhatsApp can use them.",
         "I forgot the PIN" to "On the PIN screen, tap I forgot the PIN and link the same WhatsApp again. That proves it's you. Then create a new PIN.",
-        "Where are the messages and photos kept?" to "Only on this tablet, stored securely. Nothing goes to a server of ours. Oiê has no ads and doesn't track what $kid does.",
+        "Where are the messages and photos kept?" to "Only on this tablet, stored securely, and in your WhatsApp. Oiê has no servers: the tablet links to your WhatsApp the way WhatsApp itself does, like WhatsApp Web, and messages go only through WhatsApp. No analytics, no ads, no tracking: nothing about $kid or your family reaches us. The only other connection checks for a new version of Oiê on its public GitHub page.",
     )
     override fun aboutVersion(v: String) = "Oiê $v, a test version. It uses your real WhatsApp."
     override val notWhatsApp = "Oiê isn't made or approved by WhatsApp or Meta."
