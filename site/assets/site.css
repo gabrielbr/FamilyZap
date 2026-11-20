@@ -138,11 +138,20 @@ img, svg { display: block; }
 .actor { margin: 0; display: grid; justify-items: center; position: relative; }
 /* Only the drawing steps back; the names under it keep their full contrast. */
 .actor > .sil, .actor > .hold { transition: opacity var(--t-scene) var(--ease), filter var(--t-scene) var(--ease); }
-/* People not in focus step back: the person fades, their screen loses its colour but keeps its contrast. */
+/* People not in focus step back: the person fades and their screen goes grey and lighter. The screens are pictures
+   (aria-hidden, their words are in the step text), so WCAG 1.4.3's exemption for text in a picture applies. */
 .stage:not([data-step="0"]) .actor > .sil { opacity: 0.4; }
-.stage:not([data-step="0"]) .actor > .hold { filter: grayscale(1); }
+.stage:not([data-step="0"]) .actor > .hold { filter: grayscale(1); --bezel: var(--gds-muted); }
+/* Lighter, but solid: a wash of the page colour over the screen (opacity would show the person through the device). */
+.device::after { content: ""; position: absolute; inset: 0; background: var(--gds-page); opacity: 0; pointer-events: none; transition: opacity var(--t-scene) var(--ease); }
+.stage:not([data-step="0"]) .actor > .hold .device::after { opacity: 0.5; }
+.stage:not([data-step="0"]) .actor > .hold .hand { opacity: 0.4; }
 .stage[data-focus="kid"] .actor--kid > :is(.sil, .hold), .stage[data-focus="parent"] .actor--parent > :is(.sil, .hold), .stage[data-focus="recv"] .actor--recv > :is(.sil, .hold),
-.stage[data-step="2"] .actor--kid > :is(.sil, .hold), .stage[data-step="4"] .actor--kid > :is(.sil, .hold), .stage[data-step="4"] .actor--parent > :is(.sil, .hold) { opacity: 1; filter: none; }
+.stage[data-step="2"] .actor--kid > :is(.sil, .hold), .stage[data-step="4"] .actor--kid > :is(.sil, .hold), .stage[data-step="4"] .actor--parent > :is(.sil, .hold) { opacity: 1; filter: none; --bezel: var(--brand-ink); }
+.stage[data-focus="kid"] .actor--kid > .hold .device::after, .stage[data-focus="parent"] .actor--parent > .hold .device::after, .stage[data-focus="recv"] .actor--recv > .hold .device::after,
+.stage[data-step="2"] .actor--kid > .hold .device::after, .stage[data-step="4"] .actor--kid > .hold .device::after, .stage[data-step="4"] .actor--parent > .hold .device::after { opacity: 0; }
+.stage[data-focus="kid"] .actor--kid > .hold .hand, .stage[data-focus="parent"] .actor--parent > .hold .hand, .stage[data-focus="recv"] .actor--recv > .hold .hand,
+.stage[data-step="2"] .actor--kid > .hold .hand, .stage[data-step="4"] .actor--kid > .hold .hand, .stage[data-step="4"] .actor--parent > .hold .hand { opacity: 1; }
 /* Step 6: the parent holds the tablet, so the parent's own figure leaves (one Ana on stage), and the receiver steps back. */
 .stage[data-step="6"] .actor--parent { visibility: hidden; }
 .stage[data-step="6"] .actor--recv > .sil { opacity: 0.25; }
@@ -160,8 +169,8 @@ img, svg { display: block; }
 .sil .hd { transform-box: view-box; transform-origin: 100px 150px; transition: transform var(--t-scene) var(--ease); }
 /* Typing: the head tips down towards the device, the thumbs tap. */
 .actor.is-typing .hd { transform: rotate(5deg) translateY(4px); }
-.actor.is-typing .hand { animation: tap 0.36s var(--ease) infinite; }
-.actor.is-typing .hand--r { animation-delay: 0.18s; }
+.actor.is-typing .hand { animation: tap calc(var(--t-std) * 2) var(--ease) infinite; }
+.actor.is-typing .hand--r { animation-delay: var(--t-std); }
 @keyframes tap { 50% { transform: translateY(-7px) scale(0.9); } }
 /* Reading: one nod. The answer lands: the tablet gives one press (97%, the system's press), no bounce. */
 .actor.is-nod .hd { animation: nod calc(var(--t-emph) * 2) var(--ease) var(--t-emph) 1; }
@@ -169,12 +178,12 @@ img, svg { display: block; }
 .actor.is-hop .hold { animation: press calc(var(--t-emph) * 2) var(--ease); }
 @keyframes press { 50% { transform: scale(0.97); } }
 .hold { position: relative; z-index: 2; width: var(--dw); max-width: 100%; margin-top: calc(var(--aw) * var(--pull)); }
-.hand { position: absolute; top: 56%; width: 30px; height: 30px; border-radius: 50%; background: var(--gds-ink); border: 4px solid var(--gds-page); }
+.hand { transition: opacity var(--t-scene) var(--ease); position: absolute; top: 56%; width: 30px; height: 30px; border-radius: 50%; background: var(--gds-ink); border: 4px solid var(--gds-page); }
 .hand--l { left: -15px; }
 .hand--r { right: -15px; }
 .actor figcaption { display: grid; justify-items: center; text-align: center; margin-top: var(--s3); font-size: 0.875rem; line-height: 1.3; color: var(--gds-muted); font-weight: 600; }
 .actor figcaption b { color: var(--gds-ink); font-size: 1rem; font-weight: 800; }
-.device { position: relative; border: 7px solid var(--brand-ink); background: var(--brand-ink); overflow: hidden; }
+.device { position: relative; border: 7px solid var(--bezel, var(--brand-ink)); background: var(--bezel, var(--brand-ink)); transition: border-color var(--t-scene) var(--ease), background-color var(--t-scene) var(--ease); overflow: hidden; }
 .phone { width: 100%; aspect-ratio: 9 / 16; border-radius: 24px; }
 /* In dark, the ink bezel would vanish into the ground: a muted edge keeps the device's shape. */
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .device { box-shadow: 0 0 0 2px var(--gds-muted); } }
@@ -185,8 +194,9 @@ img, svg { display: block; }
 .wire { flex: none; position: relative; height: var(--line); margin: var(--s4) 6% 0; background: var(--gds-ink); border-radius: var(--line); }
 /* The dot rides a run as wide as the wire, so it moves by transform (no layout) along it. */
 .wire__run { position: absolute; inset: 0; transform: translateX(0); transition: transform var(--t-travel) var(--ease); }
-/* The run slides past the wire's end when the dot reaches the receiver: the stage clips it, so the page never scrolls sideways. */
-.stage { overflow-x: clip; }
+/* The run slides past the wire's end when the dot reaches the receiver: the wire clips it (with room for the dot),
+   so the page never scrolls sideways and nothing else on the stage is cut. */
+.wire { overflow: clip; overflow-clip-margin: var(--s3); }
 .wire__dot { position: absolute; top: 50%; left: 0; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--gds-mint); border: 4px solid var(--gds-page); transition: opacity var(--t-emph) var(--ease); opacity: 0; }
 
 /* ---------- Oiê's own screen on the tablet (coral frame, message rows) ---------- */
@@ -249,7 +259,7 @@ img, svg { display: block; }
 .wa .kbd { background: var(--wa-kbd); }
 .device.is-typing .kbd { max-height: 40%; padding: 5px; }
 .kbd__row { display: flex; justify-content: center; gap: 3px; }
-.kbd i { flex: 1; max-width: 13px; height: 13px; border-radius: 3px; background: var(--oie-surface); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18); transition: background-color 80ms linear, transform 80ms linear; }
+.kbd i { flex: 1; max-width: 13px; height: 13px; border-radius: 3px; background: var(--oie-surface); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18); transition: background-color calc(var(--t-std) / 2) linear, transform calc(var(--t-std) / 2) linear; }
 .kbd i.kbd__space { max-width: none; flex: 0 0 55%; }
 .kbd i.is-hit { background: var(--brand-coral); transform: translateY(1px); }
 .wa .kbd i.is-hit { background: var(--wa-send); }
@@ -257,9 +267,9 @@ img, svg { display: block; }
 /* The three dots WhatsApp shows while the other person types. */
 .wa__dots { display: none; gap: 3px; padding: 7px 9px; }
 .wa__dots.is-on { display: inline-flex; }
-.wa__dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--wa-meta); animation: dot 1.1s var(--ease) infinite; }
-.wa__dots i:nth-child(2) { animation-delay: 0.15s; }
-.wa__dots i:nth-child(3) { animation-delay: 0.3s; }
+.wa__dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--wa-meta); animation: dot calc(var(--t-emph) * 4) var(--ease) infinite; }
+.wa__dots i:nth-child(2) { animation-delay: var(--t-std); }
+.wa__dots i:nth-child(3) { animation-delay: calc(var(--t-std) * 2); }
 @keyframes dot { 30% { transform: translateY(-3px); opacity: 0.5; } }
 
 /* Messages appear when their step comes (data-show = the step they arrive in). */
@@ -272,7 +282,7 @@ img, svg { display: block; }
 .stage[data-step="5"] .actor--recv [data-show] { display: block; animation: appear var(--t-scene) var(--ease); }
 
 /* Typing caret. */
-.caret { display: inline-block; width: 1.5px; height: 1.1em; margin-left: 1px; vertical-align: -0.2em; background: currentColor; animation: blink 1s steps(1) infinite; }
+.caret { display: inline-block; width: 1.5px; height: 1.1em; margin-left: 1px; vertical-align: -0.2em; background: currentColor; animation: blink calc(var(--t-emph) * 4) steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
 /* Step 5: the other people a kid can write to. */
@@ -335,8 +345,12 @@ footer { border-top: 1px solid var(--gds-line); }
   .steps { grid-column: 1; grid-row: 2; padding: var(--s8) var(--s4) 40vh; }
   /* While the visitor builds their family, the stage scrolls away with the page, so the whole form is in reach. */
   .stage[data-step="0"] { position: relative; }
-  /* …and step 1 starts in the band under the pinned stage, so its words are never hidden behind it. */
-  .step--intro, .js .step--intro { padding-bottom: 62svh; }
+  /* The stage pins as soon as the form's end slides under it, and step 1 follows right after. */
+  .step--intro, .js .step--intro { padding-bottom: var(--s6); }
+  /* "Ver a história" lands with step 1's heading just under the pinned stage. */
+  #passo-1 { scroll-margin-top: calc(62svh - var(--s16) + var(--s2)); } /* the page's 64px scroll-padding adds to it */
+  /* The stage is already at the top on a phone: no centring shift (it would push the drawing over the words). */
+  .stage.is-pinned > :is(.cast, .wire) { transform: none; }
   .step { min-height: 62vh; justify-content: flex-start; padding-top: var(--s8); }
   .step p { max-width: none; }
   .cast { grid-template-columns: minmax(0, 1fr); justify-items: center; }

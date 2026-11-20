@@ -119,6 +119,8 @@ Radii are 4 (controls), 8 (cards), 16 (pills and chips) and round (rings, faces)
 - **Motion:**
   - scene changes take 250ms and presses 150ms, all on one ease (`cubic-bezier(0.22, 1, 0.36, 1)`), with no bounce;
   - the message's trip along the wire takes 1.2s, the story's one longer motion (decision 0013);
+  - the drawn gestures run on multiples of the same tokens: typing taps at 300ms, the WhatsApp dots and the caret at 1s, and the key flash at 75ms;
+  - out-of-focus people fade, and their screens go grey and lighter. The screens are pictures hidden from screen readers, with their words repeated in the step text (WCAG 1.4.3's exemption for text in a picture).
   - nothing loops forever: the step-5 receivers go round once;
   - with "Remove animations" on, everything shows its end state.
 

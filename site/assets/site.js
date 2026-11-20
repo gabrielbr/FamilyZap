@@ -33,9 +33,9 @@
       kid: { son: { name: "Tito", sil: "son" }, daughter: { name: "Lia", sil: "daughter" } },
       parent: { mother: { name: "Ana", sil: "mother" }, father: { name: "Paulo", sil: "father" } },
       recv: {
-        grandma: { name: "Grandma Rosa", short: "Grandma", init: "GR", the: "Grandma Rosa", of: "Grandma Rosa’s", cap: "in her WhatsApp", msg: "Hi Grandma, I miss you", reply: "Me too, sweetheart. There’s cake on Sunday." },
-        grandpa: { name: "Grandpa Zé", short: "Grandpa", init: "GZ", the: "Grandpa Zé", of: "Grandpa Zé’s", cap: "in his WhatsApp", msg: "Grandpa, will you teach me to fish?", reply: "I will. Sunday, bright and early." },
-        aunt: { name: "Aunt Bia", init: "B", the: "Aunt Bia", of: "Aunt Bia’s", cap: "in her WhatsApp", msg: "Will you come to my birthday?", reply: "I will, and I’ll bring the cake." },
+        grandma: { name: "Grandma Rosa", short: "Rosa", init: "GR", the: "Grandma Rosa", of: "Grandma Rosa’s", cap: "in her WhatsApp", msg: "Hi Grandma, I miss you", reply: "Me too, sweetheart. There’s cake on Sunday." },
+        grandpa: { name: "Grandpa Zé", short: "Zé", init: "GZ", the: "Grandpa Zé", of: "Grandpa Zé’s", cap: "in his WhatsApp", msg: "Grandpa, will you teach me to fish?", reply: "I will. Sunday, bright and early." },
+        aunt: { name: "Aunt Bia", short: "Bia", init: "B", the: "Aunt Bia", of: "Aunt Bia’s", cap: "in her WhatsApp", msg: "Will you come to my birthday?", reply: "I will, and I’ll bring the cake." },
         friend: { name: "Lucas", init: "L", the: "Lucas", of: "Lucas’s", cap: "from school", msg: "Want to play after school?", reply: "Sure. See you at the court." },
       },
       story: {
@@ -294,16 +294,17 @@
     let frame = 0;
     function pick() {
       frame = 0;
-      const line = narrow.matches ? innerHeight * 0.8 : innerHeight * 0.5;
+      // On a phone the words are read in the band under the pinned stage (62% of the screen); on a desktop, mid-screen.
+      const line = narrow.matches ? stage.offsetHeight + 24 : innerHeight * 0.5;
       let best = null, gap = Infinity;
       steps.forEach((s) => {
         const r = s.firstElementChild.getBoundingClientRect();
         const d = Math.abs((r.top + r.bottom) / 2 - line);
         if (d < gap) { gap = d; best = s; }
       });
-      // On a phone the stage would pin over the family form: while any of the form is still on screen, the
-      // story waits at step 0 (the stage scrolls with the page), and starts once the form has gone up.
-      if (narrow.matches && family.getBoundingClientRect().bottom > 0) best = steps[0];
+      // On a phone the stage would pin over the family form: while the form still shows below where the stage
+      // would sit, the story waits at step 0 (the stage scrolls with the page); then it pins and step 1 follows.
+      if (narrow.matches && family.getBoundingClientRect().bottom > stage.offsetHeight) best = steps[0];
       if (best && !heroShows) setStep(Number(best.dataset.step), best.dataset.focus);
     }
     const ask = () => { if (!frame) frame = requestAnimationFrame(pick); };
