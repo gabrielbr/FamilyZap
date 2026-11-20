@@ -52,6 +52,8 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var pinResetFrom by mutableStateOf("")
     /** The kid has reacted once (v0.34): the "hold a message" hint goes. */
     var reactTipUsed by mutableStateOf(false)
+    /** The reaction the kid used last (v0.34): shown first in the sheet. */
+    var lastReaction by mutableStateOf<String?>(null)
     /** When the kid last sent "Preciso de você" (v0.33), for the 5-minute gap. */
     var needYouAt by mutableStateOf(0L)
     /** The kid's name first, then the nicknames. */
@@ -111,6 +113,7 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
         val i = messages.indexOfFirst { it.id == id }
         if (i < 0) return
         reactTipUsed = true
+        lastReaction = emoji
         val (send, after) = app.oie.logic.Reactions.kidTaps(messages[i].reactions, emoji)
         messages[i] = messages[i].copy(reactions = after)
         wa.react(messages[i], send)

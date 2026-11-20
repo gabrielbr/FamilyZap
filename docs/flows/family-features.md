@@ -21,12 +21,12 @@ Every feature keeps the product law: only allowed contacts, nothing to Oiê's se
 
 ## 3. Birthdays
 - In a contact's editor (parent area): **Aniversário**, the day and the month (no year: no age is kept).
-- On the day, the kid's home shows one line at the top, "Hoje é aniversário da Vovó", and tapping it opens her chat.
+- On the day, the kid's home shows one line at the top, "Vovó faz aniversário hoje" (no "da/do": the name works for anyone), and tapping it opens her chat.
 
 ## 4. The gentle nudge
 - In Ajustes e ajuda: **Lembrar Tito de falar com a família**, off by default.
 - It sits after the people on the home screen (audit: it must never push them down).
-- When it's on, and a person hasn't heard from the kid for 7 days, the kid's home shows one line: "Faz uma semana que você não fala com o Vovô". It never shows more than one, and it never counts streaks.
+- When it's on, and a person hasn't heard from the kid for 7 days, the kid's home shows one line: "Uma semana sem falar com Vovô" (v0.34: shorter, one line on a phone). It never shows more than one, and it never counts streaks.
   - Tapping opens the chat.
   - **Agora não** hides it for that person for 7 days.
 - Groups and paused chats are never nudged.

@@ -193,7 +193,7 @@ interface Strings {
     fun latest(v: String): String
     fun couldNotCheck(reason: String): String
     val downloadFailed: String; val checksumFailed: String; val signatureFailed: String; val allowInstalls: String
-    fun releaseOnly(v: String, id: String): String
+    val releaseOnly: String
     val version: String
     fun versionLine(v: String, code: Long): String
     val decimalComma: Boolean
@@ -226,7 +226,9 @@ interface Strings {
     fun and(names: List<String>): String
     val editContact: String
     val forgotTitle: String; val forgotShowCode: String
-    val ok: String; val bubbleWaiting: String
+    val ok: String; val bubbleWaiting: String; val you: String; val why: String; val drawUse: String
+    fun recordingEnds(seconds: Int): String
+    val linkPreparing: String; val linkSlow: String; val whatCanHappen: String; val offlineHome: String
     val newMessages: String; val reactHint: String; val releaseToCancel: String; val holdToRecord: String
     val photoShort: String; val stickerShort: String; val pauseA11y: String; val close: String
     fun downloading(length: String): String
@@ -383,7 +385,7 @@ object Pt : Strings {
     override val checksumFailed = "O download não confere com a soma de verificação da versão, então não foi instalado."
     override val signatureFailed = "O download não foi assinado pelo Oiê, então não foi instalado."
     override val allowInstalls = "Permita instalações deste app e toque em Atualizar de novo."
-    override fun releaseOnly(v: String, id: String) = "A atualização automática só funciona na versão de lançamento ($v / $id)."
+    override val releaseOnly = "A atualização automática só funciona na versão de lançamento."
     override val version = "Versão"
     override fun versionLine(v: String, code: Long) = "Oiê v$v ($code)"
     override val decimalComma = true
@@ -477,7 +479,7 @@ object Pt : Strings {
     override fun needYouWait(minutes: Int) = if (minutes <= 1) "Já foi. Dá para mandar de novo em 1 minuto." else "Já foi. Dá para mandar de novo em $minutes minutos."
     override fun needYouAsk(names: String) = "Mandar “Preciso de você” para $names?"
     override fun needYouSent(names: String) = "Mandado para $names."
-    override fun nudgeLine(name: String) = "Faz uma semana que você não fala com $name"
+    override fun nudgeLine(name: String) = "Uma semana sem falar com $name"
     override val nudgeNotNow = "Agora não"; override val nudgeTitle = "Lembrete de família"
     override fun nudgeSwitch(kid: String) = "Lembrar $kid de falar com a família"
     override fun nudgeBody(kid: String) = "Se $kid passar uma semana sem escrever para alguém, o Oiê mostra um lembrete na tela inicial. Um por vez, sem contar dias."
@@ -496,6 +498,11 @@ object Pt : Strings {
     override val releaseToCancel = "Solte para cancelar"; override val holdToRecord = "Segure o botão enquanto fala."
     override val photoShort = "Foto"; override val stickerShort = "Figurinha"; override val pauseA11y = "Pausar"; override val close = "Fechar"
     override fun downloading(length: String) = "Vídeo de $length, chegando…"
+    override val linkPreparing = "Preparando o código…"; override val linkSlow = "Isso pode levar até 1 minuto."
+    override val whatCanHappen = "O que pode acontecer com o meu WhatsApp?"
+    override val offlineHome = "Sem internet agora. Suas mensagens vão quando ela voltar."
+    override val you = "Você"; override val why = "Por quê?"; override val drawUse = "Usar desenho"
+    override fun recordingEnds(seconds: Int) = "Termina em $seconds s"
     override val ok = "OK"; override val bubbleWaiting = "Ligada. Falta o Android permitir (veja abaixo)."
     override val welcomeTitle = "A família ao alcance."
     override val sectionQuietShort = "Silêncio"; override val sectionHelpShort = "Ajustes"; override val expanded = "Aberto"; override val collapsed = "Fechado"
@@ -659,7 +666,7 @@ object En : Strings {
     override val checksumFailed = "The download didn't match the release's checksum, so it wasn't installed."
     override val signatureFailed = "The download wasn't signed by Oiê, so it wasn't installed."
     override val allowInstalls = "Allow installs from this app, then tap Update again."
-    override fun releaseOnly(v: String, id: String) = "Self-update works in the release build only ($v / $id)."
+    override val releaseOnly = "Self-update works in the release build only."
     override val version = "Version"
     override fun versionLine(v: String, code: Long) = "Oiê v$v ($code)"
     override val decimalComma = false
@@ -752,7 +759,7 @@ object En : Strings {
     override fun needYouWait(minutes: Int) = if (minutes <= 1) "It went. You can send it again in 1 minute." else "It went. You can send it again in $minutes minutes."
     override fun needYouAsk(names: String) = "Send “I need you” to $names?"
     override fun needYouSent(names: String) = "Sent to $names."
-    override fun nudgeLine(name: String) = "It's been a week since you talked to $name"
+    override fun nudgeLine(name: String) = "A week since you talked to $name"
     override val nudgeNotNow = "Not now"; override val nudgeTitle = "Family reminder"
     override fun nudgeSwitch(kid: String) = "Remind $kid to talk to family"
     override fun nudgeBody(kid: String) = "If $kid goes a week without writing to someone, Oiê shows a reminder on the home screen. One at a time, no counting days."
@@ -771,6 +778,11 @@ object En : Strings {
     override val releaseToCancel = "Release to cancel"; override val holdToRecord = "Hold the button while you talk."
     override val photoShort = "Photo"; override val stickerShort = "Sticker"; override val pauseA11y = "Pause"; override val close = "Close"
     override fun downloading(length: String) = "A $length video, on its way…"
+    override val linkPreparing = "Preparing the code…"; override val linkSlow = "This can take up to a minute."
+    override val whatCanHappen = "What could happen to my WhatsApp?"
+    override val offlineHome = "No internet right now. Your messages go when it's back."
+    override val you = "You"; override val why = "Why?"; override val drawUse = "Use drawing"
+    override fun recordingEnds(seconds: Int) = "Ends in $seconds s"
     override val ok = "OK"; override val bubbleWaiting = "On. Android still has to allow it (see below)."
     override val welcomeTitle = "Family, within reach."
     override val sectionQuietShort = "Quiet"; override val sectionHelpShort = "Settings"; override val expanded = "Open"; override val collapsed = "Closed"

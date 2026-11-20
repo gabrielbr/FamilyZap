@@ -73,20 +73,22 @@ fun PeriodEditor(initial: QuietPeriod?, onSave: (QuietPeriod) -> Unit, onDelete:
 
     Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
         Text(if (initial == null) tx.newPeriod else tx.editPeriod, style = OieType.title, color = c.ink)
-        Field(tx.name, tx.periodName(name), { name = it; touched() }, tx.nameHelp)
+        // The stored name is edited as it is (the English names show only in lists).
+        Field(tx.name, name, { name = it; touched() }, tx.nameHelp, names = true)
         Text(tx.days, style = OieType.label, color = c.ink)
         // v0.34 audit: the days wrap on a narrow phone, and each is a real checkbox for TalkBack (checked or not).
         app.oie.ui.setup.ButtonRow {
             DayOfWeek.entries.forEach { d ->
                 val on = d in days
                 Box(
+                    // v0.34 audit round 2: room inside, so a label at large text never touches the edge.
                     Modifier.defaultMinSize(minWidth = OTokens.Spacing.space12, minHeight = OTokens.Spacing.space12)
                         .clip(RoundedCornerShape(OTokens.Radius.radiusL))
                         .background(if (on) c.selected else c.surface)
                         .border(OTokens.Size.hairline, if (on) c.ink else c.line, RoundedCornerShape(OTokens.Radius.radiusL))
                         .toggleable(on, role = Role.Checkbox) { touched(); days = if (on) days - d else days + d },
                     contentAlignment = Alignment.Center,
-                ) { Text(tx.dayShort[d.value - 1], style = OieType.label, color = if (on) c.onSelected else c.ink) }
+                ) { Text(tx.dayShort[d.value - 1], modifier = Modifier.padding(horizontal = OTokens.Spacing.space2), style = OieType.label, color = if (on) c.onSelected else c.ink) }
             }
         }
         app.oie.ui.setup.ButtonRow {

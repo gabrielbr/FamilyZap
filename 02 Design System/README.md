@@ -90,7 +90,7 @@ Full rules in [`01 Brand/imagery-and-icons.md`](../01%20Brand/imagery-and-icons.
 - Files: the design system's `assets/icons/android/gg_ic_*.xml`.
 - Camera, image, sticker, send, link and clock are missing from the set. They are being added to the core in the same style (owner's decision, 2026-11-18), not drawn here.
 - Colour: ink, or muted for secondary; coral only on the one main action.
-- function only, always with a text label on the kid side;
+- function only, always with a text label on the kid side (one exception: the conversation's composer on a narrow screen, decision 0010);
 - never emoji as icons.
 
 ## 10. Components

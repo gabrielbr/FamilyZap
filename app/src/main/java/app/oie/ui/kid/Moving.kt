@@ -202,7 +202,7 @@ fun VideoBubble(media: String?, seconds: Int, tooBig: Boolean, parent: String, o
         }
         return
     }
-    val frame = rememberFirstFrame(rememberBytes(media))
+    val frame = rememberVideoFrame(media)
     Box(
         // Half the column on a tablet; narrower when a phone has less room (v0.27 audit).
         Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(OTokens.Radius.radiusS))
@@ -361,4 +361,26 @@ internal fun rememberPhoto(media: String?, maxSide: Int): android.graphics.Bitma
         bmp = media?.let { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { Photos.load(context, it, maxSide) } }
     }
     return bmp
+}
+
+/** First frames of videos, by file name (v0.34 audit round 2): decoded once, the video itself not kept in memory. */
+private val frames = android.util.LruCache<String, android.graphics.Bitmap>(FRAMES_KEPT)
+private const val FRAMES_KEPT = 24
+
+/** A stored video's first frame, read off the main thread and cached; null until ready. */
+@Composable
+internal fun rememberVideoFrame(media: String?): android.graphics.Bitmap? {
+    val context = LocalContext.current
+    var frame by remember(media) { mutableStateOf(media?.let { frames.get(it) }) }
+    LaunchedEffect(media) {
+        val m = media ?: return@LaunchedEffect
+        if (frame != null) return@LaunchedEffect
+        frame = withContext(Dispatchers.IO) {
+            runCatching {
+                val bytes = Photos.openBytes(context, m) ?: return@runCatching null
+                MediaMetadataRetriever().run { setDataSource(BytesSource(bytes)); val f = getFrameAtTime(0); release(); f }
+            }.getOrNull()?.also { frames.put(m, it) }
+        }
+    }
+    return frame
 }

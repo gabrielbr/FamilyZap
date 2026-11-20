@@ -85,10 +85,10 @@ fun UpdateAboutRows(updater: Updater) {
     val tx = str
     Text(tx.versionLine(updater.versionName, updater.versionCode), style = OieType.body, color = c.ink)
     if (!updater.isReleaseBuild) {
-        Text(tx.releaseOnly(updater.versionName, "app.oie"), style = OieType.caption, color = c.muted)
+        Text(tx.releaseOnly, style = OieType.caption, color = c.muted)
         return
     }
-    QuietButton(tx.checkForUpdates, { updater.check(manual = true) }, Modifier.height(OTokens.Size.button))
+    QuietButton(tx.checkForUpdates, { updater.check(manual = true) })
     when (val st = updater.state) {
         State.Checking -> Text(tx.checking, style = OieType.body, color = c.muted)
         is State.UpToDate -> Text(tx.latest(st.version), style = OieType.body, color = c.ink)

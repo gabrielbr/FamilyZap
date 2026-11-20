@@ -92,8 +92,10 @@ fun AddByNumber(open: Boolean, touched: () -> Unit = {}, onAdd: (Contact) -> Uni
     var busy by remember { mutableStateOf(false) }
     if (!shown) { TextLink(tx.addByNumber, { shown = true; touched() }); return }
     Text(tx.addByNumber, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
-    app.oie.ui.setup.Field(tx.contactNameLabel, name, { name = it; note = null; touched() }, "")
-    app.oie.ui.setup.Field(tx.numberLabel, number, { number = it; note = null; touched() }, note ?: tx.numberHelp)
+    app.oie.ui.setup.Field(tx.contactNameLabel, name, { name = it; note = null; touched() }, "", names = true)
+    // v0.34 audit round 2: "not on WhatsApp" is an error (colour, announced); the number gets the phone keypad.
+    app.oie.ui.setup.Field(tx.numberLabel, number, { number = it; note = null; touched() }, tx.numberHelp, error = note,
+        keyboard = androidx.compose.ui.text.input.KeyboardType.Phone)
     QuietButton(if (busy) tx.looking else tx.add, {
         if (busy || name.isBlank() || number.count { it.isDigit() } < 10) return@QuietButton
         busy = true
@@ -153,7 +155,7 @@ fun ContactEditor(ct: Contact, kid: String, fresh: List<Contact>, onSave: (Conta
             Text(contactNumber(tx, ct, fresh), style = OieType.body, color = c.muted)
         }
         // Typing counts as a touch, so the parent area doesn't close mid-name (v0.19 audit).
-        app.oie.ui.setup.Field(tx.nameKidSees(kid), name, { name = it; touched() }, tx.renameHelp(wa))
+        app.oie.ui.setup.Field(tx.nameKidSees(kid), name, { name = it; touched() }, tx.renameHelp(wa), names = true)
         if (!ct.isGroup) {
             // v0.34 audit: a day that doesn't exist is an error (colour, border, announced), not a grey hint.
             app.oie.ui.setup.Field(tx.birthdayLabel, birthday, { birthday = it; touched() }, tx.birthdayHelp(kid), error = if (parsed == null) tx.birthdayInvalid else null)

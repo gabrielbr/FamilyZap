@@ -236,6 +236,16 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
     LaunchedEffect(micError, photoError) { if (micError || photoError) { delay(NOTE_MS); micError = false; photoError = false } }
 
     fun queue(m: Message) { pending = m }
+    /** Ends a recording: sends it (if it's a second or more) or throws it away. */
+    fun stopRecording(send: Boolean) {
+        if (recordingSince == 0L) return
+        val secs = ((state.clock() - recordingSince) / 1000).toInt()
+        recordingSince = 0; away = false
+        // Under 1 s is a slip, not a message (flow branch 3a); v0.34 audit: it says how to record.
+        if (send && secs < 1) slip = true
+        val media = app.oie.data.Voice.stop(context, keep = send && secs >= 1)
+        if (media != null) queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.VOICE, durationSec = secs, media = media))
+    }
     // v0.33: listening to a voice message before it goes (its ▶ in the chat) pauses the 5 seconds; they start again when it ends.
     val hearing = pending?.let { app.oie.data.Voice.playing == it.id } ?: false
     LaunchedEffect(pending, hearing) {
@@ -254,7 +264,8 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                 app.oie.ui.common.Avatar(contact, OTokens.Size.avatar)
                 Text(contact.name, style = OieType.title, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 // v0.33: the photos, videos and GIFs in this chat. A word on the tablet, the icon alone on a phone.
-                QuietButton(if (app.oie.ui.common.isCompact) null else tx.photos, { showPhotos = true }, icon = R.drawable.gg_ic_image, contentDescription = tx.photosWith(contact.name))
+                // v0.34 audit round 2: "Fotos" keeps its word on a phone too (README §9; decision 0010 covers the composer only).
+                QuietButton(tx.photos, { showPhotos = true }, icon = R.drawable.gg_ic_image, contentDescription = tx.photosWith(contact.name))
             }
             val list = rememberLazyListState()
             // v0.34 audit (P1): the chat opens on the first unread message (under a "Novas" line), else on the newest;
@@ -268,6 +279,16 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                 val last = list.layoutInfo.totalItemsCount - 1
                 val nearEnd = (list.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) >= last - 3
                 if (last >= 0 && pending != null) list.scrollToItem(last) else if (last >= 0 && nearEnd) list.animateScrollToItem(last)
+            }
+            // v0.34 audit round 2: while the kid is at the end, the end stays in view as pictures arrive and grow.
+            var atEnd by remember { mutableStateOf(true) }
+            LaunchedEffect(list) {
+                androidx.compose.runtime.snapshotFlow { list.isScrollInProgress }.collect { scrolling -> if (!scrolling) atEnd = !list.canScrollForward }
+            }
+            LaunchedEffect(list) {
+                androidx.compose.runtime.snapshotFlow { list.canScrollForward }.collect { more ->
+                    if (more && atEnd && !list.isScrollInProgress) list.scrollToItem((list.layoutInfo.totalItemsCount - 1).coerceAtLeast(0), Int.MAX_VALUE / 2)
+                }
             }
             LazyColumn(
                 Modifier.weight(1f).fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin),
@@ -291,16 +312,17 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                         TextLink(tx.tryAgain, { state.failed.remove(m.id); state.wa.send(m) })
                     }
                 }
-                // v0.34 audit: reactions were found only by chance; a one-line hint until the kid has reacted once.
-                if (!state.reactTipUsed && visible.any { !it.fromKid && it.kind != Kind.DELETED }) item(key = "react-tip") {
-                    Text(tx.reactHint, style = OieType.caption, color = c.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-                }
                 // v0.34 audit: the snackbar says "Enviando para…", so the message itself keeps just its time.
                 pending?.let { p -> item(key = "pending") { Bubble(p, contact.name) } }
                 visible.lastOrNull { it.fromKid }?.takeIf { pending == null && visible.last().fromKid && it.id !in state.failed }?.let { last ->
                     // v0.33: "Enviada", then "Entregue", then "Vovó viu" (in a group, "Alguém viu").
                     val group = contact.isGroup && !contact.parentLine
                     item { Text(tx.receiptLine(last.receipt, contact.name, group), style = OieType.caption, color = c.muted, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth()) }
+                }
+                // v0.34 audit: reactions were found only by chance; a one-line hint until the kid has reacted once,
+                // at the end of the chat (round 2: not between messages).
+                if (!state.reactTipUsed && visible.any { !it.fromKid && it.kind != Kind.DELETED }) item(key = "react-tip") {
+                    Text(tx.reactHint, style = OieType.caption, color = c.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                 }
             }
             Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
@@ -318,9 +340,22 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                 } else if (recordingSince > 0) {
                     // v0.34 audit: a running clock while recording, and what releasing will do (send, or cancel when slid away).
                     var now by remember { mutableLongStateOf(state.clock()) }
-                    LaunchedEffect(recordingSince) { while (true) { now = state.clock(); delay(TICK_MS) } }
-                    Text(tx.recording + " · " + clockOf(((now - recordingSince) / 1000).toInt().coerceAtLeast(0)), style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
+                    LaunchedEffect(recordingSince) {
+                        while (true) {
+                            now = state.clock()
+                            // The flow's limit: 2 minutes, then it goes by itself.
+                            if (now - recordingSince >= MAX_RECORDING_MS) { stopRecording(send = true); break }
+                            delay(TICK_MS)
+                        }
+                    }
+                    val left = ((MAX_RECORDING_MS - (now - recordingSince)) / 1000).toInt()
+                    // The last 10 seconds count down, in the error colour (with the word, never colour alone).
+                    Text(if (left <= 10) tx.recordingEnds(left.coerceAtLeast(0)) else tx.recording + " · " + clockOf(((now - recordingSince) / 1000).toInt().coerceAtLeast(0)),
+                        style = OieType.label, color = if (left <= 10) c.coralText else c.ink, modifier = Modifier.weight(1f))
                     Text(if (away) tx.releaseToCancel else tx.releaseToSend, style = OieType.bodySmall, color = if (away) c.coralText else c.muted)
+                    // v0.34 audit round 2: a recording started by a tap (TalkBack) has a way out; with a finger on
+                    // the button, sliding off cancels.
+                    QuietButton(tx.cancel, { app.oie.data.Voice.stop(context, keep = false); recordingSince = 0; away = false })
                 } else if (slip) {
                     Text(tx.holdToRecord, style = OieType.body, color = c.ink, modifier = Modifier.weight(1f).semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
                 } else {
@@ -375,14 +410,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
                             if (app.oie.data.Voice.start(context)) { micError = false; recordingSince = state.clock() } else micError = true
                         } else askMic.launch(android.Manifest.permission.RECORD_AUDIO)
                     },
-                    onStop = { send ->
-                        val secs = ((state.clock() - recordingSince) / 1000).toInt()
-                        recordingSince = 0; away = false
-                        // Under 1 s is a slip, not a message (flow branch 3a); v0.34 audit: it says how to record.
-                        if (send && secs < 1) slip = true
-                        val media = app.oie.data.Voice.stop(context, keep = send && secs >= 1)
-                        if (media != null) queue(Message("k${System.nanoTime()}", contactId, true, state.clock(), Kind.VOICE, durationSec = secs, media = media))
-                    },
+                    onStop = { send -> stopRecording(send) },
                 )
             }
         }
@@ -456,7 +484,7 @@ fun Conversation(state: AppState, contactId: String, openStickers: Boolean = fal
             ReactionSheet(m,
                 onReact = { e -> state.react(m.id, e); menuFor = null },
                 onRead = if (m.kind == Kind.TEXT && m.text.isNotBlank()) ({ app.oie.data.ReadAloud.toggle(context, m.id, m.text); menuFor = null }) else null,
-                onClose = { menuFor = null })
+                onClose = { menuFor = null }, lastUsed = state.lastReaction)
         }
         if (showPhotos) PhotosScreen(state, contact, onOpen = { m -> if (m.kind == Kind.PHOTO) bigPhoto = m.media else watching = m }, onBack = { showPhotos = false })
         bigPhoto?.let { PhotoScreen(it, contact.name) { bigPhoto = null } }
@@ -525,6 +553,8 @@ private fun NewLine() {
 /** How long a short note (a slip, a problem) stays; and the recording clock's tick. */
 private const val NOTE_MS = 4_000L
 private const val TICK_MS = 500L
+/** The longest voice message (flow kid-sends-message, 3a). */
+private const val MAX_RECORDING_MS = 120_000L
 
 @Composable
 private fun Bubble(m: Message, name: String, status: String? = null, parent: String = "", onMenu: (() -> Unit)? = null, onPhoto: (String) -> Unit = {}, onWatch: (Message) -> Unit = {}) {
@@ -563,17 +593,18 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
                 Kind.STICKER -> if (m.media != null) MovingImage(m.media, OTokens.Size.contactTile + OTokens.Spacing.space8, tx.notifSticker) else STICKERS[m.text]?.let {
                     Image(painterResource(it), contentDescription = tx.stickerA11y(m.text), modifier = Modifier.size(OTokens.Size.contactTile + OTokens.Spacing.space8))
                 } ?: Text(m.text, style = OieType.title, color = ink)
-                Kind.PHOTO -> Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                // v0.34 audit round 2: media columns give way like text does, so the time beside them is never cut.
+                Kind.PHOTO -> Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                     // v0.33: tap to see it big.
                     Box(if (m.media != null) Modifier.clickable(role = Role.Button, onClickLabel = tx.photo) { onPhoto(m.media) } else Modifier) { PhotoThumb(m.media) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
                 // v0.27: videos (tap to watch) and GIFs (a silent loop).
-                Kind.VIDEO -> Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                Kind.VIDEO -> Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                     VideoBubble(m.media, m.durationSec, tooBig = !app.oie.logic.Moving.download(m.kind, m.size), parent = parent) { onWatch(m) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
-                Kind.GIF -> Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                Kind.GIF -> Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                     GifBubble(m.media) { onWatch(m) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
@@ -662,7 +693,9 @@ internal fun PhotoSourceSheet(first: String, onPick: (String) -> Unit, onClose: 
             Text(tx.photoOrVideo, style = OieType.title, color = c.ink)
             app.oie.ui.setup.ButtonRow {
                 options.forEach { (key, label) ->
-                    QuietButton(label, { onPick(key) }, icon = when (key) { "gallery" -> R.drawable.gg_ic_image; "draw" -> null; else -> R.drawable.gg_ic_camera })
+                    // v0.34 audit round 2: words only, the same for all four (the set has no video or pencil icon,
+                    // and a camera on "Gravar vídeo" misled).
+                    QuietButton(label, { onPick(key) })
                 }
             }
         }
@@ -706,7 +739,10 @@ private fun PhotoThumb(media: String?) {
     val tx = str
     val context = LocalContext.current
     val bmp = rememberPhoto(media, Photos.MAX_SIDE / 4)
-    if (bmp == null) {
+    // v0.34 audit round 2: while it loads, a tile of the photo's size holds its place (so the chat doesn't jump).
+    if (bmp == null && media != null) {
+        Box(Modifier.size(OTokens.Size.contactTile * 2).clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.line).semantics { contentDescription = tx.photo })
+    } else if (bmp == null) {
         Text(tx.photo, style = OieType.body, color = c.muted)
     } else {
         Image(

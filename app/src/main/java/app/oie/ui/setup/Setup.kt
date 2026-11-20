@@ -105,7 +105,8 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
                     // v0.34 audit: the parent's name comes from their WhatsApp profile when they haven't typed one (never asked twice).
                     2 -> LinkStep(state, back = { go(1) }, next = { if (state.parentName.isBlank()) state.parentName = state.wa.profileName.orEmpty(); go(3) })
                     3 -> NamesStep(state, back = { go(2) }, next = { go(4) })
-                    4 -> { CreatePinStep(state, next = { go(5) }); ButtonRow { QuietButton(tx.back, { go(3) }) } }
+                    // v0.34 audit round 2: Voltar centred under the centred keypad.
+                    4 -> { CreatePinStep(state, next = { go(5) }); Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { QuietButton(tx.back, { go(3) }) } }
                     5 -> ContactsStep(state, next = { go(6) }, back = { go(4) })
                     6 -> QuietStep(state, next = { go(7) }, back = { go(5) })
                     else -> {
@@ -134,8 +135,8 @@ fun Setup(state: AppState, step: Int, onClose: () -> Unit) {
 fun Wordmark() {
     androidx.compose.foundation.Image(
         painterResource(R.drawable.oie_wordmark), contentDescription = "Oiê",
-        // v0.34 audit: 40dp tall, about 88 px wide on the tablet, above the 64 px minimum.
-        modifier = Modifier.height(OTokens.Spacing.space10),
+        // v0.34 audit: the trimmed mark at 48dp tall is about 64dp wide, the logo's minimum, inside the 56dp bar.
+        modifier = Modifier.height(OTokens.Spacing.space12),
     )
 }
 
@@ -157,10 +158,11 @@ private fun LinkStep(state: AppState, back: () -> Unit, next: () -> Unit) {
         }
         return
     }
-    app.oie.ui.parent.Pairing(state) { if (!state.realMode) real?.goReal() ?: state.goReal(); next() }
-    ButtonRow {
-        QuietButton(tx.back, back)
-    }
+    app.oie.ui.parent.Pairing(state, back = back) { if (!state.realMode) real?.goReal() ?: state.goReal(); next() }
+    // Help where it's needed (Nielsen 10): the risk, one tap away.
+    var why by remember { mutableStateOf(false) }
+    TextLink(tx.whatCanHappen, { why = !why })
+    if (why) Text(tx.riskBody, style = OieType.body, color = c.ink)
 }
 
 @Composable
@@ -168,8 +170,9 @@ private fun NamesStep(state: AppState, back: () -> Unit, next: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     Text(tx.namesTitle, style = OieType.title, color = c.ink)
-    Field(tx.yourName, state.parentName, { state.parentName = it }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName))
-    Field(tx.kidNameLabel, state.kidName, { state.kidName = it }, tx.kidNameHelp(state.kidName.ifBlank { tx.theKid }))
+    Field(tx.yourName, state.parentName, { state.parentName = it }, tx.yourNameHelp(state.kidName.ifBlank { tx.theKid }, state.parentName), names = true)
+    Field(tx.kidNameLabel, state.kidName, { state.kidName = it }, tx.kidNameHelp(state.kidName.ifBlank { tx.theKid }), names = true)
+    // Help where it's needed (Nielsen 10) is on the link step; here the hints under each field do it.
     ButtonRow {
         PrimaryButton(tx.cont, next, enabled = state.kidName.isNotBlank() && state.parentName.isNotBlank())
         QuietButton(tx.back, back)
@@ -182,7 +185,8 @@ private fun NamesStep(state: AppState, back: () -> Unit, next: () -> Unit) {
  * the error colour, with an error border, and is announced. Names start with a capital.
  */
 @Composable
-fun Field(label: String, value: String, onChange: (String) -> Unit, help: String, error: String? = null) {
+fun Field(label: String, value: String, onChange: (String) -> Unit, help: String, error: String? = null,
+          keyboard: androidx.compose.ui.text.input.KeyboardType = androidx.compose.ui.text.input.KeyboardType.Text, names: Boolean = false) {
     val c = OieTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
         Text(label, style = OieType.label, color = c.ink)
@@ -193,7 +197,11 @@ fun Field(label: String, value: String, onChange: (String) -> Unit, help: String
                 if (error != null) error(error)
             },
             textStyle = OieType.body, singleLine = true, isError = error != null,
-            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences),
+            // Names start each word with a capital ("Maria Silva"); a number gets the phone keypad.
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                capitalization = if (names) androidx.compose.ui.text.input.KeyboardCapitalization.Words else androidx.compose.ui.text.input.KeyboardCapitalization.Sentences,
+                keyboardType = keyboard,
+            ),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = c.ink, unfocusedTextColor = c.ink, focusedContainerColor = c.surface,
                 unfocusedContainerColor = c.surface, focusedBorderColor = c.ink, unfocusedBorderColor = c.muted, cursorColor = c.ink,
@@ -245,8 +253,14 @@ private fun ContactsStep(state: AppState, next: () -> Unit, back: () -> Unit) {
     val renamed = remember { mutableStateMapOf<String, app.oie.logic.Contact>().apply { state.allowed.forEach { put(it.id, it) } } }
     var editing by remember { mutableStateOf<String?>(null) }
     val fresh = state.wa.contacts()
-    val all = (added + fresh.filter { a -> added.none { it.id == a.id } }).map { renamed[it.id] ?: it }
-        .sortedWith(compareBy({ it.isGroup }, { it.name.lowercase() })) // people first, then groups
+    // v0.34 audit round 2: sorted once per change, not on every recomposition.
+    val all = remember(fresh, added.toList(), renamed.toMap()) {
+        (added + fresh.filter { a -> added.none { it.id == a.id } }).map { renamed[it.id] ?: it }
+            .sortedWith(compareBy({ it.isGroup }, { it.name.lowercase() })) // people first, then groups
+    }
+    // v0.34 audit round 2: "Mudar nome" on the person just picked, not repeated on every picked row (names can
+    // also be changed any time in Contatos).
+    var lastPicked by remember { mutableStateOf<String?>(null) }
     all.firstOrNull { it.id == editing }?.let { ct ->
         app.oie.ui.parent.ContactEditor(ct, state.kidName.ifBlank { tx.theKid }, fresh,
             onSave = { renamed[it.id] = it; editing = null }, onCancel = { editing = null })
@@ -268,7 +282,7 @@ private fun ContactsStep(state: AppState, next: () -> Unit, back: () -> Unit) {
             Row(
                 Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)
                     .clip(androidx.compose.foundation.shape.RoundedCornerShape(OTokens.Radius.radiusM)).background(if (on) c.selected else androidx.compose.ui.graphics.Color.Transparent)
-                    .toggleable(on, role = Role.Checkbox) { if (on) picked.remove(ct.id) else picked.add(ct.id) }
+                    .toggleable(on, role = Role.Checkbox) { if (on) picked.remove(ct.id) else { picked.add(ct.id); lastPicked = ct.id } }
                     .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
@@ -281,7 +295,7 @@ private fun ContactsStep(state: AppState, next: () -> Unit, back: () -> Unit) {
                     if (ct.isGroup) Text(tx.groupWarning, style = OieType.caption, color = c.muted) else app.oie.ui.parent.ContactLines(ct, fresh)
                     // v0.19: a picked contact can get the name the kid will see. Its own target (the row picks), under
                     // the lines so a phone keeps the width for the name (v0.19 audit).
-                    if (on) TextLink(tx.changeName, { editing = ct.id }, Modifier.semantics { contentDescription = tx.changeNameA11y(ct.name) })
+                    if (on && ct.id == lastPicked) TextLink(tx.changeName, { editing = ct.id }, Modifier.semantics { contentDescription = tx.changeNameA11y(ct.name) })
                 }
                 if (on) OIcon(R.drawable.gg_ic_check, contentDescription = tx.chosen)
             }

@@ -11,6 +11,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import app.oie.R
@@ -36,6 +41,12 @@ fun ForgotPin(state: AppState, stage: Int) {
     val tx = str
     val real = LocalRealLink.current
     val kid = state.kidName.ifBlank { tx.theKid }
+    // v0.34 audit round 2 (P1): only a QR shown on this screen, this time, counts as the proof. A link left
+    // over from an earlier visit (the new-PIN step left with Back) never jumps to a new PIN by itself.
+    var sawQr by remember { mutableStateOf(false) }
+    val status = state.linkState.status
+    LaunchedEffect(status) { if (status is app.oie.data.LinkState.Status.Qr) sawQr = true }
+    var why by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
         Bar {
             QuietButton(null, { state.route = Route.ParentPin }, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
@@ -51,13 +62,19 @@ fun ForgotPin(state: AppState, stage: Int) {
                     return@Column
                 }
                 Text(tx.forgotBody(kid), style = OieType.body, color = c.ink)
-                if (state.pinResetFrom.isEmpty()) {
+                // Help where it's needed (Nielsen 10): the risk, one tap away.
+                app.oie.ui.common.TextLink(tx.whatCanHappen, { why = !why })
+                if (why) Text(tx.riskBody, style = OieType.body, color = c.ink)
+                val stale = status == app.oie.data.LinkState.Status.Connected && !sawQr
+                if (state.pinResetFrom.isEmpty() || stale) {
+                    if (state.linkState.pairFailed) Text(tx.linkFailed, style = OieType.body, color = c.coralText)
                     app.oie.ui.setup.ButtonRow {
-                        PrimaryButton(tx.forgotShowCode, { real?.relinkForPin() })
+                        PrimaryButton(tx.forgotShowCode, { sawQr = false; real?.relinkForPin() })
                         QuietButton(tx.cancel, { state.route = Route.ParentPin })
                     }
                 } else {
-                    Pairing(state) {
+                    Pairing(state, back = { state.route = Route.ParentPin }) {
+                        if (!sawQr) return@Pairing
                         val before = state.pinResetFrom
                         real?.ownChat { now ->
                             if (now.isNotEmpty() && now == before) state.route = Route.ForgotPin(1)

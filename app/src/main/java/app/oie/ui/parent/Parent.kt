@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.ui.input.pointer.pointerInput
@@ -104,9 +105,13 @@ fun ParentArea(state: AppState, section: Int) {
     LaunchedEffect(lastTouch) { delay(IDLE_MS); state.route = Route.KidHome }
     val touched = { lastTouch = System.currentTimeMillis() }
     // v0.34 audit: one undo snackbar for the whole area, pinned to the bottom (it was inline, off screen on a phone).
-    var undo by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
-    LaunchedEffect(undo) { if (undo != null) { delay(UNDO_MS); undo = null } }
-    val offerUndo: (String, () -> Unit) -> Unit = { text, restore -> undo = text to restore }
+    // v0.34 audit round 2: what's undone is put back; what isn't is committed when the undo goes (its 5 s run
+    // out, another undo replaces it, or the parent leaves the area), so "deleted" is always true.
+    var undo by remember { mutableStateOf<Offer?>(null) }
+    LaunchedEffect(undo) { val u = undo ?: return@LaunchedEffect; delay(UNDO_MS); u.commit(); undo = null }
+    val latest by androidx.compose.runtime.rememberUpdatedState(undo)
+    androidx.compose.runtime.DisposableEffect(Unit) { onDispose { latest?.commit?.invoke() } }
+    val offerUndo: Undo = { text, restore, commit -> undo?.commit?.invoke(); undo = Offer(text, restore, commit) }
     Box(Modifier.fillMaxSize()) {
     // v0.34 audit: any touch anywhere in the area (scrolling too) keeps it open; typing counts through touched().
     Column(Modifier.fillMaxSize().pointerInput(Unit) {
@@ -168,16 +173,22 @@ fun ParentArea(state: AppState, section: Int) {
             body(Modifier.widthIn(max = OTokens.Size.contentMax + OTokens.Spacing.space12 * 2))
         }
     }
-    undo?.let { (text, restore) ->
-        app.oie.ui.common.Snackbar(text, Modifier.align(Alignment.BottomCenter), action = tx.undo) { restore(); undo = null }
+    undo?.let { u ->
+        app.oie.ui.common.Snackbar(u.text, Modifier.align(Alignment.BottomCenter), action = tx.undo) { u.restore(); undo = null }
     }
     }
 }
 
 /** How long an undo stays offered. */
 private const val UNDO_MS = 5_000L
+
+/** An undo on offer: its line, how to put the thing back, and what to finish if nobody undoes it. */
+private class Offer(val text: String, val restore: () -> Unit, val commit: () -> Unit)
+
+/** Offers an undo: the line, the restore, and the commit (default: nothing left to do). */
+private typealias Undo = (String, () -> Unit, () -> Unit) -> Unit
 @Composable
-private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: (String, () -> Unit) -> Unit) {
+private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: Undo) {
     val c = OieTheme.colors
     val tx = str
     // v0.19: the name the kid sees, edited in place of the list, like a quiet period.
@@ -188,7 +199,7 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: (String, (
             onSave = { touched(); state.allowed[i] = it; editing = null }, onCancel = { editing = null },
             onRemove = {
                 touched(); val ct = state.allowed.removeAt(i); editing = null
-                offerUndo(tx.leftTheList(ct.name)) { state.allowed.add(i.coerceAtMost(state.allowed.size), ct) }
+                offerUndo(tx.leftTheList(ct.name), { state.allowed.add(i.coerceAtMost(state.allowed.size), ct) }, {})
             }, touched = touched)
         return
     }
@@ -282,7 +293,7 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: (String, (
 
 /** Quiet hours in the parent area: the periods, add/edit, delete with undo, and who can talk anyway. */
 @Composable
-private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: (String, () -> Unit) -> Unit) {
+private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: Undo) {
     val c = OieTheme.colors
     val tx = str
     var editing by remember { mutableStateOf<Int?>(null) } // -1 = new
@@ -293,7 +304,7 @@ private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: (Strin
             onSave = { p -> touched(); if (e == -1) state.periods.add(p) else state.periods[e] = p; editing = null },
             onDelete = if (e >= 0) ({
                 touched(); val p = state.periods.removeAt(e); editing = null
-                offerUndo(tx.deleted(p.name)) { state.periods.add(e.coerceAtMost(state.periods.size), p) }
+                offerUndo(tx.deleted(p.name), { state.periods.add(e.coerceAtMost(state.periods.size), p) }, {})
             }) else null,
             onCancel = { editing = null },
             touched = touched,
@@ -330,14 +341,15 @@ private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: (Strin
             )
         }
     }
-    Text(tx.talkAnyway(state.allowed.filter { it.quietException }.joinToString { it.name }.ifEmpty { tx.nobodyChooseInContacts }),
+    // v0.34 audit round 2: only while a period is on (otherwise Contatos has nothing to choose).
+    if (state.periods.any { it.on }) Text(tx.talkAnyway(state.allowed.filter { it.quietException }.joinToString { it.name }.ifEmpty { tx.nobodyChooseInContacts }),
         style = OieType.body, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space4))
 }
 
 
 /** Ajustes e ajuda (was Ajuda e sobre): the names (v0.9), short answers to the questions the flows raise, the risk said again, version and licences. */
 @Composable
-private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: (String, () -> Unit) -> Unit) {
+private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: Undo) {
     val c = OieTheme.colors
     val tx = str
     var open by remember { mutableStateOf<Int?>(null) }
@@ -377,8 +389,10 @@ private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: (Strin
     }
     if (!crashed) Problems(first = false, offerUndo)
     Text(tx.about, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
-    Text(tx.aboutVersion(BuildConfigInfo.VERSION), style = OieType.body, color = c.ink)
-    app.oie.LocalUpdater.current?.let { app.oie.update.UpdateAboutRows(it) }
+    // v0.34 audit round 2: the version once (the update rows carry it when there's an updater).
+    val updater = app.oie.LocalUpdater.current
+    if (updater == null) Text(tx.aboutVersion(BuildConfigInfo.VERSION), style = OieType.body, color = c.ink)
+    else app.oie.update.UpdateAboutRows(updater)
     Text(tx.notWhatsApp, style = OieType.body, color = c.ink)
     Text(tx.credits, style = OieType.caption, color = c.muted)
 }
@@ -392,11 +406,16 @@ private fun Connection(state: AppState) {
     Text(tx.connection, style = OieType.title, color = c.ink)
     // v0.24: "Conectando…" while the link comes back by itself, with no button to press for nothing.
     val link = app.oie.ui.common.linkShown(state)
-    Text(when (link) {
-        app.oie.logic.LinkView.Shown.CONNECTED -> tx.connectedTo(state.parentName)
-        app.oie.logic.LinkView.Shown.CONNECTING -> tx.connectingTo(state.parentName)
-        app.oie.logic.LinkView.Shown.DOWN -> tx.disconnected
-    }, style = OieType.body, color = c.ink)
+    // v0.34 audit round 2: "Conectando…" with the spinner (when animations are on), like every other wait.
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
+        if (link == app.oie.logic.LinkView.Shown.CONNECTING && app.oie.ui.common.animationsOn())
+            androidx.compose.material3.CircularProgressIndicator(Modifier.size(app.oie.ui.common.ICON), color = c.ink, trackColor = c.line, strokeWidth = OTokens.Size.hairline * 2)
+        Text(when (link) {
+            app.oie.logic.LinkView.Shown.CONNECTED -> tx.connectedTo(state.parentName)
+            app.oie.logic.LinkView.Shown.CONNECTING -> tx.connectingTo(state.parentName)
+            app.oie.logic.LinkView.Shown.DOWN -> tx.disconnected
+        }, style = OieType.body, color = c.ink)
+    }
     if (link == app.oie.logic.LinkView.Shown.DOWN) PrimaryButton(tx.linkConnect, { state.route = Route.Pair })
     // v0.14: a parent who saw Oiê close comes here first; point to the report while there is one.
     if (remember { app.oie.data.Diagnostics.lastCrashAt() != null }) {
@@ -420,7 +439,7 @@ private fun Connection(state: AppState) {
 
 /** Problemas (docs/flows/problem-report.md, v0.14): when Oiê last closed by itself, and the report to copy. */
 @Composable
-private fun Problems(first: Boolean, offerUndo: (String, () -> Unit) -> Unit) {
+private fun Problems(first: Boolean, offerUndo: Undo) {
     val c = OieTheme.colors
     val tx = str
     val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
@@ -429,8 +448,7 @@ private fun Problems(first: Boolean, offerUndo: (String, () -> Unit) -> Unit) {
     LaunchedEffect(copied) { if (copied) { delay(2_000); copied = false } }
     val crashAt = remember(version) { app.oie.data.Diagnostics.lastCrashAt() }
     var hidden by remember { mutableStateOf(false) }
-    LaunchedEffect(hidden) { if (hidden) { delay(UNDO_MS); app.oie.data.Diagnostics.clear(); hidden = false; version++ } }
-    val empty = remember(version) { app.oie.data.Diagnostics.isEmpty() } || hidden
+    val empty = remember(version, hidden) { app.oie.data.Diagnostics.isEmpty() } || hidden
     Text(tx.problems, style = OieType.title, color = c.ink, modifier = if (first) Modifier else Modifier.padding(top = OTokens.Spacing.space6))
     when {
         crashAt != null -> {
@@ -455,7 +473,7 @@ private fun Problems(first: Boolean, offerUndo: (String, () -> Unit) -> Unit) {
             // v0.34 audit: the report is hidden at once and deleted only once the undo is gone.
             TextLink(tx.clearReport, {
                 hidden = true
-                offerUndo(tx.reportCleared) { hidden = false }
+                offerUndo(tx.reportCleared, { hidden = false }, { app.oie.data.Diagnostics.clear() })
             })
         }
         Text(tx.reportPrivacy, style = OieType.caption, color = c.muted)
@@ -516,11 +534,15 @@ internal fun BubbleSetting(state: AppState) {
     val waiting = shown == app.oie.logic.BubblePolicy.State.NEEDS_NOTIFICATIONS || shown == app.oie.logic.BubblePolicy.State.NEEDS_PERMISSION
     app.oie.ui.common.SwitchRow(tx.bubbleSwitch, state.bubbleOn,
         { on -> state.bubbleOn = on; if (on) app.oie.data.Bubble.show(context, tx) else app.oie.data.Bubble.hide(context) },
-        help = if (waiting) tx.bubbleWaiting else null)
+        help = when (shown) {
+            app.oie.logic.BubblePolicy.State.NEEDS_NOTIFICATIONS -> tx.bubbleNeedsNotifications
+            app.oie.logic.BubblePolicy.State.NEEDS_PERMISSION -> tx.bubbleNeedsPermission
+            else -> null
+        })
     when (shown) {
         app.oie.logic.BubblePolicy.State.NEEDS_NOTIFICATIONS, app.oie.logic.BubblePolicy.State.NEEDS_PERMISSION -> {
             val forNotifications = shown == app.oie.logic.BubblePolicy.State.NEEDS_NOTIFICATIONS
-            Text(if (forNotifications) tx.bubbleNeedsNotifications else tx.bubbleNeedsPermission, style = OieType.body, color = c.ink)
+            // v0.34 audit round 2: the reason is the switch row's own line now (it was said twice).
             QuietButton(tx.bubbleAllow, { runCatching { context.startActivity(app.oie.data.Bubble.settingsIntent(context, notifications)) } })
             // Samsung tablets hide bubbles behind their own "floating notifications" setting.
             if (!forNotifications && android.os.Build.MANUFACTURER.equals("samsung", ignoreCase = true)) Text(tx.bubbleSamsung, style = OieType.caption, color = c.muted)
@@ -547,9 +569,14 @@ private fun ParentLineCard(state: AppState, touched: () -> Unit) {
             .background(c.surface).padding(OTokens.Spacing.space4),
         verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
     ) {
-        Text(tx.parentLineTitle(state.parentName.ifBlank { tx.theKid }), style = OieType.label, color = c.ink)
+        // v0.34 audit round 2: "Você" alone when the parent's name isn't set (it read "Você (a criança)").
+        Text(if (state.parentName.isBlank()) tx.you else tx.parentLineTitle(state.parentName), style = OieType.label, color = c.ink)
         Text(tx.parentLineBody(kid), style = OieType.body, color = c.ink)
-        Text(tx.parentLineNoNotify, style = OieType.caption, color = c.muted)
+        // On a phone the second note is one tap away, so the contacts start higher (less-is-more Q3).
+        val compact = app.oie.ui.common.isCompact
+        var whyOpen by remember(compact) { mutableStateOf(!compact) }
+        if (whyOpen) Text(tx.parentLineNoNotify, style = OieType.caption, color = c.muted)
+        else TextLink(tx.why, { whyOpen = true })
         note?.let { Text(it, style = OieType.body, color = c.ink) }
         QuietButton(if (creating) tx.parentLineCreating else tx.parentLineCreate(kid), {
             if (creating) return@QuietButton

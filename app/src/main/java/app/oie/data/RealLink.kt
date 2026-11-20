@@ -156,14 +156,19 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
      * the session is replaced. The parent proves it's them by linking the same WhatsApp again.
      */
     fun relinkForPin() {
+        val before = ls.status
         ls.status = LinkState.Status.Connecting
+        ls.pairFailed = false
         bg {
             val own = runCatching { link?.ownChat() }.getOrNull().orEmpty()
+            // v0.34 audit round 2: without knowing which WhatsApp it is now, the same account couldn't be told
+            // apart from another one, and the kid's chats would be wiped. So nothing is undone; the parent tries again.
+            if (own.isEmpty()) { main.post { ls.status = before; ls.pairFailed = true }; return@bg }
             runCatching { link?.unlink() }
             link = null
             listOf(db, File(db.path + "-wal"), File(db.path + "-shm")).forEach { it.delete() }
             Diagnostics.log("pin reset: relinking")
-            main.post { state.pinResetFrom = own.ifEmpty { "?" }; ls.clear(); turnOn(); start() }
+            main.post { state.pinResetFrom = own; ls.clear(); turnOn(); start() }
         }
     }
 

@@ -173,4 +173,6 @@ class PhoneScreensTest {
     @Test fun videoScreen() = shot("p40-video-screen", bigText = true) { app.oie.ui.kid.VideoScreen(null, gif = false, from = "Vovó", onBack = {}) }
     @Test fun needYouAsk() = shot("p41-need-you-ask", bigText = true) { androidx.compose.foundation.layout.Box(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.kid.NeedYouCard("Mãe e Vovô", {}, {}) } }
     @Test fun forgotPin() = shot("p42-forgot-pin", bigText = true) { app.oie.ui.parent.ForgotPin(ready().apply { realMode = true }, 0) }
+    @Test fun linkQr() = shot("p43-link-qr", bigText = true) { app.oie.ui.setup.Setup(AppState(clock = { now }).apply { linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Qr("2@sample-code-for-the-screenshot,abc,def,ghi") }, 2, onClose = {}) }
+    @Test fun setupPin() = shot("p44-setup-pin", bigText = true) { app.oie.ui.setup.Setup(AppState(), 4, onClose = {}) }
 }

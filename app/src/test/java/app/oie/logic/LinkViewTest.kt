@@ -21,4 +21,15 @@ class LinkViewTest {
         // Logged out, banned or a QR: they have their own screens.
         assertEquals(Shown.DOWN, LinkView.of(false, wanted = true, trying = false, since = 0, now = 1))
     }
+
+    /** v0.34: a dropped internet doesn't send the kid to the parent; a link only the parent can fix does. */
+    @org.junit.Test fun onlyALinkThatNeedsTheParentAsksForThem() {
+        org.junit.Assert.assertFalse(LinkView.needsParent(real = true, wanted = true, status = "Disconnected"))
+        org.junit.Assert.assertFalse(LinkView.needsParent(real = true, wanted = true, status = "Connecting"))
+        org.junit.Assert.assertTrue(LinkView.needsParent(real = true, wanted = true, status = "LoggedOut"))
+        org.junit.Assert.assertTrue(LinkView.needsParent(real = true, wanted = true, status = "Banned(hours=3)"))
+        org.junit.Assert.assertTrue(LinkView.needsParent(real = true, wanted = true, status = "Qr(code=x)"))
+        org.junit.Assert.assertTrue(LinkView.needsParent(real = true, wanted = false, status = "Off"))
+        org.junit.Assert.assertTrue(LinkView.needsParent(real = false, wanted = false, status = "Off"))
+    }
 }

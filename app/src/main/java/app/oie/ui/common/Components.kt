@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.semantics.liveRegion
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
@@ -133,7 +134,8 @@ fun QuietButton(text: String?, onClick: () -> Unit, modifier: Modifier = Modifie
 @Composable
 fun TextLink(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, color: Color = OieTheme.colors.ink) {
     Box(
-        modifier.defaultMinSize(minWidth = OTokens.Spacing.space12, minHeight = OTokens.Spacing.space12).pressable(onClick = onClick),
+        // v0.34 audit round 2: as tall as a button, so a link beside buttons lines up with them.
+        modifier.defaultMinSize(minWidth = OTokens.Spacing.space12, minHeight = OTokens.Size.button).pressable(onClick = onClick),
         contentAlignment = Alignment.CenterStart,
     ) { Text(text, style = OieType.label.copy(textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline), color = color) }
 }
@@ -181,6 +183,11 @@ fun BottomSheet(onClose: () -> Unit, content: @Composable androidx.compose.found
             Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth()
                 .clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
                 .background(c.surface).pointerInput(Unit) { detectTapGestures { } }
+                // v0.34 audit round 2: a downward drag closes it too (Material's sheet gesture), besides Back and the scrim.
+                .pointerInput(onClose) {
+                    var pulled = 0f
+                    detectVerticalDragGestures(onDragStart = { pulled = 0f }, onDragEnd = { if (pulled > OTokens.Spacing.space16.toPx()) onClose() }) { _, dy -> pulled += dy }
+                }
                 .padding(horizontal = sideMargin + OTokens.Spacing.space2, vertical = OTokens.Spacing.space8),
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             content = content,
@@ -223,11 +230,11 @@ val ICON: Dp = OTokens.Spacing.space6 - OTokens.Spacing.space1 / 2
 
 /** A family member's photo, or their initial on the soft coral round (imagery rules). */
 @Composable
-fun Initial(name: String, size: Dp, modifier: Modifier = Modifier) {
+fun Initial(name: String, size: Dp, modifier: Modifier = Modifier, letters: String? = null) {
     val c = OieTheme.colors
     Box(modifier.size(size).clip(CircleShape).background(c.selected), contentAlignment = Alignment.Center) {
         Text(
-            name.firstOrNull()?.uppercase() ?: "?",
+            letters?.replaceFirstChar { it.uppercase() } ?: name.firstOrNull()?.uppercase() ?: "?",
             // v0.34 audit: display is the greeting's alone (README §5, one per screen); a big initial is a title.
             style = OieType.title,
             color = c.onSelected, textAlign = TextAlign.Center,
@@ -240,7 +247,7 @@ fun Initial(name: String, size: Dp, modifier: Modifier = Modifier) {
  * the letter circle; otherwise the letter circle. Decorative: the name is always next to it.
  */
 @Composable
-fun Avatar(contact: app.oie.logic.Contact, size: Dp, modifier: Modifier = Modifier) {
+fun Avatar(contact: app.oie.logic.Contact, size: Dp, modifier: Modifier = Modifier, letters: String? = null) {
     val context = androidx.compose.ui.platform.LocalContext.current
     // v0.34 audit: opened and decoded off the main thread, at the size it shows (not the full picture).
     val px = with(androidx.compose.ui.platform.LocalDensity.current) { size.roundToPx() }
@@ -251,7 +258,7 @@ fun Avatar(contact: app.oie.logic.Contact, size: Dp, modifier: Modifier = Modifi
         }
     }
     val shown = picture
-    if (shown == null) Initial(contact.name, size, modifier)
+    if (shown == null) Initial(contact.name, size, modifier, letters)
     else androidx.compose.foundation.Image(
         shown, contentDescription = null, contentScale = androidx.compose.ui.layout.ContentScale.Crop,
         modifier = modifier.size(size).clip(CircleShape).background(OieTheme.colors.selected),

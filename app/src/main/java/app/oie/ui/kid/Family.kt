@@ -66,6 +66,7 @@ import app.oie.logic.Kind
 import app.oie.logic.Message
 import app.oie.logic.Reactions
 import app.oie.ui.common.Bar
+import app.oie.ui.common.pressable
 import app.oie.ui.common.OIcon
 import app.oie.ui.common.PrimaryButton
 import app.oie.ui.common.QuietButton
@@ -88,7 +89,7 @@ private fun Sheet(onClose: () -> Unit, content: @Composable () -> Unit) = app.oi
  * again takes it away), and Ouvir for a text.
  */
 @Composable
-internal fun ReactionSheet(m: Message, onReact: (String) -> Unit, onRead: (() -> Unit)?, onClose: () -> Unit) {
+internal fun ReactionSheet(m: Message, onReact: (String) -> Unit, onRead: (() -> Unit)?, onClose: () -> Unit, lastUsed: String? = null) {
     val c = OieTheme.colors
     val tx = str
     Sheet(onClose) {
@@ -99,7 +100,8 @@ internal fun ReactionSheet(m: Message, onReact: (String) -> Unit, onRead: (() ->
             if (compact) Modifier.fillMaxWidth() else Modifier,
             horizontalArrangement = if (compact) Arrangement.SpaceBetween else Arrangement.spacedBy(OTokens.Spacing.space2),
         ) {
-            Reactions.CHOICES.forEach { e ->
+            // v0.34 audit round 2: the kid's last reaction first (a shortcut for the one they use most).
+            (listOfNotNull(lastUsed) + Reactions.CHOICES.filter { it != lastUsed }).forEach { e ->
                 val picked = m.reactions[Reactions.KID] == e
                 Box(
                     Modifier.size(OTokens.Spacing.space12).clip(CircleShape).background(if (picked) c.selected else c.surface)
@@ -182,9 +184,15 @@ private fun MediaTile(m: Message, onOpen: () -> Unit) {
             bmp?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
         } else {
             // v0.34 audit: a video or GIF shows its first picture, with ▶ on it, like in the chat.
-            val frame = rememberFirstFrame(rememberBytes(m.media))
+            val frame = rememberVideoFrame(m.media)
             frame?.let { Image(it.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
             Box(Modifier.size(OTokens.Spacing.space12).clip(CircleShape).background(c.surface), contentAlignment = Alignment.Center) { OIcon(R.drawable.gg_ic_play) }
+            // A GIF says so, as in the chat (videos and GIFs looked the same).
+            if (m.kind == Kind.GIF) Text(
+                tx.gifLabel, style = OieType.caption, color = c.ink,
+                modifier = Modifier.align(Alignment.TopStart).padding(OTokens.Spacing.space2)
+                    .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.surface).padding(horizontal = OTokens.Spacing.space2),
+            )
         }
     }
 }
@@ -237,7 +245,7 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
             QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
             // v0.33 audit: on a phone, the name alone, so Pronto has room.
             Text(if (app.oie.ui.common.isCompact) to else tx.drawFor(to), style = OieType.title, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            PrimaryButton(tx.drawDone, {
+            PrimaryButton(tx.drawUse, {
                 if (strokes.isEmpty() || size.width == 0) return@PrimaryButton
                 onDone(render(strokes, size, c.drawPaper))
             }, enabled = strokes.isNotEmpty(), icon = R.drawable.gg_ic_check)
@@ -356,7 +364,7 @@ private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
-            Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClick = onOpen)
+            Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).pressable(onClick = onOpen)
                 .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space2),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
         ) {
