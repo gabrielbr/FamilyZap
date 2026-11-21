@@ -126,7 +126,7 @@ private fun blocked(state: AppState): String? {
     return when {
         state.statusAudience().isEmpty() -> tx.nobodyToSee
         app.oie.ui.common.linkShown(state) == app.oie.logic.LinkView.Shown.DOWN -> tx.askReconnect(state.parentName)
-        else -> state.quietNow()?.let { tx.quietUntilShort(it.end.hour) }
+        else -> state.quietNow()?.let { app.oie.ui.common.quietText(tx, it, state.parentName, short = true) }
     }
 }
 

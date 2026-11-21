@@ -74,6 +74,8 @@ func TestToIncomingKinds(t *testing.T) {
 		{"video", &waE2E.Message{VideoMessage: &waE2E.VideoMessage{Caption: proto.String("Tito, olha"), Seconds: proto.Uint32(42)}}, Incoming{Kind: "VIDEO", Text: "Tito, olha", DurationSec: 42}},
 		{"gif", &waE2E.Message{VideoMessage: &waE2E.VideoMessage{GifPlayback: proto.Bool(true), Seconds: proto.Uint32(3)}}, Incoming{Kind: "GIF", DurationSec: 3}},
 		{"location", &waE2E.Message{LocationMessage: &waE2E.LocationMessage{}}, Incoming{Kind: "UNSUPPORTED"}},
+		{"contact card", &waE2E.Message{ContactMessage: &waE2E.ContactMessage{Vcard: proto.String("BEGIN:VCARD\nFN:Lucas\nEND:VCARD")}}, Incoming{Kind: "CONTACT", Text: "BEGIN:VCARD\nFN:Lucas\nEND:VCARD"}},
+		{"contact cards", &waE2E.Message{ContactsArrayMessage: &waE2E.ContactsArrayMessage{Contacts: []*waE2E.ContactMessage{{Vcard: proto.String("A")}, {Vcard: proto.String("B")}}}}, Incoming{Kind: "CONTACT", Text: "A\nB"}},
 	}
 	for _, c := range cases {
 		got, ok := ToIncoming(info("m1", false), c.m)

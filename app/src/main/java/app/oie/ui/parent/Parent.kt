@@ -326,6 +326,15 @@ private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: Undo) 
         Text(tx.quietTitle, style = OieType.title, color = c.ink)
         Text(tx.quietParentBody(state.kidName), style = OieType.caption, color = c.muted)
     }
+    // v0.43: quiet turned on from the parent's WhatsApp ("/Tito silêncio"): said here, with a way to lift it.
+    if (state.quietManual) Row(
+        Modifier.fillMaxWidth().padding(bottom = OTokens.Spacing.space4).clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.selected)
+            .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
+    ) {
+        Text(tx.quietManualOn, style = OieType.label, color = c.onSelected, modifier = Modifier.weight(1f))
+        TextLink(tx.quietLift, { touched(); state.quietManual = false })
+    }
     if (app.oie.ui.common.isCompact) {
         header()
         PrimaryButton(tx.addPeriod, { touched(); editing = -1 }, icon = R.drawable.gg_ic_plus, modifier = Modifier.padding(top = OTokens.Spacing.space2))

@@ -1249,6 +1249,18 @@ func ToIncoming(info types.MessageInfo, m *waE2E.Message) (Incoming, bool) {
 		r := m.GetReactionMessage()
 		in.Kind, in.Text, in.ReplyTo = "REACTION", r.GetText(), r.GetKey().GetID()
 		return in, true
+	case m.GetContactMessage() != nil:
+		// v0.43: a shared contact card, read by the app only after the parent's "/Tito adicionar" in their own
+		// chat. Anywhere else the app shows it as "só abre no WhatsApp", as before.
+		c := m.GetContactMessage()
+		in.Kind, in.Text, ctx = "CONTACT", c.GetVcard(), c.GetContextInfo()
+	case m.GetContactsArrayMessage() != nil:
+		a := m.GetContactsArrayMessage()
+		cards := make([]string, 0, len(a.GetContacts()))
+		for _, c := range a.GetContacts() {
+			cards = append(cards, c.GetVcard())
+		}
+		in.Kind, in.Text, ctx = "CONTACT", strings.Join(cards, "\n"), a.GetContextInfo()
 	case m.GetEditedMessage() != nil, keysOnly(m):
 		return Incoming{}, false
 	default:

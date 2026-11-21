@@ -209,7 +209,7 @@ internal fun StatusViewer(state: AppState, contactId: String, onClose: () -> Uni
                 } else if (!canSend) {
                     // As in a chat: why the kid can't answer now.
                     val q = state.quietNow()
-                    Text(if (linkDown) tx.askReconnect(state.parentName) else tx.quietUntilShort(q?.end?.hour ?: 0), style = OieType.body, color = c.muted)
+                    Text(if (linkDown) tx.askReconnect(state.parentName) else app.oie.ui.common.quietText(tx, q, state.parentName, short = true), style = OieType.body, color = c.muted)
                 } else if (replying) {
                     app.oie.ui.setup.Field(tx.replyTo(contact.name), draft, { draft = it }, "")
                     app.oie.ui.setup.ButtonRow {

@@ -252,6 +252,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         // v0.36: a family member's status goes its own way (never a chat message, never a command).
         if (o.optBoolean("status")) { statusIn(o, kind); return }
         if (kind == Kind.TEXT && command(o)) return
+        if (contactCard(o)) return
         if (kind == Kind.REACTION) { reaction(o); return }
         // v0.10: a sticker the parent sends to their own chat is offered to the kid. Only stickers:
         // nothing else from that chat is read into Oiê.
@@ -362,6 +363,35 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
      * the answer goes to the parent's own chat. Returns true when the message was a command (never
      * stored, never shown to the kid).
      */
+    /** v0.43: until when a contact card shared in the parent's own chat is added ("/Tito adicionar", then the card). */
+    private var cardsUntil = 0L
+
+    /**
+     * v0.43: a contact card the parent shared in their own chat, within 10 minutes of "/Tito adicionar". Each card's
+     * person is added (or resumed) and Oiê answers per card. A card at any other time is ignored, never added.
+     */
+    private fun contactCard(o: JSONObject): Boolean {
+        if (o.optString("kind") != "CONTACT" || !o.optBoolean("selfChat") || !o.optBoolean("fromMe")) return false
+        val id = o.optString("id")
+        if (id in ours || !commandsDone.add(id)) return true
+        if (state.clock() > cardsUntil) { Diagnostics.log("command: contact card without adicionar, ignored"); return true }
+        val tx = if (context.resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt
+        val kid = state.kidName.ifBlank { tx.theKid }
+        app.oie.logic.VCard.parse(o.optString("text")).forEach { card ->
+            val r = app.oie.logic.ParentCommand.addCard(card, state.allowed.toList())
+            if (r.allowed != state.allowed.toList()) { state.allowed.clear(); state.allowed.addAll(r.allowed); refreshPhotos() }
+            Diagnostics.log("command: card → ${r.outcome.name.lowercase()}")
+            val name = r.contact?.name ?: card.name
+            noteToSelf(when (r.outcome) {
+                app.oie.logic.ParentCommand.Outcome.ADDED -> tx.cmdAdded(name, kid, false)
+                app.oie.logic.ParentCommand.Outcome.RESUMED -> tx.cmdResumed(name, kid)
+                app.oie.logic.ParentCommand.Outcome.ALREADY_IN -> tx.cmdAlready(name, kid)
+                else -> tx.cmdNoWhatsApp(name, kid)
+            })
+        }
+        return true
+    }
+
     private fun command(o: JSONObject): Boolean {
         if (!o.optBoolean("fromMe")) return false
         val id = o.optString("id")
@@ -379,7 +409,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             pn ?: chat, app.oie.logic.ContactNames.display(pn?.substringBefore('@') ?: "").ifEmpty { chat.substringBefore('@') },
             isGroup = chat.endsWith("@g.us"),
         )
-        val r = app.oie.logic.ParentCommand.apply(p.action, ids, o.optBoolean("selfChat"), candidate, state.allowed.toList())
+        val r = app.oie.logic.ParentCommand.apply(p.action, ids, o.optBoolean("selfChat"), candidate, state.allowed.toList(), p.arg)
         if (r.allowed != state.allowed.toList()) { state.allowed.clear(); state.allowed.addAll(r.allowed); refreshPhotos() }
         Diagnostics.log("command: ${p.action.name.lowercase()} → ${r.outcome.name.lowercase()}")
         val tx = if (context.resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt
@@ -402,6 +432,17 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             app.oie.logic.ParentCommand.Outcome.REMOVED -> tx.cmdRemoved(name, kid)
             app.oie.logic.ParentCommand.Outcome.NOT_IN_LIST -> tx.cmdNotIn(kid, cmd)
             app.oie.logic.ParentCommand.Outcome.OWN_CHAT -> tx.cmdOwnChat(kid, cmd)
+            // v0.43: from the parent's own chat.
+            app.oie.logic.ParentCommand.Outcome.LIST -> tx.cmdList(kid, cmd, app.oie.logic.ParentCommand.numbered(state.allowed).mapIndexed { i, c ->
+                tx.cmdListLine(i + 1, c.name, c.isGroup, c.paused, c.showWholeGroup, kid) })
+            app.oie.logic.ParentCommand.Outcome.KIDS_OWN_ON -> tx.cmdKidsOwnOn(name, kid)
+            app.oie.logic.ParentCommand.Outcome.KIDS_OWN_OFF -> tx.cmdKidsOwnOff(name, kid)
+            app.oie.logic.ParentCommand.Outcome.QUIET_ON -> { state.quietManual = true; tx.cmdQuietOn(kid, cmd) }
+            app.oie.logic.ParentCommand.Outcome.QUIET_OFF -> { state.quietManual = false; tx.cmdQuietOff(kid) }
+            app.oie.logic.ParentCommand.Outcome.SEND_CARD -> { cardsUntil = state.clock() + app.oie.logic.ParentCommand.CARD_WINDOW_MS; tx.cmdSendCard(kid) }
+            app.oie.logic.ParentCommand.Outcome.NEED_WHO -> tx.cmdNeedWho(kid, cmd, p.word)
+            app.oie.logic.ParentCommand.Outcome.NO_SUCH -> tx.cmdNoSuch(p.arg, cmd)
+            app.oie.logic.ParentCommand.Outcome.NO_WHATSAPP -> tx.cmdNoWhatsApp(name, kid)
         }
         noteToSelf(answer)
         return true

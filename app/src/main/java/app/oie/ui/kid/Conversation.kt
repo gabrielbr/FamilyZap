@@ -377,7 +377,7 @@ fun Conversation(
                 if (!canSend) {
                     val q = state.quietNow()
                     Text(
-                        if (linkDown) tx.askReconnect(state.parentName) else tx.quietUntilShort(q?.end?.hour ?: 0),
+                        if (linkDown) tx.askReconnect(state.parentName) else app.oie.ui.common.quietText(tx, q, state.parentName, short = true),
                         style = OieType.body, color = c.muted,
                     )
                 } else if (recordingSince > 0) {

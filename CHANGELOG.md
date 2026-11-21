@@ -27,6 +27,16 @@
 
 
 
+
+## 0.43.0
+- **More commands from your own WhatsApp.** In your chat with yourself ("Mensagem para você"):
+  - **/Tito contatos** lists your kid's contacts, numbered;
+  - **/Tito parar 2**, **voltar 2**, **remover 2** change one by its number (or by name);
+  - **/Tito só 2** makes it a conversation that's your kid's own, and **/Tito normal 2** undoes it;
+  - **/Tito adicionar**, then share a contact card in the next 10 minutes, adds that person (several cards work);
+  - **/Tito silêncio** turns quiet hours on now, until **/Tito liberar**. Your kid sees "Horário de silêncio até (you) liberar", and you can also lift it in Horário de silêncio on the tablet.
+
+  /Tito alone shows them all. Only your WhatsApp can use the commands, and the answers come only to your own chat.
 ## 0.42.0
 - **Groups are back in Adicionar.** You could only find people when adding someone for your kid. Oiê now keeps the list of your groups, so they don't vanish when WhatsApp is slow to answer.
 - **Your kid arranges their home.** "Arrumar", next to "Com quem você quer falar?":

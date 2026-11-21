@@ -64,13 +64,73 @@ class ParentCommandTest {
         assertEquals(Outcome.PAUSED, byLid.outcome)
     }
 
-    @Test fun theOwnChatOnlyGivesHelp() {
-        assertEquals(Outcome.OWN_CHAT, ParentCommand.apply(Action.PAUSE, listOf("me@s.whatsapp.net"), true, vovo, listOf(vovo)).outcome)
+    // v0.43: in the own chat a change needs to say who (a number from "/Tito contatos" or a name); it never acts on the own chat.
+    @Test fun theOwnChatAsksWhoAndNeverChangesItself() {
+        val r = ParentCommand.apply(Action.PAUSE, listOf("me@s.whatsapp.net"), true, vovo, listOf(vovo))
+        assertEquals(Outcome.NEED_WHO, r.outcome); assertEquals(listOf(vovo), r.allowed)
         assertEquals(Outcome.HELP, ParentCommand.apply(Action.HELP, listOf("me@s.whatsapp.net"), true, vovo, listOf(vovo)).outcome)
     }
 
     @Test fun oldCommandsAreIgnored() {
         assertTrue(ParentCommand.fresh(0, ParentCommand.MAX_AGE_MS))
         assertFalse(ParentCommand.fresh(0, ParentCommand.MAX_AGE_MS + 1))
+    }
+
+    // v0.43: commands from the parent's own chat.
+    private val tia = Contact("5521998760004@s.whatsapp.net", "Tia Bia", phone = "5521998760004")
+    private val primos = Contact("1203@g.us", "Primos", isGroup = true)
+    private val line = Contact("me@s.whatsapp.net", "Ana", parentLine = true)
+    private val list = listOf(line, vovo, tia, primos)
+
+    @Test fun theNewWordsParse() {
+        assertEquals(Action.LIST, ParentCommand.parse("/Tito contatos", names)!!.action)
+        assertEquals(Action.LIST, ParentCommand.parse("/Tito list", names)!!.action)
+        ParentCommand.parse("/Tito remover 2", names)!!.let { assertEquals(Action.REMOVE, it.action); assertEquals("2", it.arg) }
+        ParentCommand.parse("/Tito só dele Tia Bia", names)!!.let { assertEquals(Action.KIDS_OWN, it.action); assertEquals("Tia Bia", it.arg) }
+        ParentCommand.parse("/Tito so 3", names)!!.let { assertEquals(Action.KIDS_OWN, it.action); assertEquals("3", it.arg) }
+        assertEquals(Action.NOT_KIDS_OWN, ParentCommand.parse("/Tito normal 3", names)!!.action)
+        assertEquals(Action.QUIET_ON, ParentCommand.parse("/Tito silêncio", names)!!.action)
+        assertEquals(Action.QUIET_OFF, ParentCommand.parse("/Tito liberar", names)!!.action)
+    }
+
+    @Test fun numbersCountTheKidsContactsNotTheParentLine() {
+        assertEquals(listOf(vovo, tia, primos), ParentCommand.numbered(list))
+        assertEquals(tia, ParentCommand.target("2", list))
+        assertEquals(tia, ParentCommand.target("tia bia", list))
+        assertEquals(primos, ParentCommand.target("prim", list))
+        assertNull(ParentCommand.target("9", list))
+        assertNull(ParentCommand.target("Ana", list)) // the line to the parent isn't a target
+    }
+
+    @Test fun inTheOwnChatTheTargetComesFromTheArgument() {
+        val r = ParentCommand.apply(Action.PAUSE, listOf("me@s.whatsapp.net"), ownChat = true, candidate = vovo, allowed = list, arg = "1")
+        assertEquals(Outcome.PAUSED, r.outcome); assertTrue(r.allowed.first { it.id == vovo.id }.paused)
+        assertEquals(Outcome.NEED_WHO, ParentCommand.apply(Action.REMOVE, emptyList(), true, vovo, list, "").outcome)
+        assertEquals(Outcome.NO_SUCH, ParentCommand.apply(Action.REMOVE, emptyList(), true, vovo, list, "7").outcome)
+        val gone = ParentCommand.apply(Action.REMOVE, emptyList(), true, vovo, list, "Primos")
+        assertEquals(Outcome.REMOVED, gone.outcome); assertFalse(gone.allowed.contains(primos))
+    }
+
+    @Test fun kidsOwnOnAndOff() {
+        val on = ParentCommand.apply(Action.KIDS_OWN, emptyList(), true, vovo, list, "3")
+        assertEquals(Outcome.KIDS_OWN_ON, on.outcome); assertTrue(on.allowed.first { it.id == primos.id }.showWholeGroup)
+        val off = ParentCommand.apply(Action.NOT_KIDS_OWN, emptyList(), true, vovo, on.allowed, "3")
+        assertEquals(Outcome.KIDS_OWN_OFF, off.outcome); assertFalse(off.allowed.first { it.id == primos.id }.showWholeGroup)
+    }
+
+    @Test fun listAndQuietWorkAnywhereAndAddInTheOwnChatAsksForTheCard() {
+        assertEquals(Outcome.LIST, ParentCommand.apply(Action.LIST, ids, false, vovo, list).outcome)
+        assertEquals(Outcome.QUIET_ON, ParentCommand.apply(Action.QUIET_ON, emptyList(), true, vovo, list).outcome)
+        assertEquals(Outcome.QUIET_OFF, ParentCommand.apply(Action.QUIET_OFF, emptyList(), true, vovo, list).outcome)
+        assertEquals(Outcome.SEND_CARD, ParentCommand.apply(Action.ADD, emptyList(), true, vovo, list).outcome)
+    }
+
+    @Test fun aSharedCardAddsThePerson() {
+        val r = ParentCommand.addCard(ParentCommand.Card("Lucas", "5511912345678"), list)
+        assertEquals(Outcome.ADDED, r.outcome); assertEquals("5511912345678@s.whatsapp.net", r.contact!!.id)
+        assertEquals(Outcome.ALREADY_IN, ParentCommand.addCard(ParentCommand.Card("Bia", "5521998760004"), list).outcome)
+        assertEquals(Outcome.NO_WHATSAPP, ParentCommand.addCard(ParentCommand.Card("Fixo", ""), list).outcome)
+        val paused = list.map { if (it.id == tia.id) it.copy(paused = true) else it }
+        assertEquals(Outcome.RESUMED, ParentCommand.addCard(ParentCommand.Card("Bia", "5521998760004"), paused).outcome)
     }
 }

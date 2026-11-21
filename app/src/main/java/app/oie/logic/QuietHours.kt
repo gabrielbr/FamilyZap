@@ -11,6 +11,10 @@ object QuietHours {
         QuietPeriod("Dormir", java.time.DayOfWeek.entries.toSet(), LocalTime.of(21, 0), LocalTime.of(7, 0), on = false),
     )
 
+    /** v0.43: "/Tito silêncio" from the parent's WhatsApp: quiet now, all day, until "/Tito liberar". */
+    const val MANUAL = "manual"
+    val manual = QuietPeriod(MANUAL, java.time.DayOfWeek.entries.toSet(), LocalTime.MIDNIGHT, LocalTime.MAX, on = true)
+
     /** The period in force at [now], if any. An overnight period belongs to the day it starts. */
     fun active(periods: List<QuietPeriod>, now: LocalDateTime): QuietPeriod? = periods.firstOrNull { p ->
         if (!p.on) return@firstOrNull false
