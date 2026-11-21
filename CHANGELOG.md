@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **Website: no more "meeting outside".** The landing page no longer says that the conversation leads to meeting up (it could read the wrong way). It now talks about sharing the day and missing each other less, and the school friend's example is about yesterday's game.
 - **Website: the landing page tells the story of the home phone** (decision 0014). A friend said the page felt like watching over kids. Now it opens with "Lembra do telefone de casa?": the kid talks to the family and friends you choose, makes a plan, and the meeting happens outside. The look and the story's steps are the same; only the words changed. "Você vê o que sai" left the highlights (it's still answered in the FAQ), and the footer says Oiê is open source, made by Gabriel Lopes.
 - **Website polished to full marks (impeccable, independent review): 40/40 and 20/20 on both pages.**
   - **Safety page:** calmer text, with one weight per job, sources as small print, and 190 and 100 one tap to call.

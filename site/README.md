@@ -18,7 +18,7 @@ The landing page: static pages, no build step, no analytics, no tracking, no coo
 - **On a phone:** the stage pins over the top of the screen and shows one person at a time.
 - **Reduced motion:** nothing types or cycles; each step shows its end state.
 
-**The words (2026-11-21, decision 0014):** the page tells the story of the 90s home phone: "Lembra do telefone de casa?". The kid talks to familiar people, makes a plan, and the meeting happens outside. The design and steps above are unchanged. The footer credits the open-source project to Gabriel Lopes, with links to the code and gabriellopes.com.
+**The words (2026-11-21, decision 0014):** the page tells the story of the 90s home phone: "Lembra do telefone de casa?". The kid talks to familiar people, to share their day and miss each other less. Since the owner's note of 2026-11-21, the site never talks about meeting up. The design and steps above are unchanged. The footer credits the open-source project to Gabriel Lopes, with links to the code and gabriellopes.com.
 
 **The safety page (2026-11-20, flow `docs/flows/website-safety.md`):** `seguranca/` (PT) and `safety/` (EN), static pages with no script. At the top, why Oiê exists (the home phone of the 90s, no ads, no servers of ours, no analytics or tracking). Below it, a guide for parents: talking first, the tools parents already have (Family Link and others), the risks at 9–12, Brazil's rules and where to get help. Every item links to its official source, and the page shows the date it was last checked; **re-check the links and facts whenever the page changes**. Styles in `assets/read.css`. The landing page links to it from the nav ("Segurança") and the footer.
 
