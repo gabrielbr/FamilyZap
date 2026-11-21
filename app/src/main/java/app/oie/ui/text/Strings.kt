@@ -119,6 +119,10 @@ interface Strings {
     fun parentLineFallback(kid: String): String
     fun parentLineInGroup(kid: String): String
     val parentLineInOwnChat: String
+    // v0.41: the unread mark on the parent's line, behind a switch.
+    fun unreadMarkTitle(kid: String): String
+    val unreadMarkSwitch: String
+    fun unreadMarkBody(kid: String): String
     fun videoFor(to: String): String
     fun gifFor(to: String): String
     val preparingVideo: String; val videoTooLong: String; val videoTooBigToSend: String; val videoError: String
@@ -388,12 +392,15 @@ object Pt : Strings {
     override fun parentLineTitle(parent: String) = "Você ($parent)"
     override fun parentLineCreate(kid: String) = "Criar conversa com $kid"
     override fun parentLineBody(kid: String) = "Cria no seu WhatsApp um grupo só seu chamado “$kid”. O que $kid mandar para você aparece lá, e o que você escrever lá chega para $kid."
-    override val parentLineNoNotify = "O WhatsApp não toca para mensagens da sua própria conta. Por isso o Oiê marca a conversa como não lida a cada mensagem nova: ela ganha o ponto de não lida e sobe para o topo."
+    override val parentLineNoNotify = "O WhatsApp não toca para mensagens da sua própria conta. Se quiser, em Ajustes e ajuda o Oiê pode marcar a conversa como não lida a cada mensagem nova."
     override val parentLineCreating = "Criando…"
     override val parentLineNotNow = "Conecte o WhatsApp para criar a conversa."
     override fun parentLineFallback(kid: String) = "O WhatsApp não aceitou o grupo. $kid vai escrever na sua Mensagem para você; para responder, deslize a mensagem dele ou comece com o nome dele."
     override fun parentLineInGroup(kid: String) = "Grupo “$kid” no seu WhatsApp"
     override val parentLineInOwnChat = "Sua Mensagem para você no WhatsApp"
+    override fun unreadMarkTitle(kid: String) = "Sua conversa com $kid"
+    override val unreadMarkSwitch = "Marcar como não lida no meu WhatsApp"
+    override fun unreadMarkBody(kid: String) = "Ligado, o Oiê marca a conversa como não lida a cada mensagem de $kid. O WhatsApp oficial não faz isso, então fica desligado para proteger o seu número."
     override val takePhoto = "Tirar foto"; override val recordVideo = "Gravar vídeo"
     override fun videoFor(to: String) = "Vídeo para $to"
     override fun gifFor(to: String) = "GIF para $to"
@@ -700,12 +707,15 @@ object En : Strings {
     override fun parentLineTitle(parent: String) = "You ($parent)"
     override fun parentLineCreate(kid: String) = "Create a chat with $kid"
     override fun parentLineBody(kid: String) = "Creates a group with only you in your WhatsApp, called “$kid”. What $kid sends you shows there, and what you write there reaches $kid."
-    override val parentLineNoNotify = "WhatsApp doesn't ring for messages from your own account. So Oiê marks the chat unread with each new message: it gets the unread dot and moves to the top."
+    override val parentLineNoNotify = "WhatsApp doesn't ring for messages from your own account. If you like, in Settings and help Oiê can mark the chat unread with each new message."
     override val parentLineCreating = "Creating…"
     override val parentLineNotNow = "Link WhatsApp to create the chat."
     override fun parentLineFallback(kid: String) = "WhatsApp didn't accept the group. $kid will write in your Message yourself chat; to answer, swipe to reply to his message or start with his name."
     override fun parentLineInGroup(kid: String) = "Group “$kid” in your WhatsApp"
     override val parentLineInOwnChat = "Your Message yourself chat in WhatsApp"
+    override fun unreadMarkTitle(kid: String) = "Your chat with $kid"
+    override val unreadMarkSwitch = "Mark it unread in my WhatsApp"
+    override fun unreadMarkBody(kid: String) = "When this is on, Oiê marks the chat unread with each message from $kid. Official WhatsApp doesn't do this, so it stays off to protect your number."
     override val takePhoto = "Take a photo"; override val recordVideo = "Record a video"
     override fun videoFor(to: String) = "Video for $to"
     override fun gifFor(to: String) = "GIF for $to"

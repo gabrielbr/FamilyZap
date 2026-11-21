@@ -6,9 +6,10 @@ package app.oie.logic
  * bug (a loop, a retry storm after reconnecting) from looking like a bot to WhatsApp.
  */
 object SendPace {
-    const val MIN_GAP_MS = 2_000L
+    // v0.41 (the owner's low-risk pass): 4 s apart and 20 in 10 minutes, from 2 s and 30.
+    const val MIN_GAP_MS = 4_000L
     const val WINDOW_MS = 10 * 60_000L
-    const val MAX_IN_WINDOW = 30
+    const val MAX_IN_WINDOW = 20
 
     /** How long to wait before the next send, given when earlier sends went out. 0 means now. */
     fun waitMs(sentAt: List<Long>, now: Long): Long {

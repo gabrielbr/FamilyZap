@@ -120,6 +120,9 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     /** v0.37: the kid may post statuses (off until the parent turns it on; needs [statusesOn]). */
     var postingOn by mutableStateOf(false)
 
+    /** v0.41: mark the parent's own line unread after each kid message. Off unless the parent turns it on (low-risk pass). */
+    var markUnreadOn by mutableStateOf(false)
+
     /** Who sees the kid's statuses: the people in Contatos the kid can reach (Statuses.audience). */
     fun statusAudience(): List<app.oie.logic.Contact> = app.oie.logic.Statuses.audience(allowed)
 

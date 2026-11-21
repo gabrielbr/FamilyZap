@@ -390,6 +390,7 @@ private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: Undo, 
     BubbleSetting(state)
     NudgeSetting(state)
     StatusSetting(state)
+    UnreadMarkSetting(state)
     Text(tx.help, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     help.forEachIndexed { i, (q, a) ->
         // v0.34 audit: a 56dp row, and TalkBack hears whether it's open.
@@ -524,6 +525,17 @@ internal fun StatusSetting(state: AppState) {
     app.oie.ui.common.SwitchRow(tx.statusesSwitch(kid), state.statusesOn, { state.statusesOn = it }, help = tx.statusesBody(kid))
     // v0.37: posting, only while Novidades is on.
     if (state.statusesOn) app.oie.ui.common.SwitchRow(tx.postingSwitch(kid), state.postingOn, { state.postingOn = it }, help = tx.postingBody(kid))
+}
+
+/** v0.41: the unread mark on the parent's own line, only once that line exists; off unless the parent turns it on. */
+@Composable
+internal fun UnreadMarkSetting(state: AppState) {
+    if (state.allowed.none { it.parentLine }) return
+    val c = OieTheme.colors
+    val tx = str
+    val kid = state.kidName.ifBlank { tx.theKid }
+    Text(tx.unreadMarkTitle(kid), style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    app.oie.ui.common.SwitchRow(tx.unreadMarkSwitch, state.markUnreadOn, { state.markUnreadOn = it }, help = tx.unreadMarkBody(kid))
 }
 
 /** The gentle nudge (v0.33, docs/flows/family-features.md): off until the parent turns it on. */

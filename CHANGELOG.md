@@ -25,6 +25,14 @@
   - **The screens:** the message is shown on the tablet, then on your WhatsApp, then on theirs, and the reply comes back.
   - **Not only grandma:** the copy and FAQ now say "family and friends you choose" (decision 0013).
 
+
+## 0.41.0
+- **Gentler on your WhatsApp number.** Oiê now does less of what unofficial apps can get flagged for:
+  - **A calmer pace:** at least 4 seconds between your kid's messages, and at most 20 in 10 minutes. In normal use you won't notice.
+  - **The unread mark is now your choice.** On your own conversation with your kid, Oiê used to mark the chat as unread after each of their messages, so you'd notice. The official WhatsApp never does that, so it's now off. Turn it on in Ajustes e ajuda › Sua conversa com (your kid) if you want it.
+  - **Posting statuses** stays off unless you turn it on, as before.
+
+  Oiê's WhatsApp connection is already on the newest version. Nothing can make an unofficial app risk-free: WhatsApp may still restrict or block numbers that use it.
 ## 0.40.0
 - **Fewer messages reach the tablet by mistake.** Messages that came within 24 hours of your kid's last one used to reach the tablet, even when they weren't for them, like "o Tito já chegou?". Now, in that time:
   - **Talk about your kid stays with you:** "o Tito já chegou?", "como está a Lia?", "manda beijo pro Tito".

@@ -41,7 +41,7 @@ object Codec {
                 .put("viewed", it.viewed).put("reaction", it.reaction)
                 .put("audience", JSONArray(it.audience)).put("posting", it.posting).put("failed", it.failed)
         }))
-        put("postingOn", s.postingOn)
+        put("postingOn", s.postingOn).put("markUnreadOn", s.markUnreadOn)
         put("nudgeOn", s.nudgeOn).put("nudgeDismissed", JSONObject(s.nudgeDismissed.toMap())).put("needYouAt", s.needYouAt)
         put("pinHash", s.pinHash ?: JSONObject.NULL)
         put("kidNoticeSeen", s.kidNoticeSeen)
@@ -87,6 +87,7 @@ object Codec {
         s.nudgeOn = o.optBoolean("nudgeOn")
         s.statusesOn = o.optBoolean("statusesOn")
         s.postingOn = o.optBoolean("postingOn")
+        s.markUnreadOn = o.optBoolean("markUnreadOn")
         s.linkedSince = o.optLong("linkedSince")
         s.statuses.clear()
         o.optJSONArray("statuses")?.let { a ->
