@@ -449,7 +449,7 @@ private fun Help(state: AppState, offerUndo: Undo, report: ReportView) {
     // v0.14: after Oiê closed by itself, the report leads the section (it's what the parent needs now); otherwise it sits after the answers.
     val crashed = remember { app.oie.data.Diagnostics.lastCrashAt() != null }
     if (crashed) Problems(first = true, offerUndo, report)
-    Text(tx.help, style = OieType.title, color = c.ink, modifier = if (crashed) Modifier.padding(top = OTokens.Spacing.space6) else Modifier)
+    Text(tx.questions, style = OieType.title, color = c.ink, modifier = if (crashed) Modifier.padding(top = OTokens.Spacing.space6) else Modifier)
     help.forEachIndexed { i, (q, a) ->
         // v0.34 audit: a 56dp row, and TalkBack hears whether it's open.
         Column(Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)

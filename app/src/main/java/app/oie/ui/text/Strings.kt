@@ -110,6 +110,8 @@ interface Strings {
     fun pinDots(n: Int, of: Int): String
     val erase: String
     val help: String; val about: String
+    /** v0.44: the questions block in Ajuda (the tab is already called Ajuda). */
+    val questions: String
     fun helpItems(kid: String, parent: String): List<Pair<String, String>>
     fun aboutVersion(v: String): String
     val notWhatsApp: String; val credits: String
@@ -400,7 +402,7 @@ object Pt : Strings {
     override fun clock(hour: Int, minute: Int) = if (minute == 0) "${hour}h" else "%dh%02d".format(hour, minute)
     override fun pinDots(n: Int, of: Int) = "$n de $of números"
     override val erase = "Apagar"
-    override val help = "Ajuda"; override val about = "Sobre"
+    override val help = "Ajuda"; override val about = "Sobre"; override val questions = "Perguntas"
     override fun helpItems(kid: String, parent: String) = listOf(
         "O que pode acontecer com o meu WhatsApp?" to riskBody,
         "$kid vê as minhas conversas?" to "Não. O tablet mostra só o que foi mandado para $kid: respostas às mensagens de $kid, mensagens que começam com o nome de $kid, e o que chega até 24 horas depois da última mensagem de $kid. Numa conversa que você marcou como só de $kid, tudo chega. Nesse tempo, ficam de fora o que fala sobre $kid (“o $kid já chegou?”) e o que vem depois que você responde, até $kid escrever de novo. As suas outras conversas continuam só no seu WhatsApp.",
@@ -746,7 +748,7 @@ object En : Strings {
     }
     override fun pinDots(n: Int, of: Int) = "$n of $of digits"
     override val erase = "Delete"
-    override val help = "Help"; override val about = "About"
+    override val help = "Help"; override val about = "About"; override val questions = "Questions"
     override fun helpItems(kid: String, parent: String) = listOf(
         "What could happen to my WhatsApp?" to riskBody,
         "Can $kid see my chats?" to "No. The tablet only shows what was sent to $kid: replies to $kid's messages, messages that start with $kid's name, and what arrives up to 24 hours after $kid's last message. In a chat you marked as $kid's own, everything arrives. In that time, talk about $kid (“is $kid home?”) stays out, and so does what comes after you answer, until $kid writes again. Your other chats stay only in your WhatsApp.",
