@@ -234,6 +234,11 @@
         "usage": "The round hold-to-record button in a conversation: the screen's one accent, big for a kid's thumb."
       },
       {
+        "name": "news-edge",
+        "value": "2px",
+        "usage": "The brand-coral edge round a person with unread messages on the kid's home (v0.45): thicker than a hairline so news shows at a glance."
+      },
+      {
         "name": "content-max",
         "value": "600px",
         "usage": "The widest a column grows on the tablet, so lines stay readable."

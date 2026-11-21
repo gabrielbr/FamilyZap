@@ -146,9 +146,11 @@ fun KidHome(state: AppState) {
 private fun People(state: AppState) {
     // Two people with the same first letter ("Vovó", "Vovô") get two letters each, so they differ at a glance.
     val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
-    val people = state.homePeople
+    // v0.45: whoever has news comes first (newest first), highlighted; back to their place once read.
+    val people = state.homeNow
     if (app.oie.ui.common.isCompact) {
-        Column(Modifier.fillMaxWidth().padding(top = OTokens.Spacing.space4)) {
+        // v0.45: a small gap, so two highlighted rows don't touch.
+        Column(Modifier.fillMaxWidth().padding(top = OTokens.Spacing.space4), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
             people.forEach { ct -> PersonRow(state, ct, letters[ct.name]) }
         }
         return
@@ -201,13 +203,17 @@ private fun said(state: AppState, ct: app.oie.logic.Contact): Said {
     return Said(preview, whenText, unread, label, p?.failed == true)
 }
 
-/** "3 novas": ink ground, page text (a word, never a bare dot or colour). */
+/**
+ * "3 novas" (a word, never a bare dot or colour). v0.45 (the owner: "using the red that we use on the brand"): the brand
+ * coral fill with ink on it (4.8:1), so news stands out. Each person with news wears one: the owner's call over the
+ * "one filled coral per screen" rule (decision 0015).
+ */
 @Composable
 private fun NewPill(n: Int) {
     val c = OieTheme.colors
     Text(
-        str.newCount(n), style = OieType.caption, color = c.page, maxLines = 1,
-        modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(c.ink)
+        str.newCount(n), style = OieType.caption, color = c.onMint, maxLines = 1,
+        modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(c.mint)
             .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
     )
 }
@@ -217,9 +223,14 @@ private fun NewPill(n: Int) {
 private fun PersonRow(state: AppState, ct: app.oie.logic.Contact, letters: String?) {
     val c = OieTheme.colors
     val s = said(state, ct)
+    val news = s.unread > 0
     Row(
         Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin + OTokens.Spacing.space4)
             .clip(RoundedCornerShape(OTokens.Radius.radiusM))
+            // v0.45: a row with news wears the brand coral edge, like the card on a tablet.
+            // Every row keeps the same inset, so the photos line up whether a row is highlighted or not.
+            .then(if (news) Modifier.border(OTokens.Size.newsEdge, c.mint, RoundedCornerShape(OTokens.Radius.radiusM)) else Modifier)
+            .padding(horizontal = OTokens.Spacing.space3)
             .pressable { state.route = Route.Conversation(ct.id) }
             .semantics(mergeDescendants = true) { contentDescription = s.label; role = Role.Button }
             .padding(vertical = OTokens.Spacing.space2),
@@ -256,8 +267,9 @@ private fun PersonCard(state: AppState, ct: app.oie.logic.Contact, letters: Stri
     val s = said(state, ct)
     val shape = RoundedCornerShape(OTokens.Radius.radiusM)
     val canSend = state.canSend(ct) && app.oie.ui.common.linkShown(state) != app.oie.logic.LinkView.Shown.DOWN
+    // v0.45: a card with news wears a 2dp brand coral edge (3.4:1 on the page, a graphic), with "3 novas" in coral.
     Column(
-        modifier.clip(shape).background(c.surface).border(OTokens.Size.hairline, c.line, shape)
+        modifier.clip(shape).background(c.surface).border(if (s.unread > 0) OTokens.Size.newsEdge else OTokens.Size.hairline, if (s.unread > 0) c.mint else c.line, shape)
             .padding(OTokens.Spacing.space2),
     ) {
         Column(

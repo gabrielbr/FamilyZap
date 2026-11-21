@@ -43,4 +43,12 @@ object HomeOrder {
         shown.add(at, id)
         return favs to shown
     }
+
+    /**
+     * v0.45 (the owner: new messages should "go up, so you can see that you need to give attention to that", as in
+     * WhatsApp): whoever has unread messages comes first, the newest first; everyone else keeps [ordered]. Once read,
+     * a person goes back to their place. [latestNew]: contact id to the time of their newest unread message.
+     */
+    fun withNews(ordered: List<Contact>, latestNew: Map<String, Long>): List<Contact> =
+        ordered.filter { it.id in latestNew }.sortedByDescending { latestNew.getValue(it.id) } + ordered.filter { it.id !in latestNew }
 }
