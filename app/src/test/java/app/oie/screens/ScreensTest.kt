@@ -83,6 +83,10 @@ class ScreensTest {
     private fun withNews() = ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("t1", allowed[3].id, false, now - 5 * 60 * 1000, app.oie.logic.Kind.TEXT, "Tito, vamos ao parque sábado?") }
     @Test fun kidHomeNews() = shot("78-kid-home-news", false) { KidHome(withNews()) }
     // v0.48: the three views, with People and Grupos as sections (the default on the tablet is Mosaico, as in 02).
+    // v0.50: Primos (a group) has the newest message: it leads Novas, above Tia Bia and Vovó; Pessoas and Grupos follow.
+    private fun groupNews() = withNews().apply { messages += app.oie.logic.Message("pg", "primos", false, now - 60_000, app.oie.logic.Kind.TEXT, "Quem vem domingo?", sender = "5511987650001@s.whatsapp.net") }
+    @Test fun kidHomeUnreadGroup() = shot("83-kid-home-unread", false) { KidHome(groupNews()) }
+    @Test fun kidHomeUnreadGroupDark() = shot("83-kid-home-unread", true) { KidHome(groupNews().apply { homeView = "list" }) }
     @Test fun kidHomeList() = shot("80-kid-home-list", false) { KidHome(withNews().apply { homeView = "list" }) }
     @Test fun kidHomePhotos() = shot("81-kid-home-photos", false) { KidHome(withNews().apply { homeView = "photos" }) }
     @Test fun kidHomePhotosDark() = shot("81-kid-home-photos", true) { KidHome(withNews().apply { homeView = "photos" }) }

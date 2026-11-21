@@ -89,6 +89,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] v0.47: the intro message once per chat (approved words, switch on by default), reactions on the bubble's edge, content inside the frame and roomier bar (owner, 2026-11-21). Open: one real intro to a grandparent and to a group.
 - [x] v0.48: home views Lista, Fotos, Mosaico (chosen in Arrumar, remembered) and Pessoas / Grupos sections (owner, 2026-11-21). Open: which view Tito picks.
 - [x] v0.49: one small animation for every action: the 97% press on every touch target, colour fades on picks, help answers open smoothly, new messages fade in (owner, 2026-11-21).
+- [x] v0.50: "Novas" section first on the kid home: people and groups with unread messages together, newest first (owner, 2026-11-21).
 - [x] v0.37: the kid posts a status (photo, video up to 1 min, text), only to the people in Contatos, through one modified whatsmeow file (decision 0003 update); off until the parent turns it on (2026-11-20). Open: the owner checks on a device that only Contatos sees it.
 - [x] v0.36: Novidades: the kid watches, reacts to and answers the family's statuses (allowed people only; off until the parent turns it on; views show as the parent) (2026-11-20). Open: the owner checks on a device that WhatsApp shows the reaction on the status.
 - [x] v0.35: the line to the parent marks itself unread after each message from the kid (2026-11-20). Open: the owner checks the unread dot on the phone.

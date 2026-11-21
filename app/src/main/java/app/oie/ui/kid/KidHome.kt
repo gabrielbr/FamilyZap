@@ -180,15 +180,14 @@ private fun People(state: AppState) {
     // Two people with the same first letter ("Vovó", "Vovô") get two letters each, so they differ at a glance.
     val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
     // v0.45: whoever has news comes first in their section (newest first), highlighted; back to their place once read.
-    val all = state.homeNow
-    val people = all.filter { !app.oie.logic.HomeOrder.inGroups(it) }
-    val groups = all.filter { app.oie.logic.HomeOrder.inGroups(it) }
-    val both = people.isNotEmpty() && groups.isNotEmpty()
+    // v0.50: Novas first (everyone with unread messages, people and groups, newest first), then Pessoas and Grupos.
+    val sections = state.homeSections
+    val shown = listOf(tx.sectionNew to sections.news, tx.sectionPeople to sections.people, tx.sectionGroups to sections.groups).filter { it.second.isNotEmpty() }
+    val titled = shown.size > 1
     val view = homeView(state)
-    Column(Modifier.fillMaxWidth().then(if (both) Modifier else Modifier.padding(top = OTokens.Spacing.space4))) {
-        listOf(tx.sectionPeople to people, tx.sectionGroups to groups).forEach { (title, list) ->
-            if (list.isEmpty()) return@forEach
-            if (both) SectionTitle(title)
+    Column(Modifier.fillMaxWidth().then(if (titled) Modifier else Modifier.padding(top = OTokens.Spacing.space4))) {
+        shown.forEach { (title, list) ->
+            if (titled) SectionTitle(title)
             Box(Modifier.padding(top = OTokens.Spacing.space3)) {
                 when (view) {
                     HomeView.LIST -> Column(Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {

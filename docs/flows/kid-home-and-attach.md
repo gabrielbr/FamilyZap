@@ -169,3 +169,18 @@ _The owner, 2026-11-21: "Give the kid options to list the contacts as masonry, g
 - **Memory ✅:** the choice is remembered.
 - **Accessibility ✅:** radio semantics, 48dp targets, headings, reading order.
 - **Evidence 🟡:** which view Tito picks.
+
+## v0.50: "Novas" first, people and groups together
+_The owner, 2026-11-21: "when a group has notification it stays very low. So before any of these groups we want a conditional group called Unread. Anything that has notification appears there in chronological order."_
+
+- **Novas** (EN "Unread") is the home's first section. It holds everyone with unread messages, people and groups together, the newest message first, with the coral edge and "N novas" (v0.45). `HomeOrder.sections` is tested.
+- **Pessoas** and **Grupos** follow with everyone else, in the kid's order.
+- **When it shows:** only when something is unread. Once read, a person or group goes back to their own section and place. Titles show when more than one section has people.
+- **Before:** news was first only within its own section, so a group with news still sat under every person.
+- **Arrumar:** unchanged. Pessoas and Grupos, in the kid's order, with no Novas.
+
+**Review (§13):**
+- **Happy path ✅:** whatever needs Tito is at the top, one tap away.
+- **Conventions ✅:** WhatsApp's "Unread" filter.
+- **Accessibility ✅:** "Novas" is a heading, and each item's label says "N novas".
+- **Evidence 🟡:** a group message reaches the top on the tablet.
