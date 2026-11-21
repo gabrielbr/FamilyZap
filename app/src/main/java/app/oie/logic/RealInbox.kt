@@ -19,4 +19,21 @@ object RealInbox {
         if (fromMe && !contact.parentLine) return null
         return Message(id, contact.id, false, at, kind, text, replyTo, durationSec, size = size)
     }
+
+    /**
+     * v0.40: the parent writing from their phone in an allowed chat (not the line to the kid). Returns that
+     * contact's id, so the 24-hour window can close; null for anything else. The tablet's own sends never count:
+     * not one in [ours], not one already in the kid's history ([kidIds], for after a restart), and not a text
+     * that starts with the kid's signature ([kidTag], e.g. "😎*Tito*"). Only the time is kept, never the text.
+     */
+    fun parentWriting(
+        id: String, chat: String, chatAlt: String?, fromMe: Boolean, ours: Set<String>, allowed: List<Contact>,
+        kidIds: Set<String>, text: String, kidTag: String,
+    ): String? {
+        if (!fromMe || id in ours || id in kidIds) return null
+        val contact = allowed.firstOrNull { it.id == chat || (chatAlt != null && it.id == chatAlt) } ?: return null
+        if (contact.parentLine) return null
+        if (kidTag.isNotEmpty() && text.startsWith(kidTag)) return null
+        return contact.id
+    }
 }

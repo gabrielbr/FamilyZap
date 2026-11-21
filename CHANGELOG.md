@@ -23,6 +23,13 @@
   - **The screens:** the message is shown on the tablet, then on your WhatsApp, then on theirs, and the reply comes back.
   - **Not only grandma:** the copy and FAQ now say "family and friends you choose" (decision 0013).
 
+## 0.40.0
+- **Fewer messages reach the tablet by mistake.** Messages that came within 24 hours of your kid's last one used to reach the tablet, even when they weren't for them, like "o Tito já chegou?". Now, in that time:
+  - **Talk about your kid stays with you:** "o Tito já chegou?", "como está a Lia?", "manda beijo pro Tito".
+  - **When you answer in that chat, it's yours:** what the person says next stays in your WhatsApp, until your kid writes again.
+
+  Replies to your kid's messages, and messages that start with their name ("Tito, …", "Oi Tito"), still always reach them. A message like "o Tito já chegou?" that's already on the tablet leaves the chat.
+
 ## 0.39.0
 - **Your kid's name on every kind of message.** WhatsApp doesn't let a voice message or a real sticker carry a caption, so the family couldn't tell those came from your kid. Now, before a voice message or a sticker, the name goes on its own line (😎**Tito**, with the emoji you chose), then the audio or the sticker. It goes once per burst: if your kid sends five audios in a row, the name goes once, and again only after 2 minutes. Text, photos, videos, GIFs and Oiê's stickers already carried the name. Reactions stay as they are.
 

@@ -269,7 +269,7 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     fun goReal() {
         realMode = true
         linkedSince = clock()
-        allowed.clear(); messages.clear(); drafts.clear(); lastSeen.clear(); failed.clear(); quietCount = 0
+        allowed.clear(); messages.clear(); drafts.clear(); lastSeen.clear(); parentWroteAt.clear(); failed.clear(); quietCount = 0
     }
     /** Unsent drafts per contact (flow: Remembers). */
     val drafts = mutableStateMapOf<String, String>()
@@ -292,13 +292,20 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     fun unread(contactId: String): Int = visible(contactId).count { !it.fromKid && it.at > lastSeen.getOrDefault(contactId, 0L) }
     val lastSeen = mutableStateMapOf<String, Long>()
 
+    /**
+     * When the parent last wrote in each allowed chat from their phone (v0.40). Only the time, never what they
+     * wrote: it closes the 24-hour window, so what the family says next to the parent stays private.
+     */
+    val parentWroteAt = mutableStateMapOf<String, Long>()
+    fun parentWrote(chatId: String, at: Long) { if (at > (parentWroteAt[chatId] ?: 0L)) parentWroteAt[chatId] = at }
+
     /** Messages that arrived quietly during quiet hours and haven't been summed up yet. */
     var quietCount by mutableStateOf(0)
 
     /** Every message from the WhatsApp link comes in here (logic/Inbox.kt decides). Returns what happened. */
     fun receive(m: Message, now: LocalDateTime = LocalDateTime.now()): app.oie.logic.Inbox.Decision {
         val history = messages.filter { it.chatId == m.chatId }
-        val d = app.oie.logic.Inbox.decide(m, allowed, history, kidNames(), periods, now)
+        val d = app.oie.logic.Inbox.decide(m, allowed, history, kidNames(), periods, now, parentWroteAt[m.chatId])
         when (d) {
             app.oie.logic.Inbox.Decision.DROP -> {}
             app.oie.logic.Inbox.Decision.DELETE -> {

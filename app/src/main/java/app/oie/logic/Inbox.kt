@@ -28,12 +28,14 @@ object Inbox {
         names: List<String>,
         periods: List<QuietPeriod>,
         now: LocalDateTime,
+        /** v0.40: when the parent last wrote in this chat from their phone, or null. */
+        parentWroteAt: Long? = null,
     ): Decision {
         val chat = allowed.firstOrNull { it.id == message.chatId } ?: return Decision.DROP
         // v0.21: a chat the parent paused from their WhatsApp ("/Tito parar") reaches the kid in no way.
         if (chat.paused) return Decision.DROP
         if (message.kind == Kind.DELETED) return if (history.any { it.id == message.replyTo }) Decision.DELETE else Decision.DROP
-        if (!MessageRule.isForKid(message, chat, history, names)) return Decision.DROP
+        if (!MessageRule.isForKid(message, chat, history, names, parentWroteAt)) return Decision.DROP
         if (message.fromKid) return Decision.QUIET // the kid's own messages never notify
         return if (QuietHours.canSend(periods, chat, now)) Decision.NOTIFY else Decision.QUIET
     }
