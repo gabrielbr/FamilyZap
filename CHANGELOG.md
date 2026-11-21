@@ -44,6 +44,16 @@
 
 
 
+## 0.48.0
+- **Tito picks how the home looks.** In Arrumar › Mostrar como:
+  - **Lista:** one row each.
+  - **Fotos:** a grid of big photos with the names, nothing to read.
+  - **Mosaico:** cards as tall as each person's last message.
+
+  The choice is remembered. Until Tito picks, a phone shows Lista and the tablet Mosaico (today's cards).
+- **People and groups apart:** the home shows **Pessoas**, then **Grupos**, in every view and in Arrumar. News still comes first in each, then favorites, then Tito's order. Your own line with Tito counts as a person.
+- **What you have to do:** nothing.
+
 ## 0.47.0
 - **Oiê introduces Tito in each chat, once** (in the words you approved). Before Tito's first message in a chat, Oiê sends one short line.
   - **To a person:** "Oiê · Tito está escrevendo pelo WhatsApp de Ana, com o app Oiê, no tablet. Responda aqui mesmo. Para puxar conversa com Tito depois, comece a mensagem com “Tito”. Como funciona: (link)".

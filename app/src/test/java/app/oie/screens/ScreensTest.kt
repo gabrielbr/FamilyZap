@@ -82,6 +82,11 @@ class ScreensTest {
     // v0.45: Tia Bia (fourth in the order) wrote "Tito, ..." five minutes ago: she comes first, then Vovó (20 min ago); both highlighted.
     private fun withNews() = ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("t1", allowed[3].id, false, now - 5 * 60 * 1000, app.oie.logic.Kind.TEXT, "Tito, vamos ao parque sábado?") }
     @Test fun kidHomeNews() = shot("78-kid-home-news", false) { KidHome(withNews()) }
+    // v0.48: the three views, with People and Grupos as sections (the default on the tablet is Mosaico, as in 02).
+    @Test fun kidHomeList() = shot("80-kid-home-list", false) { KidHome(withNews().apply { homeView = "list" }) }
+    @Test fun kidHomePhotos() = shot("81-kid-home-photos", false) { KidHome(withNews().apply { homeView = "photos" }) }
+    @Test fun kidHomePhotosDark() = shot("81-kid-home-photos", true) { KidHome(withNews().apply { homeView = "photos" }) }
+    @Test fun kidHomeMosaicDark() = shot("82-kid-home-mosaic", true) { KidHome(withNews().apply { homeView = "mosaic"; messages += app.oie.logic.Message("m2", "mae", false, now - 3 * 60_000, app.oie.logic.Kind.TEXT, "Tito, a vó disse que domingo tem bolo de laranja e que é para você chegar cedo, porque ela quer te ensinar a fazer a cobertura.") }) }
 
     // v0.46: a group as a group: who said it (Vovó on the list, Lucas not, the parent), and the kid's own.
     private fun groupChat() = ready().apply {

@@ -50,4 +50,33 @@ class HomeOrderTest {
         assertEquals(listOf("pai", "lu", "vo", "tia"), ids(HomeOrder.withNews(ordered, mapOf("lu" to 100L, "pai" to 200L))))
         assertEquals(ids(ordered), ids(HomeOrder.withNews(ordered, emptyMap()))) // all read: the kid's order again
     }
+
+    // v0.48: people and groups are two sections.
+    private val primos = Contact("primos", "Primos", isGroup = true)
+    private val escola = Contact("escola", "Escola", isGroup = true)
+    private val linha = Contact("linha", "Mãe", isGroup = true, parentLine = true)
+    private val mixed = listOf(primos, vo, escola, linha, lu)
+
+    @Test fun peopleComeBeforeGroupsAndTheParentsLineIsAPerson() =
+        assertEquals(listOf("vo", "linha", "lu", "primos", "escola"), ids(HomeOrder.order(mixed, emptySet(), emptyList())))
+
+    @Test fun aGroupFavoriteLeadsTheGroupsNotTheHome() =
+        assertEquals(listOf("vo", "linha", "lu", "escola", "primos"), ids(HomeOrder.order(mixed, setOf("escola"), emptyList())))
+
+    @Test fun aMoveNeverCrossesFromPeopleToGroups() {
+        val order = ids(HomeOrder.order(mixed, emptySet(), emptyList()))
+        assertEquals(order, HomeOrder.move(mixed, emptySet(), emptyList(), "lu", +1)) // last person: stays
+        assertEquals(order, HomeOrder.move(mixed, emptySet(), emptyList(), "primos", -1)) // first group: stays
+        assertEquals(listOf("vo", "linha", "lu", "escola", "primos"), HomeOrder.move(mixed, emptySet(), emptyList(), "primos", +1))
+    }
+
+    @Test fun aNewGroupFavoriteGoesToTheTopOfTheGroups() {
+        val (favs, order) = HomeOrder.toggleFavorite(mixed, emptySet(), emptyList(), "escola")
+        assertEquals(listOf("vo", "linha", "lu", "escola", "primos"), ids(HomeOrder.order(mixed, favs, order)))
+    }
+
+    @Test fun newsComeFirstWithinEachSection() {
+        val ordered = HomeOrder.order(mixed, emptySet(), emptyList())
+        assertEquals(listOf("lu", "vo", "linha", "escola", "primos"), ids(HomeOrder.withNews(ordered, mapOf("lu" to 1L, "escola" to 2L))))
+    }
 }
