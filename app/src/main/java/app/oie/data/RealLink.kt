@@ -261,6 +261,11 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             val chat = o.optString("chat"); val alt = o.optString("chatAlt")
             if (state.allowed.none { it.parentLine && (it.id == chat || it.id == alt) }) return
         }
+        // v0.40: the parent wrote in this chat from their phone, so the window closes (only the time is kept).
+        if (kind != Kind.REACTION) app.oie.logic.RealInbox.parentWriting(
+            o.optString("id"), o.optString("chat"), o.optString("chatAlt").ifEmpty { null }, o.optBoolean("fromMe"), ours,
+            state.allowed, state.messages.mapTo(HashSet()) { it.id }, o.optString("text"), signed(""),
+        )?.let { state.parentWrote(it, o.optLong("at")) }
         val m = app.oie.logic.RealInbox.toMessage(
             o.optString("id"), o.optString("chat"), o.optString("chatAlt").ifEmpty { null }, o.optBoolean("fromMe"), ours,
             state.allowed, o.optLong("at"), kind, o.optString("text"), o.optString("replyTo").ifEmpty { null }, o.optInt("durationSec"), o.optLong("size"),

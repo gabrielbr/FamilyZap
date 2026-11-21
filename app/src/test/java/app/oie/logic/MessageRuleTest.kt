@@ -42,4 +42,45 @@ class MessageRuleTest {
         val group = Contact("g", "Primos", isGroup = true, showWholeGroup = true)
         assertTrue(MessageRule.isForKid(fam("a", 0).copy(chatId = "g"), group, emptyList(), "Tito"))
     }
+
+    // v0.40: the owner, 2026-11-21: "o Tito já chegou?" reached the tablet inside the 24-hour window.
+    @Test fun talkAboutTheKidStaysPrivateEvenInTheWindow() {
+        val history = listOf(kid("k1", 0))
+        for (t in listOf("o Tito já chegou?", "Como está o Tito?", "manda beijo pro Tito", "falei com o Tito hoje", "saudade do Tito", "is Tito home?"))
+            assertFalse(t, MessageRule.isForKid(fam("a", h, t), vovo, history, "Tito"))
+    }
+
+    @Test fun speakingToTheKidStillReachesHim() {
+        val history = listOf(kid("k1", 0))
+        for (t in listOf("Tito, já chegou?", "Oi Tito", "Te amo, Tito", "Beijo Tito", "Boa noite, Ana e Tito", "também te amo", "Domingo tem bolo"))
+            assertTrue(t, MessageRule.isForKid(fam("a", h, t), vovo, history, "Tito"))
+    }
+
+    @Test fun aReplyToTheKidWinsEvenIfItTalksAboutHim() =
+        assertTrue(MessageRule.isForKid(fam("a", h, "o Tito é demais", replyTo = "k1"), vovo, listOf(kid("k1", 0)), "Tito"))
+
+    @Test fun aboutKidMatchesNicknamesAndAccents() {
+        assertTrue(MessageRule.aboutKid("cadê a Lili?", listOf("Lia", "Lili")))
+        assertTrue(MessageRule.aboutKid("e o Títo?", listOf("Tito")))
+        assertTrue(MessageRule.aboutKid("a Ana Clara dormiu?", listOf("Ana Clara")))
+        assertFalse(MessageRule.aboutKid("o Titozão latiu", listOf("Tito")))
+        assertFalse(MessageRule.aboutKid("Tito", listOf("Tito")))
+        assertFalse(MessageRule.aboutKid("o Tito", listOf("")))
+    }
+
+    @Test fun afterTheParentWritesTheWindowCloses() {
+        val history = listOf(kid("k1", 0))
+        assertFalse(MessageRule.isForKid(fam("a", 2 * h, "tudo bem sim"), vovo, history, listOf("Tito"), parentWroteAt = h))
+        // A reply to the kid, or his name, still reaches him.
+        assertTrue(MessageRule.isForKid(fam("b", 2 * h, "Tito, te amo"), vovo, history, listOf("Tito"), parentWroteAt = h))
+        assertTrue(MessageRule.isForKid(fam("c", 2 * h, "ok", replyTo = "k1"), vovo, history, listOf("Tito"), parentWroteAt = h))
+    }
+
+    @Test fun whenTheKidWritesAgainTheWindowReopens() {
+        val history = listOf(kid("k1", 0), kid("k2", 3 * h))
+        assertTrue(MessageRule.isForKid(fam("a", 4 * h, "tudo bem sim"), vovo, history, listOf("Tito"), parentWroteAt = h))
+    }
+
+    @Test fun aParentMessageAfterThisOneDoesNotCloseItRetroactively() =
+        assertTrue(MessageRule.isForKid(fam("a", h, "oi meu bem"), vovo, listOf(kid("k1", 0)), listOf("Tito"), parentWroteAt = 2 * h))
 }

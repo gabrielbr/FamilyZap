@@ -53,6 +53,33 @@ This rule needs testing. The trade-off is privacy for the parent's own chats aga
 | 3c | **Sticker / text** | Reads | Shown inline. Stickers from the family's WhatsApp are shown as received. |
 | 4 | **Reply** | Uses the composer | Flow "Kid sends a message". |
 
+## v0.40: talk about the kid, and the parent taking over, stay private
+_The owner, 2026-11-21: "Phrases like 'o Tito já chegou?' are being sent to the tablet and shouldn't. We must have a more efficient way to detect when the message is for him."_
+
+**Why it happened:** "o Tito já chegou?" doesn't start with his name and isn't a reply, but it came within 24 hours of Tito's last message, so the window let it in. The window can't tell a message **to** Tito from one **about** him, or one to the parent.
+
+**Two new signals inside the window** (the owner chose both; the window stays 24 h):
+1. **Talks about the kid.** One of the kid's names right after a word like *o, a, do, da, no, na, ao, pro, pra, pelo, com, para, sobre, de, sem, até* (or *is, with, for, about, tell, ask* in English) is talk about him: "o Tito já chegou?", "como está a Lia?", "manda beijo pro Tito". It stays private. Speaking to him still counts: "Tito, …", "Oi Tito", "Te amo, Tito", "Beijo Tito", "Boa noite, Ana e Tito".
+2. **The parent took over.** When the parent writes in that chat from their phone after the kid's last message, the window closes: what the family says next answers the parent. It reopens when the kid writes again. Only the time the parent wrote is kept on the tablet, never what they wrote.
+
+**Unchanged:** a reply to one of the kid's messages, or a message that starts with his name (after at most one greeting), always reaches him. Groups set to "Mostrar tudo do grupo" and the line to the parent work as before.
+
+**Already on the tablet:** a stored message that talks about the kid leaves the chat (the same rule is applied when the chat is shown).
+
+| # | In WhatsApp (Vovó's chat) | Before | Now |
+|---|---|---|---|
+| 1 | Tito: "Oi vó" | — | — |
+| 2 | Vovó: "Oi meu amor" | Tablet | Tablet (window) |
+| 3 | Vovó: "o Tito já chegou?" | Tablet | Private (talks about him) |
+| 4 | The parent: "Chegou sim" | Private | Private, and the window closes |
+| 5 | Vovó: "Que bom, beijos" | Tablet | Private (after the parent) |
+| 6 | Vovó: "Tito, te amo" | Tablet | Tablet (his name first) |
+| 7 | Tito: "Te amo vó", then Vovó: "❤️ dorme bem" | Tablet | Tablet (the kid wrote again) |
+
+**Known limits:**
+- "Tito chegou?" (his name first, no comma) still reaches him: in chats, people address kids that way, and starting with the name is how the family talks to him.
+- "Diga ao Tito que eu amo ele" stays private now; the parent passes it on.
+
 ## v0.11: playing voice
 A voice message plays on tap and stops on a second tap. Only one plays at a time. It plays from a temporary copy of the sealed file, deleted when it ends.
 
