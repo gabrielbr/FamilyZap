@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -41,7 +42,7 @@ import app.oie.ui.theme.OieTheme
  */
 class BubbleActivity : MainActivity()
 
-object BuildConfigInfo { const val VERSION = "0.46.0" }
+object BuildConfigInfo { const val VERSION = "0.47.0" }
 
 val LocalUpdater = androidx.compose.runtime.staticCompositionLocalOf<app.oie.update.Updater?> { null }
 val LocalNotifier = androidx.compose.runtime.staticCompositionLocalOf<app.oie.data.Notifier?> { null }
@@ -94,7 +95,9 @@ open class MainActivity : ComponentActivity() {
                 // The 4dp frame round every screen (the core rule), in coral.
                 Box(
                     Modifier.fillMaxSize().background(c.page).windowInsetsPadding(WindowInsets.safeDrawing)
-                        .border(OTokens.Size.frame, c.frameLine),
+                        // v0.47 (the owner: "elements kind of hitting the wall of the screen"): the content sits inside
+                        // the frame, never under it.
+                        .border(OTokens.Size.frame, c.frameLine).padding(OTokens.Size.frame),
                 ) {
                     // v0.29: a chat's bubble shows only that chat, whatever the full app is showing.
                     if (bubbleChat != null) {

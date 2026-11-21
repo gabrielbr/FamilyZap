@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -123,8 +124,19 @@ internal fun ReactionChips(m: Message, alignEnd: Boolean) {
     if (m.reactions.isEmpty()) return
     val shown = Reactions.shown(m.reactions)
     val said = shown.joinToString(", ") { (e, n) -> if (n > 1) "$e $n" else e }
+    // v0.47 (the owner: the reaction "needs to be attached … in the same way that WhatsApp does"): the chips sit on the
+    // bubble's bottom edge, 12dp over it, at its starting corner; the layout gives that space back, so the next
+    // message stays where it was.
+    val overlap = OTokens.Spacing.space3
     Row(
-        Modifier.fillMaxWidth().semantics(mergeDescendants = true) { contentDescription = tx.reactionsA11y(said) },
+        Modifier.fillMaxWidth()
+            .layout { measurable, constraints ->
+                val p = measurable.measure(constraints)
+                val up = overlap.roundToPx()
+                layout(p.width, (p.height - up).coerceAtLeast(0)) { p.place(0, -up) }
+            }
+            .padding(horizontal = OTokens.Spacing.space3)
+            .semantics(mergeDescendants = true) { contentDescription = tx.reactionsA11y(said) },
         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1, if (alignEnd) Alignment.End else Alignment.Start),
     ) {
         shown.forEach { (e, n) ->

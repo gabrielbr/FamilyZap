@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -272,7 +273,8 @@ fun Avatar(contact: app.oie.logic.Contact, size: Dp, modifier: Modifier = Modifi
 fun Bar(content: @Composable RowScope.() -> Unit) {
     val c = OieTheme.colors
     Row(
-        Modifier.fillMaxWidth().height(OTokens.Size.header).padding(horizontal = sideMargin),
+        // v0.47: 8dp above and below the 52dp buttons, so they never touch the frame or the line under the bar.
+        Modifier.fillMaxWidth().heightIn(min = OTokens.Size.header).padding(horizontal = sideMargin, vertical = OTokens.Spacing.space2),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
         content = content,

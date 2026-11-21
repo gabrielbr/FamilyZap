@@ -71,12 +71,35 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         if (wait > 0) Thread.sleep(wait)
     }
 
+    /**
+     * v0.47 (docs/flows/intro-message.md): before the kid's first message in a chat, Oiê introduces itself once, in the
+     * owner's approved words. Its id is ours (the echo never shows), it keeps the pace like every send (L3), and the
+     * chat is marked introduced only once it went. If it fails, the kid's message isn't sent either, so nothing goes
+     * out unexplained; the retry tries both again.
+     */
+    private fun sendIntroIfNeeded(l: oielink.Link, m: app.oie.logic.Message) {
+        val chat = state.allowed.firstOrNull { it.id == m.chatId } ?: return
+        if (!app.oie.logic.Intro.needed(state.introOn, chat, state.introduced.toSet())) return
+        val tx = if (context.resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt
+        val kid = state.kidName.ifBlank { tx.theKid }; val parent = state.parentName
+        val text = if (chat.isGroup) tx.introGroup(kid, parent) else tx.introPerson(kid, parent)
+        val id = "3EB0" + java.util.UUID.randomUUID().toString().replace("-", "").take(18).uppercase()
+        ours += id
+        l.sendTextWithID(m.chatId, text, "", id)
+        sentAt += System.currentTimeMillis()
+        main.post { if (chat.id !in state.introduced) state.introduced += chat.id }
+        Diagnostics.log("send intro: ok")
+        val wait = app.oie.logic.SendPace.waitMs(sentAt, System.currentTimeMillis())
+        if (wait > 0) Thread.sleep(wait)
+    }
+
     private fun deliver(m: app.oie.logic.Message, retried: Boolean) {
         val wait = app.oie.logic.SendPace.waitMs(sentAt, System.currentTimeMillis())
         if (wait > 0) Thread.sleep(wait)
         val l = link
         val familySticker = m.kind == Kind.STICKER && m.media != null
         val err: Throwable? = if (l == null) IllegalStateException("not linked") else runCatching {
+            sendIntroIfNeeded(l, m)
             sendNameLineIfNeeded(l, m, familySticker)
             when (m.kind) {
                 // The kid writes from the parent's number, so the family sees who it is: "Tito: Oi, vó" (setup promises this).
