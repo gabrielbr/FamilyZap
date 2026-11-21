@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **`scripts/downloads.sh --mine 1`:** also shows the counts without your own download of each release, and how many releases there are.
 - **`scripts/downloads.sh`:** shows how many times each release was downloaded, from GitHub's public counts. Nothing in the app is measured. See `docs/release.md`, "Downloads".
 - **Website: "Como falar com uma criança no Oiê" is simpler, made to share in a family group.**
   - It's five short steps, each with a sample chat that says where each message goes.
