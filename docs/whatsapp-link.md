@@ -145,3 +145,6 @@ Other WhatsApp clients (nchat, wptui) use whatsmeow too, so switching clients ch
 - A refused ask keeps the last good list and emits `groupsError` (the reason and how many groups were kept) for the problem report.
 
 This also means fewer server queries, in the spirit of the low-risk pass.
+
+## v0.43: contact cards
+`ToIncoming` now reads a shared contact card (`ContactMessage`, or several in a `ContactsArrayMessage`) as kind `CONTACT`, with the card text. The app reads it only in the parent's own chat, from the parent's account, within 10 minutes of "/Tito adicionar" (`RealLink.contactCard`, `VCard`, `ParentCommand.addCard`; tested). Anywhere else the app treats it as before ("só abre no WhatsApp"). Nothing is sent to anyone but Oiê's answer in the parent's own chat (L2).

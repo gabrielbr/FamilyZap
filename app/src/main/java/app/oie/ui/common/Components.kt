@@ -340,3 +340,11 @@ fun Rounds(modifier: Modifier = Modifier) {
         drawCircle(coral, dot, androidx.compose.ui.geometry.Offset(ringCenter.x + reach * kotlin.math.cos(a).toFloat(), ringCenter.y + reach * kotlin.math.sin(a).toFloat()))
     }
 }
+
+/** v0.43: the quiet-hours line: "até 21h" for a period, "até Ana liberar" when the parent turned it on from WhatsApp. */
+fun quietText(tx: app.oie.ui.text.Strings, q: app.oie.logic.QuietPeriod?, parent: String, short: Boolean): String = when {
+    q?.name == app.oie.logic.QuietHours.MANUAL -> if (short) tx.quietByParentShort(parent) else tx.quietByParent(parent)
+    short -> tx.quietUntilShort(q?.end?.hour ?: 0)
+    else -> tx.quietUntil(q?.end?.hour ?: 0)
+}
+

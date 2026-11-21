@@ -61,3 +61,31 @@ Any of the kid's names works after the slash ("/Francisco", "/Tito", "/Chico"). 
 | 13 | Accessibility | ✅ Plain text in WhatsApp; no hidden gesture. |
 | 14 | Ethics | ✅ Only the parent's account; the kid's own notice already says the parent controls the contacts. 🟡 A paused chat just leaves the kid's home without a word; the owner's test will say if the kid needs a line ("Ana pausou esta conversa"). |
 | 15 | Evidence | 🟡 Do families find the "/Tito" message in their chat odd? The owner's test. |
+
+## v0.43: from your own chat ("Mensagem para você")
+_The owner, 2026-11-21: "extend the commands I can do from my own chat … List all contacts, remove contact, add contact (followed by the actual contact card WhatsApp shares) and others related to the settings." The owner chose: pause/resume by number, the kid-only switch, quiet hours on/off now; and "command, then card"._
+
+Typed in the parent's own chat, a change needs to say **who**: a number from the list, or a name (or part of one) that matches one contact only. Typed in a contact's chat, the commands act on that chat, as before.
+
+| Command (PT · EN) | What it does | Answer |
+|---|---|---|
+| `/Tito contatos` · `contacts` | Lists the kid's contacts, numbered (never the line to the parent), with "grupo", "pausado" and "só de Tito". | "Oiê · contatos de Tito: 1. Vovó · 2. Tia Bia · pausado · 3. Primos · grupo · só de Tito" |
+| `/Tito parar 2` · `voltar 2` · `remover 2` (or a name) | As in the chat, for that contact. | As in the chat. |
+| `/Tito só 2` · `own 2` (also "só dele/dela") | Turns on "Conversa só de Tito" for that contact (people and groups; never the parent line). | "Oiê · conversa só de Tito: tudo de Primos chega para Tito." |
+| `/Tito normal 2` | Turns it off. | "…voltou ao normal: …" |
+| `/Tito adicionar` · `add` | Opens a 10-minute window: each contact card the parent shares in this chat is added (or resumed if paused). Several cards at once work. | "Oiê · agora compartilhe aqui o cartão do contato (Anexar › Contato)…", then per card "Lucas agora pode falar com Tito." / "já pode" / "…não tem WhatsApp…" |
+| `/Tito silêncio` · `quiet` | Quiet hours **now**, with no end: the kid reads and listens but sends nothing. Exceptions (people allowed in quiet hours) still apply. | "Oiê · silêncio agora: Tito lê e ouve, mas não manda nada. Para liberar: /Tito liberar" |
+| `/Tito liberar` · `release` | Lifts it. Scheduled periods still apply. | "Oiê · liberado: …" |
+| `/Tito parar` with no number, in the own chat | Changes nothing. | "Oiê · diga quem, com o número de /Tito contatos ou o nome: por exemplo /Tito parar 2" |
+| `/Tito parar 9` (no such contact) | Changes nothing. | "Oiê · não achei “9” nos contatos…" |
+
+**Contact cards:**
+- **Read only in the parent's own chat, from the parent's own account, inside the 10 minutes after "/Tito adicionar".** A card at any other time, or anywhere else, is never added. In other chats a card still shows to the kid as "só abre no WhatsApp", as before.
+- **The number comes from the card's WhatsApp id (`waid`).** A card without one isn't on WhatsApp and is refused.
+
+**On the tablet:**
+- **Silêncio:** the kid's home and chats say "Horário de silêncio até Ana liberar."
+- **The parent's Horário de silêncio** shows "Silêncio agora, ligado pelo seu WhatsApp." with **Liberar agora**.
+- **Saved:** the setting survives a restart.
+
+**Product law:** only the parent's own account can command, and only allowed contacts are ever touched. Adding still means the parent chose that person: the card they shared.

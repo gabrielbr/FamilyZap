@@ -201,6 +201,10 @@ class ScreensTest {
         Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.BubbleSetting(ready()) }
     }
 
+    // v0.43: quiet turned on from the parent's WhatsApp ("/Tito silêncio"): no end time, the parent lifts it.
+    @Test fun kidHomeQuietManual() = shot("75-kid-home-quiet-manual", false) { KidHome(ready().apply { kidNoticeSeen = true; quietManual = true }) }
+    @Test fun parentQuietManual() = shot("76-parent-quiet-manual", false) { ParentArea(ready().apply { quietManual = true }, 1) }
+
     // v0.42: the kid arranges the home: Vovó a favorite, the others in order, arrows and hearts.
     private fun arranged() = ready().apply { kidNoticeSeen = true; toggleFavorite(allowed[2].id) }
     @Test fun kidHomeArrange() = shot("72-kid-home-arrange", false) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.kid.Arrange(arranged()) } }

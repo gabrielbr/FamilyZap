@@ -296,8 +296,12 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     fun setPin(pin: String) { pinHash = hash(pin) }
     fun checkPin(pin: String, now: Long): Boolean = pinGuard.attempt(pinHash == hash(pin), now)
 
-    fun quietNow(now: LocalDateTime = LocalDateTime.now()): QuietPeriod? = QuietHours.active(periods, now)
-    fun canSend(contact: Contact, now: LocalDateTime = LocalDateTime.now()) = QuietHours.canSend(periods, contact, now)
+    /** v0.43: quiet hours turned on now from the parent's WhatsApp ("/Tito silêncio"), until "/Tito liberar". */
+    var quietManual by mutableStateOf(false)
+    /** The periods in force, with the parent's "silêncio agora" first. */
+    val quietPeriods: List<QuietPeriod> get() = if (quietManual) listOf(QuietHours.manual) + periods else periods
+    fun quietNow(now: LocalDateTime = LocalDateTime.now()): QuietPeriod? = QuietHours.active(quietPeriods, now)
+    fun canSend(contact: Contact, now: LocalDateTime = LocalDateTime.now()) = QuietHours.canSend(quietPeriods, contact, now)
 
     /** Messages the kid sees in a chat: the approved rule (MessageRule) over the chat's history. */
     fun visible(contactId: String): List<Message> {
@@ -322,7 +326,7 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     /** Every message from the WhatsApp link comes in here (logic/Inbox.kt decides). Returns what happened. */
     fun receive(m: Message, now: LocalDateTime = LocalDateTime.now()): app.oie.logic.Inbox.Decision {
         val history = messages.filter { it.chatId == m.chatId }
-        val d = app.oie.logic.Inbox.decide(m, allowed, history, kidNames(), periods, now, parentWroteAt[m.chatId])
+        val d = app.oie.logic.Inbox.decide(m, allowed, history, kidNames(), quietPeriods, now, parentWroteAt[m.chatId])
         when (d) {
             app.oie.logic.Inbox.Decision.DROP -> {}
             app.oie.logic.Inbox.Decision.DELETE -> {

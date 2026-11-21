@@ -94,7 +94,7 @@ fun KidHome(state: AppState) {
                 val parentNeeded = state.linkState.needsParent(state.realMode)
                 Banner(if (parentNeeded) R.drawable.gg_ic_link else R.drawable.gg_ic_info, if (parentNeeded) tx.linkDropped(state.parentName) else tx.offlineHome)
             }
-            if (quiet != null) Banner(R.drawable.gg_ic_clock, tx.quietUntil(quiet.end.hour))
+            if (quiet != null) Banner(R.drawable.gg_ic_clock, app.oie.ui.common.quietText(tx, quiet, state.parentName, short = false))
             // v0.34 audit (P0): the home scrolls, so every person is reachable on a phone and at large text.
             Column(
                 Modifier.fillMaxWidth().verticalScroll(androidx.compose.foundation.rememberScrollState())
