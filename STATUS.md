@@ -76,6 +76,7 @@ Track: B · product with a team · Started: 2026-11-18
 - [x] Receiving: inbox rule, notifications, quiet-hours summary, delete for everyone (v0.4, 2026-11-18).
 - [x] Website: the landing page in `site/`, PT and EN, with the animated family line (2026-11-20). Published from `gabrielbr/oie-releases` (gh-pages) at https://gabrielbr.github.io/oie-releases/; the font is self-hosted (2026-11-20). Open: register oie.app and point it there.
 - [x] Website: the safety page (why Oiê + a sourced guide for parents), PT and EN (2026-11-20). Re-check its sources whenever it changes.
+- [x] Website: the landing page's words tell the home-phone story, design unchanged (2026-11-21, decision 0014). Open: show it to the friend who gave the feedback.
 - [x] v0.38: the kid's home as a list (phone) or cards with Escrever and Gravar áudio (tablet), each with the last message and when; Anexar replaces Foto and Figurinha in the chat (owner, 2026-11-20). Open: try Gravar áudio's tap-to-send with the kid.
 - [x] v0.37: the kid posts a status (photo, video up to 1 min, text), only to the people in Contatos, through one modified whatsmeow file (decision 0003 update); off until the parent turns it on (2026-11-20). Open: the owner checks on a device that only Contatos sees it.
 - [x] v0.36: Novidades: the kid watches, reacts to and answers the family's statuses (allowed people only; off until the parent turns it on; views show as the parent) (2026-11-20). Open: the owner checks on a device that WhatsApp shows the reaction on the status.

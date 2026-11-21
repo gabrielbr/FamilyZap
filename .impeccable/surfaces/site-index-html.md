@@ -36,7 +36,7 @@ STORY:
 Then honesty, FAQ and download.
 
 FIRST VIEWPORT:
-- A coral band with "A família ao alcance.", the subline naming family and friends, and the download.
+- A coral band with "Lembra do telefone de casa?" (decision 0014: the words tell the home-phone story), the subline naming family and friends, and the download.
 - A "Na sua casa" picker (Mãe/Pai, Filho/Filha, and who they write to).
 - The three silhouettes with their devices, already standing on the line below it.
 
