@@ -96,6 +96,7 @@
     navTalk: "Family and friends", footTalk: "For family and friends: how to talk to the child", footTalkHref: "talk-to-a-child/",
     footLine: "The home phone, back.", footCode: "The code on GitHub",
     made: "Oiê is <b>open source</b>. Made by <a href=\"https://www.gabriellopes.com\" rel=\"noopener\">Gabriel Lopes</a>.", footAll: "All releases", footLib: "whatsmeow (MPL-2.0)", footPatch: "The whatsmeow file Oiê modifies",
+    footCount: "This site counts visits without cookies or personal data, with GoatCounter. The app counts nothing.",
     footLegal: "Oiê is an independent app, not affiliated with WhatsApp or Meta. WhatsApp is a trademark of Meta. The screens on this page are example drawings.",
     title: "Oiê: the home phone, now on the tablet",
     desc: "Remember the home phone? Oiê brings it back, on the tablet: your kid talks with the family and friends you choose, through your WhatsApp. No ads, no feed, no servers.",

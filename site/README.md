@@ -1,6 +1,8 @@
 # Oiê website (oie.app)
 
-The landing page: static pages, no build step, no analytics, no tracking, no cookies.
+The landing page: static pages, no build step, no cookies, no tracking.
+
+**Visit counts (2026-11-21, decision 0017):** `assets/count.js`, on every page, sends GoatCounter the page, the other site that linked here (no query) and taps on "Baixar o Oiê" (links marked `data-count="baixar"`). Nothing is stored on the visitor's device, and nothing is counted with Do Not Track or Global Privacy Control on, or off the published host. Every footer says so. Stop counting your own visits on a browser with `?naocontar=1` (undo with `?contar=1`). The GoatCounter code is `CODE` at the top of the file. The app itself counts nothing.
 
 **v2 (2026-11-20, decision 0013):** a scrolling story told with people.
 - **Picking a family:** the visitor picks son or daughter (Tito or Lia), mother or father (Ana or Paulo), and who they write to: Vó Rosa, Vô Zé, Tia Bia or Lucas, a school friend. The whole story uses those names.
