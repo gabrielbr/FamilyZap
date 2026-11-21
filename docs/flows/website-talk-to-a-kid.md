@@ -75,3 +75,18 @@ The landing page (logo, Baixar), the other language, the safety page.
 | 13 | Accessibility | ✅ Headings in order. The examples are marked by words ("Chega", "Fica com o pai ou a mãe"), never by colour alone. |
 | 14 | Ethics | ✅ It says the parent sees everything. No promise of safety. |
 | 15 | Evidence | 🟡 Ask one grandparent to read it and send a first message. |
+
+## v2 (2026-11-21): fewer words, shown with sample chats
+_The owner: "the idea is to be something that parents would share with contacts or groups … very, very user-friendly and very educative, avoid a lot of wording, just clear messages … how do people in a group contact the kid and not the parent."_
+
+The page is now five numbered steps. Each has one short rule, one line of explanation, and a sample chat whose messages say where they go in a word ("Chega na criança", "Fica com os pais", "A criança vê"):
+1. Escreva no WhatsApp do pai ou da mãe (how the child's messages arrive).
+2. Comece com o nome (two that reach the child, one that stays with the parents).
+3. Ou responda o que ela mandou (24 hours, no name needed).
+4. Em grupo, todos veem tudo (v0.46). To talk only to the parents, message them privately.
+5. Os pais veem tudo.
+
+"Bom saber" closes with three lines (the list, what can be sent, quiet hours). It replaces the long list.
+
+- **Accessibility:** each sample message starts with a hidden "Você:" or "Tito:" for screen readers, and the tags are words.
+- **The examples are checked by `MessageRuleTest.theWebsitesExamplesHold`.**
