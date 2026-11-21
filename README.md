@@ -20,3 +20,8 @@ An Android app for the kid's tablet: Jetpack Compose, `app.oie`, min Android 8. 
 ```
 Needs JDK 17+ and the Android SDK (platform 35). The logic lives in `app/src/main/java/app/oie/logic/`, with tests in `app/src/test/`.
 
+
+How many times each release was downloaded, from GitHub's public counts (no analytics in the app; see `docs/release.md`, "Downloads"):
+```sh
+scripts/downloads.sh
+```

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **`scripts/downloads.sh`:** shows how many times each release was downloaded, from GitHub's public counts. Nothing in the app is measured. See `docs/release.md`, "Downloads".
 - **Website: "Como falar com uma criança no Oiê" is simpler, made to share in a family group.**
   - It's five short steps, each with a sample chat that says where each message goes.
   - The steps: write to the parent's WhatsApp; start with the name, or answer the child; in a group everyone sees everything; the parents see everything.

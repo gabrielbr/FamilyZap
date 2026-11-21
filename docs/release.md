@@ -42,5 +42,12 @@ Each release has:
 
 You can also run the workflow by hand (**Actions › release › Run workflow**). It does the same check, so running it twice doesn't publish twice.
 
+## Downloads
+`scripts/downloads.sh` prints one line per release (date, version, APK downloads) and the total, from GitHub's public counts for `gabrielbr/oie-releases`. It needs `curl` and `python3`, and no token.
+- **No analytics:** nothing in the app is measured; it only reads what GitHub already shows on the releases page.
+- **Not people:** a count is downloads, not people. Every Oiê updates itself from the same files, so a version's count mixes new installs and updates (and a few bots and repeats).
+- **Rough tablets in use:** about two weeks after a release, the newest version's count is a rough measure of tablets in use.
+- **The website:** GitHub Pages keeps no visitor numbers, so the site stays unmeasured.
+
 ## Testing between releases
 A debug copy (the CI artifact on each PR) can't update itself, and its About says so. To test a change on a tablet that runs a release, merge the change with a version bump instead.
