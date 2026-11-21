@@ -1,5 +1,7 @@
 package app.oie.ui.setup
 
+import app.oie.ui.common.pressableToggle
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -286,8 +288,8 @@ private fun ContactsStep(state: AppState, next: () -> Unit, back: () -> Unit) {
             // v0.34 audit: a picked row is `selected` (README: picked things), and TalkBack hears "checked".
             Row(
                 Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)
-                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(OTokens.Radius.radiusM)).background(if (on) c.selected else androidx.compose.ui.graphics.Color.Transparent)
-                    .toggleable(on, role = Role.Checkbox) { if (on) picked.remove(ct.id) else { picked.add(ct.id); lastPicked = ct.id } }
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(OTokens.Radius.radiusM)).background(app.oie.ui.common.motionColor(if (on) c.selected else androidx.compose.ui.graphics.Color.Transparent))
+                    .pressableToggle(on, role = Role.Checkbox) { if (on) picked.remove(ct.id) else { picked.add(ct.id); lastPicked = ct.id } }
                     .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),

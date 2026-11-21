@@ -40,6 +40,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.ui.semantics.liveRegion
 import app.oie.ui.theme.OTokens
@@ -73,6 +75,71 @@ fun Modifier.pressable(enabled: Boolean = true, role: Role? = Role.Button, label
 
 /** Pressed things scale to 97% (AGENTS.md, Motion). */
 private const val PRESSED = 0.97f
+
+/**
+ * v0.49 (the owner: "every action of the user has one small interaction animation"; docs/flows/interaction-motion.md):
+ * the same 97% press for any touch target, given the target's own interaction source.
+ */
+fun Modifier.pressScale(source: androidx.compose.foundation.interaction.MutableInteractionSource, enabled: Boolean = true): Modifier = composed {
+    val pressed by source.collectIsPressedAsState()
+    val moving = animationsOn()
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        if (pressed && enabled) PRESSED else 1f,
+        androidx.compose.animation.core.tween(if (moving) OTokens.Motion.motionStandard else 0, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+        label = "press",
+    )
+    this.graphicsLayer { scaleX = scale; scaleY = scale }
+}
+
+/** v0.49: a pick among several (tabs, views, colours): the 97% press, with the selected semantics. */
+fun Modifier.pressableSelect(selected: Boolean, role: Role, enabled: Boolean = true, onClick: () -> Unit): Modifier = composed {
+    val source = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    this.pressScale(source, enabled)
+        .selectable(selected, source, androidx.compose.material3.ripple(), enabled = enabled, role = role, onClick = onClick)
+}
+
+/** v0.49: an on/off (a switch row, a day, a picked contact): the 97% press, with the toggle semantics. */
+fun Modifier.pressableToggle(value: Boolean, role: Role, enabled: Boolean = true, onValueChange: (Boolean) -> Unit): Modifier = composed {
+    val source = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    this.pressScale(source, enabled)
+        .toggleable(value, source, androidx.compose.material3.ripple(), enabled = enabled, role = role, onValueChange = onValueChange)
+}
+
+/** v0.49: a tap that also has a long press (media in a chat: open or play, hold to react), with the 97% press. */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+fun Modifier.pressableCombined(
+    enabled: Boolean = true, role: Role? = Role.Button, label: String? = null, longLabel: String? = null,
+    onLongClick: (() -> Unit)? = null, onClick: () -> Unit,
+): Modifier = composed {
+    val source = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    this.pressScale(source, enabled).combinedClickable(
+        interactionSource = source, indication = androidx.compose.material3.ripple(), enabled = enabled,
+        onClickLabel = label, role = role, onLongClickLabel = longLabel, onLongClick = onLongClick, onClick = onClick,
+    )
+}
+
+/** v0.49: a long press with no tap (a message bubble, to react): the 97% press while the finger is down. */
+fun Modifier.pressScaleOnHold(key: Any?, onLongPress: () -> Unit): Modifier = composed {
+    var held by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    val moving = animationsOn()
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        if (held) PRESSED else 1f,
+        androidx.compose.animation.core.tween(if (moving) OTokens.Motion.motionStandard else 0, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+        label = "hold",
+    )
+    this.graphicsLayer { scaleX = scale; scaleY = scale }
+        .pointerInput(key) { detectTapGestures(onPress = { held = true; tryAwaitRelease(); held = false }, onLongPress = { onLongPress() }) }
+}
+
+/** v0.49: a colour that fades to its new value in 150ms when something is picked (at once with "Remove animations"). */
+@Composable
+fun motionColor(target: androidx.compose.ui.graphics.Color): androidx.compose.ui.graphics.Color {
+    val moving = animationsOn()
+    return androidx.compose.animation.animateColorAsState(
+        target, androidx.compose.animation.core.tween(if (moving) OTokens.Motion.motionStandard else 0, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+        label = "pick",
+    ).value
+}
 
 /** The one coral action on a screen (README §10: main button). */
 @Composable
@@ -152,7 +219,7 @@ fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit, help
     val c = OieTheme.colors
     Row(
         modifier.fillMaxWidth().defaultMinSize(minHeight = OTokens.Size.rowMin)
-            .toggleable(checked, role = Role.Switch, onValueChange = onChange)
+            .pressableToggle(checked, role = Role.Switch, onValueChange = onChange)
             .padding(vertical = OTokens.Spacing.space2),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),

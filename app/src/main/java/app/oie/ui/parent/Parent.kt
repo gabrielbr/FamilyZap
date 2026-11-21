@@ -1,5 +1,13 @@
 package app.oie.ui.parent
 
+import androidx.compose.animation.animateContentSize
+
+import app.oie.ui.common.motionColor
+
+import app.oie.ui.common.pressableSelect
+
+import app.oie.ui.common.pressable
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -143,8 +151,8 @@ fun ParentArea(state: AppState, section: Int, names: Boolean = false) {
             val on = i == section
             Row(
                 modifier.height(OTokens.Size.rowMin).clip(RoundedCornerShape(OTokens.Radius.radiusS))
-                    .background(if (on) c.selected else c.page)
-                    .selectable(on, role = Role.Tab) { touched(); state.route = Route.Parent(i) }
+                    .background(motionColor(if (on) c.selected else c.page))
+                    .pressableSelect(on, role = Role.Tab) { touched(); state.route = Route.Parent(i) }
                     .padding(horizontal = OTokens.Spacing.space4),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
             ) { OIcon(ic, tint = if (on) c.onSelected else c.ink); Text(label, style = OieType.label, color = if (on) c.onSelected else c.ink, maxLines = 1) }
@@ -235,7 +243,7 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: Undo) {
         Row(Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
             // v0.19: the person (avatar and lines) opens the name editor; the switch and Remover keep their own targets.
             Row(
-                Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.changeNameA11y(ct.name)) { touched(); editing = ct.id; state.contactTipUsed = true },
+                Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin).pressable(label = tx.changeNameA11y(ct.name)) { touched(); editing = ct.id; state.contactTipUsed = true },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
             app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters[ct.name])
@@ -282,7 +290,7 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: Undo) {
     run {
         addable.forEach { ct ->
             Row(
-                Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button) { touched(); state.allowed.add(ct) },
+                Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).pressable { touched(); state.allowed.add(ct) },
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
             ) {
                 app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters[ct.name])
@@ -347,7 +355,7 @@ private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: Undo) 
     if (state.periods.isEmpty()) Text(tx.noQuiet(state.kidName), style = OieType.body, color = c.muted)
     state.periods.forEachIndexed { i, p ->
         Row(
-            Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.editA11y(p.name)) { touched(); editing = i },
+            Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).pressable(label = tx.editA11y(p.name)) { touched(); editing = i },
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
         ) {
             // v0.34 audit: the name over its days and hours, so a phone at large text keeps both readable.
@@ -398,7 +406,7 @@ private fun NamesRow(state: AppState, onOpen: () -> Unit) {
     val kid = state.kidName.ifBlank { tx.theKid } + state.kidNicknames.takeIf { it.isNotEmpty() }?.joinToString(", ", " (", ")").orEmpty()
     val line = listOf(state.parentName, kid, state.kidEmoji).filter { it.isNotBlank() }.joinToString(" · ")
     Row(
-        Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.editNames, onClick = onOpen),
+        Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).pressable(label = tx.editNames, onClick = onOpen),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
     ) {
         Text(line, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2))
@@ -453,13 +461,15 @@ private fun Help(state: AppState, offerUndo: Undo, report: ReportView) {
     Text(tx.questions, style = OieType.title, color = c.ink, modifier = if (crashed) Modifier.padding(top = OTokens.Spacing.space6) else Modifier)
     help.forEachIndexed { i, (q, a) ->
         // v0.34 audit: a 56dp row, and TalkBack hears whether it's open.
+        // v0.49: the answer opens and closes smoothly (150ms), and the row presses like every other.
         Column(Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)
-            .clickable(role = Role.Button) { open = if (open == i) null else i }
+            .animateContentSize(androidx.compose.animation.core.tween(if (app.oie.ui.common.animationsOn()) OTokens.Motion.motionStandard else 0))
+            .pressable { open = if (open == i) null else i }
             .semantics { stateDescription = if (open == i) tx.expanded else tx.collapsed }
             .padding(vertical = OTokens.Spacing.space3), verticalArrangement = Arrangement.Center) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                 Text(q, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f))
-                OIcon(R.drawable.gg_ic_chevron, tint = c.muted, modifier = Modifier.rotate(if (open == i) 90f else 0f))
+                OIcon(R.drawable.gg_ic_chevron, tint = c.muted, modifier = Modifier.rotate(androidx.compose.animation.core.animateFloatAsState(if (open == i) 90f else 0f, androidx.compose.animation.core.tween(if (app.oie.ui.common.animationsOn()) OTokens.Motion.motionStandard else 0), label = "chevron").value))
             }
             if (open == i) Text(a, style = OieType.body, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space2))
         }

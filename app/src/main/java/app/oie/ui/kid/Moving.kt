@@ -1,5 +1,7 @@
 package app.oie.ui.kid
 
+import app.oie.ui.common.pressableCombined
+
 import android.graphics.ImageDecoder
 import android.graphics.drawable.AnimatedImageDrawable
 import app.oie.data.BytesSource
@@ -208,7 +210,7 @@ fun VideoBubble(media: String?, seconds: Int, tooBig: Boolean, parent: String, o
     Box(
         // Half the column on a tablet; narrower when a phone has less room (v0.27 audit).
         Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(OTokens.Radius.radiusS))
-            .background(c.line).combinedClickable(role = Role.Button, onLongClick = onLongPress, onClick = onWatch) // v0.46: long press reacts
+            .background(c.line).pressableCombined(onLongClick = onLongPress, onClick = onWatch) // v0.46: long press reacts
             .semantics(mergeDescendants = true) { contentDescription = tx.playVideoA11y(seconds) },
         contentAlignment = Alignment.Center,
     ) {
@@ -237,7 +239,7 @@ fun GifBubble(media: String?, onLongPress: (() -> Unit)? = null, onWatch: () -> 
     val animate = app.oie.ui.common.animationsOn()
     Box(
         Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.line)
-            .combinedClickable(role = Role.Button, onLongClick = onLongPress, onClick = onWatch).semantics(mergeDescendants = true) { contentDescription = tx.notifGif },
+            .pressableCombined(onLongClick = onLongPress, onClick = onWatch).semantics(mergeDescendants = true) { contentDescription = tx.notifGif },
     ) {
         // Round 3: while it arrives, the placeholder says so (as a video does).
         if (bytes == null) Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f), contentAlignment = Alignment.Center) {

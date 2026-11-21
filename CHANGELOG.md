@@ -44,6 +44,15 @@
 
 
 
+## 0.49.0
+- **Every touch answers with a small animation.** Every button, row, card, tile, tab, chip, key, emoji, sticker, photo and video now presses in slightly while held. Before, some didn't.
+  - When something is picked (a tab, a view, a day, a colour, a contact), its colour fades in.
+  - Help answers open and close smoothly.
+  - New messages fade into the chat.
+  - A message pressed to react sinks a little while held.
+  - All of it is 150 ms, with no bounce. With Android's "Remove animations" on, things change at once, with nothing moving.
+- **What you have to do:** nothing.
+
 ## 0.48.0
 - **Tito picks how the home looks.** In Arrumar › Mostrar como:
   - **Lista:** one row each.
