@@ -118,11 +118,4 @@ class MessageRuleTest {
         assertTrue(MessageRule.isForKid(m.copy(text = "o Tito vem?"), primos, emptyList(), "Tito")) // talk about him too: a group is a group
     }
 
-    /** v0.46 (decision 0016): everything in an allowed group reaches the kid, from anyone, with no name or window. */
-    @Test fun anAllowedGroupShowsEverything() {
-        val primos = Contact("g", "Primos", isGroup = true)
-        val m = Message("x", "g", false, 100 * h, Kind.TEXT, "alguém viu o jogo?", sender = "123@lid")
-        assertTrue(MessageRule.isForKid(m, primos, emptyList(), "Tito"))
-        assertTrue(MessageRule.isForKid(m.copy(text = "o Tito vem?"), primos, emptyList(), "Tito")) // talk about him too: a group is a group
-    }
 }
