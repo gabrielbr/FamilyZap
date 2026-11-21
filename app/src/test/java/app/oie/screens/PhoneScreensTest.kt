@@ -66,7 +66,9 @@ class PhoneScreensTest {
     @Test fun conversationBigText() = shot("p04-conversation-big-text", bigText = true) { Conversation(ready(), "vovo") }
     @Test fun parentContacts() = shot("p05-parent-contacts") { ParentArea(ready().apply { realMode = true }, 0) }
     @Test fun parentQuiet() = shot("p06-parent-quiet") { ParentArea(ready(), 1) }
-    @Test fun parentSettings() = shot("p07-parent-settings") { ParentArea(ready(), 3) }
+    // v0.44: Ajustes and Ajuda are separate sections.
+    @Test fun parentSettings() = shot("p07-parent-settings") { ParentArea(ready().apply { realMode = true; linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Connected }, 2) }
+    @Test fun parentHelp() = shot("p56-parent-help", bigText = true) { ParentArea(ready(), 3) }
     @Test fun setupRisk() = shot("p08-setup-risk") { Setup(AppState(), 1, onClose = {}) }
     @Test fun setupNames() = shot("p09-setup-names", bigText = true) { Setup(AppState().apply { parentName = "Ana"; kidName = "Tito" }, 3, onClose = {}) }
     @Test fun stickers() = shot("p10-stickers") { Conversation(ready(), "vovo", openStickers = true) }
@@ -105,7 +107,7 @@ class PhoneScreensTest {
     @Test fun setupContactsPicked() = shot("p16-setup-contacts-picked", bigText = true) { Setup(renamed().apply { realMode = false }, 5, onClose = {}) }
 
     // v0.21: nicknames in Ajustes e ajuda, and a paused chat, at 1.3× text.
-    @Test fun settingsNicknames() = shot("p17-settings-nicknames", bigText = true) { ParentArea(ready().apply { kidNicknames += listOf("Titinho", "Ti") }, 3) }
+    @Test fun settingsNicknames() = shot("p17-settings-nicknames", bigText = true) { ParentArea(ready().apply { kidNicknames += listOf("Titinho", "Ti") }, 2, names = true) }
     @Test fun contactsPaused() = shot("p18-contacts-paused", bigText = true) { ParentArea(ready().apply { realMode = true; allowed[1] = allowed[1].copy(paused = true) }, 0) }
 
     // v0.22: the emoji field and the preview at 1.3× text, scrolled to them.

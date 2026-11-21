@@ -39,7 +39,7 @@ The parent's WhatsApp carries all of the parent's own chats. The kid must see on
 _The owner, 2026-11-19: accept a short greeting before the name, and let the kid have as many names as the family uses ("Francisco, but also Tito, Chico, Fran")._
 - **Greetings:** one short greeting may come before the name: "Oi Tito", "Oi, Tito", "Olá Chico", "Bom dia, Fran", "Boa tarde Tito", "Boa noite Tito", "E aí Tito", "Ei Tito", "Oie Tito", "Oiê Tito", "Alô Tito"; in English "Hi", "Hey", "Hello", "Good morning". Capitals and accents don't matter.
 - **Still private:** the name in the middle of a sentence ("Fala pro Tito que…", "Oi, o Tito está aí?" counts only if the name comes right after the greeting, so this one doesn't), and a longer name that only starts the same ("Titozão").
-- **Names:** the kid's name plus any nicknames, set in Ajustes e ajuda › Nomes ("Apelidos": "Tito, Chico, Fran"). Any of them counts. The kid's messages are still signed with the main name ("Francisco: …").
+- **Names:** the kid's name plus any nicknames, set in Ajustes › Nomes ("Apelidos": "Tito, Chico, Fran"). Any of them counts. The kid's messages are still signed with the main name ("Francisco: …").
 
 This rule needs testing. The trade-off is privacy for the parent's own chats against missing a message meant for the kid. It's the riskiest assumption in v1.
 

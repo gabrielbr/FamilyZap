@@ -98,7 +98,7 @@ fun ParentPin(state: AppState) {
 
 /** Prototype screens 07, 08, 15. */
 @Composable
-fun ParentArea(state: AppState, section: Int) {
+fun ParentArea(state: AppState, section: Int, names: Boolean = false) {
     val c = OieTheme.colors
     val tx = str
     var lastTouch by remember { mutableStateOf(System.currentTimeMillis()) }
@@ -128,14 +128,16 @@ fun ParentArea(state: AppState, section: Int) {
             when (section) {
                 0 -> Contacts(state, touched, offerUndo)
                 1 -> QuietSection(state, touched, offerUndo)
-                2 -> Connection(state)
-                else -> AboutAndHelp(state, touched, offerUndo, report)
+                // v0.44 (the owner: "settings is mixed with help and everything is crowded"): changing things in
+                // Ajustes, reading and upkeep in Ajuda. The numbers keep their meaning: 2 holds the connection, 3 the report.
+                2 -> Settings(state, touched, names)
+                else -> Help(state, offerUndo, report)
             }
         }
         val compact = app.oie.ui.common.isCompact
         // v0.34 audit: on a phone the four sections are a 2 x 2 grid with short names, all in view at once.
         val sections = listOf(tx.sectionContacts to R.drawable.gg_ic_people, (if (compact) tx.sectionQuietShort else tx.sectionQuiet) to R.drawable.gg_ic_clock,
-            tx.sectionConnection to R.drawable.gg_ic_link, (if (compact) tx.sectionHelpShort else tx.sectionHelp) to R.drawable.gg_ic_info)
+            tx.sectionSettings to R.drawable.gg_ic_gear, tx.sectionHelp to R.drawable.gg_ic_info)
         @Composable
         fun tab(i: Int, label: String, ic: Int, modifier: Modifier) {
             val on = i == section
@@ -367,18 +369,54 @@ private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: Undo) 
 }
 
 
-/** Ajustes e ajuda (was Ajuda e sobre): the names (v0.9), short answers to the questions the flows raise, the risk said again, version and licences. */
+/**
+ * Ajustes (v0.44): what changes how Oiê works, in the order a parent needs it. The connection first (when it drops,
+ * it's the first thing to see), with the unread mark that belongs to the parent's WhatsApp; the names as one row
+ * that opens [NamesEditor] (set once in setup, rarely changed); then what the tablet does.
+ */
 @Composable
-private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: Undo, report: ReportView) {
+private fun Settings(state: AppState, touched: () -> Unit, startInNames: Boolean) {
     val c = OieTheme.colors
     val tx = str
-    var open by remember { mutableStateOf<Int?>(null) }
-    val help = tx.helpItems(state.kidName.ifBlank { tx.theKid }, state.parentName)
-    // v0.14: after Oiê closed by itself, the report leads the section (it's what the parent needs now); otherwise it sits at the end.
-    val crashed = remember { app.oie.data.Diagnostics.lastCrashAt() != null }
-    if (crashed) Problems(first = true, offerUndo, report)
+    var names by remember { mutableStateOf(startInNames) }
+    if (names) { NamesEditor(state, touched) { touched(); names = false }; return }
+    Connection(state)
+    UnreadMarkSetting(state)
+    Text(tx.names, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    NamesRow(state) { touched(); names = true }
+    BubbleSetting(state)
+    NudgeSetting(state)
+    StatusSetting(state)
+}
+
+/** The names as one line, "Ana · Tito (Chico, Fran) · 😎", a button that opens [NamesEditor]. */
+@Composable
+private fun NamesRow(state: AppState, onOpen: () -> Unit) {
+    val c = OieTheme.colors
+    val tx = str
+    val kid = state.kidName.ifBlank { tx.theKid } + state.kidNicknames.takeIf { it.isNotEmpty() }?.joinToString(", ", " (", ")").orEmpty()
+    val line = listOf(state.parentName, kid, state.kidEmoji).filter { it.isNotBlank() }.joinToString(" · ")
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin).clickable(role = Role.Button, onClickLabel = tx.editNames, onClick = onOpen),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
+    ) {
+        Text(line, style = OieType.label, color = c.ink, modifier = Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2))
+        OIcon(R.drawable.gg_ic_chevron, tint = c.muted)
+    }
+}
+
+/** Nomes (v0.44, a level under Ajustes): the four fields and the preview, saved as they're typed; Voltar returns. */
+@Composable
+private fun NamesEditor(state: AppState, touched: () -> Unit, onBack: () -> Unit) {
+    val c = OieTheme.colors
+    val tx = str
+    // Android's Back returns to Ajustes, like Voltar (as the period editor does).
+    androidx.activity.compose.BackHandler(onBack = onBack)
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+        QuietButton(null, onBack, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
+        Text(tx.names, style = OieType.title, color = c.ink)
+    }
     // v0.9: the names from setup can be fixed here. A blank field keeps the last name, so nothing is ever left nameless.
-    Text(tx.names, style = OieType.title, color = c.ink, modifier = if (crashed) Modifier.padding(top = OTokens.Spacing.space6) else Modifier)
     var parent by remember { mutableStateOf(state.parentName) }
     var kid by remember { mutableStateOf(state.kidName) }
     var nicks by remember { mutableStateOf(state.kidNicknames.joinToString(", ")) }
@@ -396,11 +434,22 @@ private fun AboutAndHelp(state: AppState, touched: () -> Unit, offerUndo: Undo, 
             SignaturePreview(state.kidName.ifBlank { tx.theKid }, state.kidEmoji)
         }
     }
-    BubbleSetting(state)
-    NudgeSetting(state)
-    StatusSetting(state)
-    UnreadMarkSetting(state)
-    Text(tx.help, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+}
+
+/**
+ * Ajuda (v0.44; was the second half of Ajustes e ajuda): short answers to the questions the flows raise, the problem
+ * report, and Sobre (version, updates, the notices, licences). After Oiê closed by itself, the report leads.
+ */
+@Composable
+private fun Help(state: AppState, offerUndo: Undo, report: ReportView) {
+    val c = OieTheme.colors
+    val tx = str
+    var open by remember { mutableStateOf<Int?>(null) }
+    val help = tx.helpItems(state.kidName.ifBlank { tx.theKid }, state.parentName)
+    // v0.14: after Oiê closed by itself, the report leads the section (it's what the parent needs now); otherwise it sits after the answers.
+    val crashed = remember { app.oie.data.Diagnostics.lastCrashAt() != null }
+    if (crashed) Problems(first = true, offerUndo, report)
+    Text(tx.questions, style = OieType.title, color = c.ink, modifier = if (crashed) Modifier.padding(top = OTokens.Spacing.space6) else Modifier)
     help.forEachIndexed { i, (q, a) ->
         // v0.34 audit: a 56dp row, and TalkBack hears whether it's open.
         Column(Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)

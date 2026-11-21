@@ -78,7 +78,9 @@ interface Strings {
 
     // Parent area
     val parentArea: String; val enterPin: String; val tooMany: String; val wrongPin: String; val forgotPin: String
-    val leave: String; val sectionContacts: String; val sectionQuiet: String; val sectionConnection: String; val sectionHelp: String
+    val leave: String; val sectionContacts: String; val sectionQuiet: String; val sectionSettings: String; val sectionHelp: String
+    /** v0.44: the Nomes row in Ajustes, read out as a button with its value. */
+    val editNames: String
     val connection: String
     fun connectedTo(parent: String): String
     fun connectingTo(parent: String): String
@@ -108,6 +110,8 @@ interface Strings {
     fun pinDots(n: Int, of: Int): String
     val erase: String
     val help: String; val about: String
+    /** v0.44: the questions block in Ajuda (the tab is already called Ajuda). */
+    val questions: String
     fun helpItems(kid: String, parent: String): List<Pair<String, String>>
     fun aboutVersion(v: String): String
     val notWhatsApp: String; val credits: String
@@ -282,7 +286,7 @@ interface Strings {
     val attach: String; val pauseA11y: String; val close: String
     fun downloading(length: String): String
     val welcomeTitle: String; val linkFailed: String; val linkOffline: String
-    val sectionQuietShort: String; val sectionHelpShort: String; val expanded: String; val collapsed: String; val reportCleared: String
+    val sectionQuietShort: String; val expanded: String; val collapsed: String; val reportCleared: String
     fun periodName(name: String): String
     fun forgotBody(kid: String): String
     // v0.38: the home's rows and cards, and the composer's Anexar sheet (flow kid-home-and-attach.md)
@@ -366,7 +370,8 @@ object Pt : Strings {
     override val parentArea = "Área dos pais"; override val enterPin = "Digite o seu PIN."
     override val tooMany = "Muitas tentativas. Espere 1 minuto."; override val wrongPin = "PIN errado. Tente de novo."; override val forgotPin = "Esqueci o PIN"
     override val leave = "Sair"; override val sectionContacts = "Contatos"; override val sectionQuiet = "Horário de silêncio"
-    override val sectionConnection = "Conexão"; override val sectionHelp = "Ajustes e ajuda"; override val connection = "Conexão"
+    override val sectionSettings = "Ajustes"; override val sectionHelp = "Ajuda"; override val connection = "Conexão"
+    override val editNames = "Mudar os nomes"
     override fun connectedTo(parent: String) = "Conectado ao WhatsApp de $parent."
     override fun connectingTo(parent: String) = "Conectando ao WhatsApp de $parent…"
     override val disconnected = "O Oiê se desconectou do seu WhatsApp."
@@ -397,17 +402,17 @@ object Pt : Strings {
     override fun clock(hour: Int, minute: Int) = if (minute == 0) "${hour}h" else "%dh%02d".format(hour, minute)
     override fun pinDots(n: Int, of: Int) = "$n de $of números"
     override val erase = "Apagar"
-    override val help = "Ajuda"; override val about = "Sobre"
+    override val help = "Ajuda"; override val about = "Sobre"; override val questions = "Perguntas"
     override fun helpItems(kid: String, parent: String) = listOf(
         "O que pode acontecer com o meu WhatsApp?" to riskBody,
         "$kid vê as minhas conversas?" to "Não. O tablet mostra só o que foi mandado para $kid: respostas às mensagens de $kid, mensagens que começam com o nome de $kid, e o que chega até 24 horas depois da última mensagem de $kid. Numa conversa que você marcou como só de $kid, tudo chega. Nesse tempo, ficam de fora o que fala sobre $kid (“o $kid já chegou?”) e o que vem depois que você responde, até $kid escrever de novo. As suas outras conversas continuam só no seu WhatsApp.",
         "$kid sabe que eu vejo as mensagens?" to "Sim. Na primeira vez, o Oiê diz a $kid: “${noticeBody(parent)}”",
         "Quem pode falar com $kid?" to "Só quem está em Contatos. Mensagens de qualquer outra pessoa não aparecem no tablet. Num grupo, todos do grupo veem o que $kid manda. Em Contatos, toque em alguém para mudar o nome que $kid vê (Vovó, por exemplo) ou para remover. O nome muda só no Oiê, não no seu WhatsApp.",
         "O que é o “Preciso de você”?" to "Um botão na tela inicial de $kid, que aparece quando você marca alguém em Contatos (toque na pessoa e ligue “Recebe 'Preciso de você'”). $kid confirma, e cada pessoa marcada recebe “Preciso de você.” no WhatsApp, até no horário de silêncio. Dá para mandar uma vez a cada 5 minutos. É um jeito de chamar vocês, não um serviço de emergência: em perigo, ligue 190 ou 192.",
-        "$kid pode postar novidades?" to "Se você ligar em Ajustes e ajuda › Novidades. A novidade sai da sua conta, com o nome de $kid, e só quem está em Contatos vê (não grupos, nem quem está pausado). Você a vê no seu WhatsApp, em Meu status, e pode apagar por lá; $kid também pode apagar. Vídeos têm até 1 minuto.",
-        "O que são as Novidades?" to "São os status do WhatsApp de quem está em Contatos. Ligue em Ajustes e ajuda › Novidades. $kid vê as fotos, os vídeos e os textos, pode reagir e responder (a resposta vai para a conversa com a pessoa). Quando $kid vê uma novidade, a pessoa vê que você viu, porque é a sua conta. Os seus próprios status não aparecem, nem os de mais ninguém. Cada novidade some do tablet depois de 24 horas.",
+        "$kid pode postar novidades?" to "Se você ligar em Ajustes › Novidades. A novidade sai da sua conta, com o nome de $kid, e só quem está em Contatos vê (não grupos, nem quem está pausado). Você a vê no seu WhatsApp, em Meu status, e pode apagar por lá; $kid também pode apagar. Vídeos têm até 1 minuto.",
+        "O que são as Novidades?" to "São os status do WhatsApp de quem está em Contatos. Ligue em Ajustes › Novidades. $kid vê as fotos, os vídeos e os textos, pode reagir e responder (a resposta vai para a conversa com a pessoa). Quando $kid vê uma novidade, a pessoa vê que você viu, porque é a sua conta. Os seus próprios status não aparecem, nem os de mais ninguém. Cada novidade some do tablet depois de 24 horas.",
         "Como funciona o horário de silêncio?" to "Durante um período, $kid lê e ouve, mas não manda mensagens. Quem tem “Pode falar no silêncio” em Contatos continua liberado. Dá para pausar um período sem apagar, por exemplo nas férias.",
-        "O Oiê se desconectou. E agora?" to "Abra Conexão e toque em Conectar o WhatsApp. As mensagens que $kid mandou enquanto isso ficam guardadas e saem depois.",
+        "O Oiê se desconectou. E agora?" to "Abra Ajustes e toque em Conectar o WhatsApp. As mensagens que $kid mandou enquanto isso ficam guardadas e saem depois.",
         "Como mando figurinhas para $kid?" to "No seu WhatsApp, mande a figurinha para você mesmo, na conversa com o seu próprio nome. Ela aparece para $kid em Figurinhas, em Novas de $parent, e $kid escolhe se guarda. Só as figurinhas dessa conversa chegam ao Oiê; o resto dela fica só com você. Funciona com o WhatsApp de verdade ligado.",
         "Posso mudar algo pelo meu WhatsApp?" to "Sim. Numa conversa do seu WhatsApp, mande /$kid (ou /um apelido) e o Oiê responde na sua conversa com você mesmo, com a lista: parar, voltar, adicionar, remover e só. O comando vale para a conversa onde você mandou. Quem está nela vê o seu comando, mas não as respostas. Na sua conversa com você mesmo, /$kid contatos lista os contatos com números (para usar em /$kid parar 2), /$kid adicionar e depois o cartão do contato inclui alguém, e /$kid silêncio para tudo até /$kid liberar. Só o seu WhatsApp pode usar.",
         "Esqueci o PIN" to "Na tela do PIN, toque em Esqueci o PIN e conecte o mesmo WhatsApp de novo. Isso prova que é você. Depois crie um PIN novo.",
@@ -427,7 +432,7 @@ object Pt : Strings {
     override fun parentLineTitle(parent: String) = "Você ($parent)"
     override fun parentLineCreate(kid: String) = "Criar conversa com $kid"
     override fun parentLineBody(kid: String) = "Cria no seu WhatsApp um grupo só seu chamado “$kid”. O que $kid mandar para você aparece lá, e o que você escrever lá chega para $kid."
-    override val parentLineNoNotify = "O WhatsApp não toca para mensagens da sua própria conta. Se quiser, em Ajustes e ajuda o Oiê pode marcar a conversa como não lida a cada mensagem nova."
+    override val parentLineNoNotify = "O WhatsApp não toca para mensagens da sua própria conta. Se quiser, em Ajustes o Oiê pode marcar a conversa como não lida a cada mensagem nova."
     override val parentLineCreating = "Criando…"
     override val parentLineNotNow = "Conecte o WhatsApp para criar a conversa."
     override fun parentLineFallback(kid: String) = "O WhatsApp não aceitou o grupo. $kid vai escrever na sua Mensagem para você; para responder, deslize a mensagem dele ou comece com o nome dele."
@@ -618,7 +623,7 @@ object Pt : Strings {
     override fun recordingEnds(seconds: Int) = "Termina em $seconds s"
     override val ok = "Usar"; override val arriving = "Chegando…"
     override val welcomeTitle = "A família ao alcance."
-    override val sectionQuietShort = "Silêncio"; override val sectionHelpShort = "Ajustes"; override val expanded = "Aberto"; override val collapsed = "Fechado"
+    override val sectionQuietShort = "Silêncio"; override val expanded = "Aberto"; override val collapsed = "Fechado"
     override val reportCleared = "Relatório apagado."
     override val linkFailed = "Não deu para conectar. Confira a internet do celular e tente de novo."
     override val linkOffline = "Sem internet no tablet. Quando ela voltar, tente de novo."
@@ -707,7 +712,8 @@ object En : Strings {
     override val parentArea = "Parent area"; override val enterPin = "Enter your PIN."
     override val tooMany = "Too many tries. Wait 1 minute."; override val wrongPin = "Wrong PIN. Try again."; override val forgotPin = "I forgot the PIN"
     override val leave = "Leave"; override val sectionContacts = "Contacts"; override val sectionQuiet = "Quiet hours"
-    override val sectionConnection = "Connection"; override val sectionHelp = "Settings and help"; override val connection = "Connection"
+    override val sectionSettings = "Settings"; override val sectionHelp = "Help"; override val connection = "Connection"
+    override val editNames = "Change the names"
     override fun connectedTo(parent: String) = "Linked to $parent's WhatsApp."
     override fun connectingTo(parent: String) = "Connecting to $parent's WhatsApp…"
     override val disconnected = "Oiê got disconnected from your WhatsApp."
@@ -742,17 +748,17 @@ object En : Strings {
     }
     override fun pinDots(n: Int, of: Int) = "$n of $of digits"
     override val erase = "Delete"
-    override val help = "Help"; override val about = "About"
+    override val help = "Help"; override val about = "About"; override val questions = "Questions"
     override fun helpItems(kid: String, parent: String) = listOf(
         "What could happen to my WhatsApp?" to riskBody,
         "Can $kid see my chats?" to "No. The tablet only shows what was sent to $kid: replies to $kid's messages, messages that start with $kid's name, and what arrives up to 24 hours after $kid's last message. In a chat you marked as $kid's own, everything arrives. In that time, talk about $kid (“is $kid home?”) stays out, and so does what comes after you answer, until $kid writes again. Your other chats stay only in your WhatsApp.",
         "Does $kid know I can see the messages?" to "Yes. The first time, Oiê tells $kid: “${noticeBody(parent)}”",
         "Who can talk to $kid?" to "Only the people in Contacts. Messages from anyone else don't appear on the tablet. In a group, everyone in it sees what $kid sends. In Contacts, tap someone to change the name $kid sees (Grandma, for example) or to remove them. The name changes only in Oiê, not in your WhatsApp.",
         "What is “I need you”?" to "A button on $kid's home screen that shows once you mark someone in Contacts (tap the person and turn on “Gets 'I need you'”). $kid confirms, and each marked person gets “I need you.” on WhatsApp, even in quiet hours. It can be sent once every 5 minutes. It's a way to call you, not an emergency service: in danger, call the emergency number.",
-        "Can $kid post updates?" to "If you turn it on in Settings and help › Updates. The update goes out from your account, with $kid's name, and only the people in Contacts see it (not groups, nor anyone paused). You see it in your WhatsApp, under My status, and can delete it there; $kid can delete it too. Videos are up to 1 minute.",
-        "What are Updates?" to "They're the WhatsApp statuses of the people in Contacts. Turn them on in Settings and help › Updates. $kid sees the photos, videos and texts, and can react and reply (the reply goes to the chat with that person). When $kid sees one, the person sees you viewed it, because it's your account. Your own statuses don't show, nor anyone else's. Each update leaves the tablet after 24 hours.",
+        "Can $kid post updates?" to "If you turn it on in Settings › Updates. The update goes out from your account, with $kid's name, and only the people in Contacts see it (not groups, nor anyone paused). You see it in your WhatsApp, under My status, and can delete it there; $kid can delete it too. Videos are up to 1 minute.",
+        "What are Updates?" to "They're the WhatsApp statuses of the people in Contacts. Turn them on in Settings › Updates. $kid sees the photos, videos and texts, and can react and reply (the reply goes to the chat with that person). When $kid sees one, the person sees you viewed it, because it's your account. Your own statuses don't show, nor anyone else's. Each update leaves the tablet after 24 hours.",
         "How do quiet hours work?" to "During a period, $kid can read and listen, but not send. Anyone with “Can talk in quiet hours” in Contacts still gets through. You can pause a period without deleting it, for example on holiday.",
-        "Oiê got disconnected. What now?" to "Open Connection and tap Link WhatsApp. Messages $kid sent in the meantime are kept and go out afterwards.",
+        "Oiê got disconnected. What now?" to "Open Settings and tap Link WhatsApp. Messages $kid sent in the meantime are kept and go out afterwards.",
         "How do I send stickers to $kid?" to "In your WhatsApp, send the sticker to yourself, in the chat with your own name. It shows for $kid under Stickers, in New from $parent, and $kid chooses whether to keep it. Only stickers from that chat reach Oiê; the rest of it stays with you. Works once the real WhatsApp is on.",
         "Can I change things from my WhatsApp?" to "Yes. In a chat on your WhatsApp, send /$kid (or /a nickname) and Oiê answers in your chat with yourself, with the list: stop, start, add, remove and own. The command works on the chat you sent it in. People in that chat see your command, but not the answers. In your chat with yourself, /$kid contacts lists the contacts with numbers (to use in /$kid stop 2), /$kid add followed by the contact card adds someone, and /$kid quiet stops everything until /$kid release. Only your WhatsApp can use them.",
         "I forgot the PIN" to "On the PIN screen, tap I forgot the PIN and link the same WhatsApp again. That proves it's you. Then create a new PIN.",
@@ -772,7 +778,7 @@ object En : Strings {
     override fun parentLineTitle(parent: String) = "You ($parent)"
     override fun parentLineCreate(kid: String) = "Create a chat with $kid"
     override fun parentLineBody(kid: String) = "Creates a group with only you in your WhatsApp, called “$kid”. What $kid sends you shows there, and what you write there reaches $kid."
-    override val parentLineNoNotify = "WhatsApp doesn't ring for messages from your own account. If you like, in Settings and help Oiê can mark the chat unread with each new message."
+    override val parentLineNoNotify = "WhatsApp doesn't ring for messages from your own account. If you like, in Settings Oiê can mark the chat unread with each new message."
     override val parentLineCreating = "Creating…"
     override val parentLineNotNow = "Link WhatsApp to create the chat."
     override fun parentLineFallback(kid: String) = "WhatsApp didn't accept the group. $kid will write in your Message yourself chat; to answer, swipe to reply to his message or start with his name."
@@ -962,7 +968,7 @@ object En : Strings {
     override fun recordingEnds(seconds: Int) = "Ends in $seconds s"
     override val ok = "Use"; override val arriving = "On its way…"
     override val welcomeTitle = "Family, within reach."
-    override val sectionQuietShort = "Quiet"; override val sectionHelpShort = "Settings"; override val expanded = "Open"; override val collapsed = "Closed"
+    override val sectionQuietShort = "Quiet"; override val expanded = "Open"; override val collapsed = "Closed"
     override val reportCleared = "Report deleted."
     override val linkFailed = "Couldn't link. Check the phone's internet and try again."
     override val linkOffline = "No internet on the tablet. When it's back, try again."

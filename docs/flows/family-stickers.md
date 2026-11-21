@@ -37,7 +37,7 @@ flowchart TD
 | 1 | The kid's side is still on the sample | Nothing happens; the help says it works once the real WhatsApp is on. |
 
 ## Notes
-- **Discoverability:** Ajustes e ajuda has the question "Como mando figurinhas para {kid}?".
+- **Discoverability:** Ajuda has the question "Como mando figurinhas para {kid}?".
 - **Privacy:** of the parent's own chat, only sticker files are kept. They're sealed like photos.
 
 ## Flow review (ux-user-flows §13)

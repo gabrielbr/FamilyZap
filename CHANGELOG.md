@@ -35,6 +35,17 @@
 
 
 
+## 0.44.0
+- **A tidier parent area.** "Ajustes e ajuda" mixed changing things with reading about them in one long scroll. Now:
+  - **Ajustes** (gear) holds what changes how Oiê works, in this order:
+    - **Conexão** comes first, so a dropped link is the first thing you see. "Marcar como não lida" is under it.
+    - **Nomes** is now one line ("Ana · Tito (Chico) · 😎"). Tap it to change the names and the emoji, then Voltar.
+    - **Bolha**, **Lembrete** and **Novidades** follow.
+  - **Ajuda** (info) holds the questions and answers, Problemas and Sobre (version and updates). After Oiê closes by itself, the report still comes first.
+  - Conexão is no longer a tab of its own: it's a few lines that now lead Ajustes. You still get there with one tap.
+  - The help answers now point to "Ajustes › Novidades" and "Ajustes".
+- **What you have to do:** nothing. Everything you set is where the list above says.
+
 ## 0.43.0
 - **More commands from your own WhatsApp.** In your chat with yourself ("Mensagem para você"):
   - **/Tito contatos** lists your kid's contacts, numbered;

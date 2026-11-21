@@ -8,7 +8,7 @@ import java.util.Locale
 /**
  * The problem report (docs/flows/problem-report.md, v0.14). What the link did, its warnings and
  * errors, and any crash, kept on the tablet only, in the app's private no-backup storage. The
- * parent copies it from Ajustes e ajuda; Oiê never sends it. No message text or names are written,
+ * parent copies it from Ajuda; Oiê never sends it. No message text or names are written,
  * and any run of 6+ digits (a phone number) is masked to its last 2.
  */
 object Diagnostics {
