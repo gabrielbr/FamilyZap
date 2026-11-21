@@ -10,11 +10,11 @@ Two new looks were tried on the branch first: a 90s TV infomercial, then a Y2K r
 
 ## Decision
 The v2 page keeps its hero, family picker, silhouettes, drawn screens, six story steps, FAQ, download and notice. Only the words change, to tell the home-phone story:
-- **The hero:** "Lembra do telefone de casa?" The home phone is back, on the tablet, and the meeting happens outside.
+- **The hero:** "Lembra do telefone de casa?" The home phone is back, on the tablet, to share the day and miss each other less.
 - **The steps:**
   - only familiar people on the other end;
   - the message goes out on the family line (the parent's WhatsApp), and the kid knows it from day one;
-  - the plan is made and the rest happens away from the screen;
+  - as simple as the home phone;
   - the usual crowd, with no strangers, ads or feed;
   - the parent keeps the phone book.
 - **The three highlights become "Como o telefone de casa":** the usual crowd, no ads or feed, nothing through us.
@@ -24,3 +24,12 @@ The v2 page keeps its hero, family picker, silhouettes, drawn screens, six story
 ## Kept
 - **Product law:** the WhatsApp risk is said plainly in the notice and the FAQ; no "100% safe"; no WhatsApp logo or affiliation; "o Oiê não tem servidor".
 - **The voice:** no "!", no em dashes, and buttons start with a verb.
+
+## Update, 2026-11-21: no "meeting outside"
+The owner: "we often say the conversation starts on the app, then kids would be outside… it also seems shady that they will meet people outside. So I want to avoid this way to talk about it."
+- **The landing page stops saying it.** Three lines changed, in PT and EN:
+  - the hero now ends "para contar do dia e matar a saudade";
+  - step 4 says "Simples como era o telefone de casa.";
+  - the highlight says "O Oiê serve só para conversar com quem a criança gosta.".
+- **The school friend's example** is now about yesterday's game, not meeting at the court.
+- **The rule from here on:** the site talks about keeping in touch and missing each other, never about meeting up.
