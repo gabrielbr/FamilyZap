@@ -184,3 +184,18 @@ _The owner, 2026-11-21: "when a group has notification it stays very low. So bef
 - **Conventions ✅:** WhatsApp's "Unread" filter.
 - **Accessibility ✅:** "Novas" is a heading, and each item's label says "N novas".
 - **Evidence 🟡:** a group message reaches the top on the tablet.
+
+## v0.51: the Lista view, fixed
+_The owner, 2026-11-21: "List view of contacts seems broken … it does not take full width; time of last message is not aligned with end of line; there is no line separating each row, making it confusing."_
+
+- **Full width:** the rows fill the column on the tablet too. Before, they were capped at 600dp and left half the screen empty beside them.
+- **The time at the end:** the name and the heart share the start of the top line, and the time sits at the row's end, right above the "N novas" tag. Before, a short name pulled the time towards the middle.
+- **A line between rows:** a 1dp `line` hairline separates plain rows. It starts where the text starts (after the photo) and ends where the time ends, as in WhatsApp and Contacts. Rows with news keep their coral edge and get 4dp of air instead of a line.
+- **Unchanged:** Fotos and Mosaico, the row height (56dp min), the tap and long press.
+
+**Review (§13):**
+- **Memory ✅:** each row reads as one thing: photo, name, last message, time.
+- **Conventions ✅:** the inset divider and end-aligned time of every messaging app.
+- **Accessibility ✅:** the line is decoration; each row is still one labelled target.
+- **Evidence 🟡:** Tito scans the list on the tablet without mixing rows.
+

@@ -190,9 +190,21 @@ private fun People(state: AppState) {
             if (titled) SectionTitle(title)
             Box(Modifier.padding(top = OTokens.Spacing.space3)) {
                 when (view) {
-                    HomeView.LIST -> Column(Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
-                        // v0.45: a small gap, so two highlighted rows don't touch.
-                        list.forEach { ct -> PersonRow(state, ct, letters[ct.name]) }
+                    // v0.51 (the owner: "list view seems broken"): rows span the whole width, as in the other views, with a
+                    // hairline between plain rows (from the text, after the photo, as in WhatsApp). A row with news keeps
+                    // its coral edge and a 4dp gap instead, so edges never touch a line or each other.
+                    HomeView.LIST -> Column(Modifier.fillMaxWidth()) {
+                        list.forEachIndexed { i, ct ->
+                            val news = state.unread(ct.id) > 0
+                            Box(Modifier.fillMaxWidth().then(if (news) Modifier.padding(vertical = OTokens.Spacing.space1) else Modifier)) {
+                                PersonRow(state, ct, letters[ct.name])
+                            }
+                            val next = list.getOrNull(i + 1)
+                            if (next != null && !news && state.unread(next.id) == 0) Box(
+                                Modifier.fillMaxWidth().padding(start = OTokens.Spacing.space3 + OTokens.Size.avatar + OTokens.Spacing.space4, end = OTokens.Spacing.space3)
+                                    .height(OTokens.Size.hairline).background(OieTheme.colors.line),
+                            )
+                        }
                     }
                     HomeView.PHOTOS -> PhotoGrid(state, list, letters)
                     HomeView.MOSAIC -> Mosaic(state, list, letters)
@@ -333,10 +345,12 @@ private fun PersonRow(state: AppState, ct: app.oie.logic.Contact, letters: Strin
     ) {
         app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
+            // v0.51: the name (and the heart) take what's left, so the time sits at the row's end, above the "N novas" tag.
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
-                Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                if (ct.id in state.favorites) app.oie.ui.common.OIcon(R.drawable.gg_ic_heart, tint = c.muted)
-                Box(Modifier.weight(1f))
+                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                    Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                    if (ct.id in state.favorites) app.oie.ui.common.OIcon(R.drawable.gg_ic_heart, tint = c.muted)
+                }
                 s.whenText?.let { Text(it, style = OieType.caption, color = if (s.unread > 0) c.ink else c.muted, maxLines = 1) }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {

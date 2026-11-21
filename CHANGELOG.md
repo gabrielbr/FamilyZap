@@ -45,6 +45,13 @@
 
 
 
+## 0.51.0
+- **Tito's list looks right.** In the Lista view:
+  - the rows fill the whole width on the tablet;
+  - the time of the last message sits at the end of the row, above the "N novas" tag;
+  - a thin line separates one person from the next.
+- **What you have to do:** nothing.
+
 ## 0.50.0
 - **"Novas" first on Tito's home.**
   - Everyone with unread messages, people and groups together, comes first in a section called **Novas**, the newest message first.
