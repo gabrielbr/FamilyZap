@@ -98,7 +98,7 @@ flowchart TD
 - **Motion:** the spinner honours "Remove animations"; then it's just the words and the count.
 
 ## v0.9: changing the names
-Both names from setup step 3 can be changed later in Parent area › **Ajustes e ajuda** (formerly "Ajuda e sobre"). A blank field keeps the last name. The kid's name drives the message rule ("Tito, …") and signs the kid's messages ("Tito: Oi, vó"), so a change takes effect at once for both.
+Both names from setup step 3 can be changed later in Parent area › **Ajustes › Nomes** (v0.44; formerly "Ajustes e ajuda", before that "Ajuda e sobre"). A blank field keeps the last name. The kid's name drives the message rule ("Tito, …") and signs the kid's messages ("Tito: Oi, vó"), so a change takes effect at once for both.
 
 ## v0.8: the real link
 - **Step 2:** "Conectar o WhatsApp" shows the QR and WhatsApp's own steps. When the phone scans it, the kid's side uses the real WhatsApp (`AppState.realMode`), and the contacts step lists the parent's real contacts, with a search when there are more than 12. (**Usar exemplo por enquanto** was removed in v0.12.)

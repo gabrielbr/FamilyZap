@@ -41,7 +41,7 @@ _Designed with `ux-user-flows` on 2026-11-20. Decided with the owner:_
 | any | 24 hours pass | The status is deleted from the tablet. |
 
 ## Parent
-- **Ajustes e ajuda › Novidades:** "Ver novidades da família", off.
+- **Ajustes › Novidades:** "Ver novidades da família", off.
 - Its line says what happens: "Tito vê as novidades de quem está em Contatos e pode reagir e responder. Quando Tito vê uma, a pessoa vê que você viu, porque é a sua conta."
 - Help explains the same.
 
@@ -97,7 +97,7 @@ _Designed with `ux-user-flows` on 2026-11-20. The owner asked: "Kid can publish 
 | any | The parent turns posting off | The kid's live statuses stay until they end; the kid can still delete them. |
 
 ## Parent
-- **Ajustes e ajuda › Novidades › "Tito pode postar novidades"**, off; shown only while Novidades is on.
+- **Ajustes › Novidades › "Tito pode postar novidades"**, off; shown only while Novidades is on.
 - Its line: "As novidades de Tito saem da sua conta, com o nome de Tito, só para quem está em Contatos. Você as vê no seu WhatsApp, em Meu status, e pode apagar por lá."
 
 ## Flow review (ux-user-flows §13)

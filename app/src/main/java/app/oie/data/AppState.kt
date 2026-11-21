@@ -45,7 +45,7 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var kidEmoji by mutableStateOf("")
     /** The parent turned on "Bolha na tela" (v0.25). */
     var bubbleOn by mutableStateOf(false)
-    /** The gentle nudge (v0.33): off until the parent turns it on in Ajustes e ajuda. */
+    /** The gentle nudge (v0.33): off until the parent turns it on in Ajustes. */
     var nudgeOn by mutableStateOf(false)
     /** "Agora não" on a nudge: the contact id and when (v0.33). That person isn't nudged again for a week. */
     val nudgeDismissed = mutableStateMapOf<String, Long>()

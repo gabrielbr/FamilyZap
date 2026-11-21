@@ -183,7 +183,12 @@ class ScreensTest {
     @Test fun kidHomeWithAPausedChat() = shot("27-kid-home-paused", false) { KidHome(paused().apply { kidNoticeSeen = true }) }
 
     // v0.22: the emoji before the kid's bold name, and its preview.
-    @Test fun settingsSignatureDark() = shot("28-settings-signature", true) { ParentArea(ready().apply { kidEmoji = "😎" }, 3) }
+    // v0.44: the names are a level under Ajustes.
+    @Test fun settingsSignatureDark() = shot("28-settings-signature", true) { ParentArea(ready().apply { kidEmoji = "😎" }, 2, names = true) }
+
+    // v0.44: Ajustes (the connection first, then the Nomes row and the tablet's settings) and Ajuda on their own.
+    @Test fun parentSettings() = shot("77-parent-settings", false) { ParentArea(ready().apply { realMode = true; linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Connected; kidEmoji = "😎"; kidNicknames += listOf("Chico") }, 2) }
+    @Test fun parentSettingsDark() = shot("77-parent-settings", true) { ParentArea(ready().apply { realMode = true; link.pretendDropped() }, 2) }
 
     // v0.24: right after an update the link is on its way: no "desconectado", no Connect button.
     private fun reconnecting() = ready().apply {

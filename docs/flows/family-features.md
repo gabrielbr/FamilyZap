@@ -24,7 +24,7 @@ Every feature keeps the product law: only allowed contacts, nothing to Oiê's se
 - On the day, the kid's home shows one line at the top, "Vovó faz aniversário hoje" (no "da/do": the name works for anyone), and tapping it opens her chat.
 
 ## 4. The gentle nudge
-- In Ajustes e ajuda: **Lembrar Tito de falar com a família**, off by default.
+- In Ajustes: **Lembrar Tito de falar com a família**, off by default.
 - It sits after the people on the home screen (audit: it must never push them down).
 - When it's on, and a person hasn't heard from the kid for 7 days, the kid's home shows one line: "Uma semana sem falar com Vovô" (v0.34: shorter, one line on a phone). It never shows more than one, and it never counts streaks.
   - Tapping opens the chat.

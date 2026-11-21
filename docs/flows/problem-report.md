@@ -4,9 +4,9 @@ _Designed with `ux-user-flows` on 2026-11-19 (v0.14), after the owner's first re
 
 - **Actor and job story:** the parent, in the parent area. *When Oiê closes by itself or stops working, I want to hand over what happened in one tap, so it can be fixed without me describing it.*
 - **Success measure:**
-  - after a crash, the parent can copy a report in 2 taps from Ajustes e ajuda (open the section, then Copiar);
+  - after a crash, the parent can copy a report in 2 taps from Ajuda (open the section, then Copiar);
   - the report holds what's needed to find the cause and nothing private.
-- **Entry:** Parent area › Ajustes e ajuda › **Problemas**, behind the PIN. There's no entry on the kid's side: the kid isn't asked to report anything.
+- **Entry:** Parent area › Ajuda › **Problemas** (v0.44; was Ajustes e ajuda), behind the PIN. There's no entry on the kid's side: the kid isn't asked to report anything.
 - **Product law:** the report stays on the tablet. Oiê never sends it anywhere. The parent copies it and chooses where to paste it.
 
 ## What the report holds
@@ -27,7 +27,7 @@ _Designed with `ux-user-flows` on 2026-11-19 (v0.14), after the owner's first re
 ## Steps
 | # | Screen | The parent | The system |
 |---|---|---|---|
-| 1 | Ajustes e ajuda | Scrolls to **Problemas** | If Oiê closed by itself, the first line says when: "O Oiê fechou sozinho em 19/11 às 16h20." Otherwise: "Nenhum problema guardado." |
+| 1 | Ajuda | Scrolls to **Problemas** | If Oiê closed by itself, the first line says when: "O Oiê fechou sozinho em 19/11 às 16h20." Otherwise: "Nenhum problema guardado." |
 | 2 | Same | Taps **Copiar relatório** | Copies the report to the clipboard; the button says "Copiado" for a moment (Android 13+ also shows its own copy confirmation). |
 | 3 | Elsewhere | Pastes it where they choose | Nothing is sent by Oiê. |
 | 4 | Same | Taps **Apagar relatório** (only when there is one) | Clears it at once; nothing personal is lost, so there's no confirmation. |

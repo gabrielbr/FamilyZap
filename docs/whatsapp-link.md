@@ -109,7 +109,7 @@ v0.6. Self-update picks the tablet's own (`UpdateRules.offer`).
 ## Licence
 whatsmeow is **MPL-2.0**: its own files stay MPL-2.0, and Oiê's code can stay closed. When Oiê
 ships with it, we must:
-- say in Ajustes e ajuda › Sobre that it includes whatsmeow under MPL-2.0;
+- say in Ajuda › Sobre that it includes whatsmeow under MPL-2.0;
 - link to its source, github.com/tulir/whatsmeow, at the exact commit (`link/go.mod`).
 
 **Since v0.37 Oiê modifies one whatsmeow file,** `broadcast.go` (kept in `link/_whatsmeow-patch/`, the owner's
@@ -129,14 +129,14 @@ dependencies are BSD, MIT, Apache or ISC licensed, and a full list ships with th
 1. The message rule is tested with real chats (STATUS.md).
 2. `WhatsmeowLink` implements `WhatsAppLink`. Every rule above has a test, where a test is possible.
 3. ~~The release workflow builds the AAR (Go and the NDK in CI)~~ (v0.5).
-4. ~~Ajustes e ajuda › Sobre carries the whatsmeow notice~~ (v0.5).
+4. ~~Ajuda › Sobre carries the whatsmeow notice~~ (v0.5).
 5. A test on a spare WhatsApp number first, never the owner's main one.
 
 ## v0.41: the low-risk pass (the owner, 2026-11-21)
 Other WhatsApp clients (nchat, wptui) use whatsmeow too, so switching clients changes nothing; behaviour is what matters. This pass:
 - **Pace:** 4 s between sends and at most 20 in 10 minutes (L3).
-- **The unread mark on the parent's line** (`MarkUnread`, v0.35) runs only when the parent turns it on (Ajustes e ajuda › Sua conversa com {kid}). It's off by default, for existing installs too: no official client marks the account's own chat unread.
-- **Posting statuses** stays opt-in, as before: Ajustes e ajuda › Novidades › postar. The v0.37 patch is the most unusual thing Oiê does, so the switch stays off unless the parent wants it.
+- **The unread mark on the parent's line** (`MarkUnread`, v0.35) runs only when the parent turns it on (Ajustes › Sua conversa com {kid}). It's off by default, for existing installs too: no official client marks the account's own chat unread.
+- **Posting statuses** stays opt-in, as before: Ajustes › Novidades › postar. The v0.37 patch is the most unusual thing Oiê does, so the switch stays off unless the parent wants it.
 - **whatsmeow is current:** the pin (2026-11-16, `19d61352436f`) was upstream `main` on 2026-11-21. **Check it at least once a month** (`go list -m -json go.mau.fi/whatsmeow@main` in `link/`). Outdated protocol versions stand out more than any client choice. Moving the pin means re-applying `_whatsmeow-patch/broadcast.go` on the new commit.
 
 ## v0.42: the groups are kept

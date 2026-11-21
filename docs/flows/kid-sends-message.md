@@ -97,7 +97,7 @@ Recording is real: Opus in Ogg on Android 10 and newer (WhatsApp's own voice-not
 _The owner, 2026-11-19: "the name of Tito when sent to WhatsApp should be in bold, and the parent could choose an emoji, so readability would be better", e.g. `😎*Tito*: (message)`._
 
 - **What the family sees:** WhatsApp's own bold: `*Tito*` shows as **Tito**. With an emoji: 😎**Tito**: Saudade, vó. A photo's or sticker's caption is the name alone, the same way (😎**Tito**).
-- **Where the parent chooses:** Ajustes e ajuda › Nomes › **Emoji antes do nome**, a field that takes one emoji from the keyboard. It's optional; empty means just the bold name.
+- **Where the parent chooses:** Ajustes › Nomes › **Emoji antes do nome**, a field that takes one emoji from the keyboard. It's optional; empty means just the bold name.
 - **What it shows:** a line under the field, "Fica assim no WhatsApp:", with a sample message rendered the way WhatsApp will show it. So the parent sees the result without sending anything.
 - **Rules:**
   - only one emoji is kept (the first); letters and numbers aren't an emoji and are ignored;
@@ -107,7 +107,7 @@ _The owner, 2026-11-19: "the name of Tito when sent to WhatsApp should be in bol
 
 | # | The parent | The system |
 |---|---|---|
-| 1 | Opens Ajustes e ajuda › Nomes | Sees "Emoji antes do nome" (empty) and "Fica assim no WhatsApp: **Tito**: Oi, vó". |
+| 1 | Opens Ajustes › Nomes | Sees "Emoji antes do nome" (empty) and "Fica assim no WhatsApp: **Tito**: Oi, vó". |
 | 2 | Taps the field, picks 😎 on the keyboard | The preview shows 😎**Tito**: Oi, vó at once; saved. |
 | 3 | Types more, or a letter | Only the first emoji is kept; a letter alone is ignored and the preview shows no emoji. |
 | 4 | Clears the field | Back to the bold name alone. |

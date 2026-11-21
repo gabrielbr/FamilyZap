@@ -5,12 +5,12 @@ _Designed with `ux-user-flows` on 2026-11-19 (v0.25), from the owner's request: 
 - **Actor and job story:** the kid, using another app on the tablet (a game, a video). *When I'm in another app and want to talk to Vovó, I want Oiê one tap away in a small window, so I don't lose what I was doing.* The parent turns it on.
 - **Success measure:** from another app, the kid reaches a family member in 2 taps (the bubble, then the person), and goes back to the other app with one tap outside the window.
 - **Built on Android's Bubbles** (Android 11 and later): a round Oiê bubble floats over other apps. Tapping it opens Oiê in a small window, which uses the phone-sized layout Oiê already has (the 360dp design, checked in every audit since v0.13). Android owns the bubble itself: dragging, the X to dismiss, where it sits.
-- **Entry:** Parent area › Ajustes e ajuda › **Bolha na tela** (behind the PIN). It's off until the parent turns it on.
+- **Entry:** Parent area › Ajustes › **Bolha na tela** (behind the PIN). It's off until the parent turns it on.
 
 ## Steps
 | # | Where | Who does what | The system |
 |---|---|---|---|
-| 1 | Ajustes e ajuda › Bolha na tela | The parent turns the switch on | Oiê asks Android for a bubble. If Android allows it, the bubble appears at the screen's edge: "A bolha está na tela." |
+| 1 | Ajustes › Bolha na tela | The parent turns the switch on | Oiê asks Android for a bubble. If Android allows it, the bubble appears at the screen's edge: "A bolha está na tela." |
 | 2 | Any app | The kid taps the bubble | Oiê opens in a small window over the app: the kid's home, with the family's faces. |
 | 3 | The small window | The kid taps Vovó, writes, sends | The same chat as in the full app. Messages, photos, voice and stickers work the same. |
 | 4 | The small window | The kid taps outside, or Back | The window folds back into the bubble; the other app is still there. |
