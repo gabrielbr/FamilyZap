@@ -1,5 +1,13 @@
 package app.oie.ui.kid
 
+import androidx.compose.foundation.selection.selectable
+
+import androidx.compose.ui.semantics.traversalIndex
+
+import androidx.compose.ui.semantics.isTraversalGroup
+
+import androidx.compose.ui.semantics.heading
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.size
@@ -138,31 +146,111 @@ fun KidHome(state: AppState) {
     }
 }
 
+/** v0.48: how the home shows people. The kid picks it in Arrumar; until then a phone lists, the tablet shows a mosaic. */
+internal enum class HomeView { LIST, PHOTOS, MOSAIC }
+
+@Composable
+internal fun homeView(state: AppState): HomeView = when (state.homeView) {
+    "list" -> HomeView.LIST; "photos" -> HomeView.PHOTOS; "mosaic" -> HomeView.MOSAIC
+    else -> if (app.oie.ui.common.isCompact) HomeView.LIST else HomeView.MOSAIC
+}
+
+/** v0.48: "Pessoas" or "Grupos" over a section, only when the home has both (a heading for TalkBack). */
+@Composable
+private fun SectionTitle(text: String) {
+    Text(text, style = OieType.title, color = OieTheme.colors.ink,
+        modifier = Modifier.padding(top = OTokens.Spacing.space6).semantics { heading() })
+}
+
 /**
  * v0.38 (flow kid-home-and-attach.md): every person the kid can reach, with the last message in a few words.
- * A phone lists them in rows; the tablet shows cards in even columns, each with Escrever and Gravar áudio.
+ * v0.48 (the owner: "give the kid options to list the contacts as masonry, gallery, list; separate groups from
+ * users"): people and groups are two sections, and the kid picks the view in Arrumar:
+ *  - Lista: one row each (photo, name, last message);
+ *  - Fotos: a grid of big photos with the name, nothing to read;
+ *  - Mosaico: cards in staggered columns, each as tall as its last message (with Escrever and Gravar áudio on the tablet).
  */
 @Composable
 private fun People(state: AppState) {
+    val tx = str
     // Two people with the same first letter ("Vovó", "Vovô") get two letters each, so they differ at a glance.
     val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
-    // v0.45: whoever has news comes first (newest first), highlighted; back to their place once read.
-    val people = state.homeNow
-    if (app.oie.ui.common.isCompact) {
-        // v0.45: a small gap, so two highlighted rows don't touch.
-        Column(Modifier.fillMaxWidth().padding(top = OTokens.Spacing.space4), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
-            people.forEach { ct -> PersonRow(state, ct, letters[ct.name]) }
+    // v0.45: whoever has news comes first in their section (newest first), highlighted; back to their place once read.
+    val all = state.homeNow
+    val people = all.filter { !app.oie.logic.HomeOrder.inGroups(it) }
+    val groups = all.filter { app.oie.logic.HomeOrder.inGroups(it) }
+    val both = people.isNotEmpty() && groups.isNotEmpty()
+    val view = homeView(state)
+    Column(Modifier.fillMaxWidth().then(if (both) Modifier else Modifier.padding(top = OTokens.Spacing.space4))) {
+        listOf(tx.sectionPeople to people, tx.sectionGroups to groups).forEach { (title, list) ->
+            if (list.isEmpty()) return@forEach
+            if (both) SectionTitle(title)
+            Box(Modifier.padding(top = OTokens.Spacing.space3)) {
+                when (view) {
+                    HomeView.LIST -> Column(Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
+                        // v0.45: a small gap, so two highlighted rows don't touch.
+                        list.forEach { ct -> PersonRow(state, ct, letters[ct.name]) }
+                    }
+                    HomeView.PHOTOS -> PhotoGrid(state, list, letters)
+                    HomeView.MOSAIC -> Mosaic(state, list, letters)
+                }
+            }
         }
-        return
     }
-    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth().padding(top = OTokens.Spacing.space6)) {
-        // Cards at least half the reading column wide (300dp), as many as fit: 3 on a landscape tablet, 2 standing.
-        val gap = OTokens.Spacing.space4
-        val columns = ((maxWidth + gap) / (OTokens.Size.contentMax / 2 + gap)).toInt().coerceAtLeast(1)
-        val cardW = (maxWidth - gap * (columns - 1)) / columns
+}
+
+/** v0.48 Fotos: big photos (or letters) with the name under them; as many columns as fit tiles of at least 128dp. */
+@Composable
+private fun PhotoGrid(state: AppState, list: List<app.oie.logic.Contact>, letters: Map<String, String>) {
+    val c = OieTheme.colors
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val gap = OTokens.Spacing.space3
+        val minTile = OTokens.Size.contactTile + OTokens.Spacing.space8
+        val columns = ((maxWidth + gap) / (minTile + gap)).toInt().coerceAtLeast(1)
+        val tileW = (maxWidth - gap * (columns - 1)) / columns
         @OptIn(ExperimentalLayoutApi::class)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(gap), verticalArrangement = Arrangement.spacedBy(gap)) {
-            people.forEach { ct -> PersonCard(state, ct, letters[ct.name], Modifier.width(cardW)) }
+            list.forEach { ct ->
+                val s = said(state, ct)
+                val shape = RoundedCornerShape(OTokens.Radius.radiusM)
+                Column(
+                    Modifier.width(tileW).clip(shape).background(c.surface)
+                        .border(if (s.unread > 0) OTokens.Size.newsEdge else OTokens.Size.hairline, if (s.unread > 0) c.mint else c.line, shape)
+                        .pressable { state.route = Route.Conversation(ct.id) }
+                        .semantics(mergeDescendants = true) { contentDescription = s.label; role = Role.Button }
+                        .padding(OTokens.Spacing.space3),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
+                ) {
+                    app.oie.ui.common.Avatar(ct, OTokens.Size.contactTile, letters = letters[ct.name])
+                    Text(ct.name, style = OieType.label, color = c.ink, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    if (s.unread > 0) NewPill(s.unread)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * v0.48 Mosaico: cards in staggered columns (2 on a phone, as many 300dp columns as fit on the tablet), each as tall
+ * as its last message. Placed left to right, row by row, and read in that order by TalkBack.
+ */
+@Composable
+private fun Mosaic(state: AppState, list: List<app.oie.logic.Contact>, letters: Map<String, String>) {
+    val compact = app.oie.ui.common.isCompact
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val gap = if (compact) OTokens.Spacing.space3 else OTokens.Spacing.space4
+        val minColumn = if (compact) OTokens.Size.contentMax / 4 else OTokens.Size.contentMax / 2
+        val columns = ((maxWidth + gap) / (minColumn + gap)).toInt().coerceAtLeast(1) // a lone card keeps a column's width
+        Row(Modifier.fillMaxWidth().semantics { isTraversalGroup = true }, horizontalArrangement = Arrangement.spacedBy(gap)) {
+            (0 until columns).forEach { col ->
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(gap)) {
+                    list.forEachIndexed { i, ct ->
+                        if (i % columns == col) PersonCard(state, ct, letters[ct.name],
+                            Modifier.fillMaxWidth().semantics { traversalIndex = i.toFloat() }, mosaic = true, actions = !compact)
+                    }
+                }
+            }
         }
     }
 }
@@ -264,7 +352,7 @@ private fun PersonRow(state: AppState, ct: app.oie.logic.Contact, letters: Strin
  * In quiet hours the actions go, as in the chat; the card still opens it to read and listen.
  */
 @Composable
-private fun PersonCard(state: AppState, ct: app.oie.logic.Contact, letters: String?, modifier: Modifier) {
+private fun PersonCard(state: AppState, ct: app.oie.logic.Contact, letters: String?, modifier: Modifier, mosaic: Boolean = false, actions: Boolean = true) {
     val c = OieTheme.colors
     val tx = str
     val s = said(state, ct)
@@ -287,18 +375,21 @@ private fun PersonCard(state: AppState, ct: app.oie.logic.Contact, letters: Stri
                 app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters)
                 Column(Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
-                        Text(ct.name, style = OieType.title, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                        Text(ct.name, style = OieType.title, color = c.ink, maxLines = if (mosaic) 2 else 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
                         if (ct.id in state.favorites) app.oie.ui.common.OIcon(R.drawable.gg_ic_heart, tint = c.muted)
                     }
                     s.whenText?.let { Text(it, style = OieType.caption, color = c.muted, maxLines = 1) }
                 }
-                if (s.unread > 0) NewPill(s.unread)
+                if (s.unread > 0 && !mosaic) NewPill(s.unread)
             }
             // Two lines held even when the message is short, so the cards in a row line up.
+            // v0.48: in the mosaic a card is as tall as its message (up to 6 lines), so the columns stagger.
             Text(s.preview, style = if (s.unread > 0) OieType.label else OieType.body, color = if (s.failed) c.coralText else if (s.unread > 0) c.ink else c.muted,
-                minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                minLines = if (mosaic) 1 else 2, maxLines = if (mosaic) 6 else 2, overflow = TextOverflow.Ellipsis)
+            // v0.48 audit (M1): in the mosaic's narrow columns the tag sits under the message, whole, not beside the name.
+            if (s.unread > 0 && mosaic) NewPill(s.unread)
         }
-        if (canSend) Row(
+        if (canSend && actions) Row(
             Modifier.fillMaxWidth().padding(OTokens.Spacing.space2),
             horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
         ) {
@@ -321,12 +412,19 @@ internal fun Arrange(state: AppState) {
     var dragging by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
     var offset by androidx.compose.runtime.remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     var rowPx by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(1) }
+    val now = people.map { it.id }
+    fun moved(id: String, delta: Int) = app.oie.logic.HomeOrder.move(state.reachable, state.favorites.toSet(), state.kidOrder, id, delta)
+    val both = people.any { app.oie.logic.HomeOrder.inGroups(it) } && people.any { !app.oie.logic.HomeOrder.inGroups(it) }
     Column(Modifier.fillMaxWidth().widthIn(max = OTokens.Size.contentMax).padding(top = OTokens.Spacing.space4)) {
+        // v0.48: how the home shows people; a rare choice, so it lives here and not on the home.
+        ViewChoice(state)
         people.forEachIndexed { i, ct ->
+            if (both && (i == 0 || app.oie.logic.HomeOrder.inGroups(people[i - 1]) != app.oie.logic.HomeOrder.inGroups(ct)))
+                SectionTitle(if (app.oie.logic.HomeOrder.inGroups(ct)) tx.sectionGroups else tx.sectionPeople)
             val fav = ct.id in state.favorites
-            val favCount = people.count { it.id in state.favorites }
-            val canUp = i > 0 && (fav || i > favCount)
-            val canDown = i < people.size - 1 && (!fav || i < favCount - 1)
+            // v0.48: a move stays in its section and its side of the hearts (HomeOrder.move); an arrow that can't move is dimmed.
+            val canUp = moved(ct.id, -1) != now
+            val canDown = moved(ct.id, +1) != now
             val moving = dragging == ct.id
             Row(
                 Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)
@@ -362,6 +460,28 @@ internal fun Arrange(state: AppState) {
                 SquareIcon(R.drawable.gg_ic_chevron, tx.moveUpA11y(ct.name), rotation = -90f, enabled = canUp) { state.moveOnHome(ct.id, -1) }
                 SquareIcon(R.drawable.gg_ic_chevron, tx.moveDownA11y(ct.name), rotation = 90f, enabled = canDown) { state.moveOnHome(ct.id, +1) }
             }
+        }
+    }
+}
+
+/** v0.48: "Mostrar como" with Lista, Fotos and Mosaico, one picked (a radio group, 48dp targets, the word says which). */
+@Composable
+private fun ViewChoice(state: AppState) {
+    val c = OieTheme.colors
+    val tx = str
+    val current = homeView(state)
+    Text(tx.showAs, style = OieType.label, color = c.ink, modifier = Modifier.padding(bottom = OTokens.Spacing.space2))
+    Row(Modifier.fillMaxWidth().padding(bottom = OTokens.Spacing.space4).semantics { isTraversalGroup = true },
+        horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+        listOf(HomeView.LIST to tx.viewList, HomeView.PHOTOS to tx.viewPhotos, HomeView.MOSAIC to tx.viewMosaic).forEach { (v, label) ->
+            val on = v == current
+            val shape = RoundedCornerShape(OTokens.Radius.radiusL)
+            Box(
+                Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin - OTokens.Spacing.space2).clip(shape)
+                    .background(if (on) c.selected else c.page).border(OTokens.Size.hairline, if (on) c.onSelected else c.line, shape)
+                    .selectable(on, role = Role.RadioButton) { state.homeView = v.name.lowercase() },
+                contentAlignment = Alignment.Center,
+            ) { Text(label, style = OieType.label, color = if (on) c.onSelected else c.ink, maxLines = 1) }
         }
     }
 }

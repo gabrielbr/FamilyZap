@@ -143,3 +143,29 @@ _The owner, 2026-11-21: "the cards on the main screen, when we have a notificati
 | 4 | Arrumar | — | The kid's order, with no news first |
 
 **Review (§13):** happy path unchanged (one tap to open). Accessibility: the label still reads the name, then "1 nova", then the message, and the order is the one read out. Evidence 🟡: Tito notices the new card on the tablet.
+
+## v0.48: three views, and people apart from groups
+_The owner, 2026-11-21: "Give the kid options to list the contacts as masonry, gallery, list. Separate groups from users."_
+
+- **Sections:** the home shows **Pessoas**, then **Grupos**, each with its own title (a heading for TalkBack) when both exist.
+  - The line to the parent counts as a person.
+  - Inside each section: news first (v0.45), then favorites, then the kid's order.
+  - In Arrumar, a move stays inside its section (`HomeOrder.move`, tested), and a new favorite goes to the end of its section's favorites.
+- **Views**, picked in Arrumar under "Mostrar como" (a radio group of three words) and remembered on the tablet:
+
+| View | What it shows | Good for |
+|---|---|---|
+| **Lista** | One row each: photo, name, time, the last message in one line, "N novas" | Many people, reading quickly. The default on a phone. |
+| **Fotos** | A grid of big photos (or letters) with the name under them and "N novas". Nothing to read. | Younger kids; finding someone by face. |
+| **Mosaico** | Cards in staggered columns, each as tall as its last message (up to 6 lines). On the tablet, with Escrever and Gravar áudio. | Seeing what each person said. The default on the tablet (today's cards). |
+
+- **Why the choice lives in Arrumar:** it's rarely changed (less-is-more Q5), and Arrumar is already "how my home looks". The everyday home gains no controls.
+- **Mosaico's reading order:** left to right, row by row, the same for TalkBack (`traversalIndex`), so news first still means first.
+- **Taps:** opening a chat is still one tap in every view.
+
+**Review (§13):**
+- **Conventions ✅:** list, grid and mosaic are the common gallery choices.
+- **Control ✅:** one tap changes the view back.
+- **Memory ✅:** the choice is remembered.
+- **Accessibility ✅:** radio semantics, 48dp targets, headings, reading order.
+- **Evidence 🟡:** which view Tito picks.

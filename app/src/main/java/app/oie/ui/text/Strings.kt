@@ -110,6 +110,9 @@ interface Strings {
     fun pinDots(n: Int, of: Int): String
     val erase: String
     val help: String; val about: String
+    /** v0.48: the home's sections and the "show as" choice in Arrumar. */
+    val sectionPeople: String; val sectionGroups: String; val showAs: String
+    val viewList: String; val viewPhotos: String; val viewMosaic: String
     /** v0.47: the first message in a chat, before the kid's (wording approved by the owner, 2026-11-21). */
     fun introPerson(kid: String, parent: String): String
     fun introGroup(kid: String, parent: String): String
@@ -411,7 +414,7 @@ object Pt : Strings {
     override fun clock(hour: Int, minute: Int) = if (minute == 0) "${hour}h" else "%dh%02d".format(hour, minute)
     override fun pinDots(n: Int, of: Int) = "$n de $of números"
     override val erase = "Apagar"
-    override val help = "Ajuda"; override val about = "Sobre"; override val questions = "Perguntas";
+    override val help = "Ajuda"; override val about = "Sobre"; override val questions = "Perguntas"; override val sectionPeople = "Pessoas"; override val sectionGroups = "Grupos"; override val showAs = "Mostrar como"; override val viewList = "Lista"; override val viewPhotos = "Fotos"; override val viewMosaic = "Mosaico";
     override fun introPerson(kid: String, parent: String) = "Oiê · $kid está escrevendo pelo WhatsApp de $parent, com o app Oiê, no tablet. Responda aqui mesmo. Para puxar conversa com $kid depois, comece a mensagem com “$kid”. Como funciona: ${app.oie.logic.Intro.LINK_PT}"
     override fun introGroup(kid: String, parent: String) = "Oiê · $kid vai participar deste grupo pelo WhatsApp de $parent, com o app Oiê, no tablet. $kid vê tudo o que o grupo fala. Como funciona: ${app.oie.logic.Intro.LINK_PT}"
     override val introTitle = "Primeira mensagem"; override val introSwitch = "Apresentar o Oiê na primeira mensagem"
@@ -763,7 +766,7 @@ object En : Strings {
     }
     override fun pinDots(n: Int, of: Int) = "$n of $of digits"
     override val erase = "Delete"
-    override val help = "Help"; override val about = "About"; override val questions = "Questions";
+    override val help = "Help"; override val about = "About"; override val questions = "Questions"; override val sectionPeople = "People"; override val sectionGroups = "Groups"; override val showAs = "Show as"; override val viewList = "List"; override val viewPhotos = "Photos"; override val viewMosaic = "Mosaic";
     override fun introPerson(kid: String, parent: String) = "Oiê · $kid is writing from $parent’s WhatsApp, with the Oiê app, on the tablet. Just reply here. To start a chat with $kid later, begin your message with “$kid”. How it works: ${app.oie.logic.Intro.LINK_EN}"
     override fun introGroup(kid: String, parent: String) = "Oiê · $kid will take part in this group from $parent’s WhatsApp, with the Oiê app, on the tablet. $kid sees everything the group says. How it works: ${app.oie.logic.Intro.LINK_EN}"
     override val introTitle = "First message"; override val introSwitch = "Introduce Oiê in the first message"
