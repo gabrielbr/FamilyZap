@@ -45,6 +45,14 @@
 
 
 
+## 0.50.0
+- **"Novas" first on Tito's home.**
+  - Everyone with unread messages, people and groups together, comes first in a section called **Novas**, the newest message first.
+  - Pessoas and Grupos follow.
+  - A group with news no longer sits under every person.
+  - The section shows only while something is unread. Once read, each goes back to its place.
+- **What you have to do:** nothing.
+
 ## 0.49.0
 - **Every touch answers with a small animation.** Every button, row, card, tile, tab, chip, key, emoji, sticker, photo and video now presses in slightly while held. Before, some didn't.
   - When something is picked (a tab, a view, a day, a colour, a contact), its colour fades in.

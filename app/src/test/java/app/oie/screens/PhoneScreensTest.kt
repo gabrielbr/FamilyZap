@@ -78,6 +78,8 @@ class PhoneScreensTest {
             messages += app.oie.logic.Message("g4", "primos", true, now - 30 * 60_000, app.oie.logic.Kind.TEXT, "Eu vou")
         }, "primos")
     }
+    // v0.50: Novas on a phone, with a group in it, at 1.3× text.
+    @Test fun kidHomeUnread() = shot("p61-kid-home-unread", bigText = true) { KidHome(ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("pg", "primos", false, now - 60_000, app.oie.logic.Kind.TEXT, "Quem vem domingo?", sender = "5511987650001@s.whatsapp.net") }) }
     // v0.48: Fotos and Mosaico on a phone, with the sections, at 1.3× text.
     @Test fun kidHomePhotos() = shot("p59-kid-home-photos", bigText = true) { KidHome(ready().apply { kidNoticeSeen = true; homeView = "photos" }) }
     @Test fun kidHomeMosaic() = shot("p60-kid-home-mosaic", bigText = true) { KidHome(ready().apply { kidNoticeSeen = true; homeView = "mosaic" }) }

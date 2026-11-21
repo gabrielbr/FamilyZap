@@ -71,4 +71,19 @@ object HomeOrder {
         fun section(list: List<Contact>) = list.filter { it.id in latestNew }.sortedByDescending { latestNew.getValue(it.id) } + list.filter { it.id !in latestNew }
         return section(ordered.filter { !inGroups(it) }) + section(ordered.filter { inGroups(it) })
     }
+
+    /** v0.50: the home's sections: [news] (people and groups with unread messages, newest first), then the rest. */
+    data class Sections(val news: List<Contact>, val people: List<Contact>, val groups: List<Contact>)
+
+    /**
+     * v0.50 (the owner: "when a group has notification it stays very low … before any of these groups we want a
+     * group called Unread … anything that has notification appears there in chronological order"): whoever has
+     * unread messages, person or group, sits in the first section, the newest message first; [ordered] keeps
+     * everyone else in Pessoas and Grupos. Once read, a person goes back to their place.
+     */
+    fun sections(ordered: List<Contact>, latestNew: Map<String, Long>): Sections {
+        val news = ordered.filter { it.id in latestNew }.sortedByDescending { latestNew.getValue(it.id) }
+        val rest = ordered.filter { it.id !in latestNew }
+        return Sections(news, rest.filter { !inGroups(it) }, rest.filter { inGroups(it) })
+    }
 }

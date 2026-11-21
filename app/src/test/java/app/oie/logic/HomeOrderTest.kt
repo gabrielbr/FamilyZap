@@ -79,4 +79,16 @@ class HomeOrderTest {
         val ordered = HomeOrder.order(mixed, emptySet(), emptyList())
         assertEquals(listOf("lu", "vo", "linha", "escola", "primos"), ids(HomeOrder.withNews(ordered, mapOf("lu" to 1L, "escola" to 2L))))
     }
+
+    // v0.50: unread people and groups share the first section, newest first, whatever their kind.
+    @Test fun unreadComesFirstAcrossPeopleAndGroups() {
+        val ordered = HomeOrder.order(mixed, emptySet(), emptyList())
+        val s = HomeOrder.sections(ordered, mapOf("escola" to 3L, "lu" to 1L, "primos" to 2L))
+        assertEquals(listOf("escola", "primos", "lu"), ids(s.news))
+        assertEquals(listOf("vo", "linha"), ids(s.people))
+        assertEquals(emptyList<String>(), ids(s.groups))
+        val none = HomeOrder.sections(ordered, emptyMap())
+        assertEquals(emptyList<String>(), ids(none.news))
+        assertEquals(listOf("vo", "linha", "lu"), ids(none.people))
+    }
 }
