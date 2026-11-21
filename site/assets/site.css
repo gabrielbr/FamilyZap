@@ -141,6 +141,10 @@ img, svg { display: block; }
 .step p { font-size: 1.1875rem; line-height: 1.55; margin: 0; max-width: 34ch; }
 .stage__tag { position: absolute; top: var(--s6); right: 0; z-index: 3; margin: 0; display: flex; align-items: center; gap: var(--s3); font-size: 0.8125rem; font-weight: 800; color: var(--gds-muted); }
 .stage__next { display: inline-flex; align-items: center; min-height: 44px; color: var(--gds-ink); }
+/* Six short segments, one per step; the ones read so far are ink. Decoration for sight: the words say "2 de 6". */
+.stage__bar { display: inline-flex; gap: var(--s1); width: 96px; }
+.stage__bar i { flex: 1; height: var(--s1); border-radius: var(--s1); background: var(--gds-muted); opacity: 0.35; transition: opacity var(--t-std) var(--ease), background-color var(--t-std) var(--ease); }
+.stage__bar i.is-done { background: var(--gds-ink); opacity: 1; }
 
 .cast { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: var(--s2); position: relative; z-index: 1; }
 .actor { margin: 0; display: grid; justify-items: center; position: relative; }
@@ -350,31 +354,35 @@ footer { border-top: 1px solid var(--gds-line); }
 /* Phones and narrow tablets: the stage pins on top and shows one person at a time, large; the others wait small. */
 @media (max-width: 899px) {
   .story { grid-template-columns: minmax(0, 1fr); padding: 0; }
-  .stage { grid-column: 1; height: 62svh; top: 0; z-index: 2; background: var(--gds-page); padding: var(--s4) var(--s4) var(--s3); border-bottom: 1px solid var(--gds-line); justify-content: flex-end; }
+  .stage { grid-column: 1; height: 54svh; top: 0; z-index: 2; background: var(--gds-page); padding: var(--s4) var(--s4) var(--s3); border-bottom: 1px solid var(--gds-line); justify-content: flex-end; }
   .steps { grid-column: 1; grid-row: 2; padding: var(--s8) var(--s4) 40vh; }
   /* While the visitor builds their family, the stage scrolls away with the page, so the whole form is in reach. */
   .stage[data-step="0"] { position: relative; }
   /* The stage pins as soon as the form's end slides under it, and step 1 follows right after. */
   .step--intro, .js .step--intro { padding-bottom: var(--s6); }
   /* "Ver a história" lands with step 1's heading just under the pinned stage. */
-  .step { scroll-margin-top: calc(62svh - var(--s16) - var(--s4)); } /* lands just under the stage; the page's 64px scroll-padding adds to it */
+  .step { scroll-margin-top: calc(54svh - var(--s16) - var(--s4)); } /* lands just under the stage; the page's 64px scroll-padding adds to it */
   /* The stage is already at the top on a phone: no centring shift (it would push the drawing over the words). */
   .stage.is-pinned > :is(.cast, .wire) { transform: none; }
   /* A step is as tall as the band under the stage: the next words arrive as the last ones leave. */
-  .step { min-height: 38svh; justify-content: flex-start; padding-top: var(--s4); }
+  /* Shorter than the band under the stage, so the next step's heading always shows below the one being read. */
+  .step { min-height: 34svh; justify-content: flex-start; padding-top: var(--s8); } /* the heading lands 16px clear of the stage */
   .step p { max-width: none; }
   .cast { grid-template-columns: minmax(0, 1fr); justify-items: center; }
   .actor { grid-area: 1 / 1; }
   .stage .actor { opacity: 0 !important; pointer-events: none; }
   .stage[data-focus="kid"] .actor--kid, .stage[data-focus="parent"] .actor--parent, .stage[data-focus="recv"] .actor--recv,
   .stage[data-step="0"] .actor--kid { opacity: 1 !important; filter: none; }
-  .actor { --aw: 220px; --dw: 132px; }
+  .actor { --aw: 184px; --dw: 112px; }
   .wa { font-size: 10px; }
   .wa__bar { padding-top: 12px; }
-  .actor--kid { --aw: 200px; --dw: 250px; }
+  .actor--kid { --aw: 168px; --dw: 220px; }
   .step { opacity: 1; }
   .wire { margin: var(--s3) var(--s8) 0; }
-  .stage__tag { top: var(--s3); right: var(--s4); }
+  /* The count, the bar and "Próximo" sit at the stage's bottom edge, right above the words being read and in
+     reach of the thumb, with the bar spanning the width: the story reads as a sequence to move through. */
+  .stage__tag { position: static; order: 3; width: 100%; margin-top: var(--s3); gap: var(--s3); }
+  .stage__bar { flex: 1; width: auto; }
   .get { grid-template-columns: minmax(0, 1fr); gap: var(--s8); }
   .facts { grid-template-columns: minmax(0, 1fr); }
 }
