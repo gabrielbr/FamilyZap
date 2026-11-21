@@ -382,6 +382,7 @@ private fun Settings(state: AppState, touched: () -> Unit, startInNames: Boolean
     if (names) { NamesEditor(state, touched) { touched(); names = false }; return }
     Connection(state)
     UnreadMarkSetting(state)
+    IntroSetting(state)
     Text(tx.names, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     NamesRow(state) { touched(); names = true }
     BubbleSetting(state)
@@ -583,6 +584,16 @@ internal fun StatusSetting(state: AppState) {
     app.oie.ui.common.SwitchRow(tx.statusesSwitch(kid), state.statusesOn, { state.statusesOn = it }, help = tx.statusesBody(kid))
     // v0.37: posting, only while Novidades is on.
     if (state.statusesOn) app.oie.ui.common.SwitchRow(tx.postingSwitch(kid), state.postingOn, { state.postingOn = it }, help = tx.postingBody(kid))
+}
+
+/** v0.47: the first message in each chat introduces Oiê (on by default); docs/flows/intro-message.md. */
+@Composable
+internal fun IntroSetting(state: AppState) {
+    val c = OieTheme.colors
+    val tx = str
+    val kid = state.kidName.ifBlank { tx.theKid }
+    Text(tx.introTitle, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    app.oie.ui.common.SwitchRow(tx.introSwitch, state.introOn, { state.introOn = it }, help = tx.introBody(kid))
 }
 
 /** v0.41: the unread mark on the parent's own line, only once that line exists; off unless the parent turns it on. */

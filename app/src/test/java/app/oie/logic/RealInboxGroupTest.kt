@@ -26,5 +26,6 @@ class RealInboxGroupTest {
         assertNull(gate("k1", primos.id, "oi", ours = setOf("k1")))
         assertNull(gate("k2", primos.id, "oi", kidIds = setOf("k2")))
         assertNull(gate("k3", primos.id, "😎*Tito*: oi"))
+        assertNull(gate("i1", primos.id, "Oiê · Tito vai participar deste grupo")) // v0.47: the intro's echo
     }
 }

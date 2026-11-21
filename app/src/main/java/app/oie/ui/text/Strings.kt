@@ -110,6 +110,11 @@ interface Strings {
     fun pinDots(n: Int, of: Int): String
     val erase: String
     val help: String; val about: String
+    /** v0.47: the first message in a chat, before the kid's (wording approved by the owner, 2026-11-21). */
+    fun introPerson(kid: String, parent: String): String
+    fun introGroup(kid: String, parent: String): String
+    val introTitle: String; val introSwitch: String
+    fun introBody(kid: String): String
     /** v0.46: beside a group sender who isn't one of the kid's contacts. */
     val notInContacts: String
     /** v0.44: the questions block in Ajuda (the tab is already called Ajuda). */
@@ -406,7 +411,12 @@ object Pt : Strings {
     override fun clock(hour: Int, minute: Int) = if (minute == 0) "${hour}h" else "%dh%02d".format(hour, minute)
     override fun pinDots(n: Int, of: Int) = "$n de $of números"
     override val erase = "Apagar"
-    override val help = "Ajuda"; override val about = "Sobre"; override val questions = "Perguntas"; override val notInContacts = "Fora dos contatos"
+    override val help = "Ajuda"; override val about = "Sobre"; override val questions = "Perguntas";
+    override fun introPerson(kid: String, parent: String) = "Oiê · $kid está escrevendo pelo WhatsApp de $parent, com o app Oiê, no tablet. Responda aqui mesmo. Para puxar conversa com $kid depois, comece a mensagem com “$kid”. Como funciona: ${app.oie.logic.Intro.LINK_PT}"
+    override fun introGroup(kid: String, parent: String) = "Oiê · $kid vai participar deste grupo pelo WhatsApp de $parent, com o app Oiê, no tablet. $kid vê tudo o que o grupo fala. Como funciona: ${app.oie.logic.Intro.LINK_PT}"
+    override val introTitle = "Primeira mensagem"; override val introSwitch = "Apresentar o Oiê na primeira mensagem"
+    override fun introBody(kid: String) = "Antes da primeira mensagem de $kid em cada conversa, o Oiê manda uma vez uma explicação curta, com o link de como funciona."
+    override val notInContacts = "Fora dos contatos"
     override fun helpItems(kid: String, parent: String) = listOf(
         "O que pode acontecer com o meu WhatsApp?" to riskBody,
         "$kid vê as minhas conversas?" to "Não. O tablet mostra só o que foi mandado para $kid: respostas às mensagens de $kid, mensagens que começam com o nome de $kid, e o que chega até 24 horas depois da última mensagem de $kid. Numa conversa que você marcou como só de $kid, tudo chega. Nesse tempo, ficam de fora o que fala sobre $kid (“o $kid já chegou?”) e o que vem depois que você responde, até $kid escrever de novo. As suas outras conversas continuam só no seu WhatsApp.",
@@ -753,7 +763,12 @@ object En : Strings {
     }
     override fun pinDots(n: Int, of: Int) = "$n of $of digits"
     override val erase = "Delete"
-    override val help = "Help"; override val about = "About"; override val questions = "Questions"; override val notInContacts = "Not in contacts"
+    override val help = "Help"; override val about = "About"; override val questions = "Questions";
+    override fun introPerson(kid: String, parent: String) = "Oiê · $kid is writing from $parent’s WhatsApp, with the Oiê app, on the tablet. Just reply here. To start a chat with $kid later, begin your message with “$kid”. How it works: ${app.oie.logic.Intro.LINK_EN}"
+    override fun introGroup(kid: String, parent: String) = "Oiê · $kid will take part in this group from $parent’s WhatsApp, with the Oiê app, on the tablet. $kid sees everything the group says. How it works: ${app.oie.logic.Intro.LINK_EN}"
+    override val introTitle = "First message"; override val introSwitch = "Introduce Oiê in the first message"
+    override fun introBody(kid: String) = "Before $kid’s first message in each chat, Oiê sends a short explanation once, with the link to how it works."
+    override val notInContacts = "Not in contacts"
     override fun helpItems(kid: String, parent: String) = listOf(
         "What could happen to my WhatsApp?" to riskBody,
         "Can $kid see my chats?" to "No. The tablet only shows what was sent to $kid: replies to $kid's messages, messages that start with $kid's name, and what arrives up to 24 hours after $kid's last message. In a chat you marked as $kid's own, everything arrives. In that time, talk about $kid (“is $kid home?”) stays out, and so does what comes after you answer, until $kid writes again. Your other chats stay only in your WhatsApp.",

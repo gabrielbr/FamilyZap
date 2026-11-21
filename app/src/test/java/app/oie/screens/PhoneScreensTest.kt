@@ -53,7 +53,7 @@ class PhoneScreensTest {
             OieTheme(dark = false) {
                 val c = OieTheme.colors
                 androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides app.oie.ui.text.Pt) {
-                    Box(Modifier.fillMaxSize().background(c.page).border(OTokens.Size.frame, c.frameLine)) { content() }
+                    Box(Modifier.fillMaxSize().background(c.page).border(OTokens.Size.frame, c.frameLine).padding(OTokens.Size.frame)) { content() }
                 }
             }
         }

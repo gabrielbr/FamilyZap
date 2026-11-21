@@ -43,6 +43,16 @@
 
 
 
+## 0.47.0
+- **Oiê introduces Tito in each chat, once** (in the words you approved). Before Tito's first message in a chat, Oiê sends one short line.
+  - **To a person:** "Oiê · Tito está escrevendo pelo WhatsApp de Ana, com o app Oiê, no tablet. Responda aqui mesmo. Para puxar conversa com Tito depois, comece a mensagem com “Tito”. Como funciona: (link)".
+  - **To a group:** it says Tito will take part and sees everything the group says.
+  - **When:** every chat gets it once, chats where Tito already wrote included. It goes out at the usual pace, 4 s before Tito's message, and never in your own chat with Tito.
+  - **Turning it off:** Ajustes › Primeira mensagem.
+- **Reactions sit on the message,** on its bottom edge, as in WhatsApp, instead of below it.
+- **Nothing touches the screen's edge:** everything sits inside the coral frame, and the top bar has room above and below its buttons.
+- **What you have to do:** nothing. If you'd rather Oiê didn't introduce Tito, turn it off in Ajustes before Tito writes.
+
 ## 0.46.0
 - **Groups work like groups** (decision 0016). In a group you allowed, Tito now sees everything the group says, from everyone:
   - Each message shows who wrote it, once per run, as in WhatsApp. People on Tito's list show by the name Tito knows ("Vovó").

@@ -122,6 +122,9 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
 
     /** v0.41: mark the parent's own line unread after each kid message. Off unless the parent turns it on (low-risk pass). */
     var markUnreadOn by mutableStateOf(false)
+    /** v0.47: the first message in each chat introduces Oiê (on by default, the owner's choice); and the chats already introduced. */
+    var introOn by mutableStateOf(true)
+    val introduced = mutableStateListOf<String>()
 
     /** Who sees the kid's statuses: the people in Contatos the kid can reach (Statuses.audience). */
     fun statusAudience(): List<app.oie.logic.Contact> = app.oie.logic.Statuses.audience(allowed)

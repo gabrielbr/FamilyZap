@@ -69,7 +69,7 @@ class ScreensTest {
             OieTheme(dark = dark) {
                 val c = OieTheme.colors
                 androidx.compose.runtime.CompositionLocalProvider(app.oie.ui.text.LocalStrings provides if (english) app.oie.ui.text.En else app.oie.ui.text.Pt) {
-                    Box(Modifier.fillMaxSize().background(c.page).border(OTokens.Size.frame, c.frameLine)) { content() }
+                    Box(Modifier.fillMaxSize().background(c.page).border(OTokens.Size.frame, c.frameLine).padding(OTokens.Size.frame)) { content() }
                 }
             }
         }

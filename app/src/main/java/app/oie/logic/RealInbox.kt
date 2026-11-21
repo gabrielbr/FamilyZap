@@ -22,7 +22,8 @@ object RealInbox {
         // under the parent's name. The tablet's own sends coming back never count (ours, the kid's history, the
         // kid's signature). Anywhere else, the parent's own writing stays private.
         if (fromMe && !contact.parentLine) {
-            if (!contact.isGroup || id in kidIds || (kidTag.isNotEmpty() && text.startsWith(kidTag))) return null
+            // v0.47: Oiê's own first message ("Oiê · …") is never the parent's either.
+            if (!contact.isGroup || id in kidIds || (kidTag.isNotEmpty() && text.startsWith(kidTag)) || text.startsWith(Intro.MARK)) return null
             return Message(id, contact.id, false, at, kind, text, replyTo, durationSec, size = size, fromParent = true)
         }
         return Message(id, contact.id, false, at, kind, text, replyTo, durationSec, size = size)
