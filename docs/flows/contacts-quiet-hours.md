@@ -183,3 +183,11 @@ _The owner, 2026-11-19: "the contacts don't bring all their information, for exa
 - **Phone:** the four sections are a 2 x 2 grid (Contatos, Silêncio, Conexão, Ajustes), all in view.
 - **Settings switches** (bubble, reminder, "Preciso de você") are whole-row switches. The bubble's row says "Ligada. Falta o Android permitir" until Android allows it.
 - **Desconectar o WhatsApp** wears the stop colour, with **Cancelar** beside it.
+
+## v0.42: groups in the add list, and "Conversa só de {kid}"
+- **The fix:** groups had vanished from the "Adicionar" list (people only). The link asked WhatsApp for the groups on every contacts reload; when WhatsApp refused one of those asks, the groups were silently left out. Now the last good list of groups is kept and reused for 10 minutes, or until WhatsApp says a group was joined, left or renamed. A refusal is written to the problem report (the reason only, never a name). `link.go`: `groupCache`, tested.
+- **New (the owner, 2026-11-21):** "flag specific contacts that it will be specifically for the kids, so it doesn't need to stay monitoring for keywords or to close after 24 hours." In the contact's editor, the switch **"Conversa só de {kid}"**, for people and groups (the owner chose one switch for both; it is the old "show the whole group" setting, now with a place to turn it on).
+  - **On:** everything in that chat reaches the kid. No name needed, no 24-hour window, and no "talks about the kid" filter.
+  - **Contatos says it** under the contact, in ink: "Tudo chega para {kid}".
+  - **Never on the line to the parent:** the parent's own notes there stay private. The switch isn't shown there, and the rule ignores it.
+  - **What the parent writes from their phone** in that chat still stays in the parent's WhatsApp.

@@ -1,6 +1,14 @@
 package app.oie.ui.kid
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.zIndex
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
@@ -65,6 +73,8 @@ fun KidHome(state: AppState) {
     }
     // v0.34 audit: "Preciso de você" answers in a snackbar at the bottom (announced), not a line that scrolls away.
     var said by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    // v0.42: the kid arranging the home (favorites, order).
+    var arranging by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(said) { if (said != null) { kotlinx.coroutines.delay(SAID_MS); said = null } }
     Box(Modifier.fillMaxSize()) {
         // v0.34 audit: while the notice is up, TalkBack can't reach the screen behind it.
@@ -100,17 +110,24 @@ fun KidHome(state: AppState) {
                     if (state.addRequested) Text(tx.askedToAdd(state.parentName), style = OieType.body, color = c.ink)
                     else QuietButton(tx.askToAdd, { state.addRequested = true }, Modifier.padding(top = OTokens.Spacing.space4).height(OTokens.Size.button))
                 } else {
-                    Text(tx.whoToTalk, style = OieType.body, color = c.muted)
+                    // v0.42: "Arrumar" beside the question, once there are two people to order.
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(if (arranging) tx.arrangeHint else tx.whoToTalk, style = OieType.body, color = c.muted, modifier = Modifier.weight(1f))
+                        if (state.reachable.size > 1) app.oie.ui.common.TextLink(if (arranging) tx.arrangeDone else tx.arrange, { arranging = !arranging },
+                            Modifier.padding(start = OTokens.Spacing.space4))
+                    }
+                    if (arranging) Arrange(state) else {
                     // v0.33: today's birthdays first: they're once a year.
                     HomeReminders(state, birthdays = true)
                     NovidadesRow(state, onOpen = { watching = it }, onPost = { posting = true })
                     // v0.38: a list on a phone (like a chat app's), cards with Escrever and Gravar áudio on the tablet;
-                    // each says the last message and when. The parent's order stays (v0.34: places don't move).
+                    // each says the last message and when. v0.42: in the kid's order, favorites first; places only move in Arrumar.
                     People(state)
                     // v0.33 audit: the gentle nudge after the people, so it never pushes them down (calm, not a nag).
                     HomeReminders(state, birthdays = false)
                     // v0.33: only when the parent marked someone to get it.
                     NeedYou(state) { said = it }
+                    }
                 }
             }
         }
@@ -129,9 +146,10 @@ fun KidHome(state: AppState) {
 private fun People(state: AppState) {
     // Two people with the same first letter ("Vovó", "Vovô") get two letters each, so they differ at a glance.
     val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
+    val people = state.homePeople
     if (app.oie.ui.common.isCompact) {
         Column(Modifier.fillMaxWidth().padding(top = OTokens.Spacing.space4)) {
-            state.reachable.forEach { ct -> PersonRow(state, ct, letters[ct.name]) }
+            people.forEach { ct -> PersonRow(state, ct, letters[ct.name]) }
         }
         return
     }
@@ -142,7 +160,7 @@ private fun People(state: AppState) {
         val cardW = (maxWidth - gap * (columns - 1)) / columns
         @OptIn(ExperimentalLayoutApi::class)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(gap), verticalArrangement = Arrangement.spacedBy(gap)) {
-            state.reachable.forEach { ct -> PersonCard(state, ct, letters[ct.name], Modifier.width(cardW)) }
+            people.forEach { ct -> PersonCard(state, ct, letters[ct.name], Modifier.width(cardW)) }
         }
     }
 }
@@ -179,7 +197,7 @@ private fun said(state: AppState, ct: app.oie.logic.Contact): Said {
             is app.oie.logic.HomeList.When.Date -> tx.date(w.day, w.month)
         }
     }
-    val label = listOfNotNull(ct.name, if (unread > 0) tx.newCount(unread) else null, preview, whenText).joinToString(", ")
+    val label = listOfNotNull(ct.name, if (ct.id in state.favorites) tx.favorite else null, if (unread > 0) tx.newCount(unread) else null, preview, whenText).joinToString(", ")
     return Said(preview, whenText, unread, label, p?.failed == true)
 }
 
@@ -211,7 +229,9 @@ private fun PersonRow(state: AppState, ct: app.oie.logic.Contact, letters: Strin
         app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
-                Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                if (ct.id in state.favorites) app.oie.ui.common.OIcon(R.drawable.gg_ic_heart, tint = c.muted)
+                Box(Modifier.weight(1f))
                 s.whenText?.let { Text(it, style = OieType.caption, color = if (s.unread > 0) c.ink else c.muted, maxLines = 1) }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
@@ -251,7 +271,10 @@ private fun PersonCard(state: AppState, ct: app.oie.logic.Contact, letters: Stri
             Row(Modifier.heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
                 app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters)
                 Column(Modifier.weight(1f)) {
-                    Text(ct.name, style = OieType.title, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+                        Text(ct.name, style = OieType.title, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                        if (ct.id in state.favorites) app.oie.ui.common.OIcon(R.drawable.gg_ic_heart, tint = c.muted)
+                    }
                     s.whenText?.let { Text(it, style = OieType.caption, color = c.muted, maxLines = 1) }
                 }
                 if (s.unread > 0) NewPill(s.unread)
@@ -268,6 +291,82 @@ private fun PersonCard(state: AppState, ct: app.oie.logic.Contact, letters: Stri
             QuietButton(tx.recordAudio, { state.route = Route.Conversation(ct.id, app.oie.data.Start.RECORD) }, Modifier.weight(1f), icon = R.drawable.gg_ic_mic, contentDescription = tx.recordA11yTo(ct.name))
         }
     }
+}
+
+/**
+ * v0.42 (flow kid-home-and-attach.md, "Arrumar"): the kid's own order. Each person has a heart (favorites stay on
+ * top), up and down arrows, and the whole row drags after a long press. The arrows are the way without dragging.
+ */
+@Composable
+internal fun Arrange(state: AppState) {
+    val c = OieTheme.colors
+    val tx = str
+    val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
+    val people = state.homePeople
+    var dragging by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    var offset by androidx.compose.runtime.remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    var rowPx by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(1) }
+    Column(Modifier.fillMaxWidth().widthIn(max = OTokens.Size.contentMax).padding(top = OTokens.Spacing.space4)) {
+        people.forEachIndexed { i, ct ->
+            val fav = ct.id in state.favorites
+            val favCount = people.count { it.id in state.favorites }
+            val canUp = i > 0 && (fav || i > favCount)
+            val canDown = i < people.size - 1 && (!fav || i < favCount - 1)
+            val moving = dragging == ct.id
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)
+                    .onSizeChanged { rowPx = it.height.coerceAtLeast(1) }
+                    .zIndex(if (moving) 1f else 0f)
+                    .graphicsLayer { translationY = if (moving) offset else 0f }
+                    .clip(RoundedCornerShape(OTokens.Radius.radiusM))
+                    .background(if (moving) c.surface else c.page)
+                    .pointerInput(ct.id) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = { dragging = ct.id; offset = 0f },
+                            onDragEnd = { dragging = null; offset = 0f },
+                            onDragCancel = { dragging = null; offset = 0f },
+                        ) { change, drag ->
+                            change.consume()
+                            offset += drag.y
+                            // Past half a row, the person swaps with the neighbour (within their group).
+                            if (offset > rowPx / 2f) { val before = state.homePeople.indexOfFirst { it.id == ct.id }; state.moveOnHome(ct.id, +1); if (state.homePeople.indexOfFirst { it.id == ct.id } != before) offset -= rowPx }
+                            else if (offset < -rowPx / 2f) { val before = state.homePeople.indexOfFirst { it.id == ct.id }; state.moveOnHome(ct.id, -1); if (state.homePeople.indexOfFirst { it.id == ct.id } != before) offset += rowPx }
+                        }
+                    }
+                    .padding(vertical = OTokens.Spacing.space1),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
+            ) {
+                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters[ct.name])
+                Column(Modifier.weight(1f).padding(start = OTokens.Spacing.space2)) {
+                    Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    // The word says it, not only the heart's colour.
+                    if (fav) Text(tx.favorite, style = OieType.caption, color = c.muted, maxLines = 1)
+                }
+                SquareIcon(R.drawable.gg_ic_heart, tx.favoriteA11y(ct.name), tint = if (fav) c.ink else c.muted, selected = fav) { state.toggleFavorite(ct.id) }
+                SquareIcon(R.drawable.gg_ic_chevron, tx.moveUpA11y(ct.name), rotation = -90f, enabled = canUp) { state.moveOnHome(ct.id, -1) }
+                SquareIcon(R.drawable.gg_ic_chevron, tx.moveDownA11y(ct.name), rotation = 90f, enabled = canDown) { state.moveOnHome(ct.id, +1) }
+            }
+        }
+    }
+}
+
+/** A 52dp square button with one icon (quiet style). [selected] makes it a toggle for TalkBack; a disabled one is dimmed and says so. */
+@Composable
+private fun SquareIcon(icon: Int, label: String, tint: androidx.compose.ui.graphics.Color = OieTheme.colors.ink, rotation: Float = 0f,
+                       enabled: Boolean = true, selected: Boolean? = null, onClick: () -> Unit) {
+    val c = OieTheme.colors
+    val shape = RoundedCornerShape(OTokens.Radius.radiusS)
+    Box(
+        Modifier.size(OTokens.Size.button).clip(shape)
+            .background(if (selected == true) c.selected else c.surface)
+            .border(OTokens.Size.hairline, c.line, shape)
+            .then(if (selected != null) Modifier.toggleable(value = selected, enabled = enabled, role = Role.Switch) { onClick() }
+                  else Modifier.pressable(enabled = enabled, onClick = onClick))
+            .semantics { contentDescription = label; if (!enabled) disabled() }
+            .graphicsLayer { alpha = if (enabled) 1f else 0.38f },
+        contentAlignment = Alignment.Center,
+    ) { app.oie.ui.common.OIcon(icon, Modifier.rotate(rotation), tint = tint) }
 }
 
 /** How long the "Preciso de você" answer stays. */

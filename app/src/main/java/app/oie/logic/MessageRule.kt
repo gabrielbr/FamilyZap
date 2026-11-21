@@ -37,7 +37,9 @@ object MessageRule {
      */
     fun reason(message: Message, chat: Contact, history: List<Message>, names: List<String>, parentWroteAt: Long? = null): Reason? {
         if (message.fromKid) return Reason.FROM_KID
-        if (chat.isGroup && chat.showWholeGroup) return Reason.WHOLE_GROUP
+        // v0.42: a conversation the parent marked as the kid's own (a school friend, a cousins' group): all of it
+        // reaches the kid, with no name check and no 24-hour window. Never the line to the parent (its notes stay private).
+        if (chat.showWholeGroup && !chat.parentLine) return Reason.WHOLE_GROUP
         val kidMessages = history.filter { it.fromKid && it.chatId == message.chatId && it.at <= message.at }
         // v0.30 (decision 0007): the line to the parent who owns the WhatsApp. In its own group, all of it
         // is for the kid. In the parent's "Mensagem para você" (the fallback), their notes stay private:

@@ -26,6 +26,16 @@
   - **Not only grandma:** the copy and FAQ now say "family and friends you choose" (decision 0013).
 
 
+
+## 0.42.0
+- **Groups are back in Adicionar.** You could only find people when adding someone for your kid. Oiê now keeps the list of your groups, so they don't vanish when WhatsApp is slow to answer.
+- **Your kid arranges their home.** "Arrumar", next to "Com quem você quer falar?":
+  - a heart keeps a favorite on top;
+  - arrows, or holding and dragging, change the order.
+
+  Your order in Contatos doesn't change.
+- **Conversations that are your kid's own.** In a contact's page in Contatos, turn on **"Conversa só de (your kid)"**, for a friend or a group. Everything in that chat reaches your kid, with no need for their name and no 24-hour limit. Contatos says "Tudo chega para (your kid)" under it. What you write there from your phone still stays in your WhatsApp.
+- **Recording like WhatsApp.** Your kid holds the mic to record, as before. Now, sliding up keeps it recording without holding. The mic turns into a stop button: a tap sends it, with the usual few seconds to undo or listen first.
 ## 0.41.0
 - **Gentler on your WhatsApp number.** Oiê now does less of what unofficial apps can get flagged for:
   - **A calmer pace:** at least 4 seconds between your kid's messages, and at most 20 in 10 minutes. In normal use you won't notice.

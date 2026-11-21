@@ -119,6 +119,12 @@ class PhoneScreensTest {
     @Test fun settingsBubble() = shot("p21-settings-bubble", bigText = true) {
         Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.BubbleSetting(ready().apply { bubbleOn = true }) }
     }
+    // v0.42: Arrumar and the favorites on a phone, at 1.3× text.
+    @Test fun kidHomeArrange() = shot("p54-kid-home-arrange", bigText = true) {
+        Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.kid.Arrange(ready().apply { toggleFavorite(allowed[2].id) }) }
+    }
+    @Test fun kidHomeFavorites() = shot("p55-kid-home-favorites", bigText = true) { KidHome(ready().apply { toggleFavorite(allowed[2].id) }) }
+
     // v0.41: the unread mark switch on a phone, at 1.3× text.
     @Test fun settingsUnreadMark() = shot("p53-settings-unread-mark", bigText = true) {
         Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.UnreadMarkSetting(ready().apply { allowed.add(0, app.oie.logic.Contact("1203630@g.us", "Ana", isGroup = true, parentLine = true)) }) }

@@ -241,7 +241,7 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: Undo) {
             Column(Modifier.weight(1f).padding(vertical = OTokens.Spacing.space2)) {
                 Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 // v0.19: the number, so the parent knows it's the right person.
-                ContactLines(ct, fresh, state.kidName)
+                ContactLines(ct, fresh, state.kidName.ifBlank { tx.theKid })
                 // The line says the current setting, so it's true whichever way the switch is.
                 // v0.21: a chat paused from the parent's WhatsApp says so, in ink, instead of the quiet-hours line.
                 if (ct.paused) Text(tx.pausedLine, style = OieType.caption, color = c.ink, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)

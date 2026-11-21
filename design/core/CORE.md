@@ -8,7 +8,7 @@ doesn't need the design system's repo to build.
 | Copied from | `gabrielbr/Gabriel-Deisgn-System`, release **0.31.1** (`main` at `ab22916`) |
 | Files | `core.json` (the `core` section of `tokens/tokens.json`); `scripts/tokens_lib.py`, `gen_tokens.py`, `check_tokens.py` (unchanged copies) |
 | Copied on | 2026-11-18 (Oiê design 1.0.0) |
-| Icons | `icons/gg_ic_*.xml`: the line icons Oiê uses, copied unchanged from the design system's `assets/icons/android/` at **0.32.0** (which added camera, image, sticker, send, link, clock) |
+| Icons | `icons/gg_ic_*.xml`: the line icons Oiê uses, copied unchanged from the design system's `assets/icons/android/` at **0.32.0** (which added camera, image, sticker, send, link, clock); `gg_ic_heart` added in Oiê 0.42.0, unchanged from the design system at 0.32.1 (favorites) |
 
 ## Rules
 - **Never edit these files here.** A core change is made in the design system and copied in. If

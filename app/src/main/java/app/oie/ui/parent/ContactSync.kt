@@ -126,6 +126,8 @@ fun ContactLines(ct: Contact, fresh: List<Contact>, kid: String = "") {
     if (ct.parentLine) { Text(if (ct.isGroup) tx.parentLineInGroup(kid) else tx.parentLineInOwnChat, style = OieType.caption, color = c.muted, maxLines = 2, overflow = ell); return }
     Text(contactNumber(tx, ct, fresh), style = OieType.caption, color = c.muted, maxLines = 1, overflow = ell)
     if (ct.waName.isNotBlank()) Text(tx.onWhatsApp(ct.waName), style = OieType.caption, color = c.muted, maxLines = 2, overflow = ell)
+    // v0.42: the kid's own conversation says so in the list, in ink (it changes what reaches the kid).
+    if (ct.showWholeGroup && kid.isNotBlank()) Text(tx.kidsOwnLine(kid), style = OieType.caption, color = c.ink, maxLines = 1, overflow = ell)
 }
 
 /**
@@ -141,8 +143,10 @@ fun ContactEditor(ct: Contact, kid: String, fresh: List<Contact>, onSave: (Conta
     // v0.33: the birthday (day and month) and "Preciso de você", for people only.
     var birthday by remember(ct.id) { mutableStateOf(app.oie.logic.Birthdays.display(ct.birthday)) }
     var needYou by remember(ct.id) { mutableStateOf(ct.needYou) }
+    // v0.42: the kid's own conversation (a school friend, a cousins' group): all of it reaches the kid.
+    var kidsOwn by remember(ct.id) { mutableStateOf(ct.showWholeGroup) }
     val parsed = app.oie.logic.Birthdays.parse(birthday)
-    fun edited() = app.oie.logic.ContactNames.rename(ct, name).let { if (ct.isGroup) it else it.copy(birthday = parsed ?: ct.birthday, needYou = needYou) }
+    fun edited() = app.oie.logic.ContactNames.rename(ct, name).copy(showWholeGroup = kidsOwn && !ct.parentLine).let { if (ct.isGroup) it else it.copy(birthday = parsed ?: ct.birthday, needYou = needYou) }
     androidx.activity.compose.BackHandler(onBack = onCancel)
     val wa = app.oie.logic.ContactNames.whatsAppName(ct)
     androidx.compose.foundation.layout.Column(verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
@@ -162,6 +166,8 @@ fun ContactEditor(ct: Contact, kid: String, fresh: List<Contact>, onSave: (Conta
             // v0.34 audit: one switch row (the whole row toggles; TalkBack reads it once, with its state).
             app.oie.ui.common.SwitchRow(tx.needYouLabel, needYou, { needYou = it; touched() }, help = tx.needYouHelp(kid))
         }
+        // Never on the line to the parent: the parent's own notes there stay private.
+        if (!ct.parentLine) app.oie.ui.common.SwitchRow(tx.kidsOwnLabel(kid), kidsOwn, { kidsOwn = it; touched() }, help = tx.kidsOwnHelp(kid))
         app.oie.ui.setup.ButtonRow {
             // A day that doesn't exist can't be saved: Salvar waits until it's fixed (the error says how).
             app.oie.ui.common.PrimaryButton(tx.save, { onSave(edited()) }, enabled = parsed != null || ct.isGroup)
