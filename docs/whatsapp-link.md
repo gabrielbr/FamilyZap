@@ -43,7 +43,7 @@ The phone sends the parent's contacts a few seconds after linking. The link emit
 
 ### v0.8 on the kid's side
 - **Receiving:** `RealInbox.toMessage` comes first. It drops chats that aren't allowed, the parent's own messages, and the tablet's own sends echoing back (all tested). Then comes `Inbox.decide`, then the notification. Photos, stickers and voice that are kept are downloaded and sealed.
-- **Sending:** text, photos, and stickers (as JPEG pictures) go through `SendPace`. Each send uses the message's own id. A send that fails while the link is down is retried once, on the next "connected" (L4); after that it's marked failed for the kid. Voice goes as a WhatsApp voice note (PTT) since v0.11, Opus in Ogg on Android 10+, AAC before.
+- **Sending:** text, photos, and stickers (as JPEG pictures) go through `SendPace`. Each send uses the message's own id. A send that fails while the link is down is retried once, on the next "connected" (L4); after that it's marked failed for the kid. Voice goes as a WhatsApp voice note (PTT) since v0.11, Opus in Ogg on Android 10+, AAC before. Since v0.39, a voice note or a real sticker (no caption in WhatsApp) is preceded by the kid's name on its own line, once per burst of 2 minutes per chat (`NameLine`, tested). It's a normal paced send with an id of ours, and if it fails the message isn't sent.
 
 ## How it fits together
 ```

@@ -112,6 +112,23 @@ _The owner, 2026-11-19: "the name of Tito when sent to WhatsApp should be in bol
 | 3 | Types more, or a letter | Only the first emoji is kept; a letter alone is ignored and the preview shows no emoji. |
 | 4 | Clears the field | Back to the bold name alone. |
 
+## v0.39: the name on every kind of message
+_The owner, 2026-11-21: "Every type of message should have the kid prefix (emoji+name). Right now áudio, stickers and possible others miss that."_
+
+- **The gap:** text carries the name in front, and photos, videos, GIFs and Oiê's own stickers carry it as their caption. WhatsApp gives a **voice note** and a **real sticker** (a family sticker the kid saved) no caption, so those arrived with no name.
+- **The fix:** before one of those, the name goes alone on its own line, `😎*Tito*` (shown as 😎**Tito**), and the audio or sticker follows. Same bold and emoji as v0.22.
+- **Once per burst** (the owner's choice): the name line goes only if the name didn't reach that chat in the last 2 minutes. Five audios in a row: one name line. Any message that carries the name (a text, a photo…) counts.
+- **Reactions stay bare** (the owner's choice): a reaction is a mark on a message, not a message, and can't carry a name.
+- **What the kid sees:** nothing changes on the tablet. The name line is Oiê's own, and its echo is ignored like every send.
+- **Pace and failures:** the name line is a send like any other (rule L3: 2 s apart, at most 30 in 10 minutes). If it can't go, the audio or sticker isn't sent either, and the kid gets the usual "Não foi" with Tentar de novo. The retry sends the name again if 2 minutes have passed.
+
+| # | The kid | What the family sees in WhatsApp |
+|---|---|---|
+| 1 | Records an audio to Vovó (nothing sent to her in a while) | 😎**Tito**, then the audio, 2 s later |
+| 2 | Sends a family sticker a minute later | The sticker alone (the name went a minute ago) |
+| 3 | Writes "Te amo" | 😎**Tito**: Te amo |
+| 4 | Sends an audio 5 minutes later | 😎**Tito**, then the audio |
+
 ## v0.23: photos work
 _The owner's report (2026-11-19, with a photo of the screen and issue #34): every photo, from the camera or the gallery, showed "Não deu para abrir essa foto. Tente outra."_
 
