@@ -16,6 +16,8 @@ The landing page: static pages, no build step, no analytics, no tracking, no coo
   5. It isn't only grandma: the receiver changes every few seconds.
   6. The parent holds the tablet, in the parents' area.
 - **On a phone:** the stage pins over the top of the screen and shows one person at a time.
+  - Since 2026-11-21 (the owner: visitors didn't see they had to scroll), the stage takes 54% of the screen instead of 62%. The next step's heading always shows below the one being read.
+  - The count, a six-segment progress bar and "Próximo" sit at the stage's bottom edge, right above the words. "Próximo" lands each step with its heading 16px clear of the stage.
 - **Reduced motion:** nothing types or cycles; each step shows its end state.
 
 **The words (2026-11-21, decision 0014):** the page tells the story of the 90s home phone: "Lembra do telefone de casa?". The kid talks to familiar people, to share their day and miss each other less. Since the owner's note of 2026-11-21, the site never talks about meeting up. The design and steps above are unchanged. The footer credits the open-source project to Gabriel Lopes, with links to the code and gabriellopes.com.

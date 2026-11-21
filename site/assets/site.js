@@ -79,6 +79,7 @@
     q1: "Does the person receiving need to install anything?", a1: "No. Grandparents, aunts or friends get it in their WhatsApp, like any message from you, with your kid’s name in front.",
     q2: "Can my kid talk to friends?", a2: "Yes, if you add the contact. The friend gets it from your number, with your kid’s name in front. Your kid only talks to people you approve, and no one else reaches them through Oiê.",
     q3: "Does my kid need a phone?", a3: "No. Oiê runs on an Android tablet you already have and uses your WhatsApp.",
+    q11: "Is Oiê safe?", a11: "It’s built so that little can go wrong. Oiê has no server, so nothing about your family passes through us. The kid only talks with the people you approve, the parents’ area has a PIN, and the conversations are encrypted on the tablet. Even so, no app makes a kid 100% safe, and using WhatsApp through an unofficial app can lead WhatsApp to restrict the number. Oiê is <b>open source</b>: you, or someone you trust, can <a href=\"https://github.com/gabrielbr/FamilyZap\" rel=\"noopener\">read the code on GitHub</a> and check all of this.",
     q4: "Is Oiê made by WhatsApp?", a4: "No. Oiê is an independent app that connects to your WhatsApp the way WhatsApp Web does, and it is not affiliated with WhatsApp or Meta. Use is subject to WhatsApp’s terms, and WhatsApp may restrict or block numbers that use third-party apps. That’s why Oiê sends at a person’s pace, one message at a time.",
     q9: "Does Oiê keep anything about my family?", a9: "No. Oiê has no servers. The tablet links to your WhatsApp like WhatsApp Web, and messages go only through WhatsApp. There are no analytics, ads or tracking. The only other connection checks for a new version of Oiê on its public GitHub page.",
     q10: "What if WhatsApp blocks my number?", a10: "Oiê stops at once, shows WhatsApp’s notice on the tablet with how long it lasts, and doesn’t try again on its own. On your phone, follow what WhatsApp shows you. Whenever you like, unlink Oiê in Linked devices, in your WhatsApp.",
@@ -181,6 +182,7 @@
   const run = $("#run");
   const tagText = $("#tagText");
   const tagNext = $("#tagNext");
+  const tagBar = $("#tagBar");
   const composeKid = $("#composeKid");
   const composeRecv = $("#composeRecv");
   const waTyping = $("#waTyping");
@@ -245,6 +247,10 @@
     // Where the reader is in the story: "Exemplo · 2 de 6".
     tagText.textContent = dict().example + (n > 0 ? " · " + n + " " + (lang === "en" ? "of" : "de") + " 6" : "");
     // The count is also the way on: "Próximo" goes to the next step (until the last).
+    // The bar shows the six steps at a glance, so it's plain there's more below (owner, 2026-11-21: on phones
+    // the example didn't look like something to scroll through).
+    tagBar.hidden = n < 1;
+    Array.from(tagBar.children).forEach((seg, i) => seg.classList.toggle("is-done", i < n));
     tagNext.hidden = n < 1 || n > 5;
     tagNext.href = "#passo-" + (n + 1);
     tagNext.textContent = lang === "en" ? "Next" : "Próximo";
@@ -301,8 +307,9 @@
     let frame = 0;
     function pick() {
       frame = 0;
-      // On a phone the words are read in the band under the pinned stage (62% of the screen); on a desktop, mid-screen.
-      const line = narrow.matches ? stage.offsetHeight + 24 : innerHeight * 0.5;
+      // On a phone the words are read in the band under the pinned stage (54% of the screen), a third of the way
+      // down it, so the step that's on keeps its heading in view; on a desktop, mid-screen.
+      const line = narrow.matches ? stage.offsetHeight + (innerHeight - stage.offsetHeight) * 0.3 : innerHeight * 0.5;
       let best = null, gap = Infinity;
       steps.forEach((s) => {
         const r = s.firstElementChild.getBoundingClientRect();

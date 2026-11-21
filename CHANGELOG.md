@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- **Website: the example on phones reads as a story to scroll through.** Some visitors didn't see that the example continued.
+  - A bar of six steps and "Próximo" now sit right above the words, at the bottom of the picture.
+  - The picture is smaller, so the next step's title always peeks in below.
+  - "Próximo" lands each step with its title in full view.
+- **Website FAQ: "O Oiê é seguro?"** It's first in the list. It says what keeps the risk low and that no app makes a kid 100% safe. It also says that the code is open, so anyone can read it on GitHub and check.
 - **Website: "Família e amigos" is in the top menu** of every page, next to "Segurança" (the owner: the information must be easy to reach, not only in the footer). On a phone the menu gets its own row under the logo and the language switch, and the page you're on is underlined.
 - **Website: a page for family and friends,** "Como falar com uma criança no Oiê" (`/falar-com-a-crianca/`, EN `/talk-to-a-child/`). It's a link the parent can send to a grandparent or a friend's parent. It explains how to start a conversation (an invitation, a good night): be on the list, write to the parent's number, start with the child's name. It also covers what reaches the tablet, what stays with the parent, and that the parent sees everything. A test keeps the page's examples true to the app's rule. The landing page's footer links to it.
 - **Website: no more "meeting outside".** The landing page no longer says that the conversation leads to meeting up (it could read the wrong way). It now talks about sharing the day and missing each other less, and the school friend's example is about yesterday's game.

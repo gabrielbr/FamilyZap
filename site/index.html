@@ -21,6 +21,7 @@
  {"@type":"Organization","name":"Oiê"},
  {"@type":"SoftwareApplication","name":"Oiê","operatingSystem":"Android 8+","applicationCategory":"CommunicationApplication","isAccessibleForFree":true,"author":{"@type":"Person","name":"Gabriel Lopes","url":"https://www.gabriellopes.com"},"codeRepository":"https://github.com/gabrielbr/FamilyZap","description":"O telefone de casa, de volta, no tablet: a criança fala com a família e os amigos que um responsável escolheu, pelo WhatsApp dele."},
  {"@type":"FAQPage","mainEntity":[
+  {"@type":"Question","name":"O Oiê é seguro?","acceptedAnswer":{"@type":"Answer","text":"Ele foi feito para ter pouco a dar errado. O Oiê não tem servidor, então nada sobre a sua família passa por nós. A criança só fala com quem você aprovar, a área dos pais tem PIN, e as conversas ficam cifradas no tablet. Mesmo assim, nenhum app deixa uma criança 100% segura, e usar o WhatsApp por um app não oficial pode fazer o WhatsApp restringir o número. O Oiê é código aberto: você, ou alguém de confiança, pode ler o código no GitHub e conferir tudo isso."}},
   {"@type":"Question","name":"Quem recebe precisa instalar alguma coisa?","acceptedAnswer":{"@type":"Answer","text":"Não. Avós, tios ou amigos recebem no WhatsApp deles, como qualquer mensagem sua, com o nome da criança na frente."}},
   {"@type":"Question","name":"A criança pode falar com os amigos?","acceptedAnswer":{"@type":"Answer","text":"Pode, se você adicionar o contato. O amigo recebe do seu número, com o nome da criança na frente. A criança só fala com quem você aprovar, e ninguém de fora fala com ela pelo Oiê."}},
   {"@type":"Question","name":"A criança precisa de um celular?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê fica num tablet Android que vocês já têm e usa o seu WhatsApp."}},
@@ -94,7 +95,7 @@
 <main>
   <section class="story" id="historia" aria-label="Como funciona" data-t-aria="storyA11y">
     <div class="stage" id="stage" data-step="0" data-focus="kid">
-      <p class="stage__tag"><span id="tagText" data-t="example">Exemplo</span> <a class="stage__next" id="tagNext" href="#passo-1" hidden></a></p>
+      <p class="stage__tag"><span id="tagText" data-t="example">Exemplo</span> <span class="stage__bar" id="tagBar" aria-hidden="true" hidden><i></i><i></i><i></i><i></i><i></i><i></i></span> <a class="stage__next" id="tagNext" href="#passo-1" hidden></a></p>
       <div class="cast">
         <!-- 1. The kid, holding the tablet (Oiê's own screen) -->
         <figure class="actor actor--kid" data-actor="kid">
@@ -246,6 +247,7 @@
       <div class="stop__body">
         <h2 id="faq" data-t="faqH">Perguntas da família</h2>
         <div class="faq">
+          <details><summary data-t="q11">O Oiê é seguro?</summary><p data-t-html="a11">Ele foi feito para ter pouco a dar errado. O Oiê não tem servidor, então nada sobre a sua família passa por nós. A criança só fala com quem você aprovar, a área dos pais tem PIN, e as conversas ficam cifradas no tablet. Mesmo assim, nenhum app deixa uma criança 100% segura, e usar o WhatsApp por um app não oficial pode fazer o WhatsApp restringir o número. O Oiê é <b>código aberto</b>: você, ou alguém de confiança, pode <a href="https://github.com/gabrielbr/FamilyZap" rel="noopener">ler o código no GitHub</a> e conferir tudo isso.</p></details>
           <details><summary data-t="q1">Quem recebe precisa instalar alguma coisa?</summary><p data-t="a1">Não. Avós, tios ou amigos recebem no WhatsApp deles, como qualquer mensagem sua, com o nome da criança na frente.</p></details>
           <details><summary data-t="q2">A criança pode falar com os amigos?</summary><p data-t="a2">Pode, se você adicionar o contato. O amigo recebe do seu número, com o nome da criança na frente. A criança só fala com quem você aprovar, e ninguém de fora fala com ela pelo Oiê.</p></details>
           <details><summary data-t="q3">A criança precisa de um celular?</summary><p data-t="a3">Não. O Oiê fica num tablet Android que vocês já têm e usa o seu WhatsApp.</p></details>
