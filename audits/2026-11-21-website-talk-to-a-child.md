@@ -59,3 +59,11 @@ Informal "você", Portuguese first. No "!", no em dashes, no emoji. It says plai
 
 ## Open items
 - A grandparent reads it and sends a first message (Evidence).
+
+## Added the same day: "Família e amigos" in the top menu (the owner)
+- **Change:** every page's menu shows "Segurança" and "Família e amigos" (EN "Safety", "Family and friends"). On the reading pages, the page you're on carries `aria-current="page"` and a coral underline.
+- **ux-user-flows:** Krug's trunk test now passes from every page: the major sections show, and so does where you are. The landing page's entry costs one tap instead of a scroll to the footer.
+- **impeccable:** axe found 0 violations on all six pages (landing PT and EN, safety PT and EN, family PT and EN), at 320, 375 and 1280 px, light and dark. No overflow. Links keep their 44px targets.
+  - **Finding N1 (P2):** on a phone, the menu wrapped into three rows (logo, links, language). **Fixed:** the logo and the language switch share the top row, and the links get a row of their own (`display: contents` on `.nav__right` under 640px).
+- **graphic-design-fundamentals:** the current page is shown by an underline and announced to screen readers, never by colour alone. Two links sit as one group, apart from the language switch.
+- **less-is-more:** two menu items, no more. The footer link stays, as the site's map at the bottom, as Segurança's does.

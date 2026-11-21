@@ -8,6 +8,9 @@
 .read-top .lang { border-color: var(--gds-ink); }
 .read-top .lang a { font: 700 0.875rem/1 "Nunito", sans-serif; color: var(--gds-ink); text-decoration: none; min-height: 44px; min-width: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0 var(--s3); }
 .read-top .lang a[aria-current="page"] { background: var(--gds-ink); color: var(--gds-page); }
+/* The site's menu: the page you're on is marked in words for screen readers and by an underline. */
+.read-top .nav__link { color: var(--gds-ink); text-decoration: none; }
+.read-top .nav__link:hover, .read-top .nav__link[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.3em; text-decoration-color: var(--gds-mint); }
 .read-top .btn--ink { background: var(--gds-ink); color: var(--gds-page); }
 
 .read { padding-top: var(--s12); padding-bottom: var(--s16); }

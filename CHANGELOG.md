@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **Website: "Família e amigos" is in the top menu** of every page, next to "Segurança" (the owner: the information must be easy to reach, not only in the footer). On a phone the menu gets its own row under the logo and the language switch, and the page you're on is underlined.
 - **Website: a page for family and friends,** "Como falar com uma criança no Oiê" (`/falar-com-a-crianca/`, EN `/talk-to-a-child/`). It's a link the parent can send to a grandparent or a friend's parent. It explains how to start a conversation (an invitation, a good night): be on the list, write to the parent's number, start with the child's name. It also covers what reaches the tablet, what stays with the parent, and that the parent sees everything. A test keeps the page's examples true to the app's rule. The landing page's footer links to it.
 - **Website: no more "meeting outside".** The landing page no longer says that the conversation leads to meeting up (it could read the wrong way). It now talks about sharing the day and missing each other less, and the school friend's example is about yesterday's game.
 - **Website polish:** fewer repeated "telefone de casa" lines and no tacked-on fragments. The hero is one sentence, and step 2 now says "A mensagem sai…".
