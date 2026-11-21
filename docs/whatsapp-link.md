@@ -68,7 +68,7 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 | L2 (v0.30) | **The parent's own chat may receive the kid's messages only when the parent made it the line to the kid** (WhatsApp refused the one-person group; decision 0007). | `SetParentLine`, `target` |
 | L2 (v0.36) | **Statuses never go to the status broadcast.** A reaction or a reply to a family status goes to the poster's own chat (the broadcast would reach the parent's whole status audience). Only statuses from allowed, unpaused people are kept; never the parent's own, never other broadcast lists. | `ToIncoming`, `SendStatusReaction`, `SendStatusReply` (via `target`) |
 | L2 (v0.37) | **A kid's status goes only to the people in Contatos** (allowed, unpaused, people; not groups, not the parent line). The patched whatsmeow sends a status to a chosen list instead of the parent's status audience; the list is set and cleared around each post, and an empty list is refused, so it can never fall back. At most 64 people. | `StatusAudience`, `sendStatus`, `_whatsmeow-patch/broadcast.go` |
-| L3 | **Human pace.** At least 2 s between sends, at most 30 in 10 minutes. The app waits rather than refuses. | `SendPace` (tested) |
+| L3 | **Human pace.** At least 4 s between sends, at most 20 in 10 minutes (v0.41, the owner's low-risk pass; was 2 s and 30). The app waits rather than refuses. | `SendPace` (tested) |
 | L4 | **No duplicates.** A send is retried at most once, with the same message ID, only after a reconnect. Other errors show "Não foi" with Tentar de novo for the kid. | whatsmeow `SendRequestExtra{ID}` |
 | L5 | **Bounded reconnects.** whatsmeow reconnects on its own, waiting 2 s longer each time, and stops after 8 tries. After that, the app tries again when the network or the app comes back. | `AutoReconnectHook`; `LinkService` network callback (v0.7) |
 | L6 | **Little history.** At pairing, ask for 1 day of history. Oiê shows nothing from before the link. | `HistorySyncConfig` limits |
@@ -131,3 +131,10 @@ dependencies are BSD, MIT, Apache or ISC licensed, and a full list ships with th
 3. ~~The release workflow builds the AAR (Go and the NDK in CI)~~ (v0.5).
 4. ~~Ajustes e ajuda › Sobre carries the whatsmeow notice~~ (v0.5).
 5. A test on a spare WhatsApp number first, never the owner's main one.
+
+## v0.41: the low-risk pass (the owner, 2026-11-21)
+Other WhatsApp clients (nchat, wptui) use whatsmeow too, so switching clients changes nothing; behaviour is what matters. This pass:
+- **Pace:** 4 s between sends and at most 20 in 10 minutes (L3).
+- **The unread mark on the parent's line** (`MarkUnread`, v0.35) runs only when the parent turns it on (Ajustes e ajuda › Sua conversa com {kid}). It's off by default, for existing installs too: no official client marks the account's own chat unread.
+- **Posting statuses** stays opt-in, as before: Ajustes e ajuda › Novidades › postar. The v0.37 patch is the most unusual thing Oiê does, so the switch stays off unless the parent wants it.
+- **whatsmeow is current:** the pin (2026-11-16, `19d61352436f`) was upstream `main` on 2026-11-21. **Check it at least once a month** (`go list -m -json go.mau.fi/whatsmeow@main` in `link/`). Outdated protocol versions stand out more than any client choice. Moving the pin means re-applying `_whatsmeow-patch/broadcast.go` on the new commit.

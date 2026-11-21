@@ -114,7 +114,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             main.post { state.failed.remove(m.id); state.heard(listOf(m.id), app.oie.logic.Receipt.SENT) }
             // v0.35: on the line to the parent, the chat marks itself unread on the parent's phone (WhatsApp never
             // notifies an account of its own messages). Nothing is sent to anyone; a failure doesn't touch the message.
-            if (state.allowed.any { it.parentLine && it.id == m.chatId }) {
+            // v0.41: only if the parent turned it on (an action no official client takes; low-risk pass).
+            if (state.markUnreadOn && state.allowed.any { it.parentLine && it.id == m.chatId }) {
                 val r = runCatching { l?.markUnread(m.chatId, m.id, System.currentTimeMillis()) }
                 Diagnostics.log("parent line: marked unread ${r.exceptionOrNull()?.let { "failed: ${it.message}" } ?: "ok"}")
             }

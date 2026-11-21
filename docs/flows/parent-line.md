@@ -58,3 +58,9 @@ _The owner's report: the line works, but the parent's phone doesn't show it. Wha
 | 3 | Happy path | ✅ Nothing changes for the kid; nothing to do for the parent. |
 | 4 | Branches | ✅ Marking fails: the message is unaffected, the next one tries again. |
 | 14 | Ethics | ✅ It only touches the chat Oiê created for the kid; the parent's other chats are never changed. |
+
+## v0.41: the unread mark is a switch, off by default
+_The owner's low-risk pass, 2026-11-21._ Marking the parent's own chat unread after each of the kid's messages (v0.35) is something no official WhatsApp client does, so it now runs only when the parent turns it on.
+- **Where:** Ajustes e ajuda › **Sua conversa com {kid}** › "Marcar como não lida no meu WhatsApp". The section shows only once the line exists.
+- **Default:** off, for existing installs too. With it off, the kid's messages still arrive in the chat; the parent just isn't nudged by the unread dot.
+- **The card's "Por quê?" note** now says the mark can be turned on in Ajustes e ajuda.

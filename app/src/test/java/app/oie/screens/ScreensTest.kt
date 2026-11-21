@@ -201,6 +201,14 @@ class ScreensTest {
         Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.BubbleSetting(ready()) }
     }
 
+    // v0.41: the unread mark on the parent's own line, off by default (low-risk pass).
+    @Test fun settingsUnreadMark() = shot("71-settings-unread-mark", false) {
+        Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.UnreadMarkSetting(ready().apply { allowed.add(0, app.oie.logic.Contact("1203630@g.us", "Ana", isGroup = true, parentLine = true)) }) }
+    }
+    @Test fun settingsUnreadMarkOnDark() = shot("71-settings-unread-mark", true) {
+        Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.UnreadMarkSetting(ready().apply { markUnreadOn = true; allowed.add(0, app.oie.logic.Contact("1203630@g.us", "Ana", isGroup = true, parentLine = true)) }) }
+    }
+
     // v0.26: WhatsApp profile pictures where Oiê has them; the letter circle for the rest.
     private fun withPictures() = ready().apply {
         kidNoticeSeen = true

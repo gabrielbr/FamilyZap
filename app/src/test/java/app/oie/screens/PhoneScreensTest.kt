@@ -119,6 +119,10 @@ class PhoneScreensTest {
     @Test fun settingsBubble() = shot("p21-settings-bubble", bigText = true) {
         Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.BubbleSetting(ready().apply { bubbleOn = true }) }
     }
+    // v0.41: the unread mark switch on a phone, at 1.3× text.
+    @Test fun settingsUnreadMark() = shot("p53-settings-unread-mark", bigText = true) {
+        Column(Modifier.padding(OTokens.Spacing.space4)) { app.oie.ui.parent.UnreadMarkSetting(ready().apply { allowed.add(0, app.oie.logic.Contact("1203630@g.us", "Ana", isGroup = true, parentLine = true)) }) }
+    }
     @Test fun kidHomeInTheBubble() = shot("p20-kid-home-bubble", bigText = true) { KidHome(ready()) }
 
     // v0.27: videos and a GIF in the chat on a phone, at 1.3× text.
