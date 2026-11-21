@@ -188,7 +188,10 @@ private fun said(state: AppState, ct: app.oie.logic.Contact): Said {
             app.oie.logic.HomeList.What.DELETED -> tx.deletedMessage
             app.oie.logic.HomeList.What.OTHER -> tx.somethingInWhatsApp
         }
-        val own = if (p.mine) tx.mine(base) else base
+        // v0.46: in a group, who said it comes first ("Vovó: Domingo tem bolo"), as in WhatsApp.
+        val last = seen.lastOrNull()
+        val who = if (ct.isGroup && !ct.parentLine && !p.mine && last != null && !last.fromKid) app.oie.logic.GroupSender.of(last, state.allowed, state.parentName).name else ""
+        val own = if (p.mine) tx.mine(base) else if (who.isNotEmpty()) "$who: $base" else base
         if (p.failed) tx.notSent + " · " + own else own
     }
     val whenText = p?.let {

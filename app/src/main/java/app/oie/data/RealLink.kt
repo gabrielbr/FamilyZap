@@ -271,10 +271,14 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         val m = app.oie.logic.RealInbox.toMessage(
             o.optString("id"), o.optString("chat"), o.optString("chatAlt").ifEmpty { null }, o.optBoolean("fromMe"), ours,
             state.allowed, o.optLong("at"), kind, o.optString("text"), o.optString("replyTo").ifEmpty { null }, o.optInt("durationSec"), o.optLong("size"),
-        )?.copy(sender = o.optString("sender")) ?: return
+            kidIds = state.messages.mapTo(HashSet()) { it.id }, kidTag = signed(""),
+        )?.copy(sender = o.optString("sender"), senderAlt = o.optString("senderAlt"), senderName = o.optString("senderName")) ?: return
         val d = state.receive(m)
         // v0.29: with "Bolha na tela" on, the notification is also that chat's bubble.
-        if (d == app.oie.logic.Inbox.Decision.NOTIFY) state.allowed.firstOrNull { it.id == m.chatId }?.let { notifier?.message(m, it, state.bubbleOn) }
+        if (d == app.oie.logic.Inbox.Decision.NOTIFY) state.allowed.firstOrNull { it.id == m.chatId }?.let {
+            val who = if (it.isGroup && !it.parentLine) app.oie.logic.GroupSender.of(m, state.allowed, state.parentName).name else ""
+            notifier?.message(m, it, state.bubbleOn, who)
+        }
         val kept = d == app.oie.logic.Inbox.Decision.NOTIFY || d == app.oie.logic.Inbox.Decision.QUIET
         // v0.27: videos and GIFs too; a video over the limit stays in WhatsApp (the chat says so).
         if (kept && app.oie.logic.Moving.download(kind, o.optLong("size"))) bg {

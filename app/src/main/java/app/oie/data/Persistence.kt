@@ -68,7 +68,7 @@ object Codec {
             JSONObject().put("id", it.id).put("chat", it.chatId).put("kid", it.fromKid).put("at", it.at)
                 .put("kind", it.kind.name).put("text", it.text).put("replyTo", it.replyTo ?: JSONObject.NULL)
                 .put("dur", it.durationSec).put("media", it.media ?: JSONObject.NULL).put("size", it.size)
-                .put("sender", it.sender).put("receipt", it.receipt.name).put("reactions", JSONObject(it.reactions)).put("statusQuote", it.statusQuote)
+                .put("sender", it.sender).put("receipt", it.receipt.name).put("reactions", JSONObject(it.reactions)).put("statusQuote", it.statusQuote).put("senderAlt", it.senderAlt).put("senderName", it.senderName).put("fromParent", it.fromParent)
         }))
         put("drafts", JSONObject(s.drafts.toMap()))
         put("lastSeen", JSONObject(s.lastSeen.toMap()))
@@ -145,7 +145,7 @@ object Codec {
                     if (isNull("media")) null else getString("media"), optLong("size"), optString("sender"),
                     runCatching { app.oie.logic.Receipt.valueOf(optString("receipt")) }.getOrDefault(app.oie.logic.Receipt.NONE),
                     optJSONObject("reactions")?.let { r -> r.keys().asSequence().associateWith { k -> r.getString(k) } } ?: emptyMap(),
-                    optString("statusQuote"),
+                    optString("statusQuote"), optString("senderAlt"), optString("senderName"), optBoolean("fromParent"),
                 )
             }
         }

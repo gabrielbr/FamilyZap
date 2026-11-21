@@ -21,6 +21,7 @@ import app.oie.data.Photos
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -339,6 +340,13 @@ fun Conversation(
                 if (visible.isEmpty() && pending == null) item { Text(tx.firstHi(contact.name), style = OieType.body, color = c.muted) }
                 itemsIndexed(visible, key = { _, m -> m.id }) { i, m ->
                     if (i == firstUnread) NewLine()
+                    // v0.46 (groups as groups): who said it, once per run, as in WhatsApp; "Fora dos contatos" for
+                    // anyone who isn't on the kid's list.
+                    if (contact.isGroup && !contact.parentLine && !m.fromKid) {
+                        val prev = visible.getOrNull(i - 1)
+                        if (i == firstUnread || prev == null || prev.fromKid || senderKey(prev) != senderKey(m))
+                            SenderLine(app.oie.logic.GroupSender.of(m, state.allowed, state.parentName))
+                    }
                     val failed = m.id in state.failed
                     Bubble(m, contact.name, status = if (failed) tx.notSent else null, parent = state.parentName,
                         onMenu = { menuFor = m }, onPhoto = { bigPhoto = it }) { watching = it }
@@ -619,6 +627,29 @@ private fun NewLine() {
     }
 }
 
+/** One sender in a group, for grouping a run of their messages under one name (v0.46). */
+private fun senderKey(m: Message): String = if (m.fromParent) "parent" else m.sender.ifEmpty { m.senderAlt }
+
+/**
+ * v0.46: the sender's name above their run of messages in a group. Someone who isn't one of the kid's contacts
+ * carries "Fora dos contatos" beside the name: a word in an outlined tag, never colour alone.
+ */
+@Composable
+private fun SenderLine(who: app.oie.logic.GroupSender.Who) {
+    val c = OieTheme.colors
+    Row(
+        Modifier.fillMaxWidth().padding(top = OTokens.Spacing.space2).semantics(mergeDescendants = true) {},
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
+    ) {
+        Text(who.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+        if (!who.onList) Text(
+            str.notInContacts, style = OieType.caption, color = c.muted, maxLines = 1,
+            modifier = Modifier.border(BorderStroke(OTokens.Size.hairline, c.muted), RoundedCornerShape(OTokens.Radius.radiusL))
+                .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
+        )
+    }
+}
+
 /** How long a short note (a slip, a problem) stays; and the recording clock's tick. */
 private const val NOTE_MS = 4_000L
 private const val TICK_MS = 500L
@@ -627,6 +658,7 @@ private const val MOTION_SETTLE_MS = 600L
 /** The longest voice message (flow kid-sends-message, 3a). */
 private const val MAX_RECORDING_MS = 120_000L
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class) // combinedClickable: tap and long press on media (v0.46)
 @Composable
 private fun Bubble(m: Message, name: String, status: String? = null, parent: String = "", onMenu: (() -> Unit)? = null, onPhoto: (String) -> Unit = {}, onWatch: (Message) -> Unit = {}) {
     val c = OieTheme.colors
@@ -654,7 +686,8 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
                     val on = app.oie.data.Voice.playing == m.id
                     Box(
                         Modifier.size(OTokens.Spacing.space12).clip(androidx.compose.foundation.shape.CircleShape)
-                            .clickable(enabled = m.media != null, role = Role.Button) { m.media?.let { app.oie.data.Voice.toggle(context, m.id, it) } },
+                            // v0.46: a long press here reacts too (the owner: react to "any type of media").
+                            .combinedClickable(enabled = m.media != null, role = Role.Button, onLongClick = onMenu) { m.media?.let { app.oie.data.Voice.toggle(context, m.id, it) } },
                         contentAlignment = Alignment.Center,
                     ) { OIcon(if (on) R.drawable.gg_ic_pause else R.drawable.gg_ic_play, tint = ink, contentDescription = if (on) tx.pauseA11y else tx.listenA11y(m.durationSec)) }
                     Text("%d:%02d".format(m.durationSec / 60, m.durationSec % 60), style = OieType.caption, color = c.muted)
@@ -667,16 +700,16 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
                 // v0.34 audit round 2: media columns give way like text does, so the time beside them is never cut.
                 Kind.PHOTO -> Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                     // v0.33: tap to see it big.
-                    Box(if (m.media != null) Modifier.clickable(role = Role.Button, onClickLabel = tx.photo) { onPhoto(m.media) } else Modifier) { PhotoThumb(m.media) }
+                    Box(if (m.media != null) Modifier.combinedClickable(role = Role.Button, onClickLabel = tx.photo, onLongClick = onMenu, onLongClickLabel = tx.react) { onPhoto(m.media) } else Modifier) { PhotoThumb(m.media) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
                 // v0.27: videos (tap to watch) and GIFs (a silent loop).
                 Kind.VIDEO -> Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
-                    VideoBubble(m.media, m.durationSec, tooBig = !app.oie.logic.Moving.download(m.kind, m.size), parent = parent) { onWatch(m) }
+                    VideoBubble(m.media, m.durationSec, tooBig = !app.oie.logic.Moving.download(m.kind, m.size), parent = parent, onLongPress = onMenu) { onWatch(m) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
                 Kind.GIF -> Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
-                    GifBubble(m.media) { onWatch(m) }
+                    GifBubble(m.media, onLongPress = onMenu) { onWatch(m) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
                 Kind.UNSUPPORTED -> Text(tx.onlyInWhatsApp(name), style = OieType.body, color = c.muted)

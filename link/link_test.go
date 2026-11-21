@@ -91,6 +91,26 @@ func TestToIncomingKinds(t *testing.T) {
 	}
 }
 
+// v0.46: in a group, the sender's profile name and other address come along, so the tablet can name
+// them and mark whoever isn't on the kid's list.
+func TestToIncomingGroupSender(t *testing.T) {
+	i := info("g1", false)
+	i.Chat = types.NewJID("120363000000", types.GroupServer)
+	i.IsGroup = true
+	i.Sender = types.NewJID("123456789", types.HiddenUserServer)
+	i.SenderAlt = types.NewJID("5511988887777", types.DefaultUserServer)
+	i.PushName = "Lucas"
+	got, ok := ToIncoming(i, &waE2E.Message{Conversation: proto.String("oi")})
+	if !ok || got.SenderName != "Lucas" || got.SenderAlt != "5511988887777@s.whatsapp.net" || got.Sender != "123456789@lid" {
+		t.Fatalf("group sender: %+v", got)
+	}
+	// Not in a 1:1 chat: there the chat is the person.
+	one, _ := ToIncoming(info("p1", false), &waE2E.Message{Conversation: proto.String("oi")})
+	if one.SenderName != "" || one.SenderAlt != "" {
+		t.Fatalf("1:1 must not carry a sender name: %+v", one)
+	}
+}
+
 func TestToIncomingDropsWhatTheAppNeverNeeds(t *testing.T) {
 	drops := map[string]*waE2E.Message{
 		"keys":     {SenderKeyDistributionMessage: &waE2E.SenderKeyDistributionMessage{}},

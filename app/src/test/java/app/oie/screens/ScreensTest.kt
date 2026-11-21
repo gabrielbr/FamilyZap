@@ -82,6 +82,19 @@ class ScreensTest {
     // v0.45: Tia Bia (fourth in the order) wrote "Tito, ..." five minutes ago: she comes first, then Vovó (20 min ago); both highlighted.
     private fun withNews() = ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("t1", allowed[3].id, false, now - 5 * 60 * 1000, app.oie.logic.Kind.TEXT, "Tito, vamos ao parque sábado?") }
     @Test fun kidHomeNews() = shot("78-kid-home-news", false) { KidHome(withNews()) }
+
+    // v0.46: a group as a group: who said it (Vovó on the list, Lucas not, the parent), and the kid's own.
+    private fun groupChat() = ready().apply {
+        kidNoticeSeen = true; reactTipUsed = true
+        val vo = "5511987650001@s.whatsapp.net"
+        messages += Message("g1", "primos", false, now - 50 * 60_000, Kind.TEXT, "Domingo tem bolo aqui em casa", sender = vo)
+        messages += Message("g2", "primos", false, now - 49 * 60_000, Kind.TEXT, "Venham cedo", sender = vo)
+        messages += Message("g3", "primos", false, now - 40 * 60_000, Kind.TEXT, "Eu levo a bola", sender = "88776655@lid", senderAlt = "5511912345678@s.whatsapp.net", senderName = "Lucas")
+        messages += Message("g4", "primos", true, now - 30 * 60_000, Kind.TEXT, "Eu vou")
+        messages += Message("g5", "primos", false, now - 20 * 60_000, Kind.TEXT, "Levo o Tito às 10h", fromParent = true)
+    }
+    @Test fun groupChatLight() = shot("79-group-chat", false) { app.oie.ui.kid.Conversation(groupChat(), "primos") }
+    @Test fun groupChatDark() = shot("79-group-chat", true) { app.oie.ui.kid.Conversation(groupChat(), "primos") }
     @Test fun kidHomeNewsDark() = shot("78-kid-home-news", true) { KidHome(withNews()) }
     @Test fun kidHomeUnlinked() = shot("03-kid-home-unlinked", false) { KidHome(ready().apply { kidNoticeSeen = true; link.pretendDropped() }) }
     @Test fun conversationLight() = shot("04-conversation", false) { Conversation(ready().apply { kidNoticeSeen = true }, "vovo") }

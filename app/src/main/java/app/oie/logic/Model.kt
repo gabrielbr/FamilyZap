@@ -68,6 +68,12 @@ data class Message(
     val reactions: Map<String, String> = emptyMap(),
     /** The kid's reply to a status (v0.36): what it answered, shown above the text; [replyTo] is the status. */
     val statusQuote: String = "",
+    /** v0.46 (groups as groups): the sender's other address (phone or LID), to find them on the kid's list. */
+    val senderAlt: String = "",
+    /** v0.46: the sender's WhatsApp profile name, shown (with "Fora dos contatos") when they aren't on the list. */
+    val senderName: String = "",
+    /** v0.46: written by the parent from their phone in a group: part of the group's talk, shown under the parent's name. */
+    val fromParent: Boolean = false,
 )
 
 /** One quiet-hours period (docs/flows/contacts-quiet-hours.md). End before start means overnight. */

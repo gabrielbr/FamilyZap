@@ -127,7 +127,7 @@ fun ContactLines(ct: Contact, fresh: List<Contact>, kid: String = "") {
     Text(contactNumber(tx, ct, fresh), style = OieType.caption, color = c.muted, maxLines = 1, overflow = ell)
     if (ct.waName.isNotBlank()) Text(tx.onWhatsApp(ct.waName), style = OieType.caption, color = c.muted, maxLines = 2, overflow = ell)
     // v0.42: the kid's own conversation says so in the list, in ink (it changes what reaches the kid).
-    if (ct.showWholeGroup && kid.isNotBlank()) Text(tx.kidsOwnLine(kid), style = OieType.caption, color = c.ink, maxLines = 1, overflow = ell)
+    if (ct.showWholeGroup && !ct.isGroup && kid.isNotBlank()) Text(tx.kidsOwnLine(kid), style = OieType.caption, color = c.ink, maxLines = 1, overflow = ell)
 }
 
 /**
@@ -167,7 +167,10 @@ fun ContactEditor(ct: Contact, kid: String, fresh: List<Contact>, onSave: (Conta
             app.oie.ui.common.SwitchRow(tx.needYouLabel, needYou, { needYou = it; touched() }, help = tx.needYouHelp(kid))
         }
         // Never on the line to the parent: the parent's own notes there stay private.
-        if (!ct.parentLine) app.oie.ui.common.SwitchRow(tx.kidsOwnLabel(kid), kidsOwn, { kidsOwn = it; touched() }, help = tx.kidsOwnHelp(kid))
+        // v0.46: a group always shows the kid everything (decision 0016), so the kid-only switch is for people; the
+        // group's editor says what the kid sees instead, before the parent keeps it.
+        if (ct.isGroup && !ct.parentLine) Text(tx.groupShowsAll(kid), style = OieType.body, color = c.ink)
+        else if (!ct.parentLine) app.oie.ui.common.SwitchRow(tx.kidsOwnLabel(kid), kidsOwn, { kidsOwn = it; touched() }, help = tx.kidsOwnHelp(kid))
         app.oie.ui.setup.ButtonRow {
             // A day that doesn't exist can't be saved: Salvar waits until it's fixed (the error says how).
             app.oie.ui.common.PrimaryButton(tx.save, { onSave(edited()) }, enabled = parsed != null || ct.isGroup)
