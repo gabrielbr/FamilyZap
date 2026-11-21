@@ -1,5 +1,11 @@
 package app.oie.ui.kid
 
+import app.oie.ui.common.pressScaleOnHold
+
+import app.oie.ui.common.pressableCombined
+
+import app.oie.ui.common.pressable
+
 import androidx.compose.ui.semantics.clearAndSetSemantics
 
 import androidx.compose.ui.draw.rotate
@@ -330,6 +336,7 @@ fun Conversation(
                     if (more && atEnd && !list.isScrollInProgress) list.scrollToItem((list.layoutInfo.totalItemsCount - 1).coerceAtLeast(0), Int.MAX_VALUE / 2)
                 }
             }
+            val moving = app.oie.ui.common.animationsOn()
             LazyColumn(
                 Modifier.weight(1f).fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin),
                 state = list, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
@@ -339,6 +346,12 @@ fun Conversation(
                 item { Box(Modifier.height(OTokens.Spacing.space6)) }
                 if (visible.isEmpty() && pending == null) item { Text(tx.firstHi(contact.name), style = OieType.body, color = c.muted) }
                 itemsIndexed(visible, key = { _, m -> m.id }) { i, m ->
+                  // v0.49: a new message fades in and the list makes room smoothly (150ms); at once with "Remove animations".
+                  Column(Modifier.animateItem(
+                      fadeInSpec = if (moving) androidx.compose.animation.core.tween(OTokens.Motion.motionStandard) else null,
+                      placementSpec = if (moving) androidx.compose.animation.core.tween(OTokens.Motion.motionStandard, easing = androidx.compose.animation.core.FastOutSlowInEasing) else null,
+                      fadeOutSpec = if (moving) androidx.compose.animation.core.tween(OTokens.Motion.motionStandard) else null,
+                  )) {
                     if (i == firstUnread) NewLine()
                     // v0.46 (groups as groups): who said it, once per run, as in WhatsApp; "Fora dos contatos" for
                     // anyone who isn't on the kid's list.
@@ -358,6 +371,7 @@ fun Conversation(
                     if (failed) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextLink(tx.tryAgain, { state.failed.remove(m.id); state.wa.send(m) })
                     }
+                  }
                 }
                 // v0.34 audit: the snackbar says "Enviando para…", so the message itself keeps just its time.
                 pending?.let { p -> item(key = "pending") { Bubble(p, contact.name) } }
@@ -493,7 +507,7 @@ fun Conversation(
             if (micError) tx.micError else tx.photoError, style = OieType.body, color = c.coralText,
             modifier = Modifier.align(Alignment.TopCenter).padding(top = OTokens.Size.header + OTokens.Spacing.space4, start = app.oie.ui.common.sideMargin, end = app.oie.ui.common.sideMargin)
                 .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.coralSoft)
-                .clickable(onClickLabel = tx.close) { micError = false; photoError = false }
+                .pressable(role = null, label = tx.close) { micError = false; photoError = false }
                 .semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite }
                 .padding(OTokens.Spacing.space3),
         )
@@ -665,7 +679,7 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
     val tx = str
     // v0.33: a long press opens the reactions (and Ouvir); TalkBack gets the same as its long-press action.
     val menu = if (onMenu == null || m.kind == Kind.DELETED) Modifier else Modifier
-        .pointerInput(m.id) { detectTapGestures(onLongPress = { onMenu() }) }
+        .pressScaleOnHold(m.id) { onMenu() } // v0.49: the bubble presses to 97% while held
         .semantics { onLongClick(label = tx.react) { onMenu(); true } }
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (m.fromKid) Arrangement.End else Arrangement.Start) {
         Row(
@@ -687,7 +701,7 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
                     Box(
                         Modifier.size(OTokens.Spacing.space12).clip(androidx.compose.foundation.shape.CircleShape)
                             // v0.46: a long press here reacts too (the owner: react to "any type of media").
-                            .combinedClickable(enabled = m.media != null, role = Role.Button, onLongClick = onMenu) { m.media?.let { app.oie.data.Voice.toggle(context, m.id, it) } },
+                            .pressableCombined(enabled = m.media != null, onLongClick = onMenu) { m.media?.let { app.oie.data.Voice.toggle(context, m.id, it) } },
                         contentAlignment = Alignment.Center,
                     ) { OIcon(if (on) R.drawable.gg_ic_pause else R.drawable.gg_ic_play, tint = ink, contentDescription = if (on) tx.pauseA11y else tx.listenA11y(m.durationSec)) }
                     Text("%d:%02d".format(m.durationSec / 60, m.durationSec % 60), style = OieType.caption, color = c.muted)
@@ -700,7 +714,7 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
                 // v0.34 audit round 2: media columns give way like text does, so the time beside them is never cut.
                 Kind.PHOTO -> Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
                     // v0.33: tap to see it big.
-                    Box(if (m.media != null) Modifier.combinedClickable(role = Role.Button, onClickLabel = tx.photo, onLongClick = onMenu, onLongClickLabel = tx.react) { onPhoto(m.media) } else Modifier) { PhotoThumb(m.media) }
+                    Box(if (m.media != null) Modifier.pressableCombined(label = tx.photo, onLongClick = onMenu, longLabel = tx.react) { onPhoto(m.media) } else Modifier) { PhotoThumb(m.media) }
                     if (m.text.isNotBlank()) Text(m.text, style = OieType.body, color = ink)
                 }
                 // v0.27: videos (tap to watch) and GIFs (a silent loop).
@@ -740,7 +754,7 @@ private fun StickerRows(state: AppState, onMake: () -> Unit, onPick: (String) ->
             Image(
                 painterResource(res), contentDescription = tx.sendSticker(w),
                 modifier = Modifier.size(tile).clip(RoundedCornerShape(OTokens.Radius.radiusL))
-                    .clickable(role = Role.Button) { onPick(w) },
+                    .pressable { onPick(w) },
             )
         }
     }
@@ -749,7 +763,7 @@ private fun StickerRows(state: AppState, onMake: () -> Unit, onPick: (String) ->
         Text(tx.familyStickers, style = OieType.label, color = c.ink)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
             saved.forEach { s ->
-                FamilyStickerTile(s.media, tile, Modifier.clickable(role = Role.Button) { onPickFamily(s) }.semantics { contentDescription = tx.sendFamilySticker })
+                FamilyStickerTile(s.media, tile, Modifier.pressable { onPickFamily(s) }.semantics { contentDescription = tx.sendFamilySticker })
             }
         }
     }

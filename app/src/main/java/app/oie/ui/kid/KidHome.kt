@@ -1,5 +1,9 @@
 package app.oie.ui.kid
 
+import app.oie.ui.common.pressableSelect
+
+import app.oie.ui.common.pressableToggle
+
 import androidx.compose.foundation.selection.selectable
 
 import androidx.compose.ui.semantics.traversalIndex
@@ -478,8 +482,8 @@ private fun ViewChoice(state: AppState) {
             val shape = RoundedCornerShape(OTokens.Radius.radiusL)
             Box(
                 Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin - OTokens.Spacing.space2).clip(shape)
-                    .background(if (on) c.selected else c.page).border(OTokens.Size.hairline, if (on) c.onSelected else c.line, shape)
-                    .selectable(on, role = Role.RadioButton) { state.homeView = v.name.lowercase() },
+                    .background(app.oie.ui.common.motionColor(if (on) c.selected else c.page)).border(OTokens.Size.hairline, app.oie.ui.common.motionColor(if (on) c.onSelected else c.line), shape)
+                    .pressableSelect(on, role = Role.RadioButton) { state.homeView = v.name.lowercase() },
                 contentAlignment = Alignment.Center,
             ) { Text(label, style = OieType.label, color = if (on) c.onSelected else c.ink, maxLines = 1) }
         }
@@ -494,9 +498,9 @@ private fun SquareIcon(icon: Int, label: String, tint: androidx.compose.ui.graph
     val shape = RoundedCornerShape(OTokens.Radius.radiusS)
     Box(
         Modifier.size(OTokens.Size.button).clip(shape)
-            .background(if (selected == true) c.selected else c.surface)
+            .background(app.oie.ui.common.motionColor(if (selected == true) c.selected else c.surface))
             .border(OTokens.Size.hairline, c.line, shape)
-            .then(if (selected != null) Modifier.toggleable(value = selected, enabled = enabled, role = Role.Switch) { onClick() }
+            .then(if (selected != null) Modifier.pressableToggle(value = selected, enabled = enabled, role = Role.Switch) { onClick() }
                   else Modifier.pressable(enabled = enabled, onClick = onClick))
             .semantics { contentDescription = label; if (!enabled) disabled() }
             .graphicsLayer { alpha = if (enabled) 1f else 0.38f },

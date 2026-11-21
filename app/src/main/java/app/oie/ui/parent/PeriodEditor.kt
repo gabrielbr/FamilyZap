@@ -1,5 +1,7 @@
 package app.oie.ui.parent
 
+import app.oie.ui.common.pressableToggle
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -84,9 +86,9 @@ fun PeriodEditor(initial: QuietPeriod?, onSave: (QuietPeriod) -> Unit, onDelete:
                     // v0.34 audit round 2: room inside, so a label at large text never touches the edge.
                     Modifier.defaultMinSize(minWidth = OTokens.Spacing.space12, minHeight = OTokens.Spacing.space12)
                         .clip(RoundedCornerShape(OTokens.Radius.radiusL))
-                        .background(if (on) c.selected else c.surface)
-                        .border(OTokens.Size.hairline, if (on) c.ink else c.line, RoundedCornerShape(OTokens.Radius.radiusL))
-                        .toggleable(on, role = Role.Checkbox) { touched(); days = if (on) days - d else days + d },
+                        .background(app.oie.ui.common.motionColor(if (on) c.selected else c.surface))
+                        .border(OTokens.Size.hairline, app.oie.ui.common.motionColor(if (on) c.ink else c.line), RoundedCornerShape(OTokens.Radius.radiusL))
+                        .pressableToggle(on, role = Role.Checkbox) { touched(); days = if (on) days - d else days + d },
                     contentAlignment = Alignment.Center,
                 ) { Text(tx.dayShort[d.value - 1], modifier = Modifier.padding(horizontal = OTokens.Spacing.space2), style = OieType.label, color = if (on) c.onSelected else c.ink) }
             }

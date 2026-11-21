@@ -1,5 +1,7 @@
 package app.oie.ui.kid
 
+import app.oie.ui.common.pressableSelect
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -105,8 +107,8 @@ internal fun ReactionSheet(m: Message, onReact: (String) -> Unit, onRead: (() ->
             (listOfNotNull(lastUsed) + Reactions.CHOICES.filter { it != lastUsed }).forEach { e ->
                 val picked = m.reactions[Reactions.KID] == e
                 Box(
-                    Modifier.size(OTokens.Spacing.space12).clip(CircleShape).background(if (picked) c.selected else c.surface)
-                        .clickable(role = Role.Button) { onReact(e) }
+                    Modifier.size(OTokens.Spacing.space12).clip(CircleShape).background(app.oie.ui.common.motionColor(if (picked) c.selected else c.surface))
+                        .pressable { onReact(e) }
                         .semantics { contentDescription = tx.reactWith(e); selected = picked },
                     contentAlignment = Alignment.Center,
                 ) { Text(e, style = OieType.title) }
@@ -192,7 +194,7 @@ private fun MediaTile(m: Message, onOpen: () -> Unit) {
     Box(
         Modifier.aspectRatio(1f).clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.surface)
             .border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusS))
-            .clickable(role = Role.Button, onClickLabel = label, onClick = onOpen).semantics { contentDescription = label },
+            .pressable(label = label, onClick = onOpen).semantics { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) {
         if (m.kind == Kind.PHOTO) {
@@ -308,7 +310,7 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
                 // A swatch is never colour alone: a hairline, its name for TalkBack, and an ink ring when picked.
                 Box(
                     Modifier.size(OTokens.Spacing.space12).clip(CircleShape)
-                        .clickable(role = Role.RadioButton) { color = i }
+                        .pressableSelect(color == i, role = Role.RadioButton) { color = i }
                         .semantics { contentDescription = tx.drawColors[i]; selected = color == i },
                     contentAlignment = Alignment.Center,
                 ) {
@@ -340,9 +342,9 @@ private fun Toggle(label: String, on: Boolean, onClick: () -> Unit) {
     val c = OieTheme.colors
     Box(
         Modifier.heightIn(min = OTokens.Spacing.space12).clip(RoundedCornerShape(OTokens.Radius.radiusL))
-            .background(if (on) c.selected else c.surface)
-            .border(BorderStroke(OTokens.Size.hairline, if (on) c.selected else c.line), RoundedCornerShape(OTokens.Radius.radiusL))
-            .clickable(role = Role.RadioButton, onClick = onClick).semantics { selected = on }
+            .background(app.oie.ui.common.motionColor(if (on) c.selected else c.surface))
+            .border(BorderStroke(OTokens.Size.hairline, app.oie.ui.common.motionColor(if (on) c.selected else c.line)), RoundedCornerShape(OTokens.Radius.radiusL))
+            .pressableSelect(on, role = Role.RadioButton, onClick = onClick)
             .padding(horizontal = OTokens.Spacing.space4),
         contentAlignment = Alignment.Center,
     ) { Text(label, style = OieType.label, color = if (on) c.onSelected else c.ink) }
