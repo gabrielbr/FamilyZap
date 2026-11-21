@@ -23,5 +23,5 @@ Needs JDK 17+ and the Android SDK (platform 35). The logic lives in `app/src/mai
 
 How many times each release was downloaded, from GitHub's public counts (no analytics in the app; see `docs/release.md`, "Downloads"):
 ```sh
-scripts/downloads.sh
+scripts/downloads.sh            # add --mine 1 to leave out your own download of each release
 ```
