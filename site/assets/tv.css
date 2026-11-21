@@ -1,0 +1,230 @@
+/* Oiê landing page v3: a 90s TV infomercial (decision 0014).
+   Page-only exceptions approved by the owner: "!" in playful lines, Nunito 900 and italics, and a 90s TV
+   palette (yellow, teal, purple) beside the brand coral. Everything else comes from tokens.css. */
+
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/nunito-400.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/nunito-600.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/nunito-700.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 800; font-display: swap; src: url("fonts/nunito-800.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 900; font-display: swap; src: url("fonts/nunito-900.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: italic; font-weight: 700; font-display: swap; src: url("fonts/nunito-700-italic.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: italic; font-weight: 900; font-display: swap; src: url("fonts/nunito-900-italic.woff2") format("woff2"); }
+
+:root {
+  /* The TV palette: fixed in both themes (the ad is the same on every set). Text pairs: ink on yellow, teal
+     and coral; white on purple and static. */
+  --tv-purple: #4527A0;
+  --tv-yellow: #FFD23F;
+  --tv-teal: #20B2A6;
+  --tv-coral: #E8573C;
+  --tv-static: #23201F;
+  --tv-phone: #111111;   /* the smartphone in the "before" scene */
+  --tv-glass: #3A3634;
+  --tv-blush: #FCE1D6;   /* the light theme's selected token: faces on the drawn tablet */
+  --tv-ink: #2A1714;
+  --tv-white: #FFFFFF;
+  --tv-cream: #FFF6EE;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px; --s16: 64px;
+  --r-control: 4px; --r-card: 8px; --r-pill: 16px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-std: 150ms;
+  --t-emph: 250ms;
+  --outline: 4px;
+  --page-max: 1120px;
+  --measure: 62ch;
+  color-scheme: light dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body { margin: 0; background: var(--gds-page); color: var(--gds-ink); font: 400 1.0625rem/1.6 "Nunito", system-ui, sans-serif; overflow-x: clip; }
+img, svg { display: block; }
+a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; border-radius: var(--r-control); }
+::selection { background: var(--tv-yellow); color: var(--tv-ink); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip { position: absolute; left: var(--s4); top: -100px; z-index: 10; background: var(--tv-yellow); color: var(--tv-ink); padding: var(--s3) var(--s4); border: var(--outline) solid var(--tv-ink); border-radius: var(--r-control); font-weight: 800; }
+.skip:focus { top: var(--s4); }
+.wrap { max-width: var(--page-max); margin: 0 auto; padding: 0 var(--s6); }
+
+/* ---------- Scenes: each one a beat of the ad, a whole field of colour ---------- */
+.scene { position: relative; padding: var(--s16) 0; min-height: 72svh; display: grid; align-content: center; overflow: hidden; }
+.scene--purple { background: var(--tv-purple); color: var(--tv-white); }
+.scene--yellow { background: var(--tv-yellow); color: var(--tv-ink); }
+.scene--teal { background: var(--tv-teal); color: var(--tv-ink); }
+.scene--coral { background: var(--tv-coral); color: var(--tv-ink); }
+/* The problem plays in black and white, like the "before" in every ad: grey static and scanlines. */
+.scene--static { background: var(--tv-static) repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 5px); color: var(--tv-white); }
+/* Halftone dots, the print of the era, in a corner of the bright fields. */
+.scene--yellow::before, .scene--teal::before, .scene--coral::before, .scene--purple::before {
+  content: ""; position: absolute; inset: auto -10% -30% auto; width: 60vmax; height: 60vmax; pointer-events: none;
+  background: radial-gradient(circle, rgba(42, 23, 20, 0.14) 2px, transparent 2.5px) 0 0 / 18px 18px;
+  -webkit-mask-image: radial-gradient(circle at 70% 70%, #000 0, transparent 65%); mask-image: radial-gradient(circle at 70% 70%, #000 0, transparent 65%);
+}
+.scene--purple::before { background-image: radial-gradient(circle, rgba(255, 255, 255, 0.12) 2px, transparent 2.5px); }
+.scene > * { position: relative; width: 100%; }
+
+h1, h2 { font-weight: 900; font-style: italic; line-height: 1; letter-spacing: -0.02em; margin: 0 0 var(--s6); text-wrap: balance; }
+h1 { font-size: clamp(2.75rem, 7.4vw, 5.75rem); }
+h2 { font-size: clamp(2.25rem, 5.6vw, 4.25rem); }
+h2.mega { font-size: clamp(2.75rem, 7vw, 5.5rem); }
+.big { font-size: clamp(1.25rem, 2.4vw, 1.625rem); line-height: 1.4; font-weight: 700; max-width: 30ch; margin: 0 0 var(--s6); text-wrap: pretty; }
+.center { text-align: center; display: grid; justify-items: center; }
+.center .big { margin-inline: auto; }
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--s10); align-items: center; }
+
+/* ---------- The bar on top: logo, Segurança, PT/EN ---------- */
+.bar { max-width: var(--page-max); margin: 0 auto; padding: var(--s4) var(--s6); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s4); }
+.bar__logo img { width: 80px; height: auto; }
+.bar__right { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s4); }
+.bar__link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 800; }
+.lang { display: inline-flex; border: 2px solid currentColor; border-radius: var(--r-pill); overflow: hidden; }
+.lang button { font: 800 0.875rem/1 "Nunito", sans-serif; color: inherit; background: transparent; border: 0; min-height: 44px; min-width: 48px; padding: 0 var(--s3); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--tv-white); color: var(--tv-purple); }
+
+/* ---------- Opening: the tablet dressed as the home phone ---------- */
+.hero { min-height: 100svh; padding: 0; align-content: start; }
+.cta { min-height: 0; padding: var(--s16) 0; }
+.hero__grid { max-width: var(--page-max); margin: 0 auto; padding: var(--s8) var(--s6) var(--s12); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: var(--s8); align-items: center; }
+.hero__lede { font-size: clamp(1.25rem, 2.2vw, 1.5rem); line-height: 1.4; font-weight: 700; max-width: 26ch; margin: 0 0 var(--s8); }
+.hero__note { font-size: 0.9375rem; font-weight: 700; margin: var(--s4) 0 0; opacity: 0.92; }
+.hero__art { margin: 0; position: relative; }
+.phone-tab { width: 100%; height: auto; overflow: visible; }
+.phone-tab .ink { fill: var(--tv-ink); }
+.phone-tab .screen { fill: var(--tv-cream); stroke: var(--tv-coral); stroke-width: 6; }
+.phone-tab .faces circle { fill: var(--tv-blush); stroke: var(--tv-ink); stroke-width: 2.5; }
+.phone-tab .faces text { font: 800 17px "Nunito", sans-serif; fill: var(--tv-ink); text-anchor: middle; }
+.phone-tab .faces text.nm { font: 700 13px "Nunito", sans-serif; }
+.phone-tab .cord { fill: none; stroke: var(--tv-ink); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
+/* The handset: a coral receiver, lifted off the tablet, on its curly cord. */
+.phone-tab .grip-out { fill: none; stroke: var(--tv-ink); stroke-width: 40; stroke-linecap: round; }
+.phone-tab .grip-in { fill: none; stroke: var(--tv-coral); stroke-width: 30; stroke-linecap: round; }
+.phone-tab .cup { fill: var(--tv-coral); stroke: var(--tv-ink); stroke-width: 5; }
+.phone-tab .ring path { stroke: var(--tv-yellow); stroke-width: 6; stroke-linecap: round; fill: none; }
+.phone-tab .handset { transform-box: fill-box; transform-origin: 50% 100%; }
+.trim { position: absolute; top: -6%; left: 50%; translate: -50% 0; margin: 0; font: italic 900 clamp(1.25rem, 2.6vw, 1.75rem)/1 "Nunito", sans-serif; color: var(--tv-yellow); transform: rotate(-4deg); white-space: nowrap; }
+
+/* ---------- Starbursts: the ad's loudest voice ---------- */
+.burst {
+  --star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 0l7 17 15-10-1 18 18-3-9 16 17 6-15 10 13 12-18 3 6 17-17-6-1 18-12-13-12 13-1-18-17 6 6-17-18-3 13-12-15-10 17-6-9-16 18 3-1-18 15 10z' fill='%23FFD23F' stroke='%232A1714' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E");
+  display: inline-grid; place-items: center; margin: 0; aspect-ratio: 1; background: var(--star) center / contain no-repeat; color: var(--tv-ink);
+  font-weight: 900; font-style: italic; text-align: center; line-height: 1; transform: rotate(-12deg);
+}
+.burst span { display: block; max-width: 70%; }
+.burst--new { width: 104px; font-size: 1.25rem; margin-bottom: var(--s4); }
+.burst--big { width: clamp(180px, 22vw, 220px); font-size: clamp(0.9375rem, 1.6vw, 1.125rem); margin-bottom: var(--s4);
+  --star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 0l7 17 15-10-1 18 18-3-9 16 17 6-15 10 13 12-18 3 6 17-17-6-1 18-12-13-12 13-1-18-17 6 6-17-18-3 13-12-15-10 17-6-9-16 18 3-1-18 15 10z' fill='%23FFFFFF' stroke='%232A1714' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.burst span { max-width: 62%; }
+.burst--price { width: clamp(240px, 34vw, 340px); font-size: clamp(1.75rem, 4vw, 2.75rem); margin: var(--s2) auto var(--s8); transform: rotate(-6deg);
+  --star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 0l7 17 15-10-1 18 18-3-9 16 17 6-15 10 13 12-18 3 6 17-17-6-1 18-12-13-12 13-1-18-17 6 6-17-18-3 13-12-15-10 17-6-9-16 18 3-1-18 15 10z' fill='%23E8573C' stroke='%232A1714' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+
+/* ---------- Buttons: big, yellow, outlined, a little too excited ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 var(--s8); border: var(--outline) solid var(--tv-ink); border-radius: var(--r-pill);
+  font: italic 900 1.25rem/1 "Nunito", sans-serif; text-decoration: none; transition: transform var(--t-std) var(--ease); }
+.btn:hover { transform: rotate(-2deg) scale(1.03); }
+.btn:active { transform: scale(0.97); }
+.btn--yellow { background: var(--tv-yellow); color: var(--tv-ink); }
+.btn--big { min-height: 64px; font-size: 1.5rem; }
+.scene--purple :focus-visible, .scene--static :focus-visible { outline-color: var(--tv-yellow); }
+
+/* ---------- The problem: a phone bursting with everything ---------- */
+.stamp { display: inline-block; margin: var(--s4) 0 0; padding: var(--s2) var(--s4); border: var(--outline) solid var(--tv-yellow); border-radius: var(--r-control); color: var(--tv-yellow);
+  font: italic 900 clamp(1.5rem, 3vw, 2.25rem)/1.1 "Nunito", sans-serif; transform: rotate(-4deg); }
+.chaos { margin: 0; }
+.chaos svg { width: 100%; max-width: 420px; height: auto; margin-inline: auto; overflow: visible; }
+.chaos .ink { fill: var(--tv-phone); stroke: var(--tv-white); stroke-width: 4; }
+.chaos .glass { fill: var(--tv-glass); }
+.chaos .tags rect { stroke: var(--tv-ink); stroke-width: 4; }
+.chaos .t1 { fill: var(--tv-yellow); } .chaos .t2 { fill: var(--tv-coral); } .chaos .t3 { fill: var(--tv-white); } .chaos .t4 { fill: var(--tv-teal); }
+.chaos .tags text { font: italic 900 18px "Nunito", sans-serif; fill: var(--tv-ink); text-anchor: middle; }
+
+/* ---------- 1, 2, 3 ---------- */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s8); }
+.steps li { display: grid; gap: var(--s4); font-size: clamp(1.25rem, 2.2vw, 1.5rem); font-weight: 800; line-height: 1.3; }
+.num { display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; background: var(--tv-yellow); border: var(--outline) solid var(--tv-ink); font: italic 900 2.75rem/1 "Nunito", sans-serif; }
+.cordline { position: absolute; left: 0; right: 0; bottom: var(--s6); width: 100%; height: 36px; }
+.cordline path { fill: none; stroke: var(--tv-ink); stroke-width: 3; vector-effect: non-scaling-stroke; }
+
+/* ---------- "Mas espera… tem mais!": four stickers ---------- */
+.wobble { transform: rotate(-2deg); }
+.stickers { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6); max-width: 900px; }
+.stickers li { background: var(--tv-cream); color: var(--tv-ink); border: var(--outline) solid var(--tv-ink); border-radius: var(--r-card); padding: var(--s6); font-size: 1.125rem; line-height: 1.4; transform: rotate(-1.5deg); }
+.stickers li:nth-child(2n) { transform: rotate(1.5deg); background: var(--tv-yellow); }
+.stickers li:nth-child(3) { background: var(--tv-white); }
+.stickers b { display: block; font: italic 900 1.5rem/1.15 "Nunito", sans-serif; margin-bottom: var(--s1); }
+
+/* ---------- Celular x Oiê: words and marks, never colour alone ---------- */
+.versus { width: 100%; max-width: 900px; border-collapse: separate; border-spacing: 0; font-size: 1.125rem; }
+.versus th, .versus td { text-align: left; padding: var(--s4); border-bottom: 2px solid rgba(255, 255, 255, 0.3); vertical-align: top; }
+.versus thead th { font: italic 900 1.25rem/1.2 "Nunito", sans-serif; border-bottom: var(--outline) solid var(--tv-yellow); }
+.versus tbody th { font-weight: 800; width: 28%; }
+.versus td:nth-child(2)::before, .versus td:nth-child(3)::before { display: inline-block; margin-right: var(--s2); font-weight: 900; }
+.versus td:nth-child(2) { color: rgba(255, 255, 255, 0.85); }
+.versus td:nth-child(2)::before { content: "✕"; }
+.versus td:nth-child(3) { font-weight: 800; }
+.versus td:nth-child(3)::before { content: "✓"; color: var(--tv-yellow); }
+
+/* ---------- Baixe já ---------- */
+.install { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: var(--s4); font-size: 1.125rem; }
+.install li { counter-increment: s; display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: var(--s3); align-items: start; }
+.install li::before { content: counter(s); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--tv-yellow); color: var(--tv-ink); border: 3px solid var(--tv-ink); font: italic 900 1.375rem/1 "Nunito", sans-serif; }
+
+/* ---------- After the ad: the notice, the questions, the credits (calm, in the page's own colours) ---------- */
+.plain { padding: var(--s16) 0 var(--s8); }
+.plain h2 { font-size: clamp(1.75rem, 3.6vw, 2.5rem); }
+.plain p { max-width: var(--measure); margin: 0 0 var(--s3); }
+.faq { max-width: 760px; border-top: 1px solid var(--gds-line); }
+.faq details { border-bottom: 1px solid var(--gds-line); }
+.faq summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: var(--s4); min-height: 56px; padding: var(--s3) 0; font-weight: 800; font-size: 1.125rem; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: ""; width: 12px; height: 12px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translate(-2px, -2px); transition: transform var(--t-std) var(--ease); flex: none; }
+.faq details[open] summary::after { transform: rotate(-135deg) translate(-2px, -2px); }
+.faq details p { margin: 0 0 var(--s6); }
+.more { margin-top: var(--s6); }
+.more a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 800; }
+
+.foot { border-top: 1px solid var(--gds-line); padding: var(--s10) 0 var(--s12); color: var(--gds-muted); font-size: 0.9375rem; }
+.foot__made { color: var(--gds-ink); font-size: 1.25rem; font-weight: 700; margin: 0 0 var(--s4); }
+.foot__made a { font-weight: 900; }
+.foot__links { list-style: none; margin: 0 0 var(--s4); padding: 0; display: flex; flex-wrap: wrap; column-gap: var(--s6); }
+.foot__links a { display: inline-flex; align-items: center; min-height: 44px; }
+.foot__legal { margin: 0; max-width: 60ch; }
+
+/* ---------- Motion: one ring when the phone arrives; each scene cuts in like a TV cut ---------- */
+@keyframes ring { 0%, 100% { transform: rotate(0); } 15%, 55% { transform: rotate(-9deg) translateY(-6px); } 35%, 75% { transform: rotate(9deg) translateY(-6px); } }
+@keyframes blink { 50% { opacity: 0; } }
+.js .hero .handset { animation: ring calc(var(--t-emph) * 4) var(--ease) var(--t-emph) 2; }
+.js .hero .ring, .js .hero .trim { animation: blink calc(var(--t-emph) * 2) steps(1) var(--t-emph) 4; }
+.js .reveal { opacity: 0; transform: scale(0.94); transition: opacity var(--t-emph) var(--ease), transform var(--t-emph) var(--ease); transition-delay: calc(var(--i, 0) * 90ms); }
+.js .is-in .reveal { opacity: 1; transform: none; }
+.js .is-in .burst.reveal { transform: rotate(-12deg); }
+.js .is-in .burst--price.reveal { transform: rotate(-6deg); }
+.js .is-in .stickers li.reveal { transform: rotate(-1.5deg); }
+.js .is-in .stickers li.reveal:nth-child(2n) { transform: rotate(1.5deg); }
+.js .is-in .stamp.reveal { transform: rotate(-4deg); }
+.js .is-in .wobble.reveal { transform: rotate(-2deg); }
+
+/* ---------- Narrower screens ---------- */
+@media (max-width: 899px) {
+  .hero__grid, .two { grid-template-columns: minmax(0, 1fr); }
+  .hero__art { max-width: 460px; }
+  .steps { grid-template-columns: minmax(0, 1fr); gap: var(--s6); }
+  .steps li { grid-template-columns: 72px minmax(0, 1fr); align-items: center; }
+  .num { width: 64px; height: 64px; font-size: 2.25rem; }
+  .stickers { grid-template-columns: minmax(0, 1fr); }
+  .scene { min-height: 0; padding: var(--s12) 0; }
+  .hero { min-height: 0; padding: 0; }
+  .cordline { position: relative; bottom: auto; margin-top: var(--s8); }
+}
+@media (max-width: 640px) {
+  .wrap, .bar, .hero__grid { padding-left: var(--s4); padding-right: var(--s4); }
+  .versus { font-size: 1rem; }
+  .versus th, .versus td { padding: var(--s3) var(--s2); }
+  .versus tbody th { width: 30%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition-duration: 1ms !important; }
+  .js .reveal { opacity: 1; transform: none; }
+}

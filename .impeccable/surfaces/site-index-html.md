@@ -5,41 +5,22 @@ primary_target: "site/index.html"
 related_targets: []
 ---
 
-# Surface: the Oiê landing page (site/index.html), v2
+# Surface: the Oiê landing page (site/index.html), v3
 
 - **Mode:** Persuade.
-- **Audience:** parents of kids 9–12 (Brazil first). Family and friends are the second readers.
-- **Action:** "Baixar o Oiê", the latest APK from gabrielbr/oie-releases.
-- **Constraints:**
-  - PT-BR first, with EN.
-  - Decision 0013: silhouettes, WhatsApp-coloured screens on the parent's and receiver's phones only, many receivers including friends.
-  - Product law: no affiliation, risk said plainly, no safety claims.
+- **Audience:** parents of kids 9–12, Brazil first. A friend's feedback: v2 felt like monitoring kids.
+- **Action:** "Baixe já", the latest APK, free.
+- **Constraints:** PT-BR first, with EN. Decision 0014: "!", Nunito 900/italic and a 90s TV palette are allowed on this page only. Product law: the risk is readable, no "100% safe", no WhatsApp logo, no invented claims.
 
 ## Direction contract
-THESIS: The visitor watches their own family use Oiê. A scrolling story pins three people (the kid with the tablet, the parent whose WhatsApp is the bridge, and the person they write to) and walks one message from the tablet through the parent's phone to the receiver and back. It replaces the abstract route of v1 and the category's phone-mockup hero.
+THESIS: The page is a 90s TV infomercial selling the home phone back to kids. Each scene is one beat of the ad: hook, problem, "apresentamos", 1-2-3, "mas espera, tem mais", the comparison, the price and "baixe já". It refuses the monitoring-app page (dashboards, parent controls up front) and the soft cream family page.
 
-OWN-WORLD:
-- Silhouettes built from the logo's touching rounds, in ink on the cream page.
-- The kid's tablet in Oiê's coral frame with its own message rows.
-- The two phones drawn as WhatsApp screens in WhatsApp-like colours, with no logo (decision 0013).
-- The coral hero band and the line joining the three people carry over from v1.
-- Nunito only.
+OWN-WORLD: Saturated TV fields fill whole sections: purple, yellow, teal and coral, with ink outlines. The furniture is starbursts, tilted stickers, a heavy ink rule and halftone dots. The type is Nunito 900 italic, slanted and huge, over Nunito body. The tablet is drawn as a phone (a handset on a curly cord), and the curly cord runs between scenes.
 
-STORY:
-1. The kid writes.
-2. It leaves the parent's WhatsApp, signed, and the parent sees it.
-3. It arrives as a normal message.
-4. They reply, and it comes back.
-5. It isn't only grandma: grandpa, an aunt, a school friend.
-6. The parent chooses who.
+STORY: The visitor remembers calling a friend, sees why a smartphone is the wrong tool for a 9-year-old, meets Oiê, sees it's easy and free, and downloads.
 
-Then honesty, FAQ and download.
+FIRST VIEWPORT: A purple field. A tilted yellow "NOVO!" starburst, top left. The huge italic headline "Lembra do telefone de casa?". Right side (below on phones): the tablet-phone, ringing, its handset on a curly cord. A yellow "Baixe já. É grátis." button with an ink outline, and a quiet "Segurança" link in the nav.
 
-FIRST VIEWPORT:
-- A coral band with "A família ao alcance.", the subline naming family and friends, and the download.
-- A "Na sua casa" picker (Mãe/Pai, Filho/Filha, and who they write to).
-- The three silhouettes with their devices, already standing on the line below it.
-
-FORM: The owner's direction, pinned. seed: none (pinned) "I want a scrolly telling page where we can use some vectorized silhouettes of father or mother, son or daughter, and somebody that can be grandma or grandpa".
+FORM: seed: none (pinned). Owner: "make a v3 of the landing page, but change it look and feel to look like a 90's infomercial. It must be fun catchy, and a little goofy, just like an infomercial … in storytelling or scroll telling format. Avoid a lot of text … FAQ in the bottom … open source, and made by me." Hero object chosen by the owner: "The tablet as a phone".
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
