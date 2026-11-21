@@ -164,3 +164,6 @@ _The owner's test (2026-11-20): animated stickers from WhatsApp's own packs show
 - A video still downloading says "Vídeo de 0:42, chegando…", with no ▶ (nothing to play yet).
 - Pictures, video frames and profile photos are opened off the main thread, so the chat scrolls smoothly.
 - A tap on a photo opens it big (v0.33); a family member's reaction shows under the message.
+
+## v0.42: conversations that are the kid's own
+Rule 4 ("Mostrar tudo do grupo") is now for people too, and the parent turns it on in the contact's editor: **"Conversa só de {kid}"**. Everything in such a chat reaches the kid: no name check, no 24-hour window, and none of v0.40's filters. The line to the parent is never treated this way (`MessageRule`, tested). See `contacts-quiet-hours.md`, v0.42.

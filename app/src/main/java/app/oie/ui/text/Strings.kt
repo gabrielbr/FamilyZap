@@ -36,6 +36,11 @@ interface Strings {
     val parentButton: String
     fun hello(kid: String): String
     val whoToTalk: String
+    // v0.42: the kid arranges the home (favorites on top, their own order).
+    val arrange: String; val arrangeDone: String; val arrangeHint: String; val favorite: String
+    fun favoriteA11y(name: String): String
+    fun moveUpA11y(name: String): String
+    fun moveDownA11y(name: String): String
     fun nobodyYet(parent: String): String
     val askToAdd: String
     fun askedToAdd(parent: String): String
@@ -212,6 +217,10 @@ interface Strings {
     fun birthdayHelp(kid: String): String
     val needYouLabel: String
     fun needYouHelp(kid: String): String
+    // v0.42: a conversation that is the kid's own (all of it reaches the kid).
+    fun kidsOwnLabel(kid: String): String
+    fun kidsOwnHelp(kid: String): String
+    fun kidsOwnLine(kid: String): String
     val needYouButton: String; val needYouSend: String; val needYouText: String
     fun needYouWait(minutes: Int): String
     fun needYouAsk(names: String): String
@@ -300,6 +309,11 @@ object Pt : Strings {
     override val parentButton = "Pais"
     override fun hello(kid: String) = "Oiê, $kid"
     override val whoToTalk = "Com quem você quer falar?"
+    override val arrange = "Arrumar"; override val arrangeDone = "Pronto"; override val favorite = "Favorito"
+    override val arrangeHint = "Toque no coração para deixar alguém no topo. Segure e arraste para mudar a ordem, ou use as setas."
+    override fun favoriteA11y(name: String) = "Favorito: $name"
+    override fun moveUpA11y(name: String) = "Subir $name"
+    override fun moveDownA11y(name: String) = "Descer $name"
     override fun nobodyYet(parent: String) = "Ainda não tem ninguém aqui. Peça para $parent escolher com quem você pode falar."
     override val askToAdd = "Pedir para adicionar alguém"
     override fun askedToAdd(parent: String) = "Pedido feito. $parent vai ver na área dos pais."
@@ -365,7 +379,7 @@ object Pt : Strings {
     override val help = "Ajuda"; override val about = "Sobre"
     override fun helpItems(kid: String, parent: String) = listOf(
         "O que pode acontecer com o meu WhatsApp?" to riskBody,
-        "$kid vê as minhas conversas?" to "Não. O tablet mostra só o que foi mandado para $kid: respostas às mensagens de $kid, mensagens que começam com o nome de $kid, e o que chega até 24 horas depois da última mensagem de $kid. Nesse tempo, ficam de fora o que fala sobre $kid (“o $kid já chegou?”) e o que vem depois que você responde, até $kid escrever de novo. As suas outras conversas continuam só no seu WhatsApp.",
+        "$kid vê as minhas conversas?" to "Não. O tablet mostra só o que foi mandado para $kid: respostas às mensagens de $kid, mensagens que começam com o nome de $kid, e o que chega até 24 horas depois da última mensagem de $kid. Numa conversa que você marcou como só de $kid, tudo chega. Nesse tempo, ficam de fora o que fala sobre $kid (“o $kid já chegou?”) e o que vem depois que você responde, até $kid escrever de novo. As suas outras conversas continuam só no seu WhatsApp.",
         "$kid sabe que eu vejo as mensagens?" to "Sim. Na primeira vez, o Oiê diz a $kid: “${noticeBody(parent)}”",
         "Quem pode falar com $kid?" to "Só quem está em Contatos. Mensagens de qualquer outra pessoa não aparecem no tablet. Num grupo, todos do grupo veem o que $kid manda. Em Contatos, toque em alguém para mudar o nome que $kid vê (Vovó, por exemplo) ou para remover. O nome muda só no Oiê, não no seu WhatsApp.",
         "O que é o “Preciso de você”?" to "Um botão na tela inicial de $kid, que aparece quando você marca alguém em Contatos (toque na pessoa e ligue “Recebe 'Preciso de você'”). $kid confirma, e cada pessoa marcada recebe “Preciso de você.” no WhatsApp, até no horário de silêncio. Dá para mandar uma vez a cada 5 minutos. É um jeito de chamar vocês, não um serviço de emergência: em perigo, ligue 190 ou 192.",
@@ -512,6 +526,9 @@ object Pt : Strings {
     override fun birthdayHelp(kid: String) = "Por exemplo 25/12. No dia, $kid vê um lembrete. O ano não é guardado."
     override val needYouLabel = "Recebe “Preciso de você”"
     override fun needYouHelp(kid: String) = "Quando $kid tocar em Preciso de você, essa pessoa recebe uma mensagem."
+    override fun kidsOwnLabel(kid: String) = "Conversa só de $kid"
+    override fun kidsOwnHelp(kid: String) = "Tudo desta conversa vai para $kid, sem precisar do nome nem do limite de 24 horas. Bom para os amigos de $kid."
+    override fun kidsOwnLine(kid: String) = "Tudo chega para $kid"
     override val needYouButton = "Preciso de você"; override val needYouSend = "Mandar"; override val needYouText = "Preciso de você."
     override fun needYouWait(minutes: Int) = if (minutes <= 1) "Já foi. Dá para mandar de novo em 1 minuto." else "Já foi. Dá para mandar de novo em $minutes minutos."
     override fun needYouAsk(names: String) = "Mandar “Preciso de você” para $names?"
@@ -611,6 +628,11 @@ object En : Strings {
     override val parentButton = "Parents"
     override fun hello(kid: String) = "Oiê, $kid"
     override val whoToTalk = "Who do you want to talk to?"
+    override val arrange = "Arrange"; override val arrangeDone = "Done"; override val favorite = "Favorite"
+    override val arrangeHint = "Tap the heart to keep someone on top. Hold and drag to change the order, or use the arrows."
+    override fun favoriteA11y(name: String) = "Favorite: $name"
+    override fun moveUpA11y(name: String) = "Move $name up"
+    override fun moveDownA11y(name: String) = "Move $name down"
     override fun nobodyYet(parent: String) = "Nobody here yet. Ask $parent to choose who you can talk to."
     override val askToAdd = "Ask to add someone"
     override fun askedToAdd(parent: String) = "Request sent. $parent will see it in the parent area."
@@ -680,7 +702,7 @@ object En : Strings {
     override val help = "Help"; override val about = "About"
     override fun helpItems(kid: String, parent: String) = listOf(
         "What could happen to my WhatsApp?" to riskBody,
-        "Can $kid see my chats?" to "No. The tablet only shows what was sent to $kid: replies to $kid's messages, messages that start with $kid's name, and what arrives up to 24 hours after $kid's last message. In that time, talk about $kid (“is $kid home?”) stays out, and so does what comes after you answer, until $kid writes again. Your other chats stay only in your WhatsApp.",
+        "Can $kid see my chats?" to "No. The tablet only shows what was sent to $kid: replies to $kid's messages, messages that start with $kid's name, and what arrives up to 24 hours after $kid's last message. In a chat you marked as $kid's own, everything arrives. In that time, talk about $kid (“is $kid home?”) stays out, and so does what comes after you answer, until $kid writes again. Your other chats stay only in your WhatsApp.",
         "Does $kid know I can see the messages?" to "Yes. The first time, Oiê tells $kid: “${noticeBody(parent)}”",
         "Who can talk to $kid?" to "Only the people in Contacts. Messages from anyone else don't appear on the tablet. In a group, everyone in it sees what $kid sends. In Contacts, tap someone to change the name $kid sees (Grandma, for example) or to remove them. The name changes only in Oiê, not in your WhatsApp.",
         "What is “I need you”?" to "A button on $kid's home screen that shows once you mark someone in Contacts (tap the person and turn on “Gets 'I need you'”). $kid confirms, and each marked person gets “I need you.” on WhatsApp, even in quiet hours. It can be sent once every 5 minutes. It's a way to call you, not an emergency service: in danger, call the emergency number.",
@@ -826,6 +848,9 @@ object En : Strings {
     override fun birthdayHelp(kid: String) = "For example 25/12. On the day, $kid sees a reminder. The year isn't kept."
     override val needYouLabel = "Gets “I need you”"
     override fun needYouHelp(kid: String) = "When $kid taps I need you, this person gets a message."
+    override fun kidsOwnLabel(kid: String) = "$kid's own chat"
+    override fun kidsOwnHelp(kid: String) = "Everything in this chat goes to $kid, with no need for the name and no 24-hour limit. Good for $kid's friends."
+    override fun kidsOwnLine(kid: String) = "Everything reaches $kid"
     override val needYouButton = "I need you"; override val needYouSend = "Send"; override val needYouText = "I need you."
     override fun needYouWait(minutes: Int) = if (minutes <= 1) "It went. You can send it again in 1 minute." else "It went. You can send it again in $minutes minutes."
     override fun needYouAsk(names: String) = "Send “I need you” to $names?"

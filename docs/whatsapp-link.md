@@ -138,3 +138,10 @@ Other WhatsApp clients (nchat, wptui) use whatsmeow too, so switching clients ch
 - **The unread mark on the parent's line** (`MarkUnread`, v0.35) runs only when the parent turns it on (Ajustes e ajuda › Sua conversa com {kid}). It's off by default, for existing installs too: no official client marks the account's own chat unread.
 - **Posting statuses** stays opt-in, as before: Ajustes e ajuda › Novidades › postar. The v0.37 patch is the most unusual thing Oiê does, so the switch stays off unless the parent wants it.
 - **whatsmeow is current:** the pin (2026-11-16, `19d61352436f`) was upstream `main` on 2026-11-21. **Check it at least once a month** (`go list -m -json go.mau.fi/whatsmeow@main` in `link/`). Outdated protocol versions stand out more than any client choice. Moving the pin means re-applying `_whatsmeow-patch/broadcast.go` on the new commit.
+
+## v0.42: the groups are kept
+`Contacts()` asked WhatsApp for the parent's groups (`GetJoinedGroups`) on every reload: on connect, on each contacts burst and when Contatos opened. A refused ask dropped the groups silently, so the parent could only add people.
+- The last good list is now reused for `GroupsRefresh` (10 minutes), or until a `JoinedGroup` or `GroupInfo` event marks it stale.
+- A refused ask keeps the last good list and emits `groupsError` (the reason and how many groups were kept) for the problem report.
+
+This also means fewer server queries, in the spirit of the low-risk pass.

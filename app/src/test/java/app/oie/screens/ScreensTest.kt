@@ -201,6 +201,14 @@ class ScreensTest {
         Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.BubbleSetting(ready()) }
     }
 
+    // v0.42: the kid arranges the home: Vovó a favorite, the others in order, arrows and hearts.
+    private fun arranged() = ready().apply { kidNoticeSeen = true; toggleFavorite(allowed[2].id) }
+    @Test fun kidHomeArrange() = shot("72-kid-home-arrange", false) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.kid.Arrange(arranged()) } }
+    @Test fun kidHomeArrangeDark() = shot("72-kid-home-arrange", true) { Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.kid.Arrange(arranged()) } }
+    @Test fun kidHomeFavorites() = shot("73-kid-home-favorites", false) { KidHome(arranged()) }
+    // v0.42: a conversation that is the kid's own says so in Contatos.
+    @Test fun contactsKidsOwn() = shot("74-contacts-kids-own", false) { ParentArea(ready().apply { allowed[4] = allowed[4].copy(showWholeGroup = true) }, 0) }
+
     // v0.41: the unread mark on the parent's own line, off by default (low-risk pass).
     @Test fun settingsUnreadMark() = shot("71-settings-unread-mark", false) {
         Column(Modifier.padding(OTokens.Spacing.space12)) { app.oie.ui.parent.UnreadMarkSetting(ready().apply { allowed.add(0, app.oie.logic.Contact("1203630@g.us", "Ana", isGroup = true, parentLine = true)) }) }

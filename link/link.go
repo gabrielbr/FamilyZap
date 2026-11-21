@@ -87,7 +87,44 @@ type Link struct {
 	parentLine string
 	// statusMu holds one status post at a time, so the chosen audience can't leak into another send (v0.37).
 	statusMu sync.Mutex
+	// groups keeps the last good list of the parent's groups (v0.42): asking WhatsApp on every
+	// contacts reload got refused at times, and the groups vanished from the parent's list.
+	groups groupCache
 }
+
+// GroupsRefresh is how long the list of groups is reused before WhatsApp is asked again (v0.42),
+// unless WhatsApp says the groups changed (joined, left, renamed).
+const GroupsRefresh = 10 * time.Minute
+
+// groupCache is the last good list of groups. A failed ask keeps the last good list.
+type groupCache struct {
+	mu    sync.Mutex
+	list  []contactEntry
+	at    time.Time
+	stale bool
+}
+
+// get returns the groups, asking [fetch] only when there's no list yet, it's older than
+// GroupsRefresh, or it was marked stale. On an error it returns the last good list and the error.
+func (g *groupCache) get(now time.Time, fetch func() ([]contactEntry, error)) ([]contactEntry, error) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if g.list != nil && !g.stale && now.Sub(g.at) < GroupsRefresh {
+		return g.list, nil
+	}
+	fresh, err := fetch()
+	if err != nil {
+		return g.list, err
+	}
+	if fresh == nil {
+		fresh = []contactEntry{}
+	}
+	g.list, g.at, g.stale = fresh, now, false
+	return fresh, nil
+}
+
+// markStale makes the next get ask WhatsApp again.
+func (g *groupCache) markStale() { g.mu.Lock(); g.stale = true; g.mu.Unlock() }
 
 // MaxPendingMedia is how many received photos, voice notes and stickers stay downloadable.
 const MaxPendingMedia = 200
@@ -234,12 +271,22 @@ func (k *Link) Contacts() (list string, err error) {
 			out = append(out, contactEntry{jid.ToNonAD().String(), name, false, k.phoneOf(ctx, jid)})
 		}
 	}
-	groups, err := k.c.GetJoinedGroups(ctx)
-	if err == nil {
-		for _, g := range groups {
-			out = append(out, contactEntry{g.JID.String(), g.GroupName.Name, true, ""})
+	groups, gerr := k.groups.get(time.Now(), func() ([]contactEntry, error) {
+		joined, err := k.c.GetJoinedGroups(ctx)
+		if err != nil {
+			return nil, err
 		}
+		list := make([]contactEntry, 0, len(joined))
+		for _, g := range joined {
+			list = append(list, contactEntry{g.JID.String(), g.GroupName.Name, true, ""})
+		}
+		return list, nil
+	})
+	if gerr != nil {
+		// For the problem report: the reason only, never a group's name.
+		k.emit("groupsError", map[string]any{"error": gerr.Error(), "kept": len(groups)})
 	}
+	out = append(out, groups...)
 	return encodeContacts(out)
 }
 
@@ -372,6 +419,10 @@ func (k *Link) handle(e interface{}) {
 		}
 		k.contactsChanged()
 	case *events.Contact, *events.PushName:
+		k.contactsChanged()
+	case *events.JoinedGroup, *events.GroupInfo:
+		// v0.42: a group joined, left or renamed: ask WhatsApp for the groups on the next reload.
+		k.groups.markStale()
 		k.contactsChanged()
 	case *events.Receipt:
 		// v0.33: "Entregue" and "Vovó viu" under the kid's message. Only the family's receipts for

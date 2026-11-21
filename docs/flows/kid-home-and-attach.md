@@ -99,3 +99,24 @@ flowchart TD
 | 15 | Evidence | 🟡 To try with the kid: does Gravar áudio's tap-to-send feel natural next to the chat's hold-to-record? If it confuses, the chat's mic can accept both (it already does for TalkBack). |
 
 Issues: none critical or important. Polish: the phone's unread line ellipsizes before the "novas" pill on long messages (accepted; the chat shows the rest).
+
+## v0.42: Arrumar (the kid's own order, favorites on top)
+_The owner, 2026-11-21: "allow the kid to reorganize the listing of the contacts that they have and also mark as favorites so they stay on top." The owner chose an "Arrumar" mode and the kid's order on the home._
+
+- **Where:** "Arrumar", a link beside "Com quem você quer falar?", once there are two people. In the mode, the question becomes the hint and the link says "Pronto".
+- **In Arrumar,** each person has three 52dp buttons:
+  - a **heart:** favorites stay on top, and "Favorito" is written under the name, so it never depends on the colour alone;
+  - **up** and **down:** the way to move someone without dragging.
+
+  The whole row also **drags** after a long press.
+- **The groups:** favorites first, then everyone else. Moving never crosses between them: the heart decides the group, and the arrows or dragging decide the order inside it. At a group's edge, the arrow is dimmed and says it's off.
+- **On the home,** a favorite's row or card shows the heart beside the name, and TalkBack says "Favorito".
+- **New people** the parent adds go to the end, in the parent's order. Pausing someone hides them; resuming brings them back to their place.
+- **The parent's order in Contatos** doesn't change. The kid's order is saved on the tablet only.
+
+| # | The kid | The home |
+|---|---|---|
+| 1 | Taps Arrumar | The list shows hearts and arrows. Birthdays, Novidades and the nudge step aside. |
+| 2 | Taps Vovô's heart | Vovô moves to the top, with "Favorito" under the name. |
+| 3 | Holds Lucas and drags him up | Lucas swaps place as he passes each person (not above the favorites). |
+| 4 | Taps Pronto | The home is back, in the new order. |

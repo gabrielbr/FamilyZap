@@ -83,4 +83,17 @@ class MessageRuleTest {
 
     @Test fun aParentMessageAfterThisOneDoesNotCloseItRetroactively() =
         assertTrue(MessageRule.isForKid(fam("a", h, "oi meu bem"), vovo, listOf(kid("k1", 0)), listOf("Tito"), parentWroteAt = 2 * h))
+
+    // v0.42: a conversation the parent marked as the kid's own: all of it, no name, no window.
+    @Test fun aKidsOwnConversationAlwaysReachesTheKid() {
+        val friend = Contact("lu", "Lucas", showWholeGroup = true)
+        val m = Message("a", "lu", fromKid = false, at = 100 * h, kind = Kind.TEXT, text = "o Tito vem hoje?")
+        assertTrue(MessageRule.isForKid(m, friend, emptyList(), listOf("Tito"), parentWroteAt = 99 * h))
+    }
+
+    @Test fun theLineToTheParentIsNeverWhole() {
+        val ownChat = Contact("me", "Ana", parentLine = true, showWholeGroup = true)
+        val note = Message("a", "me", fromKid = false, at = h, kind = Kind.TEXT, text = "comprar pão")
+        assertFalse(MessageRule.isForKid(note, ownChat, emptyList(), "Tito"))
+    }
 }

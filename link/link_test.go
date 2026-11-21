@@ -577,3 +577,37 @@ func TestStatusPostsFollowTheSendRules(t *testing.T) {
 		t.Fatalf("got %+v", m)
 	}
 }
+
+// v0.42: the groups vanished from the parent's list when WhatsApp refused the ask; the last good list stays.
+func TestGroupCacheKeepsTheLastGoodList(t *testing.T) {
+	var g groupCache
+	calls := 0
+	ok := func() ([]contactEntry, error) { calls++; return []contactEntry{{"1@g.us", "Primos", true, ""}}, nil }
+	fail := func() ([]contactEntry, error) { calls++; return nil, errors.New("rate-overlimit") }
+	t0 := time.Unix(1_000_000, 0)
+
+	if l, err := g.get(t0, ok); err != nil || len(l) != 1 || calls != 1 {
+		t.Fatalf("first ask: %v %v %d", l, err, calls)
+	}
+	// Within the refresh time, WhatsApp isn't asked again.
+	if l, _ := g.get(t0.Add(time.Minute), fail); len(l) != 1 || calls != 1 {
+		t.Fatalf("reused: %v %d", l, calls)
+	}
+	// After it, a refused ask keeps the last good list and reports the error.
+	if l, err := g.get(t0.Add(GroupsRefresh), fail); err == nil || len(l) != 1 || calls != 2 {
+		t.Fatalf("refused: %v %v %d", l, err, calls)
+	}
+	// Marked stale (joined, left, renamed): asked again at once.
+	g.markStale()
+	if _, err := g.get(t0.Add(GroupsRefresh+time.Second), ok); err != nil || calls != 3 {
+		t.Fatalf("stale: %v %d", err, calls)
+	}
+}
+
+func TestGroupCacheWithNothingYet(t *testing.T) {
+	var g groupCache
+	l, err := g.get(time.Unix(1, 0), func() ([]contactEntry, error) { return nil, errors.New("offline") })
+	if err == nil || len(l) != 0 {
+		t.Fatalf("got %v %v", l, err)
+	}
+}

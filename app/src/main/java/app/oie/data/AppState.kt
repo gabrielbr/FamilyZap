@@ -185,6 +185,20 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     }
     /** The contacts on the kid's side: the allowed ones the parent hasn't paused from their WhatsApp (v0.21). */
     val reachable: List<Contact> get() = allowed.filter { !it.paused }
+
+    /** v0.42: the kid's own order and favorites on the home (HomeOrder). Contact ids; the parent's order is untouched. */
+    val kidOrder = androidx.compose.runtime.mutableStateListOf<String>()
+    val favorites = androidx.compose.runtime.mutableStateListOf<String>()
+    /** The people on the kid's home, in the kid's order: favorites first. */
+    val homePeople: List<Contact> get() = app.oie.logic.HomeOrder.order(reachable, favorites.toSet(), kidOrder)
+    fun moveOnHome(id: String, delta: Int) {
+        val next = app.oie.logic.HomeOrder.move(reachable, favorites.toSet(), kidOrder, id, delta)
+        kidOrder.clear(); kidOrder.addAll(next)
+    }
+    fun toggleFavorite(id: String) {
+        val (favs, next) = app.oie.logic.HomeOrder.toggleFavorite(reachable, favorites.toSet(), kidOrder, id)
+        favorites.clear(); favorites.addAll(favs); kidOrder.clear(); kidOrder.addAll(next)
+    }
     /** SHA-256 of the PIN, never the PIN itself. */
     internal var pinHash: String? = null
     val pinGuard = Pin.Guard()

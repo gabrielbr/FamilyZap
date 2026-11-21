@@ -73,6 +73,7 @@ object Codec {
         put("drafts", JSONObject(s.drafts.toMap()))
         put("lastSeen", JSONObject(s.lastSeen.toMap()))
         put("parentWroteAt", JSONObject(s.parentWroteAt.toMap()))
+        put("kidOrder", JSONArray(s.kidOrder.toList())).put("favorites", JSONArray(s.favorites.toList()))
         put("ruleTest", JSONObject().put("on", s.linkState.on)) // "ruleTest" kept as the key so older saves still read
     }.toString()
 
@@ -149,6 +150,8 @@ object Codec {
         }
         s.drafts.clear(); o.optJSONObject("drafts")?.let { d -> d.keys().forEach { k -> s.drafts[k] = d.getString(k) } }
         s.lastSeen.clear(); o.optJSONObject("lastSeen")?.let { d -> d.keys().forEach { k -> s.lastSeen[k] = d.getLong(k) } }
+        s.kidOrder.clear(); o.optJSONArray("kidOrder")?.let { a -> for (i in 0 until a.length()) s.kidOrder += a.getString(i) }
+        s.favorites.clear(); o.optJSONArray("favorites")?.let { a -> for (i in 0 until a.length()) s.favorites += a.getString(i) }
         s.parentWroteAt.clear(); o.optJSONObject("parentWroteAt")?.let { d -> d.keys().forEach { k -> s.parentWroteAt[k] = d.getLong(k) } }
         s.linkState.clear()
         s.linkState.on = o.optJSONObject("ruleTest")?.optBoolean("on") ?: false
