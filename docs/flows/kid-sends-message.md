@@ -231,3 +231,19 @@ _The owner's test (2026-11-20): the kid can record and listen in Oiê, but the f
 
 ## v0.34: one verb
 The kid's side says **Mandar** everywhere (the voice's own examples: "Mandar oi"): the send button, "Mandando para Vovó" in the undo bar, "Mandada" under the last message. "Enviar" is left only in the parent's "Enviar para o GitHub".
+
+## v0.42: slide up to stop holding (like WhatsApp)
+_The owner, 2026-11-21: "press and slide up, so it starts recording, and where the icon position was stays the stop, so the user can record audio without needing to hold the button."_
+
+| # | The kid | What happens |
+|---|---|---|
+| 1 | Presses and holds the mic | Recording starts. An up arrow appears above the button. On the tablet the hint says "Arraste para cima para não precisar segurar". |
+| 2a | Lets go | It sends, as before (5 s to undo or listen). |
+| 2b | Slides sideways or down, then lets go | It's cancelled, as before ("Solte para cancelar" while away). |
+| 2c | Slides up past the arrow | It keeps recording without the finger. The mic turns into a **stop** button, and the hint says "Toque no botão para mandar". |
+| 3 | (after 2c) Taps stop | It sends, with the usual 5 s to undo or listen. **Cancelar** throws it away. The 2-minute limit still ends it by itself. |
+
+- **"Gravar áudio" from the home** starts in the same state as 2c (stop button, Cancelar).
+- **Accessibility:** TalkBack's double-tap still starts a recording, and a second double-tap sends it. No one has to drag (WCAG 2.5.7).
+- **While recording,** the reaction tip ("Segure uma mensagem…") steps aside, so the arrow never covers it.
+- **Copy:** "Toque no botão para mandar" replaces "Toque no microfone para enviar" (one verb, Mandar; and the button is no longer a microphone).

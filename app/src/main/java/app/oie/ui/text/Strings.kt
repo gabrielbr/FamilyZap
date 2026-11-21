@@ -57,6 +57,8 @@ interface Strings {
     fun sentAt(time: String): String
     fun askReconnect(parent: String): String
     val recording: String; val releaseToSend: String
+    // v0.43: slide up to keep recording without holding (like WhatsApp).
+    val slideUpToKeep: String
     fun writeTo(name: String): String
     fun sendingTo(name: String): String
     val photoError: String
@@ -330,6 +332,7 @@ object Pt : Strings {
     override fun sentAt(time: String) = "Mandada · $time"
     override fun askReconnect(parent: String) = "Peça para $parent conectar de novo."
     override val recording = "Gravando…"; override val releaseToSend = "Solte para mandar"
+    override val slideUpToKeep = "Arraste para cima para não precisar segurar"
     override fun writeTo(name: String) = "Escreva para $name"
     override fun sendingTo(name: String) = "Mandando para $name"
     override val photoError = "Não deu para abrir essa foto. Tente outra."
@@ -588,7 +591,7 @@ object Pt : Strings {
     override fun forgotBody(kid: String) = "Para provar que é você, conecte o Oiê ao seu WhatsApp de novo. O tablet sai do WhatsApp e mostra um código para ler com o seu celular, como no começo. Os contatos e as conversas de $kid continuam aqui. Depois, você escolhe o PIN novo."
     override val write = "Escrever"; override val recordAudio = "Gravar áudio"; override val noMessagesYet = "Ainda sem mensagens"
     override val yesterday = "Ontem"; override val sticker = "Figurinha"; override val somethingInWhatsApp = "Algo que só abre no WhatsApp"
-    override val tapToSend = "Toque no microfone para enviar"; override val galleryShort = "Galeria"
+    override val tapToSend = "Toque no botão para mandar"; override val galleryShort = "Galeria"
     override fun mine(text: String) = "Você: $text"
     override fun voicePreview(seconds: Int) = "Áudio · %d:%02d".format(seconds / 60, seconds % 60)
     override fun weekday(day: Int) = listOf("Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo")[(day - 1).coerceIn(0, 6)]
@@ -649,6 +652,7 @@ object En : Strings {
     override fun sentAt(time: String) = "Sent · $time"
     override fun askReconnect(parent: String) = "Ask $parent to link it again."
     override val recording = "Recording…"; override val releaseToSend = "Let go to send"
+    override val slideUpToKeep = "Slide up to stop holding"
     override fun writeTo(name: String) = "Write to $name"
     override fun sendingTo(name: String) = "Sending to $name"
     override val photoError = "Couldn't open that photo. Try another one."
@@ -911,7 +915,7 @@ object En : Strings {
     override fun forgotBody(kid: String) = "To prove it's you, link Oiê to your WhatsApp again. The tablet leaves WhatsApp and shows a code to scan with your phone, like at the start. $kid's contacts and chats stay here. Then you choose the new PIN."
     override val write = "Write"; override val recordAudio = "Record audio"; override val noMessagesYet = "No messages yet"
     override val yesterday = "Yesterday"; override val sticker = "Sticker"; override val somethingInWhatsApp = "Something that only opens in WhatsApp"
-    override val tapToSend = "Tap the microphone to send"; override val galleryShort = "Gallery"
+    override val tapToSend = "Tap the button to send"; override val galleryShort = "Gallery"
     override fun mine(text: String) = "You: $text"
     override fun voicePreview(seconds: Int) = "Voice message · %d:%02d".format(seconds / 60, seconds % 60)
     override fun weekday(day: Int) = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")[(day - 1).coerceIn(0, 6)]

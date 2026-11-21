@@ -1,5 +1,11 @@
 package app.oie.ui.kid
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
+
+import androidx.compose.ui.draw.rotate
+
+import androidx.compose.foundation.layout.offset
+
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -354,7 +360,7 @@ fun Conversation(
                 }
                 // v0.34 audit: reactions were found only by chance; a one-line hint until the kid has reacted once,
                 // at the end of the chat (round 2: not between messages).
-                if (!state.reactTipUsed && visible.any { !it.fromKid && it.kind != Kind.DELETED }) item(key = "react-tip") {
+                if (!state.reactTipUsed && recordingSince == 0L && visible.any { !it.fromKid && it.kind != Kind.DELETED }) item(key = "react-tip") {
                     Text(tx.reactHint, style = OieType.caption, color = c.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                 }
             }
@@ -391,7 +397,8 @@ fun Conversation(
                         style = OieType.label, color = if (left <= 10) c.coralText else c.ink, modifier = Modifier.weight(1f))
                     // Round 3: on a phone the hint shows only when it matters (slid off), so the clock and Cancelar fit.
                     // v0.38: started by a tap, nothing is held: the hint says to tap the button.
-                    if (away || !app.oie.ui.common.isCompact) Text(if (away) tx.releaseToCancel else if (byTap) tx.tapToSend else tx.releaseToSend, style = OieType.bodySmall, color = if (away) c.coralText else c.muted)
+                    // v0.43: while held, the tablet says the button can be slid up (the arrow above it says so on a phone).
+                    if (away || !app.oie.ui.common.isCompact) Text(if (away) tx.releaseToCancel else if (byTap) tx.tapToSend else tx.slideUpToKeep, style = OieType.bodySmall, color = if (away) c.coralText else c.muted)
                     // v0.34 audit round 2: a recording started by a tap (TalkBack) has a way out; with a finger on
                     // the button, sliding off cancels.
                     QuietButton(tx.cancel, { app.oie.data.Voice.stop(context, keep = false); recordingSince = 0; away = false; byTap = false })
@@ -440,7 +447,10 @@ fun Conversation(
                 }
                 if (canSend && draft.isBlank()) RecordButton(
                     recording = recordingSince > 0,
+                    kept = byTap,
                     onAway = { away = it },
+                    // v0.43: slid up while holding: it keeps recording without the finger, like a tap-started one.
+                    onKeep = { byTap = true; away = false },
                     onStart = { tap ->
                         byTap = tap
                         // v0.11: a real recording. Without the microphone permission, ask for it (the parent was asked at setup).
@@ -536,9 +546,15 @@ fun Conversation(
     }
 }
 
-/** Hold to record, release to send; tap to start and tap again to send for anyone who can't hold (WCAG 2.5.7). */
+/**
+ * Hold to record, release to send; tap to start and tap again to send for anyone who can't hold (WCAG 2.5.7).
+ * v0.43 (the owner: "press and slide up, so it starts recording, and where the icon position was stays the stop"):
+ * while held, an arrow above the button shows that sliding up keeps the recording going without the finger; the
+ * button then becomes a stop button that sends (with the usual 5 s to undo or listen). Sliding sideways or down
+ * still cancels on release.
+ */
 @Composable
-private fun RecordButton(recording: Boolean, onStart: (tap: Boolean) -> Unit, onStop: (send: Boolean) -> Unit, onAway: (Boolean) -> Unit) {
+private fun RecordButton(recording: Boolean, kept: Boolean, onStart: (tap: Boolean) -> Unit, onStop: (send: Boolean) -> Unit, onAway: (Boolean) -> Unit, onKeep: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     // v0.34 audit: one gesture for the whole press (it was restarted mid-press when recording began, which could
@@ -548,6 +564,14 @@ private fun RecordButton(recording: Boolean, onStart: (tap: Boolean) -> Unit, on
     val start by androidx.compose.runtime.rememberUpdatedState(onStart)
     val stop by androidx.compose.runtime.rememberUpdatedState(onStop)
     val away by androidx.compose.runtime.rememberUpdatedState(onAway)
+    val keep by androidx.compose.runtime.rememberUpdatedState(onKeep)
+    Box(contentAlignment = Alignment.Center) {
+    // The arrow to slide up to, only while the recording is held.
+    if (recording && !kept) Box(
+        Modifier.offset(y = -(OTokens.Size.record + OTokens.Spacing.space2)).size(OTokens.Size.button).clip(CircleShape)
+            .background(c.surface).border(OTokens.Size.hairline, c.line, CircleShape).clearAndSetSemantics { },
+        contentAlignment = Alignment.Center,
+    ) { OIcon(R.drawable.gg_ic_chevron, Modifier.rotate(-90f), tint = c.ink) }
     Box(
         Modifier.size(OTokens.Size.record).scale(if (recording) 0.97f else 1f).clip(CircleShape).background(c.mint)
             .semantics {
@@ -561,19 +585,27 @@ private fun RecordButton(recording: Boolean, onStart: (tap: Boolean) -> Unit, on
                     if (isRecording) { stop(true); return@awaitEachGesture }
                     start(false)
                     val slop = viewConfiguration.touchSlop * 2
+                    // Slid up past the arrow (a button and a bit above), the recording keeps going on its own.
+                    val keepAt = -(size.height + slop)
                     var off = false
+                    var kept = false
                     while (true) {
                         val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
                         if (!change.pressed) break
+                        if (kept) continue
                         val p = change.position
-                        val outside = p.x < -slop || p.y < -slop || p.x > size.width + slop || p.y > size.height + slop
+                        val sideways = p.x < -slop || p.x > size.width + slop
+                        if (!sideways && p.y < keepAt) { kept = true; if (off) { off = false; away(false) }; keep(); continue }
+                        // Up, toward the arrow, isn't "away"; sideways or down is.
+                        val outside = sideways || p.y > size.height + slop
                         if (outside != off) { off = outside; away(off) }
                     }
-                    stop(!off)
+                    if (!kept) stop(!off)
                 }
             },
         contentAlignment = Alignment.Center,
-    ) { OIcon(R.drawable.gg_ic_mic, tint = c.onMint, size = OTokens.Spacing.space8) }
+    ) { OIcon(if (recording && kept) R.drawable.gg_ic_stop else R.drawable.gg_ic_mic, tint = c.onMint, size = OTokens.Spacing.space8) }
+    }
 }
 
 /** "Novas": where the unread messages start (v0.34 audit, flow kid-receives-messages.md). */
