@@ -48,4 +48,5 @@
 | GoatCounter's own script | 2 (duplicate of 40 lines of ours) | Not added | `count.js` |
 
 ## Open items
-- The owner's GoatCounter code. Until it's set, the script sends nothing.
+- The owner's GoatCounter site is `ogabriel` (given 2026-11-21). They gave GoatCounter's standard snippet; we kept our own script instead, so no third-party code runs on the site. It sends the same counts to the same endpoint.
+- Check the first visits show on ogabriel.goatcounter.com after the site publishes.

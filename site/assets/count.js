@@ -8,7 +8,7 @@
 //   (?contar=1 undoes it). That one choice is kept in the browser's local storage.
 (function () {
   "use strict";
-  var CODE = "TBD"; // the GoatCounter site code (source needed: the owner's GoatCounter account)
+  var CODE = "ogabriel"; // the owner's GoatCounter site (dashboard: ogabriel.goatcounter.com)
   var HOSTS = ["gabrielbr.github.io"];
   var KEY = "oie-naocontar";
 
@@ -19,7 +19,7 @@
     if (localStorage.getItem(KEY) === "1") return;
   } catch (e) { /* storage blocked: count as usual */ }
 
-  if (CODE === "TBD" || HOSTS.indexOf(location.hostname) < 0) return;
+  if (HOSTS.indexOf(location.hostname) < 0) return;
   if (navigator.doNotTrack === "1" || window.doNotTrack === "1" || navigator.globalPrivacyControl) return;
 
   var END = "https://" + CODE + ".goatcounter.com/count";
