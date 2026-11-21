@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **Website: a page for family and friends,** "Como falar com uma criança no Oiê" (`/falar-com-a-crianca/`, EN `/talk-to-a-child/`). It's a link the parent can send to a grandparent or a friend's parent. It explains how to start a conversation (an invitation, a good night): be on the list, write to the parent's number, start with the child's name. It also covers what reaches the tablet, what stays with the parent, and that the parent sees everything. A test keeps the page's examples true to the app's rule. The landing page's footer links to it.
 - **Website: no more "meeting outside".** The landing page no longer says that the conversation leads to meeting up (it could read the wrong way). It now talks about sharing the day and missing each other less, and the school friend's example is about yesterday's game.
 - **Website polish:** fewer repeated "telefone de casa" lines and no tacked-on fragments. The hero is one sentence, and step 2 now says "A mensagem sai…".
 - **Website: the landing page tells the story of the home phone** (decision 0014). A friend said the page felt like watching over kids. Now it opens with "Lembra do telefone de casa?": the kid talks to the family and friends you choose, makes a plan, and the meeting happens outside. The look and the story's steps are the same; only the words changed. "Você vê o que sai" left the highlights (it's still answered in the FAQ), and the footer says Oiê is open source, made by Gabriel Lopes.

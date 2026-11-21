@@ -22,6 +22,8 @@ The landing page: static pages, no build step, no analytics, no tracking, no coo
 
 **The safety page (2026-11-20, flow `docs/flows/website-safety.md`):** `seguranca/` (PT) and `safety/` (EN), static pages with no script. At the top, why Oiê exists (the home phone of the 90s, no ads, no servers of ours, no analytics or tracking). Below it, a guide for parents: talking first, the tools parents already have (Family Link and others), the risks at 9–12, Brazil's rules and where to get help. Every item links to its official source, and the page shows the date it was last checked; **re-check the links and facts whenever the page changes**. Styles in `assets/read.css`. The landing page links to it from the nav ("Segurança") and the footer.
 
+**The page for family and friends (2026-11-21, flow `docs/flows/website-talk-to-a-kid.md`):** `falar-com-a-crianca/` (PT) and `talk-to-a-child/` (EN), static pages in the safety page's style (`read.css`). They're for the people on the other side, a link the parent sends: be on the list, start with the child's name (examples of what reaches the tablet and what stays with the parent), then just talk, and what's good to know. The examples are checked by `MessageRuleTest.theWebsitesExamplesHold`; **if `MessageRule` changes, change this page too.** The landing page's footer links to it.
+
 **Files:**
 - `index.html`: the page, Portuguese first, with English through the switch or `?lang=en`. The silhouettes and line icons are inline SVG symbols.
 - `assets/site.js`:

@@ -96,4 +96,22 @@ class MessageRuleTest {
         val note = Message("a", "me", fromKid = false, at = h, kind = Kind.TEXT, text = "comprar pão")
         assertFalse(MessageRule.isForKid(note, ownChat, emptyList(), "Tito"))
     }
+
+    /** The examples on the website's page for family and friends (site/falar-com-a-crianca, site/talk-to-a-child). */
+    @Test fun theWebsitesExamplesHold() {
+        val starts = listOf(
+            "Tito, sábado é o aniversário do Lucas. Quer vir?", "Oi Tito, boa noite. Dorme bem.", "Bom dia, Tito. Como foi a prova?",
+            "Tito, it's Lucas's birthday on Saturday. Want to come?", "Hi Tito, good night. Sleep well.", "Good morning, Tito. How was the test?",
+        )
+        for (t in starts) assertTrue(t, MessageRule.isForKid(fam("a", 0, t), vovo, emptyList(), "Tito"))
+        // Talk about the kid stays with the parent, even right after the kid wrote (inside the 24-hour window).
+        val about = listOf(
+            "O Tito pode vir sábado?", "Manda um beijo pro Tito.", "Como está o Tito?",
+            "Is Tito free on Saturday?", "Tell Tito I said hi.", "How is Tito doing?",
+        )
+        for (t in about) {
+            assertFalse(t, MessageRule.isForKid(fam("a", 0, t), vovo, emptyList(), "Tito"))
+            assertFalse(t, MessageRule.isForKid(fam("b", 2 * h, t), vovo, listOf(kid("k", h)), "Tito"))
+        }
+    }
 }
