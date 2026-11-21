@@ -6,6 +6,7 @@ _Designed with `ux-user-flows` on 2026-11-21, at the owner's request: "a specifi
 - **Success measure:** their first message to the kid reaches the tablet. That takes one read of the page and no question to the parent.
 - **Entry points:**
   - a link the parent sends ("Para falar com o Tito, veja aqui");
+  - the top menu of every page ("Família e amigos", next to "Segurança"), since the owner's note of 2026-11-21: "I want this information accessible, so it should be in a top-level menu, not in the footer only";
   - the landing page's footer;
   - the safety page's footer;
   - search.

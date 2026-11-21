@@ -91,7 +91,7 @@
     g3: "Open Oiê: your name, your kid’s, and a QR code you scan in your WhatsApp.", g4: "Choose the contacts, family or friends. Your kid can send the first hello.",
     getSmall: "For Android 8 or newer. The file comes from Oiê’s releases page on GitHub, with a code (SHA-256) to check the file is the original.",
     navSafety: "Safety", footSafety: "Why Oiê, and kids safe online", navSafetyHref: "safety/",
-    footTalk: "For family and friends: how to talk to the child", footTalkHref: "talk-to-a-child/",
+    navTalk: "Family and friends", footTalk: "For family and friends: how to talk to the child", footTalkHref: "talk-to-a-child/",
     footLine: "The home phone, back.", footCode: "The code on GitHub",
     made: "Oiê is <b>open source</b>. Made by <a href=\"https://www.gabriellopes.com\" rel=\"noopener\">Gabriel Lopes</a>.", footAll: "All releases", footLib: "whatsmeow (MPL-2.0)", footPatch: "The whatsmeow file Oiê modifies",
     footLegal: "Oiê is an independent app, not affiliated with WhatsApp or Meta. WhatsApp is a trademark of Meta. The screens on this page are example drawings.",
