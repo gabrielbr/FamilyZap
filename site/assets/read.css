@@ -44,7 +44,7 @@
 
 .items { margin: 0; padding: 0; list-style: none; }
 .items > li { padding: var(--s4) 0 var(--s2); border-top: 1px solid var(--gds-line); max-width: var(--measure); }
-.items h4 { font-weight: 700; font-size: 1.25rem; line-height: 1.3; margin: 0 0 var(--s2); }
+.items h3, .items h4 { font-weight: 700; font-size: 1.25rem; line-height: 1.3; margin: 0 0 var(--s2); }
 /* The source sits with its item: its 44px target starts right under the text. */
 .items p { margin: 0; }
 .items li > .src { margin-top: calc(-1 * var(--s2)); }
@@ -58,6 +58,18 @@
 .call { display: inline-flex; align-items: center; min-height: 44px; margin-right: var(--s4); font-weight: 700; color: var(--gds-ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
 .items li > .call { margin-top: calc(-1 * var(--s2)); }
 
+/* The page for family and friends (falar-com-a-crianca, talk-to-a-child). */
+.read-p { margin: 0 0 var(--s4); max-width: var(--measure); text-wrap: pretty; }
+/* Two lists of example messages, told apart by their titles (never by colour alone). Each message is drawn
+   as a plain line in the page's own surface, so it reads as something you'd type, not as a WhatsApp screen. */
+.say { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s6); margin: var(--s6) 0; max-width: var(--measure); }
+/* Here h3 is an item title under the step's h2, not the safety page's section title. */
+.read .stop .items h3, .read .stop .say h3 { font-weight: 700; font-size: 1.25rem; line-height: 1.3; letter-spacing: 0; margin: 0 0 var(--s2); }
+.read .stop .say h3 { margin-bottom: var(--s3); }
+.say ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); }
+.say li { background: var(--gds-surface); border: 1px solid var(--gds-line); border-radius: var(--r-card); padding: var(--s3) var(--s4); line-height: 1.4; }
+.say__col:last-child li { background: transparent; color: var(--gds-muted); border-style: dashed; }
+
 .read-back { margin: var(--s6) 0 0; }
 .read-back a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
 
@@ -69,6 +81,7 @@
   .read.wrap { padding-left: var(--s4); padding-right: var(--s4); }
   /* On a phone the ring sits above its title, so the text gets the full column. */
   .read .stop { grid-template-columns: minmax(0, 1fr); }
+  .say { grid-template-columns: minmax(0, 1fr); }
   .read .stop__ring { width: 28px; height: 28px; border-width: 4px; margin: 0 0 var(--s3); }
 }
 
