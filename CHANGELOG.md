@@ -23,6 +23,9 @@
   - **The screens:** the message is shown on the tablet, then on your WhatsApp, then on theirs, and the reply comes back.
   - **Not only grandma:** the copy and FAQ now say "family and friends you choose" (decision 0013).
 
+## 0.39.0
+- **Your kid's name on every kind of message.** WhatsApp doesn't let a voice message or a real sticker carry a caption, so the family couldn't tell those came from your kid. Now, before a voice message or a sticker, the name goes on its own line (😎**Tito**, with the emoji you chose), then the audio or the sticker. It goes once per burst: if your kid sends five audios in a row, the name goes once, and again only after 2 minutes. Text, photos, videos, GIFs and Oiê's stickers already carried the name. Reactions stay as they are.
+
 ## 0.38.1
 - **Clearer about privacy.** Ajuda now says it plainly: Oiê has no servers. The tablet links to your WhatsApp the way WhatsApp itself does (like WhatsApp Web), and messages go only through WhatsApp. There is no analytics, no ads and no tracking, so nothing about your kid or your family reaches us. The only other connection checks GitHub for a new version of Oiê. Nothing in how the app works changed.
 

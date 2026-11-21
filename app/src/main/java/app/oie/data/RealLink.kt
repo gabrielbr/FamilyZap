@@ -50,11 +50,34 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
 
     private fun signed(text: String): String = app.oie.logic.Signature.sign(state.kidName, text, state.kidEmoji)
 
+    /** When the kid's name last reached each chat (v0.39), for the name line before a voice note or a family sticker. */
+    private val lastNamedAt = java.util.concurrent.ConcurrentHashMap<String, Long>()
+
+    /**
+     * v0.39: a voice note or a family sticker can't carry a caption, so the name goes alone just before it
+     * ("😎*Tito*"), once per burst ([app.oie.logic.NameLine]). It keeps the pace like every send (L3), and its id
+     * is ours, so its echo never shows on the tablet. If it fails, the message after it isn't sent either.
+     */
+    private fun sendNameLineIfNeeded(l: oielink.Link, m: app.oie.logic.Message, familySticker: Boolean) {
+        if (!app.oie.logic.NameLine.needed(m.kind, familySticker, state.kidName, lastNamedAt[m.chatId], System.currentTimeMillis())) return
+        val id = "3EB0" + java.util.UUID.randomUUID().toString().replace("-", "").take(18).uppercase()
+        ours += id
+        l.sendTextWithID(m.chatId, signed(""), "", id)
+        val at = System.currentTimeMillis()
+        sentAt += at
+        lastNamedAt[m.chatId] = at
+        Diagnostics.log("send name line: ok")
+        val wait = app.oie.logic.SendPace.waitMs(sentAt, System.currentTimeMillis())
+        if (wait > 0) Thread.sleep(wait)
+    }
+
     private fun deliver(m: app.oie.logic.Message, retried: Boolean) {
         val wait = app.oie.logic.SendPace.waitMs(sentAt, System.currentTimeMillis())
         if (wait > 0) Thread.sleep(wait)
         val l = link
+        val familySticker = m.kind == Kind.STICKER && m.media != null
         val err: Throwable? = if (l == null) IllegalStateException("not linked") else runCatching {
+            sendNameLineIfNeeded(l, m, familySticker)
             when (m.kind) {
                 // The kid writes from the parent's number, so the family sees who it is: "Tito: Oi, vó" (setup promises this).
                 // v0.36: an answer to a status quotes it, in the poster's chat.
@@ -87,6 +110,7 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
         Diagnostics.log("send ${m.kind}${if (retried) " (retry)" else ""}: ${err?.let { "failed: ${it.message}" } ?: "ok"}")
         while (sentAt.size > app.oie.logic.SendPace.MAX_IN_WINDOW * 2) sentAt.removeAt(0)
         if (err == null) {
+            if (app.oie.logic.NameLine.carriesName(m.kind, familySticker)) lastNamedAt[m.chatId] = System.currentTimeMillis()
             main.post { state.failed.remove(m.id); state.heard(listOf(m.id), app.oie.logic.Receipt.SENT) }
             // v0.35: on the line to the parent, the chat marks itself unread on the parent's phone (WhatsApp never
             // notifies an account of its own messages). Nothing is sent to anyone; a failure doesn't touch the message.
