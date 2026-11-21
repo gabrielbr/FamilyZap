@@ -119,6 +119,7 @@ object OTokens {
         val avatar = 48.dp
         val contactTile = 96.dp
         val record = 72.dp
+        val newsEdge = 2.dp
         val contentMax = 600.dp
     }
 

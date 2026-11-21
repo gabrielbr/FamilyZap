@@ -79,6 +79,10 @@ class ScreensTest {
     @Test fun kidNotice() = shot("01-kid-notice", false) { KidHome(ready()) }
     @Test fun kidHomeLight() = shot("02-kid-home", false) { KidHome(ready().apply { kidNoticeSeen = true }) }
     @Test fun kidHomeDark() = shot("02-kid-home", true) { KidHome(ready().apply { kidNoticeSeen = true }) }
+    // v0.45: Tia Bia (fourth in the order) wrote "Tito, ..." five minutes ago: she comes first, then Vovó (20 min ago); both highlighted.
+    private fun withNews() = ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("t1", allowed[3].id, false, now - 5 * 60 * 1000, app.oie.logic.Kind.TEXT, "Tito, vamos ao parque sábado?") }
+    @Test fun kidHomeNews() = shot("78-kid-home-news", false) { KidHome(withNews()) }
+    @Test fun kidHomeNewsDark() = shot("78-kid-home-news", true) { KidHome(withNews()) }
     @Test fun kidHomeUnlinked() = shot("03-kid-home-unlinked", false) { KidHome(ready().apply { kidNoticeSeen = true; link.pretendDropped() }) }
     @Test fun conversationLight() = shot("04-conversation", false) { Conversation(ready().apply { kidNoticeSeen = true }, "vovo") }
     @Test fun conversationDark() = shot("04-conversation", true) { Conversation(ready().apply { kidNoticeSeen = true }, "vovo") }

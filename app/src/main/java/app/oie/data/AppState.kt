@@ -191,6 +191,10 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     val favorites = androidx.compose.runtime.mutableStateListOf<String>()
     /** The people on the kid's home, in the kid's order: favorites first. */
     val homePeople: List<Contact> get() = app.oie.logic.HomeOrder.order(reachable, favorites.toSet(), kidOrder)
+    /** v0.45: the home as the kid sees it outside Arrumar: whoever has news first, newest first (HomeOrder.withNews). */
+    val homeNow: List<Contact> get() = app.oie.logic.HomeOrder.withNews(homePeople, reachable.mapNotNull { ct -> latestNew(ct.id)?.let { ct.id to it } }.toMap())
+    /** When the newest unread message from this person arrived, or null when everything is read. */
+    fun latestNew(contactId: String): Long? = visible(contactId).filter { !it.fromKid && it.at > lastSeen.getOrDefault(contactId, 0L) }.maxOfOrNull { it.at }
     fun moveOnHome(id: String, delta: Int) {
         val next = app.oie.logic.HomeOrder.move(reachable, favorites.toSet(), kidOrder, id, delta)
         kidOrder.clear(); kidOrder.addAll(next)

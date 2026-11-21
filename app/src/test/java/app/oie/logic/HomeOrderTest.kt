@@ -44,4 +44,10 @@ class HomeOrderTest {
         assertEquals(setOf("pai"), favs)
         assertEquals(listOf("pai", "tia", "lu", "vo"), ids(HomeOrder.order(parent, favs, order)))
     }
+
+    @Test fun newsComeFirstNewestFirstAndTheRestKeepTheirPlace() {
+        val ordered = HomeOrder.order(parent, setOf("vo"), listOf("vo", "tia", "lu", "pai"))
+        assertEquals(listOf("pai", "lu", "vo", "tia"), ids(HomeOrder.withNews(ordered, mapOf("lu" to 100L, "pai" to 200L))))
+        assertEquals(ids(ordered), ids(HomeOrder.withNews(ordered, emptyMap()))) // all read: the kid's order again
+    }
 }

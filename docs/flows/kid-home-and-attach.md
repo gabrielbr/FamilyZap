@@ -120,3 +120,26 @@ _The owner, 2026-11-21: "allow the kid to reorganize the listing of the contacts
 | 2 | Taps Vovô's heart | Vovô moves to the top, with "Favorito" under the name. |
 | 3 | Holds Lucas and drags him up | Lucas swaps place as he passes each person (not above the favorites). |
 | 4 | Taps Pronto | The home is back, in the new order. |
+
+## v0.45: news comes first, in the brand coral
+_The owner, 2026-11-21: "the cards on the main screen, when we have a notification, are very soft and don't bring attention to the kid. Those should move up from the list and also have a highlight card, using the red of the brand and the notification tag. As happens on WhatsApp, when somebody contacts you, they go up."_
+
+- **Order:**
+  - Whoever has unread messages comes first, the newest message first (`HomeOrder.withNews`).
+  - Everyone else keeps the kid's order (favorites, then Arrumar's order).
+  - Once the kid opens the chat and reads, the person goes back to their place. The kid's order is never rewritten, so nothing the kid arranged is lost.
+- **Look:**
+  - A person with news wears a 2dp brand-coral edge (`news-edge`, 3.4:1 on the page, a graphic).
+  - "3 novas" is filled with the brand coral, with ink on it (4.8:1).
+  - Colour is never alone: the count is a word, and the last message is in bold.
+- **Arrumar:** shows the kid's order only, with no news first, so arranging is never confused by moving rows.
+- **The one-filled-coral rule:** each person with news has a coral tag. That's the owner's call (decision 0015). The filled coral action stays one per screen, because the home has no other.
+
+| # | Situation | Before | After |
+|---|---|---|---|
+| 1 | Tia Bia (4th) writes "Tito, …" | Her card stays 4th, with a dark "1 nova" | Tia Bia moves to the top with a coral edge and "1 nova" |
+| 2 | Vovó wrote 20 min earlier, still unread | Vovó 1st | Vovó 2nd (Tia Bia's is newer), also highlighted |
+| 3 | Tito reads Tia Bia | — | Tia Bia goes back to 4th, plain |
+| 4 | Arrumar | — | The kid's order, with no news first |
+
+**Review (§13):** happy path unchanged (one tap to open). Accessibility: the label still reads the name, then "1 nova", then the message, and the order is the one read out. Evidence 🟡: Tito notices the new card on the tablet.

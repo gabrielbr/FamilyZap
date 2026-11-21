@@ -35,6 +35,15 @@
 
 
 
+## 0.45.0
+- **New messages come first on Tito's home, in the brand coral.**
+  - Whoever wrote and hasn't been read yet moves to the top, the newest first, as in WhatsApp.
+  - Their card (or row, on a phone) gets a coral edge, and "3 novas" turns coral.
+  - Once Tito reads the chat, the person goes back to their place in Tito's order.
+  - Arrumar always shows Tito's own order.
+- **Phones:** every kid and parent screen was checked on a 360dp phone with 1.3× text. On the home, the rows now line up and have a small gap between them.
+- **What you have to do:** nothing.
+
 ## 0.44.0
 - **A tidier parent area.** "Ajustes e ajuda" mixed changing things with reading about them in one long scroll. Now:
   - **Ajustes** (gear) holds what changes how Oiê works, in this order:

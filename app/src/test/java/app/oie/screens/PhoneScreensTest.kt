@@ -69,6 +69,8 @@ class PhoneScreensTest {
     // v0.44: Ajustes and Ajuda are separate sections.
     @Test fun parentSettings() = shot("p07-parent-settings") { ParentArea(ready().apply { realMode = true; linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Connected }, 2) }
     @Test fun parentHelp() = shot("p56-parent-help", bigText = true) { ParentArea(ready(), 3) }
+    // v0.45: news first, highlighted, at 1.3× text.
+    @Test fun kidHomeNews() = shot("p57-kid-home-news", bigText = true) { KidHome(ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("t1", allowed[3].id, false, now - 5 * 60 * 1000, app.oie.logic.Kind.TEXT, "Tito, vamos ao parque sábado?") }) }
     @Test fun setupRisk() = shot("p08-setup-risk") { Setup(AppState(), 1, onClose = {}) }
     @Test fun setupNames() = shot("p09-setup-names", bigText = true) { Setup(AppState().apply { parentName = "Ana"; kidName = "Tito" }, 3, onClose = {}) }
     @Test fun stickers() = shot("p10-stickers") { Conversation(ready(), "vovo", openStickers = true) }
