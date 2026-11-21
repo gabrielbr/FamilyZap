@@ -50,11 +50,13 @@ class Notifier(private val context: Context, private val tx: Strings) {
      * One notification per family member. [bubble] (v0.29, "Bolha na tela" on): it's also that chat's
      * bubble, which opens only that chat.
      */
-    fun message(m: Message, from: app.oie.logic.Contact, bubble: Boolean) {
+    /** [who]: in a group, who wrote it (v0.46), so the line reads "Vovó: Domingo tem bolo" under the group's name. */
+    fun message(m: Message, from: app.oie.logic.Contact, bubble: Boolean, who: String = "") {
         if (!allowed()) return
+        val text = if (who.isNotEmpty()) "$who: ${body(m, from.name)}" else body(m, from.name)
         val b = NotificationCompat.Builder(context, channel).setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(from.name).setContentText(body(m, from.name)).setAutoCancel(true).setContentIntent(open(m.chatId))
-        if (bubble) Bubble.decorate(context, b, from, body(m, from.name), m.at, silent = false)
+            .setContentTitle(from.name).setContentText(text).setAutoCancel(true).setContentIntent(open(m.chatId))
+        if (bubble) Bubble.decorate(context, b, from, text, m.at, silent = false)
         post(m.chatId.hashCode(), b)
     }
 

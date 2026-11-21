@@ -35,6 +35,16 @@
 
 
 
+## 0.46.0
+- **Groups work like groups** (decision 0016). In a group you allowed, Tito now sees everything the group says, from everyone:
+  - Each message shows who wrote it, once per run, as in WhatsApp. People on Tito's list show by the name Tito knows ("Vovó").
+  - Anyone else shows by their WhatsApp name, with a **"Fora dos contatos"** tag.
+  - What you write in that group from your phone shows too, under your name.
+  - The home preview and the notification say who wrote it ("Vovó: Domingo tem bolo").
+  - In a group's settings, the "Conversa só de Tito" switch is replaced by a line saying what Tito sees. The switch stays for people.
+- **React to anything.** A long press on a photo, video, GIF or voice message now opens Reagir, as on text. A tap still opens or plays it.
+- **What you have to do:** look at the groups in Contatos. Tito will see everything in them. If one shouldn't be whole for Tito, remove it or pause it.
+
 ## 0.45.0
 - **New messages come first on Tito's home, in the brand coral.**
   - Whoever wrote and hasn't been read yet moves to the top, the newest first, as in WhatsApp.

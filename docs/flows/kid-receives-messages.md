@@ -167,3 +167,11 @@ _The owner's test (2026-11-20): animated stickers from WhatsApp's own packs show
 
 ## v0.42: conversations that are the kid's own
 Rule 4 ("Mostrar tudo do grupo") is now for people too, and the parent turns it on in the contact's editor: **"Conversa só de {kid}"**. Everything in such a chat reaches the kid: no name check, no 24-hour window, and none of v0.40's filters. The line to the parent is never treated this way (`MessageRule`, tested). See `contacts-quiet-hours.md`, v0.42.
+
+## v0.46: groups as groups
+Since v0.46 (decision 0016, flow `docs/flows/groups.md`), **everything in an allowed group reaches the kid**:
+- every member, with their name on the message;
+- people not on the kid's list, marked "Fora dos contatos";
+- the parent's own messages in that group.
+
+The rule above (name, reply, 24 hours, talk about the kid, the parent taking over) now applies to people (1:1 chats) only. A long press on any message, media included, opens Reagir.

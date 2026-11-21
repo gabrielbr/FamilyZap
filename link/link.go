@@ -1172,6 +1172,11 @@ type Incoming struct {
 	// matches the allowed list against both.
 	ChatAlt string `json:"chatAlt,omitempty"`
 	Sender  string `json:"sender"`
+	// SenderAlt is the sender's other address in a group (phone number or LID), so the app can tell
+	// whether they're on the kid's list; SenderName is their WhatsApp profile name, shown when they
+	// aren't (v0.46, groups as groups).
+	SenderAlt  string `json:"senderAlt,omitempty"`
+	SenderName string `json:"senderName,omitempty"`
 	// FromMe means sent by the parent's account: from the tablet (the kid) or from the parent's
 	// own phone. The app tells them apart by the ids it sent; the parent's own are dropped.
 	FromMe bool `json:"fromMe"`
@@ -1213,6 +1218,12 @@ func ToIncoming(info types.MessageInfo, m *waE2E.Message) (Incoming, bool) {
 	}
 	if !info.IsGroup && !alt.IsEmpty() {
 		in.ChatAlt = alt.ToNonAD().String()
+	}
+	if info.IsGroup && !info.IsFromMe {
+		in.SenderName = info.PushName
+		if !info.SenderAlt.IsEmpty() {
+			in.SenderAlt = info.SenderAlt.ToNonAD().String()
+		}
 	}
 	var ctx *waE2E.ContextInfo
 	switch {

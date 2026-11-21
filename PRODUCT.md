@@ -10,7 +10,7 @@ _For apps and websites (Stage 1). Agents and the impeccable skill read this as t
 - **What it must never do or claim:**
   - Never hide the risk: parents are told, before linking, that this is not an official WhatsApp feature and their number could be restricted or banned.
   - No data leaves: Oiê has no servers at all. The tablet links to the parent's WhatsApp the way WhatsApp's own linked devices do (like WhatsApp Web), and messages travel only through WhatsApp. Messages and contacts stay on the family's devices. No analytics, no ads, no tracking: nothing about the family reaches us. The only other connection is the update check on GitHub's public page (owner, 2026-11-20).
-  - No strangers: the kid can never reach, or be reached by, a contact the parent didn't allow.
+  - No strangers: the kid can never reach, or be reached by, a contact the parent didn't allow. Inside a group the parent allowed, the kid sees the whole group, and people not on the kid's list are marked (decision 0016).
   - No safety promises: never claim to make a child "100% safe" or to replace a parent's attention.
   - No WhatsApp affiliation: never imply it's made or endorsed by WhatsApp or Meta; no WhatsApp logo.
 - **Name:** Oiê, said "oy-YEH"; Android id `app.oie` (decision 0002).

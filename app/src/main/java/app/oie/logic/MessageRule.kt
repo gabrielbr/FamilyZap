@@ -10,7 +10,7 @@ import java.text.Normalizer
  *  1. replies to (quotes) one of the kid's messages, at any time; or
  *  2. starts with one of the kid's names ("Tito, …"), after at most one short greeting ("Oi Tito", v0.21); or
  *  3. arrives within 24 hours after the kid's last message in that chat; or
- *  4. comes from a group the parent set to "Mostrar tudo do grupo".
+ *  4. comes from a group the parent set to "Mostrar tudo do grupo" (since v0.46: from any allowed group).
  * v0.40 (the owner, 2026-11-21: "o Tito já chegou?" reached the tablet): the 24-hour window no longer lets in
  *  - a message that talks about the kid ("o Tito já chegou?", "manda beijo pro Tito"), see [aboutKid];
  *  - anything after the parent wrote in that chat, until the kid writes again (the parent took over).
@@ -40,6 +40,9 @@ object MessageRule {
         // v0.42: a conversation the parent marked as the kid's own (a school friend, a cousins' group): all of it
         // reaches the kid, with no name check and no 24-hour window. Never the line to the parent (its notes stay private).
         if (chat.showWholeGroup && !chat.parentLine) return Reason.WHOLE_GROUP
+        // v0.46 (the owner: "a group is a group … for the kids, I want to show all the content that happens in a group";
+        // decision 0016): everything in a group the parent allowed reaches the kid, from everyone in it.
+        if (chat.isGroup) return Reason.WHOLE_GROUP
         val kidMessages = history.filter { it.fromKid && it.chatId == message.chatId && it.at <= message.at }
         // v0.30 (decision 0007): the line to the parent who owns the WhatsApp. In its own group, all of it
         // is for the kid. In the parent's "Mensagem para você" (the fallback), their notes stay private:

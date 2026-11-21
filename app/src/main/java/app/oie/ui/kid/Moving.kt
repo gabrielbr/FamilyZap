@@ -12,6 +12,7 @@ import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -191,8 +192,9 @@ fun clockOf(seconds: Int): String = "%d:%02d".format(seconds / 60, seconds % 60)
  * A video in the chat: its first frame with ▶ and the length. Tapping opens the player. Without the
  * file (still downloading, or too big to keep) it says so in words.
  */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class) // combinedClickable: tap and long press on media (v0.46)
 @Composable
-fun VideoBubble(media: String?, seconds: Int, tooBig: Boolean, parent: String, onWatch: () -> Unit) {
+fun VideoBubble(media: String?, seconds: Int, tooBig: Boolean, parent: String, onLongPress: (() -> Unit)? = null, onWatch: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     if (media == null) {
@@ -206,7 +208,7 @@ fun VideoBubble(media: String?, seconds: Int, tooBig: Boolean, parent: String, o
     Box(
         // Half the column on a tablet; narrower when a phone has less room (v0.27 audit).
         Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(OTokens.Radius.radiusS))
-            .background(c.line).clickable(role = Role.Button, onClick = onWatch)
+            .background(c.line).combinedClickable(role = Role.Button, onLongClick = onLongPress, onClick = onWatch) // v0.46: long press reacts
             .semantics(mergeDescendants = true) { contentDescription = tx.playVideoA11y(seconds) },
         contentAlignment = Alignment.Center,
     ) {
@@ -226,15 +228,16 @@ fun VideoBubble(media: String?, seconds: Int, tooBig: Boolean, parent: String, o
  * A GIF in the chat: plays in a silent loop, with a small "GIF" label. With "Remove animations" on,
  * it shows its first frame and plays when tapped. Tapping opens it big either way.
  */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class) // combinedClickable: tap and long press on media (v0.46)
 @Composable
-fun GifBubble(media: String?, onWatch: () -> Unit) {
+fun GifBubble(media: String?, onLongPress: (() -> Unit)? = null, onWatch: () -> Unit) {
     val c = OieTheme.colors
     val tx = str
     val bytes = rememberBytes(media)
     val animate = app.oie.ui.common.animationsOn()
     Box(
         Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.line)
-            .clickable(role = Role.Button, onClick = onWatch).semantics(mergeDescendants = true) { contentDescription = tx.notifGif },
+            .combinedClickable(role = Role.Button, onLongClick = onLongPress, onClick = onWatch).semantics(mergeDescendants = true) { contentDescription = tx.notifGif },
     ) {
         // Round 3: while it arrives, the placeholder says so (as a video does).
         if (bytes == null) Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f), contentAlignment = Alignment.Center) {

@@ -69,6 +69,15 @@ class PhoneScreensTest {
     // v0.44: Ajustes and Ajuda are separate sections.
     @Test fun parentSettings() = shot("p07-parent-settings") { ParentArea(ready().apply { realMode = true; linkState.on = true; linkState.status = app.oie.data.LinkState.Status.Connected }, 2) }
     @Test fun parentHelp() = shot("p56-parent-help", bigText = true) { ParentArea(ready(), 3) }
+    // v0.46: the group chat with names and "Fora dos contatos", at 1.3× text.
+    @Test fun groupChat() = shot("p58-group-chat", bigText = true) {
+        app.oie.ui.kid.Conversation(ready().apply {
+            kidNoticeSeen = true; reactTipUsed = true
+            messages += app.oie.logic.Message("g1", "primos", false, now - 50 * 60_000, app.oie.logic.Kind.TEXT, "Domingo tem bolo aqui em casa", sender = "5511987650001@s.whatsapp.net")
+            messages += app.oie.logic.Message("g3", "primos", false, now - 40 * 60_000, app.oie.logic.Kind.TEXT, "Eu levo a bola", sender = "88776655@lid", senderAlt = "5511912345678@s.whatsapp.net", senderName = "Lucas Andrade Ferreira")
+            messages += app.oie.logic.Message("g4", "primos", true, now - 30 * 60_000, app.oie.logic.Kind.TEXT, "Eu vou")
+        }, "primos")
+    }
     // v0.45: news first, highlighted, at 1.3× text.
     @Test fun kidHomeNews() = shot("p57-kid-home-news", bigText = true) { KidHome(ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("t1", allowed[3].id, false, now - 5 * 60 * 1000, app.oie.logic.Kind.TEXT, "Tito, vamos ao parque sábado?") }) }
     @Test fun setupRisk() = shot("p08-setup-risk") { Setup(AppState(), 1, onClose = {}) }
