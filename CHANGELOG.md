@@ -1,6 +1,14 @@
 # Changelog
 
 ## Unreleased
+- **Website: "Como falar com uma criança no Oiê" is simpler, made to share in a family group.**
+  - It's five short steps, each with a sample chat that says where each message goes.
+  - The steps: write to the parent's WhatsApp; start with the name, or answer the child; in a group everyone sees everything; the parents see everything.
+- **Website FAQ: "Por que um tablet e não um celular?"**
+  - A tablet stays at home, like the old home phone, and doesn't go in a pocket. Kids talk at calmer moments, not all day.
+  - It cites the federal guide's advice against an own phone before 12.
+  - If you choose a phone, Oiê works on it too.
+- **Website: groups.** The highlights, the FAQ and the safety page now say that in a group you approve, your kid sees the whole group, and people not on their list are marked (v0.46).
 - **Website: the example on phones reads as a story to scroll through.** Some visitors didn't see that the example continued.
   - A bar of six steps and "Próximo" now sit right above the words, at the bottom of the picture.
   - The picture is smaller, so the next step's title always peeks in below.

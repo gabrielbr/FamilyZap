@@ -97,22 +97,17 @@ class MessageRuleTest {
         assertFalse(MessageRule.isForKid(note, ownChat, emptyList(), "Tito"))
     }
 
-    /** The examples on the website's page for family and friends (site/falar-com-a-crianca, site/talk-to-a-child). */
+    /** The examples on the website's page for family and friends (site/falar-com-a-crianca, site/talk-to-a-child; v2). */
     @Test fun theWebsitesExamplesHold() {
-        val starts = listOf(
-            "Tito, sábado é o aniversário do Lucas. Quer vir?", "Oi Tito, boa noite. Dorme bem.", "Bom dia, Tito. Como foi a prova?",
-            "Tito, it's Lucas's birthday on Saturday. Want to come?", "Hi Tito, good night. Sleep well.", "Good morning, Tito. How was the test?",
-        )
+        val starts = listOf("Tito, quer vir aqui sábado?", "Oi Tito, boa noite.", "Tito, want to come over on Saturday?", "Hi Tito, good night.")
         for (t in starts) assertTrue(t, MessageRule.isForKid(fam("a", 0, t), vovo, emptyList(), "Tito"))
-        // Talk about the kid stays with the parent, even right after the kid wrote (inside the 24-hour window).
-        val about = listOf(
-            "O Tito pode vir sábado?", "Manda um beijo pro Tito.", "Como está o Tito?",
-            "Is Tito free on Saturday?", "Tell Tito I said hi.", "How is Tito doing?",
-        )
-        for (t in about) {
+        // Talk about the kid stays with the parents, even right after the kid wrote (inside the 24-hour window).
+        for (t in listOf("O Tito pode vir sábado?", "Is Tito free on Saturday?")) {
             assertFalse(t, MessageRule.isForKid(fam("a", 0, t), vovo, emptyList(), "Tito"))
             assertFalse(t, MessageRule.isForKid(fam("b", 2 * h, t), vovo, listOf(kid("k", h)), "Tito"))
         }
+        // Step 3: an answer after the kid wrote, with no name, reaches him.
+        assertTrue(MessageRule.isForKid(fam("c", 2 * h, "Que legal, me conta tudo"), vovo, listOf(kid("k", h)), "Tito"))
     }
 
     /** v0.46 (decision 0016): everything in an allowed group reaches the kid, from anyone, with no name or window. */
@@ -122,4 +117,5 @@ class MessageRuleTest {
         assertTrue(MessageRule.isForKid(m, primos, emptyList(), "Tito"))
         assertTrue(MessageRule.isForKid(m.copy(text = "o Tito vem?"), primos, emptyList(), "Tito")) // talk about him too: a group is a group
     }
+
 }
