@@ -39,3 +39,25 @@ No "!", no em dashes, no hype.
 
 ## Open items
 - **The safety page** (`seguranca/`, `safety/`) still opens with the 90s story ("Combinava a bicicleta… o encontro acontecia lá fora") and closes with "conversar para se encontrar. O resto acontece fora da tela." The owner asked about the landing page only; the safety page is flagged to them.
+
+## Impeccable polish (same day, the owner: "Use impeccable polish on the landing page")
+Polish (`reference/polish.md`) with impeccable's context loaded (PRODUCT.md, DESIGN.md, the surface brief).
+- **What I looked at:**
+  - every scene, on desktop (1280) and phone (375), in PT and EN;
+  - "Próximo" and slow scrolling through the story on a phone;
+  - the detector, run once.
+- **Fixed:**
+  - **P2, a pronoun with nothing before it:** step 2 opened "Ela sai pela linha da casa…", but no heading before it names a message. It's now "A mensagem sai pela linha da casa: o seu WhatsApp." (EN: "The message goes out on the family line: your WhatsApp.")
+  - **P2, the fragment cadence (detector "aphoristic cadence", added by today's words):** "telefone de casa" appeared about eight times, and four lines were tacked-on fragments. The fixes:
+    - the title is now "Oiê: o telefone de casa, agora no tablet";
+    - the hero is one sentence ("Ele voltou, agora no tablet: …");
+    - "Como o telefone de casa, que era de todo mundo." was cut from step 2;
+    - "Simples como era o telefone de casa." was cut from step 4.
+
+    The image stays where it carries meaning: the hero question, step 1, the phone book in step 6, and the highlights heading.
+- **Left, and why:**
+  - **The aphoristic-cadence match on "No seu celular, …":** a false positive, since in Portuguese "No" means "on the".
+  - **"Sem análise de uso, sem anúncios, sem rastreamento":** the plain privacy facts the product rules ask for.
+  - **Cramped padding, nested cards and the pulsing dot:** the drawn devices and WhatsApp's typing dots, already dispositioned by the independent review on 2026-11-20.
+- **Checks after the fixes:** axe clean at 320–1440 in PT and EN, light and dark; no sideways scroll at 200% text; reduced motion OK; no script errors.
+- **Scores:** critique 40/40 and audit 20/20 hold. No P0 or P1.
