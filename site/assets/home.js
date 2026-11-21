@@ -1,25 +1,26 @@
-/* Oiê landing page v3 (decision 0014): the PT/EN switch and the scenes cutting in as they arrive.
+/* Oiê landing page, Y2K (decision 0015): the PT/EN switch and the scenes cutting in as they arrive.
    Portuguese is the page itself; English comes from the table below. Nothing is sent anywhere. */
 (() => {
   "use strict";
   const EN = {
     skip: "Skip to the download", navSafety: "Safety", navSafetyHref: "safety/", langGroup: "Language",
-    new: "New!", h1: "Remember the home phone?", lede: "It’s back. Now on the tablet, so your kid can call family and friends.",
-    cta: "Get it now. It’s free!", ctaNote: "For Android tablets, version 8 or newer.", ring: "Ring ring!",
+    h1: "Remember the home phone?", lede: "It’s back. Now on the tablet, so your kid can call family and friends.",
+    cta: "Get it now. It’s free!", ctaNote: "For Android tablets, version 8 or newer.",
+    heroAlt: "A translucent orange plastic tablet, like the gadgets of 1999, with a home-phone handset and a curly cord. On screen, Oiê shows Grandma, Grandpa, Aunt Bia and Lucas, and Grandma is calling.",
+    phoneAlt: "A phone covered in pop-up ads: Ad, Buy now, Who are you? and Endless feed.",
     s2h: "Today, to talk to Grandma…", s2p: "…a kid gets a whole phone. With a feed, ads and strangers thrown in.", s2stamp: "It doesn’t have to be like this.",
-    c1: "AD!", c2: "ENDLESS FEED", c3: "WHO ARE YOU?", c4: "BUY NOW!",
-    s3burst: "Introducing", s3h: "Oiê: the home phone,<br>on the tablet.", s3p: "Your kid talks to the people you chose. No one else.",
+    s3h: "Introducing Oiê.", s3p: "<b>The home phone, on the tablet.</b> To call Grandma, a cousin and a best friend.",
     s4h: "It’s this easy:", s4a: "Tap Grandma’s photo.", s4b: "Talk, write or send a sticker.", s4c: "It reaches her WhatsApp, through yours.",
     s5h: "But wait… there’s more!",
-    m1: "<b>Only who you choose.</b> Family or friends.", m2: "<b>No ads.</b> No feed. No endless scrolling.",
-    m3: "<b>Oiê has no servers.</b> Nothing about your family reaches us.", m4: "<b>Quiet hours.</b> At school and at bedtime.",
-    s6h: "Phone vs Oiê", vsWhat: "What", vsPhone: "Kid’s own phone", vsOie: "Oiê on the tablet",
+    m1: "<b>Call who you love.</b> Grandma, a cousin, a best friend: whoever you choose.", m2: "<b>Voice, photos and stickers.</b> Just how kids like it.",
+    m3: "<b>No ads. No feed.</b> No endless scrolling.", m4: "<b>Oiê has no servers.</b> Nothing about your family reaches us.",
+    s6h: "Phone vs Oiê", vsWhat: "What", vsPhone: "Phone", vsOie: "Oiê",
     v1: "Who they talk to", v1a: "Anyone", v1b: "Only who you approved",
     v2: "Ads and feeds", v2a: "Lots", v2b: "None",
-    v3: "Your kid’s data", v3a: "Turned into ads", v3b: "Stays at home",
+    v3: "Your kid’s data", v3a: "Can be turned into ads", v3b: "Never reach us",
     v4: "What it needs", v4a: "A SIM, a plan and a device of their own", v4b: "The home tablet and your WhatsApp",
-    s7h: "And how much is it?", price: "R$ 0,00", s7p: "It’s free. And the code is open: anyone can check what it does.",
-    s8h: "Get it now!", ctaDl: "Download Oiê", dlNote: "Open this page on your kid’s Android tablet (Android 8 or newer).",
+    s7h: "And how much is it?", price: "R$ 0.00", s7p: "It’s free. And the code is open: anyone can check what it does.",
+    s8h: "Get it now!", ctaDl: "Download Oiê", dlNote: "Open this page on your kid’s Android tablet (Android 8 or newer). The button takes you to the latest file, on GitHub.", riskLine: "Before you link, read the notice: WhatsApp may restrict or block numbers.",
     g1: "On your kid’s tablet, tap Download Oiê and open the file.",
     g2: "If Android asks, allow the install. If it won’t let you, whoever manages the tablet can allow it.",
     g3: "Open Oiê, scan the QR code with your WhatsApp and choose the contacts.",
@@ -39,10 +40,9 @@
     moreSafety: "Why we made Oiê, and a safety guide for parents",
     made: "Oiê is <b>open source</b>. Made by <a href=\"https://www.gabriellopes.com\" rel=\"noopener\">Gabriel Lopes</a>.",
     footCode: "The code on GitHub", footAll: "All releases", footLib: "whatsmeow (MPL-2.0)",
-    footLegal: "Oiê is an independent app, not affiliated with WhatsApp or Meta. WhatsApp is a trademark of Meta. The drawings on this page are examples.",
+    footLegal: "Oiê is an independent app, not affiliated with WhatsApp or Meta. WhatsApp is a trademark of Meta. The pictures on this page are illustrations.",
     title: "Oiê: the home phone, back. On the tablet.",
     desc: "Remember the home phone? Oiê brings it to the tablet: your kid talks to the family and friends you choose, through your WhatsApp. No ads, no feed, no servers. Free and open source.",
-    f1: "Grandma", f2: "Grandpa", f3: "Aunt Bia", f4: "Lucas",
   };
 
   document.documentElement.classList.add("js");
@@ -52,7 +52,7 @@
   all("[data-t-html]").forEach((el) => (PT[el.dataset.tHtml] = el.innerHTML));
   all("[data-t-aria]").forEach((el) => (PT[el.dataset.tAria] = el.getAttribute("aria-label")));
   all("[data-t-href]").forEach((el) => (PT[el.dataset.tHref] = el.getAttribute("href")));
-  all("[data-v]").forEach((el) => (PT[el.dataset.v] = el.textContent));
+  all("[data-t-alt]").forEach((el) => (PT[el.dataset.tAlt] = el.getAttribute("alt")));
   PT.title = document.title;
   PT.desc = document.querySelector('meta[name="description"]').content;
 
@@ -66,7 +66,7 @@
     all("[data-t-html]").forEach((el) => { if (d[el.dataset.tHtml] != null) el.innerHTML = d[el.dataset.tHtml]; });
     all("[data-t-aria]").forEach((el) => { if (d[el.dataset.tAria] != null) el.setAttribute("aria-label", d[el.dataset.tAria]); });
     all("[data-t-href]").forEach((el) => { if (d[el.dataset.tHref] != null) el.setAttribute("href", d[el.dataset.tHref]); });
-    all("[data-v]").forEach((el) => { if (d[el.dataset.v] != null) el.textContent = d[el.dataset.v]; });
+    all("[data-t-alt]").forEach((el) => { if (d[el.dataset.tAlt] != null) el.setAttribute("alt", d[el.dataset.tAlt]); });
     document.title = d.title;
     document.querySelector('meta[name="description"]').content = d.desc;
     all(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
@@ -82,7 +82,7 @@
   // Each scene cuts in once, the way an ad cuts between shots. Without the observer, everything simply shows.
   const scenes = all("main .scene");
   scenes.forEach((s) => {
-    Array.from(s.querySelectorAll("h2, .big, .burst, .stamp, .steps li, .stickers li, .versus, .btn, .install, .chaos")).forEach((el, i) => {
+    Array.from(s.querySelectorAll("h2, .big, .stop, .steps li, .jelly li, .win, .price, .install, .before__art")).forEach((el, i) => {
       el.classList.add("reveal");
       el.style.setProperty("--i", String(i));
     });

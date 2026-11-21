@@ -1,6 +1,6 @@
 # 0014 · The landing page becomes a 90s infomercial
 
-- **Date:** 2026-11-21 · **Status:** accepted · **By:** the owner
+- **Date:** 2026-11-21 · **Status:** superseded by 0015 before it shipped · **By:** the owner
 - **Replaces:** decision 0013's story (the silhouettes and the drawn WhatsApp screens) on the landing page. The safety page is unchanged.
 
 ## Context

@@ -1,0 +1,266 @@
+/* Oiê landing page, Y2K (decision 0015): the 90s home phone, sold back to kids in the look of 1999.
+   Candy translucent plastic, liquid chrome, holographic foil, sparkles and film grain.
+   The art is rendered (3D and generated raster textures in assets/img), not drawn. Nunito only.
+   Nothing is loaded from another site. */
+
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/nunito-400.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/nunito-700.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 800; font-display: swap; src: url("fonts/nunito-800.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-weight: 900; font-display: swap; src: url("fonts/nunito-900.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: italic; font-weight: 900; font-display: swap; src: url("fonts/nunito-900-italic.woff2") format("woff2"); }
+
+:root {
+  /* 1999's palette: tangerine candy (the product), lime, a blueberry night, silver and chrome. */
+  --y-night: #0E1240;
+  --y-night-2: #1B2370;
+  --y-ink: #14102E;
+  --y-tang: #FF6A2B;
+  --y-tang-deep: #E2470F;
+  --y-lime: #C6F432;
+  --y-blue: #2D5BFF;
+  --y-silver: #E4E8F0;
+  --y-silver-2: #C6CCD8;
+  --y-white: #F8F9FD;
+  --y-muted: #4A4766;     /* secondary text on light scenes: 8:1 on silver */
+  --y-soft: #C9CEF2;      /* secondary text on the night: 11:1 */
+  --y-win: #D4D0C8;       /* the old OS's window grey */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px; --s16: 64px;
+  --r-control: 4px; --r-card: 8px; --r-pill: 16px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-std: 150ms; --t-emph: 250ms;
+  --measure: 62ch;
+  --chrome: url("img/chrome.webp");
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: var(--s4); scrollbar-color: var(--y-tang) var(--y-night); -webkit-text-size-adjust: 100%; }
+body { margin: 0; font: 400 1.0625rem/1.6 "Nunito", system-ui, sans-serif; color: var(--y-ink); background: var(--y-night); overflow-x: clip; }
+/* Film grain over everything: the page is printed, not drawn. */
+body::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-events: none; background: url("img/grain.png"); opacity: 0.11; mix-blend-mode: overlay; }
+::selection { background: var(--y-lime); color: var(--y-ink); }
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--y-blue); outline-offset: 3px; border-radius: var(--r-control); }
+.night :focus-visible { outline-color: var(--y-lime); }
+h1, h2 { font-weight: 900; font-style: italic; line-height: 1.02; letter-spacing: -0.025em; margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(2.25rem, 5.2vw, 4.25rem); }
+p { margin: 0; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip { position: absolute; left: var(--s4); top: -100px; z-index: 40; background: var(--y-lime); color: var(--y-ink); padding: var(--s3) var(--s4); border-radius: var(--r-control); font-weight: 800; }
+.skip:focus { top: var(--s4); }
+.wrap { width: min(100%, 72rem); margin: 0 auto; padding: 0 var(--s8); }
+
+/* ---------- Scenes ---------- */
+.scene { position: relative; isolation: isolate; padding: var(--s16) 0; min-height: 76svh; display: grid; align-content: center; overflow: clip; }
+/* Between scenes, a strip of liquid chrome. */
+.scene + .scene, main > .scene:first-child, .plain:first-of-type, .foot { position: relative; }
+.scene + .scene::before, main > .scene:first-child::before, .plain:first-of-type::before, .foot::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 8px; z-index: 3; background: var(--chrome) center / 100% 100%; box-shadow: 0 1px 0 rgb(0 0 0 / 0.25); }
+.foil { background: linear-gradient(rgb(255 255 255 / 0.3), rgb(255 255 255 / 0.3)), url("img/foil.webp") center / cover, var(--y-white); }
+.silver { background: linear-gradient(180deg, var(--y-white), var(--y-silver) 55%, var(--y-silver-2)); }
+.night { background: url("img/sparkle.webp") center / 900px repeat, radial-gradient(120% 90% at 70% 40%, var(--y-night-2), var(--y-night) 60%); color: var(--y-white); }
+/* Candy plastic: a flat candy colour with the iMac's fine inner stripes. */
+.candy { background:
+  repeating-linear-gradient(90deg, rgb(255 255 255 / 0.16) 0 3px, transparent 3px 9px),
+  linear-gradient(180deg, rgb(255 255 255 / 0.22), transparent 40%),
+  var(--candy); }
+.candy--lime { --candy: var(--y-lime); }
+.candy--tang { --candy: #FF8A4C; }
+
+/* Liquid chrome lettering: the two big reveals only (Apresentamos, the price), always on the night. */
+.chrome { background: var(--chrome) center / 100% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 2px 0 rgb(255 255 255 / 0.35)) drop-shadow(0 10px 18px rgb(0 0 0 / 0.45)); padding: 0.06em 0.12em 0.1em; margin-inline: -0.12em; }
+@media (forced-colors: active) { .chrome { color: CanvasText; background: none; filter: none; } }
+
+.big { font-size: clamp(1.25rem, 2.2vw, 1.5rem); line-height: 1.45; font-weight: 700; max-width: 34ch; text-wrap: pretty; }
+.center { text-align: center; }
+.center .big { margin-inline: auto; }
+
+/* ---------- Buttons: candy gel ---------- */
+.gel { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 var(--s8);
+  border-radius: 999px; font: 900 1.1875rem/1 "Nunito", sans-serif; color: var(--y-ink); text-decoration: none;
+  background: linear-gradient(180deg, #FFC09A 0%, #FF8A4C 46%, var(--y-tang) 54%, #FF9A62 100%);
+  border: 1px solid #A8330A; box-shadow: 0 8px 18px rgb(150 45 5 / 0.35), inset 0 -4px 8px rgb(170 50 0 / 0.25), inset 0 2px 0 rgb(255 255 255 / 0.6);
+  transition: transform var(--t-std) var(--ease), box-shadow var(--t-std) var(--ease); }
+.gel::before { content: ""; position: absolute; left: 14px; right: 14px; top: 4px; height: 42%; border-radius: 999px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.1)); pointer-events: none; }
+.gel span { position: relative; }
+.gel:hover { transform: translateY(-1px); box-shadow: 0 12px 22px rgb(150 45 5 / 0.4), inset 0 -4px 8px rgb(170 50 0 / 0.25), inset 0 2px 0 rgb(255 255 255 / 0.6); }
+.gel:active { transform: scale(0.97); }
+.gel--big { min-height: 68px; font-size: 1.375rem; padding: 0 var(--s10); }
+
+/* ---------- Hero ---------- */
+.bar { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); padding: var(--s4) var(--s8); width: min(100%, 80rem); margin: 0 auto; position: relative; z-index: 2; }
+.bar__logo img { width: 76px; }
+.bar__right { display: flex; align-items: center; gap: var(--s4); }
+.bar__link { font-weight: 800; min-height: 48px; display: inline-flex; align-items: center; padding: 0 var(--s2); }
+.lang { display: inline-flex; border-radius: 999px; padding: 3px; background: rgb(255 255 255 / 0.55); border: 1px solid rgb(20 16 46 / 0.25); box-shadow: inset 0 1px 0 #fff; }
+.lang button { font: 800 0.9375rem/1 "Nunito", sans-serif; min-width: 48px; min-height: 44px; border: 0; border-radius: 999px; background: none; color: var(--y-ink); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--y-ink); color: var(--y-white); }
+
+.hero { min-height: 100svh; padding: 0 0 var(--s12); align-content: start; }
+.hero__grid { width: min(100%, 80rem); margin: 0 auto; padding: var(--s8) var(--s8) 0; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--s8); align-items: center; }
+.hero h1 { font-size: clamp(3rem, 6.6vw, 5.75rem); }
+.hero__lede { font-size: clamp(1.25rem, 2.2vw, 1.5rem); line-height: 1.45; font-weight: 700; margin: var(--s6) 0 var(--s8); max-width: 30ch; }
+.note { margin-top: var(--s3); font-size: 0.9375rem; color: var(--y-muted); font-weight: 700; max-width: 40ch; }
+.night .note { color: var(--y-soft); }
+.hero__art { margin: 0; position: relative; }
+.hero__art img { width: 100%; filter: drop-shadow(0 30px 40px rgb(80 20 0 / 0.18)); transform-origin: 70% 30%; }
+/* The authored moment: on arrival the phone rings twice, the way a home phone does. */
+@keyframes ring { 0%, 100% { rotate: 0deg; } 10%, 30% { rotate: -1.4deg; } 20%, 40% { rotate: 1.4deg; } 50% { rotate: 0deg; } }
+.js .hero__art img { animation: ring 1.2s var(--ease) 0.6s 2; }
+
+/* ---------- Before: today's phone ---------- */
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: var(--s12); align-items: center; }
+.before .big { margin-top: var(--s6); color: var(--y-muted); }
+.stop { display: inline-block; margin-top: var(--s8); font: italic 900 clamp(1.5rem, 2.8vw, 2rem)/1.1 "Nunito", sans-serif; padding: var(--s3) var(--s6); border-radius: 999px;
+  background: linear-gradient(180deg, #E9FF8F, var(--y-lime) 55%, #A9D81E); border: 1px solid #6E8C0C; box-shadow: 0 8px 16px rgb(60 80 0 / 0.25), inset 0 2px 0 rgb(255 255 255 / 0.7); rotate: -2deg; }
+.before__art { margin: 0; justify-self: center; width: min(100%, 360px); }
+.before__art img { filter: drop-shadow(0 24px 30px rgb(0 0 0 / 0.25)); }
+
+/* ---------- Introducing ---------- */
+.reveal-h { font-size: clamp(3rem, 8vw, 6rem); }
+.intro .big { margin-top: var(--s6); color: var(--y-soft); }
+.intro .big b { color: var(--y-white); }
+.blob { position: absolute; z-index: -1; pointer-events: none; width: clamp(90px, 14vw, 200px); }
+.blob--a { top: 4%; left: 3%; rotate: -12deg; width: clamp(80px, 11vw, 160px); }
+.blob--b { bottom: 8%; right: 7%; width: clamp(110px, 16vw, 230px); }
+.blob--c { top: 6%; right: 10%; width: clamp(64px, 8vw, 120px); }
+
+/* ---------- Steps: three candy bubbles ---------- */
+.steps { list-style: none; margin: var(--s10) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s6); }
+.steps li { position: relative; padding: var(--s6); padding-top: var(--s16); border-radius: 28px; font-size: clamp(1.25rem, 2vw, 1.5rem); line-height: 1.3; font-weight: 800;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0.4)); border: 1px solid rgb(255 255 255 / 0.9);
+  box-shadow: 0 10px 24px rgb(40 60 0 / 0.18), inset 0 2px 0 #fff; backdrop-filter: blur(6px); }
+.steps li:nth-child(2) { translate: 0 var(--s6); }
+.steps li:nth-child(3) { translate: 0 var(--s12); }
+/* A glossy candy ball carries the number. */
+.num { position: absolute; top: calc(-1 * var(--s6)); left: var(--s6); width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center;
+  font: italic 900 2.25rem/1 "Nunito", sans-serif; color: var(--y-white); text-shadow: 0 2px 2px rgb(0 0 0 / 0.35);
+  background: radial-gradient(circle at 32% 28%, #fff 0 6%, var(--b1) 26%, var(--b2) 80%); box-shadow: 0 8px 14px rgb(0 0 0 / 0.25), inset 0 -6px 10px rgb(0 0 0 / 0.2); }
+.steps li:nth-child(1) .num { --b1: #FF8A4C; --b2: #C2380A; }
+.steps li:nth-child(2) .num { --b1: #5B82FF; --b2: #1A2FB0; }
+.steps li:nth-child(3) .num { --b1: #C84DE0; --b2: #6E1A8E; }
+
+/* ---------- But wait, there's more: jelly panels ---------- */
+.jelly { list-style: none; margin: var(--s10) 0 0; padding: 0; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--s6); }
+.jelly li { position: relative; padding: var(--s8) var(--s6) var(--s6); border-radius: 28px; font-size: 1.125rem; line-height: 1.45; font-weight: 700; color: var(--y-ink);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.92), rgb(255 255 255 / 0.66)); border: 1px solid rgb(255 255 255 / 0.95);
+  box-shadow: 0 12px 26px rgb(120 40 0 / 0.22), inset 0 2px 0 #fff; }
+.jelly li::before { content: ""; position: absolute; left: var(--s6); right: var(--s6); top: 6px; height: 14px; border-radius: 999px; background: linear-gradient(180deg, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0)); }
+.jelly b { display: block; font: italic 900 clamp(1.375rem, 2.2vw, 1.75rem)/1.1 "Nunito", sans-serif; margin-bottom: var(--s2); }
+.jelly li:nth-child(1) { grid-column: 1 / span 7; rotate: -1deg; }
+.jelly li:nth-child(2) { grid-column: 8 / span 5; rotate: 1.5deg; margin-top: var(--s8); }
+.jelly li:nth-child(3) { grid-column: 2 / span 5; rotate: 1deg; }
+.jelly li:nth-child(4) { grid-column: 7 / span 6; rotate: -1.5deg; }
+.jelly li:nth-child(4) { background: linear-gradient(180deg, #2C3590, var(--y-night)); color: var(--y-white); border-color: #5560C8; }
+.jelly li:nth-child(4)::before { background: linear-gradient(180deg, rgb(255 255 255 / 0.4), rgb(255 255 255 / 0)); }
+
+/* ---------- Phone vs Oiê: a window from the old desktop ---------- */
+.win { margin-top: var(--s10); background: var(--y-win); border: 2px solid; border-color: #fff #404040 #404040 #fff; box-shadow: 0 18px 40px rgb(20 16 46 / 0.25); padding: 4px; max-width: 56rem; }
+.win__bar { height: 36px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; padding: 0 6px;
+  background: linear-gradient(90deg, var(--y-night), var(--y-blue)); }
+.win__bar i { width: 24px; height: 22px; background: var(--y-win); border: 2px solid; border-color: #fff #404040 #404040 #fff; }
+.versus { width: 100%; border-collapse: collapse; background: #fff; font-size: 1.125rem; margin-top: 4px; border: 2px solid; border-color: #808080 #fff #fff #808080; }
+.versus th, .versus td { text-align: left; padding: var(--s4) var(--s4); border-bottom: 1px solid #D9D6CF; vertical-align: top; }
+.versus thead th { font: 900 1.125rem/1.2 "Nunito", sans-serif; background: #EFEDE8; }
+.versus thead th:last-child { background: var(--y-tang); color: var(--y-ink); }
+.versus tbody th { font-weight: 800; color: var(--y-muted); width: 28%; }
+.versus td:last-child { font-weight: 900; background: #FFF1E8; }
+.versus td { position: relative; padding-left: calc(var(--s4) + 26px); }
+.versus td::before { content: ""; position: absolute; left: var(--s4); top: calc(var(--s4) + 3px); width: 18px; height: 18px; background: currentColor;
+  -webkit-mask: var(--mark) center / contain no-repeat; mask: var(--mark) center / contain no-repeat; }
+.versus td:nth-child(2) { --mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E"); color: #8A2A12; }
+.versus td:nth-child(3) { --mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E"); }
+
+/* ---------- The price ---------- */
+.price { font-weight: 900; font-style: italic; font-size: clamp(4.5rem, 15vw, 10rem); line-height: 0.95; margin: var(--s6) auto var(--s4); display: inline-block; letter-spacing: -0.04em; }
+.price-scene .big { color: var(--y-soft); }
+
+/* ---------- Get it ---------- */
+.get h2 { font-size: clamp(3rem, 8vw, 6rem); margin-bottom: var(--s8); }
+.risk { margin-top: var(--s4); font-weight: 800; max-width: 44ch; }
+.risk a { color: var(--y-ink); }
+.install { margin: 0; padding: var(--s8); list-style: none; counter-reset: i; border-radius: 28px; background: rgb(255 255 255 / 0.72); border: 1px solid #fff; box-shadow: 0 12px 30px rgb(20 16 46 / 0.15), inset 0 2px 0 #fff; }
+.install li { counter-increment: i; position: relative; padding-left: 52px; font-weight: 700; font-size: 1.0625rem; }
+.install li + li { margin-top: var(--s6); }
+.install li::before { content: counter(i); position: absolute; left: 0; top: -2px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  font: italic 900 1.125rem/1 "Nunito", sans-serif; color: var(--y-white); background: radial-gradient(circle at 32% 28%, #fff 0 6%, #5B82FF 28%, #1A2FB0 82%); }
+
+/* ---------- Plain: the notice, the questions, the credits ---------- */
+.plain { background: var(--y-white); padding: var(--s16) 0; }
+.plain h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: var(--s6); }
+.plain p { max-width: var(--measure); }
+.plain p + p { margin-top: var(--s4); }
+.notice { border-radius: var(--r-card); }
+.faq { max-width: 52rem; border-top: 1px solid #D5D8E4; }
+.faq details { border-bottom: 1px solid #D5D8E4; }
+.faq summary { cursor: pointer; list-style: none; min-height: 60px; display: flex; align-items: center; justify-content: space-between; gap: var(--s4); font-weight: 800; font-size: 1.1875rem; padding: var(--s3) 0; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { flex: none; width: 28px; height: 28px; border-radius: 50%;
+  content: "+"; display: grid; place-items: center; font: 900 1.25rem/1 "Nunito", sans-serif; color: #fff; text-shadow: 0 1px 1px rgb(0 0 0 / 0.4);
+  background: radial-gradient(circle at 32% 28%, #FFD2B8 0 8%, #FF8A4C 30%, #C2380A 85%); }
+.faq details[open] summary::after { content: "−"; background: radial-gradient(circle at 32% 28%, #C9D6FF 0 8%, #5B82FF 30%, #1A2FB0 85%); }
+.faq details p { padding: 0 0 var(--s6); }
+.more { margin-top: var(--s8); }
+.more a { display: inline-flex; align-items: center; min-height: 48px; font-weight: 800; }
+
+.foot { background: var(--y-night) url("img/sparkle.webp") center / 900px; color: var(--y-white); padding: var(--s12) 0 var(--s16); }
+.foot__made { font-size: clamp(1.375rem, 2.6vw, 1.75rem); font-weight: 800; line-height: 1.3; max-width: 30ch; }
+.foot__made b { color: var(--y-lime); }
+.foot__links { list-style: none; padding: 0; margin: var(--s6) 0; display: flex; flex-wrap: wrap; gap: 0 var(--s6); }
+.foot__links a { display: inline-flex; align-items: center; min-height: 48px; font-weight: 700; }
+.foot__legal { color: var(--y-soft); font-size: 0.9375rem; max-width: 60ch; }
+.foot :focus-visible { outline-color: var(--y-lime); }
+
+/* Scenes cut in once, from a visible start (the content is there without the script). */
+.js .reveal { transition: scale var(--t-emph) var(--ease) calc(var(--i, 0) * 60ms), opacity var(--t-emph) var(--ease) calc(var(--i, 0) * 60ms); scale: 0.97; opacity: 0.4; }
+.js .is-in .reveal { scale: 1; opacity: 1; }
+
+/* ---------- Dark: the plain parts follow the system; the scenes are their own world ---------- */
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: dark; }
+  .plain { background: #121530; color: var(--y-white); }
+  .faq, .faq details { border-color: #343A6E; }
+  .plain :focus-visible { outline-color: var(--y-lime); }
+}
+
+/* ---------- Narrow ---------- */
+@media (max-width: 899px) {
+  .scene { min-height: 0; padding: var(--s12) 0; }
+  .hero { min-height: 0; padding-bottom: var(--s12); }
+  .hero__grid, .two { grid-template-columns: minmax(0, 1fr); }
+  .hero__art { order: -1; max-width: 560px; margin: 0 auto; width: 100%; }
+  .steps { grid-template-columns: minmax(0, 1fr); gap: var(--s10); margin-top: var(--s12); }
+  .steps li:nth-child(n) { translate: none; }
+  .jelly { grid-template-columns: minmax(0, 1fr); }
+  .jelly li:nth-child(n) { grid-column: auto; margin-top: 0; }
+  .before__art { width: min(70%, 280px); }
+  /* The blobs move to the corners, clear of the words. */
+  .intro, .price-scene { padding: calc(var(--s16) + var(--s10)) 0; }
+  .blob--a { top: var(--s2); left: var(--s2); width: 76px; }
+  .blob--b { bottom: var(--s2); right: var(--s2); width: 92px; }
+  .blob--c { top: var(--s2); right: var(--s2); width: 64px; }
+}
+@media (max-width: 640px) {
+  .wrap, .bar, .hero__grid { padding-left: var(--s4); padding-right: var(--s4); }
+  .bar__logo img { width: 64px; }
+  /* On a phone each row's label spans the window, and the two answers sit side by side under it. */
+  .versus { font-size: 1rem; }
+  .versus tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .versus thead th:first-child { display: none; }
+  .versus tbody th { grid-column: 1 / -1; width: auto; padding: var(--s3) var(--s3) var(--s1); border-bottom: 0; background: #F6F5F1; }
+  .versus th, .versus td { padding: var(--s3); }
+  .versus td { padding-left: calc(var(--s3) + 22px); }
+  .versus td::before { left: var(--s3); top: calc(var(--s3) + 3px); width: 16px; height: 16px; }
+  .win { margin-inline: calc(-1 * var(--s2)); }
+  .gel { width: 100%; }
+  .install { padding: var(--s6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition-duration: 1ms !important; }
+  .js .reveal { scale: 1; opacity: 1; }
+}

@@ -8,27 +8,26 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Oiê: o telefone de casa, de volta">
 <meta property="og:description" content="A criança fala com a família e os amigos que você escolher, do tablet, pelo seu WhatsApp. Grátis e de código aberto.">
-<meta name="theme-color" content="#4527A0">
+<meta name="theme-color" content="#0E1240">
 <link rel="icon" href="assets/favicon.ico" sizes="48x48">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/nunito-900-italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/nunito-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/nunito-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/nunito-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/tokens.css">
-<link rel="stylesheet" href="assets/tv.css">
+<link rel="stylesheet" href="assets/home.css">
+<link rel="preload" href="assets/img/hero-1600.webp" as="image" imagesrcset="assets/img/hero-800.webp 800w, assets/img/hero-1600.webp 1600w" imagesizes="(max-width: 899px) 92vw, 52vw">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
  {"@type":"SoftwareApplication","name":"Oiê","operatingSystem":"Android 8+","applicationCategory":"CommunicationApplication","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"author":{"@type":"Person","name":"Gabriel Lopes","url":"https://www.gabriellopes.com"},"codeRepository":"https://github.com/gabrielbr/FamilyZap","description":"Do tablet, a criança fala com a família e os amigos que um responsável escolheu, pelo WhatsApp dele."},
  {"@type":"FAQPage","mainEntity":[
   {"@type":"Question","name":"Quem recebe precisa instalar alguma coisa?","acceptedAnswer":{"@type":"Answer","text":"Não. A família e os amigos recebem no WhatsApp deles, como uma mensagem sua, com o nome da criança na frente."}},
   {"@type":"Question","name":"A criança pode falar com os amigos?","acceptedAnswer":{"@type":"Answer","text":"Pode, se você adicionar. Ela só fala com quem você aprovar, e ninguém de fora fala com ela pelo Oiê."}},
-  {"@type":"Question","name":"A criança precisa de um celular?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê fica num tablet Android que vocês já têm e usa o seu WhatsApp."}},
   {"@type":"Question","name":"O Oiê é do WhatsApp?","acceptedAnswer":{"@type":"Answer","text":"Não. É um app independente, que conecta ao seu WhatsApp como o WhatsApp Web, e não é afiliado ao WhatsApp nem à Meta. O WhatsApp pode restringir ou bloquear números que usam apps de terceiros."}},
   {"@type":"Question","name":"Eu vejo o que a criança manda?","acceptedAnswer":{"@type":"Answer","text":"Vê. As mensagens saem do seu WhatsApp, então ficam no seu celular também. A criança sabe disso desde o primeiro dia."}},
   {"@type":"Question","name":"O Oiê guarda alguma coisa sobre a minha família?","acceptedAnswer":{"@type":"Answer","text":"Não. O Oiê não tem servidor. As mensagens vão só pelo WhatsApp. Não tem análise de uso, anúncio nem rastreamento. A única outra conexão é para ver se há versão nova, no GitHub."}},
   {"@type":"Question","name":"E se o WhatsApp bloquear o meu número?","acceptedAnswer":{"@type":"Answer","text":"O Oiê para na hora, mostra no tablet o aviso do WhatsApp e não tenta de novo sozinho. No seu celular, siga o que o WhatsApp mostrar. Você pode desconectar o Oiê em Aparelhos conectados."}},
-  {"@type":"Question","name":"Dá para fazer ligação?","acceptedAnswer":{"@type":"Answer","text":"Ainda não. Por enquanto: mensagens, áudios, fotos, vídeos e figurinhas."}},
   {"@type":"Question","name":"Por que não está na Play Store?","acceptedAnswer":{"@type":"Answer","text":"Por enquanto o Oiê é baixado direto da página de versões. Cada versão traz um código (SHA-256) para conferir que o arquivo é o original, e o app avisa quando tem versão nova."}}
  ]}
 ]}
@@ -37,9 +36,9 @@
 <body>
 <a class="skip" href="#baixe" data-t="skip">Pular para o download</a>
 
-<header class="scene scene--purple hero" id="topo">
+<header class="scene foil hero" id="topo">
   <nav class="bar" aria-label="Oiê">
-    <a class="bar__logo" href="#topo" aria-label="Oiê"><img src="assets/oie-wordmark-white.svg" alt="Oiê" width="80" height="73"></a>
+    <a class="bar__logo" href="#topo" aria-label="Oiê"><img src="assets/oie-wordmark-coral.svg" alt="Oiê" width="80" height="73"></a>
     <div class="bar__right">
       <a class="bar__link" href="seguranca/" data-t="navSafety" data-t-href="navSafetyHref">Segurança</a>
       <div class="lang" role="group" aria-label="Idioma" data-t-aria="langGroup">
@@ -50,74 +49,42 @@
   </nav>
   <div class="hero__grid">
     <div class="hero__copy">
-      <p class="burst burst--new" aria-hidden="true"><span data-t="new">Novo!</span></p>
       <h1 data-t="h1">Lembra do telefone de casa?</h1>
       <p class="hero__lede" data-t="lede">Ele voltou. Agora no tablet, para a criança ligar para a família e os amigos.</p>
-      <a class="btn btn--yellow" href="#baixe" data-t="cta">Baixe já. É grátis!</a>
-      <p class="hero__note" data-t="ctaNote">Para tablets Android 8 ou mais novos.</p>
+      <a class="gel" href="#baixe"><span data-t="cta">Baixe já. É grátis!</span></a>
+      <p class="note" data-t="ctaNote">Para tablets Android 8 ou mais novos.</p>
     </div>
-    <figure class="hero__art" aria-hidden="true">
-      <svg class="phone-tab" viewBox="0 0 440 360">
-        <g class="tab">
-          <rect x="14" y="96" width="320" height="236" rx="24" class="ink"/>
-          <rect x="30" y="112" width="288" height="204" rx="12" class="screen"/>
-          <image href="assets/oie-wordmark-coral.svg" x="46" y="124" width="34" height="31"/>
-          <g class="faces">
-            <g><circle cx="80" cy="212" r="27"/><text x="80" y="219">Vó</text><text class="nm" x="80" y="262" data-v="f1">Vó Rosa</text></g>
-            <g><circle cx="148" cy="212" r="27"/><text x="148" y="219">Vô</text><text class="nm" x="148" y="262" data-v="f2">Vô Zé</text></g>
-            <g><circle cx="216" cy="212" r="27"/><text x="216" y="219">T</text><text class="nm" x="216" y="262" data-v="f3">Tia Bia</text></g>
-            <g><circle cx="284" cy="212" r="27"/><text x="284" y="219">L</text><text class="nm" x="284" y="262" data-v="f4">Lucas</text></g>
-          </g>
-          <circle cx="352" cy="252" r="10" class="ink"/>
-        </g>
-        <path class="cord" d="M321.1 113.4 L322.5 117.8 L325.1 121.5 L328.5 124.2 L332.2 125.7 L335.7 126.0 L338.6 125.3 L340.3 123.8 L340.7 122.1 L339.8 120.6 L337.7 119.7 L334.7 119.9 L331.5 121.3 L328.4 123.8 L326.0 127.5 L324.7 131.8 L324.8 136.4 L326.2 140.8 L328.7 144.5 L332.1 147.2 L335.9 148.7 L339.4 149.0 L342.2 148.3 L344.0 146.8 L344.4 145.1 L343.5 143.6 L341.3 142.7 L338.4 142.9 L335.1 144.3 L332.1 146.8 L329.7 150.5 L328.4 154.8 L328.4 159.4 L329.8 163.8 L332.4 167.5 L335.8 170.2 L339.5 171.7 L343.1 172.0 L345.9 171.3 L347.6 169.8 L348.1 168.1 L347.1 166.6 L345.0 165.7 L342.1 165.9 L338.8 167.3 L335.7 169.8 L333.4 173.5 L332.1 177.8 L332.1 182.4 L333.5 186.8 L336.1 190.5 L339.5 193.2 L343.2 194.7 L346.7 195.0 L349.6 194.3 L351.3 192.8 L351.7 191.1 L350.8 189.6 L348.7 188.7 L345.7 188.9 L342.5 190.3 L339.4 192.8 L337.0 196.5 L335.7 200.8 L335.8 205.4 L337.2 209.8 L339.7 213.5 L343.1 216.2 L346.9 217.7 L350.4 218.0 L353.2 217.3 L355.0 215.8 L355.4 214.1 L354.5 212.6 L352.3 211.7 L349.4 211.9 L346.1 213.3 L343.1 215.8 L340.7 219.5 L339.4 223.8 L339.4 228.4 L340.8 232.8 L343.4 236.5 L346.8 239.2 L350.5 240.7 L354.1 241.0 L356.9 240.3 L358.6 238.8 L359.1 237.1 L358.1 235.6 L356.0 234.7 L353.1 234.9 L349.8 236.3 L346.7 238.8 L344.4 242.5 L343.1 246.8 L343.1 251.4"/>
-        <g class="handset">
-          <path class="grip-out" d="M118 74 C 170 18, 270 18, 322 74"/>
-          <path class="grip-in" d="M118 74 C 170 18, 270 18, 322 74"/>
-          <rect x="74" y="58" width="78" height="44" rx="20" transform="rotate(-24 113 80)" class="cup"/>
-          <rect x="288" y="58" width="78" height="44" rx="20" transform="rotate(24 327 80)" class="cup"/>
-        </g>
-        <g class="ring">
-          <path d="M66 30l-18-14M58 54l-24-4M402 30l18-14M410 54l24-4"/>
-        </g>
-      </svg>
-      <figcaption class="trim" data-t="ring">Trim trim!</figcaption>
+    <figure class="hero__art">
+      <img src="assets/img/hero-1600.webp" srcset="assets/img/hero-800.webp 800w, assets/img/hero-1600.webp 1600w" sizes="(max-width: 899px) 92vw, 52vw" width="1600" height="1141" alt="Um tablet de plástico laranja translúcido, como os aparelhos de 1999, com um fone de telefone de casa e um fio enrolado. Na tela, o Oiê mostra Vó, Vô, Tia Bia e Lucas, e a Vó está chamando." data-t-alt="heroAlt" fetchpriority="high">
     </figure>
   </div>
 </header>
 
 <main>
-  <section class="scene scene--static" aria-labelledby="s2">
+  <section class="scene silver before" aria-labelledby="s2">
     <div class="wrap two">
       <div>
         <h2 id="s2" data-t="s2h">Hoje, para falar com a vó…</h2>
         <p class="big" data-t="s2p">…a criança ganha um celular inteiro. Com feed, anúncio e gente estranha junto.</p>
-        <p class="stamp" data-t="s2stamp">Não precisa ser assim.</p>
+        <p class="stop" data-t="s2stamp">Não precisa ser assim.</p>
       </div>
-      <figure class="chaos" aria-hidden="true">
-        <svg viewBox="0 0 360 380">
-          <rect x="110" y="40" width="140" height="280" rx="22" class="ink"/>
-          <rect x="122" y="60" width="116" height="236" rx="8" class="glass"/>
-          <g class="tags">
-            <g transform="translate(8 52) rotate(-10)"><rect width="150" height="44" rx="10" class="t1"/><text x="75" y="29" data-t="c1">ANÚNCIO!</text></g>
-            <g transform="translate(206 92) rotate(8)"><rect width="146" height="44" rx="10" class="t2"/><text x="73" y="29" data-t="c2">FEED SEM FIM</text></g>
-            <g transform="translate(0 190) rotate(6)"><rect width="168" height="44" rx="10" class="t3"/><text x="84" y="29" data-t="c3">QUEM É VOCÊ?</text></g>
-            <g transform="translate(196 236) rotate(-7)"><rect width="156" height="44" rx="10" class="t4"/><text x="78" y="29" data-t="c4">COMPRE JÁ!</text></g>
-          </g>
-        </svg>
+      <figure class="before__art">
+        <img src="assets/img/phone-900.webp" srcset="assets/img/phone-450.webp 450w, assets/img/phone-900.webp 734w" sizes="(max-width: 899px) 70vw, 360px" width="734" height="1188" loading="lazy" alt="Um celular coberto de janelas de propaganda: Anúncio, Compre já, Quem é você? e Feed sem fim." data-t-alt="phoneAlt">
       </figure>
     </div>
   </section>
 
-  <section class="scene scene--yellow" aria-labelledby="s3">
+  <section class="scene night intro" aria-labelledby="s3">
+    <img class="blob blob--a" src="assets/img/blob-chrome.webp" alt="" width="440" height="403" loading="lazy">
+    <img class="blob blob--b" src="assets/img/blob-lime.webp" alt="" width="440" height="436" loading="lazy">
+    <img class="blob blob--c" src="assets/img/blob-chrome2.webp" alt="" width="407" height="440" loading="lazy">
     <div class="wrap center">
-      <p class="burst burst--big" aria-hidden="true"><span data-t="s3burst">Apresentamos</span></p>
-      <h2 id="s3" class="mega" data-t-html="s3h">Oiê: o telefone de casa,<br>no tablet.</h2>
-      <p class="big" data-t="s3p">A criança fala com quem você escolheu. Mais ninguém.</p>
+      <h2 id="s3" class="reveal-h"><span class="chrome" data-t="s3h">Apresentamos o Oiê.</span></h2>
+      <p class="big" data-t-html="s3p"><b>O telefone de casa, no tablet.</b> Para ligar para a vó, o primo e o melhor amigo.</p>
     </div>
   </section>
 
-  <section class="scene scene--teal" aria-labelledby="s4">
+  <section class="scene candy candy--lime" aria-labelledby="s4">
     <div class="wrap">
       <h2 id="s4" data-t="s4h">É fácil assim:</h2>
       <ol class="steps">
@@ -126,50 +93,54 @@
         <li><span class="num" aria-hidden="true">3</span><span data-t="s4c">Chega no WhatsApp dela, pelo seu.</span></li>
       </ol>
     </div>
-    <svg class="cordline" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0.0 31.0 L5.7 30.2 L10.8 27.8 L14.8 24.2 L17.4 20.0 L18.5 15.8 L18.3 12.2 L16.9 9.8 L15.0 9.0 L13.1 9.8 L11.7 12.2 L11.5 15.8 L12.6 20.0 L15.2 24.2 L19.2 27.8 L24.3 30.2 L30.0 31.0 L35.7 30.2 L40.8 27.8 L44.8 24.2 L47.4 20.0 L48.5 15.8 L48.3 12.2 L46.9 9.8 L45.0 9.0 L43.1 9.8 L41.7 12.2 L41.5 15.8 L42.6 20.0 L45.2 24.2 L49.2 27.8 L54.3 30.2 L60.0 31.0 L65.7 30.2 L70.8 27.8 L74.8 24.2 L77.4 20.0 L78.5 15.8 L78.3 12.2 L76.9 9.8 L75.0 9.0 L73.1 9.8 L71.7 12.2 L71.5 15.8 L72.6 20.0 L75.2 24.2 L79.2 27.8 L84.3 30.2 L90.0 31.0 L95.7 30.2 L100.8 27.8 L104.8 24.2 L107.4 20.0 L108.5 15.8 L108.3 12.2 L106.9 9.8 L105.0 9.0 L103.1 9.8 L101.7 12.2 L101.5 15.8 L102.6 20.0 L105.2 24.2 L109.2 27.8 L114.3 30.2 L120.0 31.0 L125.7 30.2 L130.8 27.8 L134.8 24.2 L137.4 20.0 L138.5 15.8 L138.3 12.2 L136.9 9.8 L135.0 9.0 L133.1 9.8 L131.7 12.2 L131.5 15.8 L132.6 20.0 L135.2 24.2 L139.2 27.8 L144.3 30.2 L150.0 31.0 L155.7 30.2 L160.8 27.8 L164.8 24.2 L167.4 20.0 L168.5 15.8 L168.3 12.2 L166.9 9.8 L165.0 9.0 L163.1 9.8 L161.7 12.2 L161.5 15.8 L162.6 20.0 L165.2 24.2 L169.2 27.8 L174.3 30.2 L180.0 31.0 L185.7 30.2 L190.8 27.8 L194.8 24.2 L197.4 20.0 L198.5 15.8 L198.3 12.2 L196.9 9.8 L195.0 9.0 L193.1 9.8 L191.7 12.2 L191.5 15.8 L192.6 20.0 L195.2 24.2 L199.2 27.8 L204.3 30.2 L210.0 31.0 L215.7 30.2 L220.8 27.8 L224.8 24.2 L227.4 20.0 L228.5 15.8 L228.3 12.2 L226.9 9.8 L225.0 9.0 L223.1 9.8 L221.7 12.2 L221.5 15.8 L222.6 20.0 L225.2 24.2 L229.2 27.8 L234.3 30.2 L240.0 31.0 L245.7 30.2 L250.8 27.8 L254.8 24.2 L257.4 20.0 L258.5 15.8 L258.3 12.2 L256.9 9.8 L255.0 9.0 L253.1 9.8 L251.7 12.2 L251.5 15.8 L252.6 20.0 L255.2 24.2 L259.2 27.8 L264.3 30.2 L270.0 31.0 L275.7 30.2 L280.8 27.8 L284.8 24.2 L287.4 20.0 L288.5 15.8 L288.3 12.2 L286.9 9.8 L285.0 9.0 L283.1 9.8 L281.7 12.2 L281.5 15.8 L282.6 20.0 L285.2 24.2 L289.2 27.8 L294.3 30.2 L300.0 31.0 L305.7 30.2 L310.8 27.8 L314.8 24.2 L317.4 20.0 L318.5 15.8 L318.3 12.2 L316.9 9.8 L315.0 9.0 L313.1 9.8 L311.7 12.2 L311.5 15.8 L312.6 20.0 L315.2 24.2 L319.2 27.8 L324.3 30.2 L330.0 31.0 L335.7 30.2 L340.8 27.8 L344.8 24.2 L347.4 20.0 L348.5 15.8 L348.3 12.2 L346.9 9.8 L345.0 9.0 L343.1 9.8 L341.7 12.2 L341.5 15.8 L342.6 20.0 L345.2 24.2 L349.2 27.8 L354.3 30.2 L360.0 31.0 L365.7 30.2 L370.8 27.8 L374.8 24.2 L377.4 20.0 L378.5 15.8 L378.3 12.2 L376.9 9.8 L375.0 9.0 L373.1 9.8 L371.7 12.2 L371.5 15.8 L372.6 20.0 L375.2 24.2 L379.2 27.8 L384.3 30.2 L390.0 31.0 L395.7 30.2 L400.8 27.8 L404.8 24.2 L407.4 20.0 L408.5 15.8 L408.3 12.2 L406.9 9.8 L405.0 9.0 L403.1 9.8 L401.7 12.2 L401.5 15.8 L402.6 20.0 L405.2 24.2 L409.2 27.8 L414.3 30.2 L420.0 31.0 L425.7 30.2 L430.8 27.8 L434.8 24.2 L437.4 20.0 L438.5 15.8 L438.3 12.2 L436.9 9.8 L435.0 9.0 L433.1 9.8 L431.7 12.2 L431.5 15.8 L432.6 20.0 L435.2 24.2 L439.2 27.8 L444.3 30.2 L450.0 31.0 L455.7 30.2 L460.8 27.8 L464.8 24.2 L467.4 20.0 L468.5 15.8 L468.3 12.2 L466.9 9.8 L465.0 9.0 L463.1 9.8 L461.7 12.2 L461.5 15.8 L462.6 20.0 L465.2 24.2 L469.2 27.8 L474.3 30.2 L480.0 31.0 L485.7 30.2 L490.8 27.8 L494.8 24.2 L497.4 20.0 L498.5 15.8 L498.3 12.2 L496.9 9.8 L495.0 9.0 L493.1 9.8 L491.7 12.2 L491.5 15.8 L492.6 20.0 L495.2 24.2 L499.2 27.8 L504.3 30.2 L510.0 31.0 L515.7 30.2 L520.8 27.8 L524.8 24.2 L527.4 20.0 L528.5 15.8 L528.3 12.2 L526.9 9.8 L525.0 9.0 L523.1 9.8 L521.7 12.2 L521.5 15.8 L522.6 20.0 L525.2 24.2 L529.2 27.8 L534.3 30.2 L540.0 31.0 L545.7 30.2 L550.8 27.8 L554.8 24.2 L557.4 20.0 L558.5 15.8 L558.3 12.2 L556.9 9.8 L555.0 9.0 L553.1 9.8 L551.7 12.2 L551.5 15.8 L552.6 20.0 L555.2 24.2 L559.2 27.8 L564.3 30.2 L570.0 31.0 L575.7 30.2 L580.8 27.8 L584.8 24.2 L587.4 20.0 L588.5 15.8 L588.3 12.2 L586.9 9.8 L585.0 9.0 L583.1 9.8 L581.7 12.2 L581.5 15.8 L582.6 20.0 L585.2 24.2 L589.2 27.8 L594.3 30.2 L600.0 31.0 L605.7 30.2 L610.8 27.8 L614.8 24.2 L617.4 20.0 L618.5 15.8 L618.3 12.2 L616.9 9.8 L615.0 9.0 L613.1 9.8 L611.7 12.2 L611.5 15.8 L612.6 20.0 L615.2 24.2 L619.2 27.8 L624.3 30.2 L630.0 31.0 L635.7 30.2 L640.8 27.8 L644.8 24.2 L647.4 20.0 L648.5 15.8 L648.3 12.2 L646.9 9.8 L645.0 9.0 L643.1 9.8 L641.7 12.2 L641.5 15.8 L642.6 20.0 L645.2 24.2 L649.2 27.8 L654.3 30.2 L660.0 31.0 L665.7 30.2 L670.8 27.8 L674.8 24.2 L677.4 20.0 L678.5 15.8 L678.3 12.2 L676.9 9.8 L675.0 9.0 L673.1 9.8 L671.7 12.2 L671.5 15.8 L672.6 20.0 L675.2 24.2 L679.2 27.8 L684.3 30.2 L690.0 31.0 L695.7 30.2 L700.8 27.8 L704.8 24.2 L707.4 20.0 L708.5 15.8 L708.3 12.2 L706.9 9.8 L705.0 9.0 L703.1 9.8 L701.7 12.2 L701.5 15.8 L702.6 20.0 L705.2 24.2 L709.2 27.8 L714.3 30.2 L720.0 31.0 L725.7 30.2 L730.8 27.8 L734.8 24.2 L737.4 20.0 L738.5 15.8 L738.3 12.2 L736.9 9.8 L735.0 9.0 L733.1 9.8 L731.7 12.2 L731.5 15.8 L732.6 20.0 L735.2 24.2 L739.2 27.8 L744.3 30.2 L750.0 31.0 L755.7 30.2 L760.8 27.8 L764.8 24.2 L767.4 20.0 L768.5 15.8 L768.3 12.2 L766.9 9.8 L765.0 9.0 L763.1 9.8 L761.7 12.2 L761.5 15.8 L762.6 20.0 L765.2 24.2 L769.2 27.8 L774.3 30.2 L780.0 31.0 L785.7 30.2 L790.8 27.8 L794.8 24.2 L797.4 20.0 L798.5 15.8 L798.3 12.2 L796.9 9.8 L795.0 9.0 L793.1 9.8 L791.7 12.2 L791.5 15.8 L792.6 20.0 L795.2 24.2 L799.2 27.8 L804.3 30.2 L810.0 31.0 L815.7 30.2 L820.8 27.8 L824.8 24.2 L827.4 20.0 L828.5 15.8 L828.3 12.2 L826.9 9.8 L825.0 9.0 L823.1 9.8 L821.7 12.2 L821.5 15.8 L822.6 20.0 L825.2 24.2 L829.2 27.8 L834.3 30.2 L840.0 31.0 L845.7 30.2 L850.8 27.8 L854.8 24.2 L857.4 20.0 L858.5 15.8 L858.3 12.2 L856.9 9.8 L855.0 9.0 L853.1 9.8 L851.7 12.2 L851.5 15.8 L852.6 20.0 L855.2 24.2 L859.2 27.8 L864.3 30.2 L870.0 31.0 L875.7 30.2 L880.8 27.8 L884.8 24.2 L887.4 20.0 L888.5 15.8 L888.3 12.2 L886.9 9.8 L885.0 9.0 L883.1 9.8 L881.7 12.2 L881.5 15.8 L882.6 20.0 L885.2 24.2 L889.2 27.8 L894.3 30.2 L900.0 31.0 L905.7 30.2 L910.8 27.8 L914.8 24.2 L917.4 20.0 L918.5 15.8 L918.3 12.2 L916.9 9.8 L915.0 9.0 L913.1 9.8 L911.7 12.2 L911.5 15.8 L912.6 20.0 L915.2 24.2 L919.2 27.8 L924.3 30.2 L930.0 31.0 L935.7 30.2 L940.8 27.8 L944.8 24.2 L947.4 20.0 L948.5 15.8 L948.3 12.2 L946.9 9.8 L945.0 9.0 L943.1 9.8 L941.7 12.2 L941.5 15.8 L942.6 20.0 L945.2 24.2 L949.2 27.8 L954.3 30.2 L960.0 31.0 L965.7 30.2 L970.8 27.8 L974.8 24.2 L977.4 20.0 L978.5 15.8 L978.3 12.2 L976.9 9.8 L975.0 9.0 L973.1 9.8 L971.7 12.2 L971.5 15.8 L972.6 20.0 L975.2 24.2 L979.2 27.8 L984.3 30.2 L990.0 31.0 L995.7 30.2 L1000.8 27.8 L1004.8 24.2 L1007.4 20.0 L1008.5 15.8 L1008.3 12.2 L1006.9 9.8 L1005.0 9.0 L1003.1 9.8 L1001.7 12.2 L1001.5 15.8 L1002.6 20.0 L1005.2 24.2 L1009.2 27.8 L1014.3 30.2 L1020.0 31.0 L1025.7 30.2 L1030.8 27.8 L1034.8 24.2 L1037.4 20.0 L1038.5 15.8 L1038.3 12.2 L1036.9 9.8 L1035.0 9.0 L1033.1 9.8 L1031.7 12.2 L1031.5 15.8 L1032.6 20.0 L1035.2 24.2 L1039.2 27.8 L1044.3 30.2 L1050.0 31.0 L1055.7 30.2 L1060.8 27.8 L1064.8 24.2 L1067.4 20.0 L1068.5 15.8 L1068.3 12.2 L1066.9 9.8 L1065.0 9.0 L1063.1 9.8 L1061.7 12.2 L1061.5 15.8 L1062.6 20.0 L1065.2 24.2 L1069.2 27.8 L1074.3 30.2 L1080.0 31.0 L1085.7 30.2 L1090.8 27.8 L1094.8 24.2 L1097.4 20.0 L1098.5 15.8 L1098.3 12.2 L1096.9 9.8 L1095.0 9.0 L1093.1 9.8 L1091.7 12.2 L1091.5 15.8 L1092.6 20.0 L1095.2 24.2 L1099.2 27.8 L1104.3 30.2 L1110.0 31.0 L1115.7 30.2 L1120.8 27.8 L1124.8 24.2 L1127.4 20.0 L1128.5 15.8 L1128.3 12.2 L1126.9 9.8 L1125.0 9.0 L1123.1 9.8 L1121.7 12.2 L1121.5 15.8 L1122.6 20.0 L1125.2 24.2 L1129.2 27.8 L1134.3 30.2 L1140.0 31.0 L1145.7 30.2 L1150.8 27.8 L1154.8 24.2 L1157.4 20.0 L1158.5 15.8 L1158.3 12.2 L1156.9 9.8 L1155.0 9.0 L1153.1 9.8 L1151.7 12.2 L1151.5 15.8 L1152.6 20.0 L1155.2 24.2 L1159.2 27.8 L1164.3 30.2 L1170.0 31.0 L1175.7 30.2 L1180.8 27.8 L1184.8 24.2 L1187.4 20.0 L1188.5 15.8 L1188.3 12.2 L1186.9 9.8 L1185.0 9.0 L1183.1 9.8 L1181.7 12.2 L1181.5 15.8 L1182.6 20.0 L1185.2 24.2 L1189.2 27.8 L1194.3 30.2 L1200.0 31.0"/></svg>
   </section>
 
-  <section class="scene scene--coral" aria-labelledby="s5">
+  <section class="scene candy candy--tang" aria-labelledby="s5">
     <div class="wrap">
-      <h2 id="s5" class="wobble" data-t="s5h">Mas espera… tem mais!</h2>
-      <ul class="stickers">
-        <li data-t-html="m1"><b>Só quem você escolher.</b> Família ou amigos.</li>
-        <li data-t-html="m2"><b>Sem anúncio.</b> Sem feed. Sem rolar sem fim.</li>
-        <li data-t-html="m3"><b>O Oiê não tem servidor.</b> Nada sobre a família chega até nós.</li>
-        <li data-t-html="m4"><b>Horário de silêncio.</b> Na escola e na hora de dormir.</li>
+      <h2 id="s5" data-t="s5h">Mas espera… tem mais!</h2>
+      <ul class="jelly">
+        <li data-t-html="m1"><b>Liga pra quem gosta.</b> Vó, primo, melhor amigo: quem você escolher.</li>
+        <li data-t-html="m2"><b>Áudio, foto e figurinha.</b> Do jeitinho que criança gosta.</li>
+        <li data-t-html="m3"><b>Sem anúncio. Sem feed.</b> Nada de rolar sem fim.</li>
+        <li data-t-html="m4"><b>O Oiê não tem servidor.</b> Nada sobre a família chega até nós.</li>
       </ul>
     </div>
   </section>
 
-  <section class="scene scene--purple" aria-labelledby="s6">
+  <section class="scene silver" aria-labelledby="s6">
     <div class="wrap">
       <h2 id="s6" data-t="s6h">Celular x Oiê</h2>
-      <table class="versus">
-        <thead><tr><th scope="col"><span class="visually-hidden" data-t="vsWhat">O quê</span></th><th scope="col" data-t="vsPhone">Celular da criança</th><th scope="col" data-t="vsOie">Oiê no tablet</th></tr></thead>
-        <tbody>
-          <tr><th scope="row" data-t="v1">Com quem fala</th><td data-t="v1a">Qualquer um</td><td data-t="v1b">Só quem você aprovou</td></tr>
-          <tr><th scope="row" data-t="v2">Anúncios e feed</th><td data-t="v2a">Muitos</td><td data-t="v2b">Nenhum</td></tr>
-          <tr><th scope="row" data-t="v3">Dados da criança</th><td data-t="v3a">Viram anúncio</td><td data-t="v3b">Não saem de casa</td></tr>
-          <tr><th scope="row" data-t="v4">Precisa de</th><td data-t="v4a">Chip, plano e um aparelho só dela</td><td data-t="v4b">O tablet de casa e o seu WhatsApp</td></tr>
-        </tbody>
-      </table>
+      <div class="win">
+        <div class="win__bar" aria-hidden="true"><i></i><i></i><i></i></div>
+        <table class="versus">
+          <thead><tr><th scope="col"><span class="visually-hidden" data-t="vsWhat">O quê</span></th><th scope="col" data-t="vsPhone">Celular</th><th scope="col" data-t="vsOie">Oiê</th></tr></thead>
+          <tbody>
+            <tr><th scope="row" data-t="v1">Com quem fala</th><td data-t="v1a">Qualquer um</td><td data-t="v1b">Só quem você aprovou</td></tr>
+            <tr><th scope="row" data-t="v2">Anúncios e feed</th><td data-t="v2a">Muitos</td><td data-t="v2b">Nenhum</td></tr>
+            <tr><th scope="row" data-t="v3">Dados da criança</th><td data-t="v3a">Podem virar anúncio</td><td data-t="v3b">Não chegam até nós</td></tr>
+            <tr><th scope="row" data-t="v4">Precisa de</th><td data-t="v4a">Chip, plano e um aparelho só dela</td><td data-t="v4b">O tablet de casa e o seu WhatsApp</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
 
-  <section class="scene scene--yellow" aria-labelledby="s7">
+  <section class="scene night price-scene" aria-labelledby="s7">
+    <img class="blob blob--c" src="assets/img/blob-chrome.webp" alt="" width="440" height="403" loading="lazy">
     <div class="wrap center">
       <h2 id="s7" data-t="s7h">E quanto custa?</h2>
-      <p class="burst burst--price"><span data-t="price">R$ 0,00</span></p>
+      <p class="price"><span class="chrome" data-t="price">R$ 0,00</span></p>
       <p class="big" data-t="s7p">É de graça. E o código é aberto: qualquer um pode conferir o que ele faz.</p>
     </div>
   </section>
 
-  <section class="scene scene--purple cta" id="baixe" aria-labelledby="s8">
+  <section class="scene foil get" id="baixe" aria-labelledby="s8">
     <div class="wrap two">
       <div>
-        <h2 id="s8" class="mega" data-t="s8h">Baixe já!</h2>
-        <a class="btn btn--yellow btn--big" href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener" data-t="ctaDl">Baixar o Oiê</a>
-        <p class="hero__note" data-t="dlNote">Abra esta página no tablet Android da criança (Android 8 ou mais novo).</p>
+        <h2 id="s8" data-t="s8h">Baixe já!</h2>
+        <a class="gel gel--big" href="https://github.com/gabrielbr/oie-releases/releases/latest" rel="noopener"><span data-t="ctaDl">Baixar o Oiê</span></a>
+        <p class="note" data-t="dlNote">Abra esta página no tablet Android da criança (Android 8 ou mais novo). O botão leva ao arquivo mais recente, no GitHub.</p>
+        <p class="risk"><a href="#aviso" data-t="riskLine">Antes de conectar, leia o aviso: o WhatsApp pode restringir ou bloquear números.</a></p>
       </div>
       <ol class="install">
         <li data-t="g1">No tablet da criança, toque em Baixar o Oiê e abra o arquivo.</li>
@@ -193,12 +164,10 @@
       <div class="faq">
         <details><summary data-t="q1">Quem recebe precisa instalar alguma coisa?</summary><p data-t="a1">Não. A família e os amigos recebem no WhatsApp deles, como uma mensagem sua, com o nome da criança na frente.</p></details>
         <details><summary data-t="q2">A criança pode falar com os amigos?</summary><p data-t="a2">Pode, se você adicionar. Ela só fala com quem você aprovar, e ninguém de fora fala com ela pelo Oiê.</p></details>
-        <details><summary data-t="q3">A criança precisa de um celular?</summary><p data-t="a3">Não. O Oiê fica num tablet Android que vocês já têm e usa o seu WhatsApp.</p></details>
         <details><summary data-t="q4">O Oiê é do WhatsApp?</summary><p data-t="a4">Não. É um app independente, que conecta ao seu WhatsApp como o WhatsApp Web, e não é afiliado ao WhatsApp nem à Meta. O WhatsApp pode restringir ou bloquear números que usam apps de terceiros.</p></details>
         <details><summary data-t="q5">Eu vejo o que a criança manda?</summary><p data-t="a5">Vê. As mensagens saem do seu WhatsApp, então ficam no seu celular também. A criança sabe disso desde o primeiro dia.</p></details>
         <details><summary data-t="q6">O Oiê guarda alguma coisa sobre a minha família?</summary><p data-t="a6">Não. O Oiê não tem servidor. As mensagens vão só pelo WhatsApp. Não tem análise de uso, anúncio nem rastreamento. A única outra conexão é para ver se há versão nova, no GitHub.</p></details>
         <details><summary data-t="q7">E se o WhatsApp bloquear o meu número?</summary><p data-t="a7">O Oiê para na hora, mostra no tablet o aviso do WhatsApp e não tenta de novo sozinho. No seu celular, siga o que o WhatsApp mostrar. Você pode desconectar o Oiê em Aparelhos conectados.</p></details>
-        <details><summary data-t="q8">Dá para fazer ligação?</summary><p data-t="a8">Ainda não. Por enquanto: mensagens, áudios, fotos, vídeos e figurinhas.</p></details>
         <details><summary data-t="q9">Por que não está na Play Store?</summary><p data-t="a9">Por enquanto o Oiê é baixado direto da página de versões. Cada versão traz um código (SHA-256) para conferir que o arquivo é o original, e o app avisa quando tem versão nova.</p></details>
       </div>
       <p class="more"><a href="seguranca/" data-t="moreSafety" data-t-href="navSafetyHref">Por que fizemos o Oiê, e um guia de segurança para pais</a></p>
@@ -215,10 +184,10 @@
       <li><a href="https://github.com/gabrielbr/oie-releases/releases" rel="noopener" data-t="footAll">Todas as versões</a></li>
       <li><a href="https://github.com/tulir/whatsmeow" rel="noopener" data-t="footLib">whatsmeow (MPL-2.0)</a></li>
     </ul>
-    <p class="foot__legal" data-t="footLegal">O Oiê é um app independente, não afiliado ao WhatsApp nem à Meta. WhatsApp é uma marca da Meta. Os desenhos desta página são exemplos.</p>
+    <p class="foot__legal" data-t="footLegal">O Oiê é um app independente, não afiliado ao WhatsApp nem à Meta. WhatsApp é uma marca da Meta. As imagens desta página são ilustrações.</p>
   </div>
 </footer>
 
-<script src="assets/tv.js" defer></script>
+<script src="assets/home.js" defer></script>
 </body>
 </html>
