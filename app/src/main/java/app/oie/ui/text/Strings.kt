@@ -423,7 +423,7 @@ object Pt : Strings {
     override fun introPerson(kid: String, parent: String) = "Oiê · $kid está escrevendo pelo WhatsApp de $parent, com o app Oiê, no tablet. Responda aqui mesmo. Para puxar conversa com $kid depois, comece a mensagem com “$kid”. Como funciona: ${app.oie.logic.Intro.LINK_PT}"
     override fun introGroup(kid: String, parent: String) = "Oiê · $kid vai participar deste grupo pelo WhatsApp de $parent, com o app Oiê, no tablet. $kid vê tudo o que o grupo fala. Como funciona: ${app.oie.logic.Intro.LINK_PT}"
     override val introTitle = "Primeira mensagem"; override val introSwitch = "Apresentar o Oiê na primeira mensagem"
-    override fun introBody(kid: String) = "Antes da primeira mensagem de $kid em cada conversa, o Oiê manda uma vez uma explicação curta, com o link de como funciona."
+    override fun introBody(kid: String) = "Antes da primeira mensagem de $kid em cada conversa, o Oiê manda uma explicação curta, com o link de como funciona. Cada vez que um WhatsApp é conectado, ele explica de novo."
     override val notInContacts = "Fora dos contatos"
     override fun helpItems(kid: String, parent: String) = listOf(
         "O que pode acontecer com o meu WhatsApp?" to riskBody,
@@ -776,7 +776,7 @@ object En : Strings {
     override fun introPerson(kid: String, parent: String) = "Oiê · $kid is writing from $parent’s WhatsApp, with the Oiê app, on the tablet. Just reply here. To start a chat with $kid later, begin your message with “$kid”. How it works: ${app.oie.logic.Intro.LINK_EN}"
     override fun introGroup(kid: String, parent: String) = "Oiê · $kid will take part in this group from $parent’s WhatsApp, with the Oiê app, on the tablet. $kid sees everything the group says. How it works: ${app.oie.logic.Intro.LINK_EN}"
     override val introTitle = "First message"; override val introSwitch = "Introduce Oiê in the first message"
-    override fun introBody(kid: String) = "Before $kid’s first message in each chat, Oiê sends a short explanation once, with the link to how it works."
+    override fun introBody(kid: String) = "Before $kid’s first message in each chat, Oiê sends a short explanation with the link to how it works. Each time a WhatsApp is linked, it explains again."
     override val notInContacts = "Not in contacts"
     override fun helpItems(kid: String, parent: String) = listOf(
         "What could happen to my WhatsApp?" to riskBody,

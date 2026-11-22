@@ -88,4 +88,12 @@ class PersistenceTest {
         }
         assertNull(Store(File(dir, "state.sealed"), broken).read())
     }
+
+    // v0.54: which WhatsApp sent the intros is kept, so a different one after a restart still starts them over.
+    @Test fun introsKeepTheirWhatsApp() {
+        val a = AppState(); a.introduced += "vovo"; a.introducedBy = "5511900000001@s.whatsapp.net"
+        val b = AppState(); Codec.decode(Codec.encode(a), b)
+        assertEquals(listOf("vovo"), b.introduced.toList())
+        assertEquals("5511900000001@s.whatsapp.net", b.introducedBy)
+    }
 }

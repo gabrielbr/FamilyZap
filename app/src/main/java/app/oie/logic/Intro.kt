@@ -15,4 +15,11 @@ object Intro {
     const val LINK_EN = "https://gabrielbr.github.io/oie-releases/talk-to-a-child/"
 
     fun needed(on: Boolean, chat: Contact, introduced: Set<String>): Boolean = on && !chat.parentLine && chat.id !in introduced
+
+    /**
+     * v0.54 (the owner: "it must happen for every new WhatsApp connection"): the chats already introduced belong to
+     * the WhatsApp that introduced them. When the tablet is on another one ([own], its own chat id), they start over.
+     * An unknown [own] (empty) changes nothing.
+     */
+    fun accountChanged(introducedBy: String, own: String): Boolean = own.isNotEmpty() && own != introducedBy
 }

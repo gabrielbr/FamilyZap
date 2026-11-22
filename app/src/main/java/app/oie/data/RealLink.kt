@@ -79,7 +79,13 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
      */
     private fun sendIntroIfNeeded(l: oielink.Link, m: app.oie.logic.Message) {
         val chat = state.allowed.firstOrNull { it.id == m.chatId } ?: return
-        if (!app.oie.logic.Intro.needed(state.introOn, chat, state.introduced.toSet())) return
+        if (!state.introOn || chat.parentLine) return
+        // v0.54: intros belong to the WhatsApp that sent them; on another one, every chat gets one again.
+        val own = runCatching { l.ownChat() }.getOrDefault("")
+        val changed = app.oie.logic.Intro.accountChanged(state.introducedBy, own)
+        if (changed) main.post { state.introduced.clear(); state.introducedBy = own }
+        val done = if (changed) emptySet() else state.introduced.toSet()
+        if (!app.oie.logic.Intro.needed(state.introOn, chat, done)) return
         val tx = if (context.resources.configuration.locales[0].language == "en") app.oie.ui.text.En else app.oie.ui.text.Pt
         val kid = state.kidName.ifBlank { tx.theKid }; val parent = state.parentName
         val text = if (chat.isGroup) tx.introGroup(kid, parent) else tx.introPerson(kid, parent)
@@ -228,7 +234,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             link = null
             listOf(db, File(db.path + "-wal"), File(db.path + "-shm")).forEach { it.delete() }
             Diagnostics.log("pin reset: relinking")
-            main.post { state.pinResetFrom = own; ls.clear(); turnOn(); start() }
+            // v0.54: a new link, so every chat gets the intro again.
+            main.post { state.pinResetFrom = own; state.forgetIntros(); ls.clear(); turnOn(); start() }
         }
     }
 
@@ -252,6 +259,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
 
     /** Logs out of WhatsApp and deletes the session and the test from the tablet. */
     fun unlink() {
+        // v0.54: the next link (the same WhatsApp or another parent's) introduces Oiê again in every chat.
+        state.forgetIntros()
         bg {
             runCatching { link?.unlink() }
             link = null
@@ -626,7 +635,8 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
                 "qr" -> { ls.status = LinkState.Status.Qr(o.optString("code")); ls.pairFailed = false }
                 "paired", "connected" -> {
                     // A fresh pairing starts the contact list from nothing (v0.17).
-                    if (kind == "paired") { ls.contactsSynced = false; ls.linkedAt = state.clock() }
+                    // v0.54: a new pairing (another parent, the same one after a logout, a PIN remake) introduces Oiê again everywhere.
+                    if (kind == "paired") { ls.contactsSynced = false; ls.linkedAt = state.clock(); state.forgetIntros() }
                     else if (ls.linkedAt == 0L) ls.linkedAt = state.clock()
                     ls.status = LinkState.Status.Connected; ls.downSince = 0L; loadContacts(); refreshPhotos()
                     // v0.30: the link must know the line to the parent, so it may write to the parent's own chat if that's the line.

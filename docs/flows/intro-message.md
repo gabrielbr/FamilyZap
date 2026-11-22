@@ -39,3 +39,19 @@ flowchart TD
 | 7 | Control | ✅ One switch in Ajustes. |
 | 14 | Ethics | ✅ It says plainly who is writing and how. No claims, no tracking parameters in the link. One message per chat, ever, at a human pace, never bulk. |
 | 15 | Evidence | 🟡 One real first message to a grandparent and one to a group. |
+
+## v0.54: again for every new WhatsApp link
+_The owner, 2026-11-22: "If the father decides that the mother will be the bridge, so they disconnect and connect again, the first message when they send to anyone should again send the first automated text … it must happen for every new WhatsApp connection."_
+
+- **Before:** "once per chat, ever". After a switch to the other parent's WhatsApp, nobody heard from Oiê again, although the kid's messages now come from a number they've never seen used this way.
+- **Now:** "once per chat, per WhatsApp link". The list of chats already introduced belongs to the WhatsApp that sent the intros, and starts empty when:
+  - the tablet pairs with a WhatsApp (the QR code is read): after the parent disconnects Oiê and links again, with the same WhatsApp or another one; after WhatsApp logged the tablet out; after a PIN remake;
+  - the tablet finds itself on a different WhatsApp than the one that sent the intros (`Intro.accountChanged`, checked before every first message).
+- **The words:** unchanged, with the parent's name as set in Ajustes › Nomes. When the bridge changes, the parent changes the name there.
+- **Unchanged:** never on the line to the parent, the switch in Ajustes, the pace, and what happens if it fails.
+
+**Review (§13):**
+- **Ethics ✅:** whoever's number the kid writes from, the people on the other side are told how it works.
+- **Branches ✅:** same WhatsApp relinked, another WhatsApp, a PIN remake.
+- **Evidence 🟡:** switch the bridge on the tablet and send to one grandparent.
+
