@@ -14,6 +14,8 @@ Ideas and planned work. When something ships, move it into the docs.
 ## Next
 
 ## Later
+- Material 3 Expressive across the app: done in v0.52 (decision 0018). Next, when Material's Expressive APIs leave "experimental": drop the opt-in and re-check the screens.
+
 - A paperclip icon in the Gabriel core set for Anexar (v0.38 uses the set's plus, with the word on the tablet).
 - If the kid finds the chat's hold-to-record and the card's tap-to-send confusing side by side, offer one gesture everywhere (v0.38 flow, evidence item 15).
 - The Oiê sticker words are drawn into each sticker; "Boa noite" sits smaller than the others. Redraw it at the same size (an asset change in 01 Brand/stickers).

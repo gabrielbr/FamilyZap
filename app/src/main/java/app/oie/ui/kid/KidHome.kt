@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package app.oie.ui.kid
 
 import app.oie.ui.common.pressableSelect
@@ -162,8 +164,8 @@ internal fun homeView(state: AppState): HomeView = when (state.homeView) {
 /** v0.48: "Pessoas" or "Grupos" over a section, only when the home has both (a heading for TalkBack). */
 @Composable
 private fun SectionTitle(text: String) {
-    Text(text, style = OieType.title, color = OieTheme.colors.ink,
-        modifier = Modifier.padding(top = OTokens.Spacing.space6).semantics { heading() })
+    Text(text, style = androidx.compose.material3.MaterialTheme.typography.titleMediumEmphasized, color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(top = OTokens.Spacing.space6, start = OTokens.Spacing.space1).semantics { heading() })
 }
 
 /**
@@ -190,21 +192,10 @@ private fun People(state: AppState) {
             if (titled) SectionTitle(title)
             Box(Modifier.padding(top = OTokens.Spacing.space3)) {
                 when (view) {
-                    // v0.51 (the owner: "list view seems broken"): rows span the whole width, as in the other views, with a
-                    // hairline between plain rows (from the text, after the photo, as in WhatsApp). A row with news keeps
-                    // its coral edge and a 4dp gap instead, so edges never touch a line or each other.
-                    HomeView.LIST -> Column(Modifier.fillMaxWidth()) {
-                        list.forEachIndexed { i, ct ->
-                            val news = state.unread(ct.id) > 0
-                            Box(Modifier.fillMaxWidth().then(if (news) Modifier.padding(vertical = OTokens.Spacing.space1) else Modifier)) {
-                                PersonRow(state, ct, letters[ct.name])
-                            }
-                            val next = list.getOrNull(i + 1)
-                            if (next != null && !news && state.unread(next.id) == 0) Box(
-                                Modifier.fillMaxWidth().padding(start = OTokens.Spacing.space3 + OTokens.Size.avatar + OTokens.Spacing.space4, end = OTokens.Spacing.space3)
-                                    .height(OTokens.Size.hairline).background(OieTheme.colors.line),
-                            )
-                        }
+                    // v0.52 (decision 0018): Material 3 Expressive's segmented list: each section is one group of rows with
+                    // big outer corners and small gaps between them, so each row reads as one thing (the v0.51 complaint).
+                    HomeView.LIST -> Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(androidx.compose.material3.ListItemDefaults.SegmentedGap)) {
+                        list.forEachIndexed { i, ct -> PersonRow(state, ct, letters[ct.name], i, list.size) }
                     }
                     HomeView.PHOTOS -> PhotoGrid(state, list, letters)
                     HomeView.MOSAIC -> Mosaic(state, list, letters)
@@ -227,18 +218,18 @@ private fun PhotoGrid(state: AppState, list: List<app.oie.logic.Contact>, letter
         FlowRow(horizontalArrangement = Arrangement.spacedBy(gap), verticalArrangement = Arrangement.spacedBy(gap)) {
             list.forEach { ct ->
                 val s = said(state, ct)
-                val shape = RoundedCornerShape(OTokens.Radius.radiusM)
+                val shape = androidx.compose.material3.MaterialTheme.shapes.large
+                val sc = androidx.compose.material3.MaterialTheme.colorScheme
                 Column(
-                    Modifier.width(tileW).clip(shape).background(c.surface)
-                        .border(if (s.unread > 0) OTokens.Size.newsEdge else OTokens.Size.hairline, if (s.unread > 0) c.mint else c.line, shape)
+                    Modifier.width(tileW).clip(shape).background(if (s.unread > 0) sc.secondaryContainer else sc.surfaceContainer)
                         .pressable { state.route = Route.Conversation(ct.id) }
                         .semantics(mergeDescendants = true) { contentDescription = s.label; role = Role.Button }
                         .padding(OTokens.Spacing.space3),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
                 ) {
-                    app.oie.ui.common.Avatar(ct, OTokens.Size.contactTile, letters = letters[ct.name])
-                    Text(ct.name, style = OieType.label, color = c.ink, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    app.oie.ui.common.Avatar(ct, OTokens.Size.contactTile, letters = letters[ct.name], strong = s.unread > 0)
+                    Text(ct.name, style = OieType.label, color = if (s.unread > 0) sc.onSecondaryContainer else sc.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                     if (s.unread > 0) NewPill(s.unread)
                 }
             }
@@ -310,55 +301,53 @@ private fun said(state: AppState, ct: app.oie.logic.Contact): Said {
 }
 
 /**
- * "3 novas" (a word, never a bare dot or colour). v0.45 (the owner: "using the red that we use on the brand"): the brand
- * coral fill with ink on it (4.8:1), so news stands out. Each person with news wears one: the owner's call over the
- * "one filled coral per screen" rule (decision 0015).
+ * "3 novas" (a word, never a bare dot or colour). v0.52 (decision 0018): Material's badge, in primary with on-primary,
+ * the one solid thing on a row with news; the row itself is the soft secondary container.
  */
 @Composable
 private fun NewPill(n: Int) {
-    val c = OieTheme.colors
-    Text(
-        str.newCount(n), style = OieType.caption, color = c.onMint, maxLines = 1,
-        modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(c.mint)
-            .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
-    )
+    val sc = androidx.compose.material3.MaterialTheme.colorScheme
+    androidx.compose.material3.Badge(containerColor = sc.primary, contentColor = sc.onPrimary) {
+        Text(str.newCount(n), style = androidx.compose.material3.MaterialTheme.typography.labelMedium, maxLines = 1,
+            modifier = Modifier.padding(horizontal = OTokens.Spacing.space1))
+    }
 }
 
-/** A phone's row: photo, name and when on top, the last message under it, "2 novas" at the end. One tap opens the chat. */
+/**
+ * A row (v0.52, decision 0018): Material's segmented list item. Photo, name (and heart), the last message under it,
+ * the time and "2 novas" at the end. A row with news is the secondary container, its name and message bold.
+ */
 @Composable
-private fun PersonRow(state: AppState, ct: app.oie.logic.Contact, letters: String?) {
-    val c = OieTheme.colors
+private fun PersonRow(state: AppState, ct: app.oie.logic.Contact, letters: String?, index: Int, count: Int) {
+    val sc = androidx.compose.material3.MaterialTheme.colorScheme
     val s = said(state, ct)
     val news = s.unread > 0
-    Row(
-        Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin + OTokens.Spacing.space4)
-            .clip(RoundedCornerShape(OTokens.Radius.radiusM))
-            // v0.45: a row with news wears the brand coral edge, like the card on a tablet.
-            // Every row keeps the same inset, so the photos line up whether a row is highlighted or not.
-            .then(if (news) Modifier.border(OTokens.Size.newsEdge, c.mint, RoundedCornerShape(OTokens.Radius.radiusM)) else Modifier)
-            .padding(horizontal = OTokens.Spacing.space3)
-            .pressable { state.route = Route.Conversation(ct.id) }
-            .semantics(mergeDescendants = true) { contentDescription = s.label; role = Role.Button }
-            .padding(vertical = OTokens.Spacing.space2),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
+    val fg = if (news) sc.onSecondaryContainer else sc.onSurface
+    val soft = if (news) sc.onSecondaryContainer else sc.onSurfaceVariant
+    androidx.compose.material3.SegmentedListItem(
+        onClick = { state.route = Route.Conversation(ct.id) },
+        shapes = androidx.compose.material3.ListItemDefaults.segmentedShapes(index, count),
+        modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) { contentDescription = s.label; role = Role.Button },
+        colors = androidx.compose.material3.ListItemDefaults.segmentedColors(
+            containerColor = if (news) sc.secondaryContainer else sc.surfaceContainer, contentColor = fg, supportingContentColor = soft, trailingContentColor = soft,
+        ),
+        leadingContent = { app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters, strong = news) },
+        supportingContent = {
+            // A message that didn't go says "Não foi" in the error colour, as in the chat (a word, never the colour alone).
+            Text(s.preview, style = if (news) OieType.bodySmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) else OieType.bodySmall,
+                color = if (s.failed) sc.error else soft, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        },
+        trailingContent = if (s.whenText == null && !news) null else ({
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
+                s.whenText?.let { Text(it, style = OieType.caption, color = soft, maxLines = 1) }
+                if (news) NewPill(s.unread)
+            }
+        }),
     ) {
-        app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
-            // v0.51: the name (and the heart) take what's left, so the time sits at the row's end, above the "N novas" tag.
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
-                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
-                    Text(ct.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                    if (ct.id in state.favorites) app.oie.ui.common.OIcon(R.drawable.gg_ic_heart, tint = c.muted)
-                }
-                s.whenText?.let { Text(it, style = OieType.caption, color = if (s.unread > 0) c.ink else c.muted, maxLines = 1) }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
-                // A message that didn't go says "Não foi" in the error colour, as in the chat (a word, never the colour alone).
-                Text(s.preview, style = if (s.unread > 0) OieType.label else OieType.bodySmall, color = if (s.failed) c.coralText else if (s.unread > 0) c.ink else c.muted,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                if (s.unread > 0) NewPill(s.unread)
-            }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
+            Text(ct.name, style = if (news) OieType.label.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold) else OieType.label, color = fg,
+                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+            if (ct.id in state.favorites) app.oie.ui.common.OIcon(R.drawable.gg_ic_heart, tint = soft)
         }
     }
 }
@@ -373,15 +362,19 @@ private fun PersonCard(state: AppState, ct: app.oie.logic.Contact, letters: Stri
     val c = OieTheme.colors
     val tx = str
     val s = said(state, ct)
-    val shape = RoundedCornerShape(OTokens.Radius.radiusM)
+    val shape = androidx.compose.material3.MaterialTheme.shapes.large
+    val sc = androidx.compose.material3.MaterialTheme.colorScheme
     val canSend = state.canSend(ct) && app.oie.ui.common.linkShown(state) != app.oie.logic.LinkView.Shown.DOWN
-    // v0.45: a card with news wears a 2dp brand coral edge (3.4:1 on the page, a graphic), with "3 novas" in coral.
+    // v0.52 (decision 0018): a Material card; one with news is the secondary container, with the "3 novas" badge.
+    val news = s.unread > 0
+    val fg = if (news) sc.onSecondaryContainer else sc.onSurface
+    val soft = if (news) sc.onSecondaryContainer else sc.onSurfaceVariant
     Column(
-        modifier.clip(shape).background(c.surface).border(if (s.unread > 0) OTokens.Size.newsEdge else OTokens.Size.hairline, if (s.unread > 0) c.mint else c.line, shape)
+        modifier.clip(shape).background(if (news) sc.secondaryContainer else sc.surfaceContainer)
             .padding(OTokens.Spacing.space2),
     ) {
         Column(
-            Modifier.fillMaxWidth().clip(RoundedCornerShape(OTokens.Radius.radiusS))
+            Modifier.fillMaxWidth().clip(androidx.compose.material3.MaterialTheme.shapes.small)
                 .pressable { state.route = Route.Conversation(ct.id) }
                 .semantics(mergeDescendants = true) { contentDescription = s.label; role = Role.Button }
                 .padding(OTokens.Spacing.space2),
@@ -389,19 +382,19 @@ private fun PersonCard(state: AppState, ct: app.oie.logic.Contact, letters: Stri
         ) {
             // One height with or without the time under the name, so the cards in a row line up.
             Row(Modifier.heightIn(min = OTokens.Size.rowMin), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
-                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters)
+                app.oie.ui.common.Avatar(ct, OTokens.Size.avatar, letters = letters, strong = news)
                 Column(Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
-                        Text(ct.name, style = OieType.title, color = c.ink, maxLines = if (mosaic) 2 else 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                        if (ct.id in state.favorites) app.oie.ui.common.OIcon(R.drawable.gg_ic_heart, tint = c.muted)
+                        Text(ct.name, style = OieType.title, color = fg, maxLines = if (mosaic) 2 else 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                        if (ct.id in state.favorites) app.oie.ui.common.OIcon(R.drawable.gg_ic_heart, tint = soft)
                     }
-                    s.whenText?.let { Text(it, style = OieType.caption, color = c.muted, maxLines = 1) }
+                    s.whenText?.let { Text(it, style = OieType.caption, color = soft, maxLines = 1) }
                 }
                 if (s.unread > 0 && !mosaic) NewPill(s.unread)
             }
             // Two lines held even when the message is short, so the cards in a row line up.
             // v0.48: in the mosaic a card is as tall as its message (up to 6 lines), so the columns stagger.
-            Text(s.preview, style = if (s.unread > 0) OieType.label else OieType.body, color = if (s.failed) c.coralText else if (s.unread > 0) c.ink else c.muted,
+            Text(s.preview, style = if (news) OieType.label else OieType.body, color = if (s.failed) sc.error else soft,
                 minLines = if (mosaic) 1 else 2, maxLines = if (mosaic) 6 else 2, overflow = TextOverflow.Ellipsis)
             // v0.48 audit (M1): in the mosaic's narrow columns the tag sits under the message, whole, not beside the name.
             if (s.unread > 0 && mosaic) NewPill(s.unread)
@@ -448,7 +441,7 @@ internal fun Arrange(state: AppState) {
                     .onSizeChanged { rowPx = it.height.coerceAtLeast(1) }
                     .zIndex(if (moving) 1f else 0f)
                     .graphicsLayer { translationY = if (moving) offset else 0f }
-                    .clip(RoundedCornerShape(OTokens.Radius.radiusM))
+                    .clip(androidx.compose.material3.MaterialTheme.shapes.medium)
                     .background(if (moving) c.surface else c.page)
                     .pointerInput(ct.id) {
                         detectDragGesturesAfterLongPress(
@@ -473,7 +466,7 @@ internal fun Arrange(state: AppState) {
                     // The word says it, not only the heart's colour.
                     if (fav) Text(tx.favorite, style = OieType.caption, color = c.muted, maxLines = 1)
                 }
-                SquareIcon(R.drawable.gg_ic_heart, tx.favoriteA11y(ct.name), tint = if (fav) c.ink else c.muted, selected = fav) { state.toggleFavorite(ct.id) }
+                SquareIcon(R.drawable.gg_ic_heart, tx.favoriteA11y(ct.name), selected = fav) { state.toggleFavorite(ct.id) }
                 SquareIcon(R.drawable.gg_ic_chevron, tx.moveUpA11y(ct.name), rotation = -90f, enabled = canUp) { state.moveOnHome(ct.id, -1) }
                 SquareIcon(R.drawable.gg_ic_chevron, tx.moveDownA11y(ct.name), rotation = 90f, enabled = canDown) { state.moveOnHome(ct.id, +1) }
             }
@@ -481,44 +474,50 @@ internal fun Arrange(state: AppState) {
     }
 }
 
-/** v0.48: "Mostrar como" with Lista, Fotos and Mosaico, one picked (a radio group, 48dp targets, the word says which). */
+/**
+ * v0.48: "Mostrar como" with Lista, Fotos and Mosaico, one picked. v0.52 (decision 0018): Material 3 Expressive's
+ * connected button group; the picked one is filled and round, with a check (the word and the check say which).
+ */
 @Composable
 private fun ViewChoice(state: AppState) {
     val c = OieTheme.colors
     val tx = str
     val current = homeView(state)
     Text(tx.showAs, style = OieType.label, color = c.ink, modifier = Modifier.padding(bottom = OTokens.Spacing.space2))
+    val options = listOf(HomeView.LIST to tx.viewList, HomeView.PHOTOS to tx.viewPhotos, HomeView.MOSAIC to tx.viewMosaic)
     Row(Modifier.fillMaxWidth().padding(bottom = OTokens.Spacing.space4).semantics { isTraversalGroup = true },
-        horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2)) {
-        listOf(HomeView.LIST to tx.viewList, HomeView.PHOTOS to tx.viewPhotos, HomeView.MOSAIC to tx.viewMosaic).forEach { (v, label) ->
+        horizontalArrangement = Arrangement.spacedBy(androidx.compose.material3.ButtonGroupDefaults.ConnectedSpaceBetween)) {
+        options.forEachIndexed { i, (v, label) ->
             val on = v == current
-            val shape = RoundedCornerShape(OTokens.Radius.radiusL)
-            Box(
-                Modifier.weight(1f).heightIn(min = OTokens.Size.rowMin - OTokens.Spacing.space2).clip(shape)
-                    .background(app.oie.ui.common.motionColor(if (on) c.selected else c.page)).border(OTokens.Size.hairline, app.oie.ui.common.motionColor(if (on) c.onSelected else c.line), shape)
-                    .pressableSelect(on, role = Role.RadioButton) { state.homeView = v.name.lowercase() },
-                contentAlignment = Alignment.Center,
-            ) { Text(label, style = OieType.label, color = if (on) c.onSelected else c.ink, maxLines = 1) }
+            androidx.compose.material3.ToggleButton(
+                checked = on, onCheckedChange = { state.homeView = v.name.lowercase() },
+                modifier = Modifier.weight(1f).heightIn(min = androidx.compose.material3.ButtonDefaults.MediumContainerHeight).semantics { role = Role.RadioButton },
+                shapes = when (i) {
+                    0 -> androidx.compose.material3.ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    options.lastIndex -> androidx.compose.material3.ButtonGroupDefaults.connectedTrailingButtonShapes()
+                    else -> androidx.compose.material3.ButtonGroupDefaults.connectedMiddleButtonShapes()
+                },
+            ) {
+                if (on) { app.oie.ui.common.OIcon(R.drawable.gg_ic_check, tint = androidx.compose.material3.LocalContentColor.current, size = androidx.compose.material3.ToggleButtonDefaults.IconSize)
+                    androidx.compose.foundation.layout.Spacer(Modifier.width(androidx.compose.material3.ToggleButtonDefaults.IconSpacing)) }
+                Text(label, maxLines = 1)
+            }
         }
     }
 }
 
-/** A 52dp square button with one icon (quiet style). [selected] makes it a toggle for TalkBack; a disabled one is dimmed and says so. */
+/** A Material icon button (56dp). [selected] makes it an outlined toggle (filled when on); a disabled one is dimmed and says so. */
 @Composable
-private fun SquareIcon(icon: Int, label: String, tint: androidx.compose.ui.graphics.Color = OieTheme.colors.ink, rotation: Float = 0f,
+private fun SquareIcon(icon: Int, label: String, tint: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified, rotation: Float = 0f,
                        enabled: Boolean = true, selected: Boolean? = null, onClick: () -> Unit) {
-    val c = OieTheme.colors
-    val shape = RoundedCornerShape(OTokens.Radius.radiusS)
-    Box(
-        Modifier.size(OTokens.Size.button).clip(shape)
-            .background(app.oie.ui.common.motionColor(if (selected == true) c.selected else c.surface))
-            .border(OTokens.Size.hairline, c.line, shape)
-            .then(if (selected != null) Modifier.pressableToggle(value = selected, enabled = enabled, role = Role.Switch) { onClick() }
-                  else Modifier.pressable(enabled = enabled, onClick = onClick))
-            .semantics { contentDescription = label; if (!enabled) disabled() }
-            .graphicsLayer { alpha = if (enabled) 1f else 0.38f },
-        contentAlignment = Alignment.Center,
-    ) { app.oie.ui.common.OIcon(icon, Modifier.rotate(rotation), tint = tint) }
+    // v0.52 audit: Material's small size on a phone (touch area still 48dp), so the names beside them aren't cut.
+    val compact = app.oie.ui.common.isCompact
+    val size = if (compact) androidx.compose.material3.IconButtonDefaults.smallContainerSize() else androidx.compose.material3.IconButtonDefaults.mediumContainerSize()
+    val glyphSize = if (compact) androidx.compose.material3.IconButtonDefaults.smallIconSize else androidx.compose.material3.IconButtonDefaults.mediumIconSize
+    val glyph: @Composable () -> Unit = { androidx.compose.material3.Icon(androidx.compose.ui.res.painterResource(icon), label, Modifier.rotate(rotation).size(glyphSize)) }
+    if (selected != null) androidx.compose.material3.OutlinedIconToggleButton(checked = selected, onCheckedChange = { onClick() }, modifier = Modifier.size(size), enabled = enabled,
+        shapes = androidx.compose.material3.IconButtonDefaults.toggleableShapes()) { glyph() }
+    else androidx.compose.material3.OutlinedIconButton(onClick = onClick, modifier = Modifier.size(size), enabled = enabled, shapes = androidx.compose.material3.IconButtonDefaults.shapes()) { glyph() }
 }
 
 /** How long the "Preciso de você" answer stays. */
@@ -533,8 +532,8 @@ private fun KidNotice(state: AppState) {
     Box(Modifier.fillMaxSize().background(c.scrim).pointerInput(Unit) { detectTapGestures { } }, contentAlignment = Alignment.BottomCenter) {
         Column(
             Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
-                .background(c.surface).padding(OTokens.Spacing.space8),
+                .clip(androidx.compose.material3.BottomSheetDefaults.ExpandedShape)
+                .background(androidx.compose.material3.BottomSheetDefaults.ContainerColor).padding(OTokens.Spacing.space8),
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
         ) {
             Text(tx.noticeTitle, style = OieType.title, color = c.ink)

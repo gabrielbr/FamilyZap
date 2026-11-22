@@ -1,5 +1,7 @@
 package app.oie.ui.kid
 
+import androidx.compose.ui.semantics.heading
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -73,7 +75,9 @@ internal fun NovidadesRow(state: AppState, onOpen: (String) -> Unit, onPost: () 
     val mine = state.myStatuses()
     if (row.isEmpty() && !posting && mine.isEmpty()) return
     val letters = app.oie.logic.Initials.of(state.reachable.map { it.name })
-    Text(tx.novidades, style = OieType.label, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    // v0.52: the same Material subheader as the home's other sections (Novas, Pessoas, Grupos).
+    Text(tx.novidades, style = androidx.compose.material3.MaterialTheme.typography.titleMediumEmphasized, color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(top = OTokens.Spacing.space6, start = OTokens.Spacing.space1).semantics { heading() })
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4)) {
         if (mine.isNotEmpty()) StatusRound(tx.you, tx.watchStatus(tx.you), tx.you, Ring.SEEN, { onOpen(Statuses.MINE) }) {
             app.oie.ui.common.Avatar(app.oie.logic.Contact(Statuses.MINE, state.kidName), OTokens.Size.avatar)
@@ -99,7 +103,7 @@ private enum class Ring { UNSEEN, SEEN, NONE }
 private fun StatusRound(name: String, action: String, said: String, ring: Ring, onClick: () -> Unit, note: String? = null, inner: @Composable () -> Unit) {
     val c = OieTheme.colors
     Column(
-        Modifier.widthIn(min = OTokens.Size.contactTile).clip(RoundedCornerShape(OTokens.Radius.radiusM))
+        Modifier.widthIn(min = OTokens.Size.contactTile).clip(androidx.compose.material3.MaterialTheme.shapes.medium)
             .pressable(label = action, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = said }
             .padding(vertical = OTokens.Spacing.space2),
@@ -162,7 +166,7 @@ internal fun StatusViewer(state: AppState, contactId: String, onClose: () -> Uni
             // A segment per status: past ones full, the current one marked, the rest a hairline.
             Row(Modifier.fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space2), horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
                 mine.forEachIndexed { i, _ ->
-                    Box(Modifier.weight(1f).height(OTokens.Spacing.space1).clip(RoundedCornerShape(OTokens.Radius.radiusS))
+                    Box(Modifier.weight(1f).height(OTokens.Spacing.space1).clip(androidx.compose.material3.MaterialTheme.shapes.small)
                         .background(if (i <= index) c.ink else c.line))
                 }
             }
@@ -252,14 +256,14 @@ private fun StatusContent(s: Status, arriving: Boolean, tooBig: Boolean, parent:
         arriving -> Text(tx.arriving, style = OieType.body, color = c.muted)
         tooBig -> Text(tx.statusTooBig(parent), style = OieType.body, color = c.ink, textAlign = TextAlign.Center)
         s.kind == Kind.PHOTO -> rememberPhoto(s.media, Photos.MAX_SIDE)?.let {
-            Image(it.asImageBitmap(), tx.photo, Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)), contentScale = ContentScale.Fit)
+            Image(it.asImageBitmap(), tx.photo, Modifier.clip(androidx.compose.material3.MaterialTheme.shapes.medium), contentScale = ContentScale.Fit)
         } ?: Text(tx.arriving, style = OieType.body, color = c.muted)
         s.kind == Kind.VIDEO || s.kind == Kind.GIF -> rememberBytes(s.media)?.let { bytes ->
             VideoSurface(bytes, loop = s.kind == Kind.GIF, muted = s.kind == Kind.GIF, play = playing, modifier = Modifier.fillMaxWidth(), onEnd = onEnd)
         } ?: Text(tx.arriving, style = OieType.body, color = c.muted)
         s.kind == Kind.TEXT -> Box(
-            Modifier.fillMaxWidth().heightIn(min = OTokens.Size.contactTile * 2).clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.selected)
-                .border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusM)).padding(OTokens.Spacing.space8),
+            Modifier.fillMaxWidth().heightIn(min = OTokens.Size.contactTile * 2).clip(androidx.compose.material3.MaterialTheme.shapes.medium).background(c.selected)
+                .padding(OTokens.Spacing.space8),
             contentAlignment = Alignment.Center,
         ) { Text(s.text, style = OieType.title, color = c.onSelected, textAlign = TextAlign.Center) }
         else -> Text(tx.onlyInWhatsApp(parent), style = OieType.body, color = c.muted)

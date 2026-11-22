@@ -150,7 +150,7 @@ private fun Qr(code: String, a11y: String) {
         QRCodeWriter().encode(code, BarcodeFormat.QR_CODE, 0, 0, mapOf(EncodeHintType.MARGIN to 0))
     }
     Box(
-        Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.qrGround).padding(OTokens.Spacing.space6)
+        Modifier.clip(androidx.compose.material3.MaterialTheme.shapes.medium).background(c.qrGround).padding(OTokens.Spacing.space6)
             .semantics { contentDescription = a11y },
     ) {
         // v0.34 audit round 2: as wide as the column allows, up to 288dp, always square (a phone's column is narrower).

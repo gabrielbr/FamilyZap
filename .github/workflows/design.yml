@@ -13,3 +13,9 @@ jobs:
           python-version: "3.12"
       - name: Design tokens check (layers, brand, contrast, generated files)
         run: python3 design/build.py --check
+      # v0.52 (decision 0018): the Material colour scheme generated from the brand coral, and its contrast.
+      - name: Material colour scheme check (generated file and contrast)
+        run: |
+          python3 -m pip install --quiet materialyoucolor==3.0.4
+          python3 design/m3/scheme.py --check
+          diff design/generated/OieScheme.kt app/src/main/java/app/oie/ui/theme/OieScheme.kt

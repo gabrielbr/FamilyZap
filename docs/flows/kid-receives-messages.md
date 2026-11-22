@@ -175,3 +175,15 @@ Since v0.46 (decision 0016, flow `docs/flows/groups.md`), **everything in an all
 - the parent's own messages in that group.
 
 The rule above (name, reply, 24 hours, talk about the kid, the parent taking over) now applies to people (1:1 chats) only. A long press on any message, media included, opens Reagir.
+
+## v0.52: Material 3 Expressive (decision 0018)
+- **No step changes.**
+- **Bubbles:** Material's large shape. One person's run joins up: the corners where their bubbles meet are small. The kid's on the secondary container, family's on the high surface container, no borders.
+- **Groups:** the sender's name in primary; "Fora dos contatos" stays a word in an outlined tag.
+- **"Novas":** a small Material chip in the middle, instead of a line.
+- **The input:** a Material pill. The record button takes the medium FAB's look (primary container, rounded square, shadow) and turns round while recording.
+
+**Review (§13):**
+- **Memory ✅:** runs read as one person's.
+- **Accessibility ✅:** the same labels and long-press actions.
+

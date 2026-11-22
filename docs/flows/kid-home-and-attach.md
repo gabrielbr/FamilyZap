@@ -199,3 +199,18 @@ _The owner, 2026-11-21: "List view of contacts seems broken … it does not take
 - **Accessibility ✅:** the line is decoration; each row is still one labelled target.
 - **Evidence 🟡:** Tito scans the list on the tablet without mixing rows.
 
+## v0.52: Material 3 Expressive (decision 0018)
+_The owner, 2026-11-22: "Go ahead with the implementation keeping defaults, but we want the frame around it."_
+
+- **No step changes:** what the kid taps, and in what order, is the same.
+- **Lista:** each section is one Material segmented list (big outer corners, small gaps between rows). A row with news is the secondary container, bold, with the "N novas" badge.
+- **Fotos and Mosaico:** Material cards, no borders. News is the secondary container.
+- **Arrumar:** "Mostrar como" is Material's connected button group. The heart is an outlined toggle (filled when on); the arrows are outlined icon buttons (smaller on a phone, with the same 48dp target).
+- **Faces:** Material's 9-sided cookie for everyone. On a row with news the face is the primary container, so it shows.
+
+**Review (§13):**
+- **Happy path ✅:** unchanged, no new taps.
+- **Conventions ✅:** Android's own components now.
+- **Accessibility ✅:** same labels and roles; the badge is a word.
+- **Evidence 🟡:** Tito uses the new look for a week.
+

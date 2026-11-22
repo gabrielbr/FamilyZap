@@ -143,21 +143,12 @@ fun ParentArea(state: AppState, section: Int, names: Boolean = false) {
             }
         }
         val compact = app.oie.ui.common.isCompact
-        // v0.34 audit: on a phone the four sections are a 2 x 2 grid with short names, all in view at once.
+        // v0.34 audit: short names on a phone, so all four fit.
         val sections = listOf(tx.sectionContacts to R.drawable.gg_ic_people, (if (compact) tx.sectionQuietShort else tx.sectionQuiet) to R.drawable.gg_ic_clock,
             tx.sectionSettings to R.drawable.gg_ic_gear, tx.sectionHelp to R.drawable.gg_ic_info)
-        @Composable
-        fun tab(i: Int, label: String, ic: Int, modifier: Modifier) {
-            val on = i == section
-            Row(
-                modifier.height(OTokens.Size.rowMin).clip(RoundedCornerShape(OTokens.Radius.radiusS))
-                    .background(motionColor(if (on) c.selected else c.page))
-                    .pressableSelect(on, role = Role.Tab) { touched(); state.route = Route.Parent(i) }
-                    .padding(horizontal = OTokens.Spacing.space4),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
-            ) { OIcon(ic, tint = if (on) c.onSelected else c.ink); Text(label, style = OieType.label, color = if (on) c.onSelected else c.ink, maxLines = 1) }
-        }
-        // A tablet: sections on the left, the section on the right. A phone: the sections on top, the section below.
+        val go: (Int) -> Unit = { i -> touched(); state.route = Route.Parent(i) }
+        // A tablet: Material's navigation rail on the left, the section on the right. A phone: the section, with
+        // Material's navigation bar at the bottom (v0.52, decision 0018; they were hand-made tabs).
         val body: @Composable (Modifier) -> Unit = { m ->
             Column(
                 m.verticalScroll(rememberScrollState())
@@ -167,26 +158,35 @@ fun ParentArea(state: AppState, section: Int, names: Boolean = false) {
             ) { sectionContent() }
         }
         if (compact) Column(Modifier.fillMaxSize()) {
-            Column(Modifier.fillMaxWidth().padding(OTokens.Spacing.space2), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
-                listOf(0, 2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
-                        (row..row + 1).forEach { i -> tab(i, sections[i].first, sections[i].second, Modifier.weight(1f)) }
-                    }
+            body(Modifier.fillMaxWidth().weight(1f))
+            androidx.compose.material3.ShortNavigationBar {
+                sections.forEachIndexed { i, (label, ic) ->
+                    androidx.compose.material3.ShortNavigationBarItem(
+                        selected = i == section, onClick = { go(i) },
+                        icon = { OIcon(ic, tint = androidx.compose.material3.LocalContentColor.current) },
+                        label = { Text(label, maxLines = 1) },
+                    )
                 }
             }
-            Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
-            body(Modifier.fillMaxWidth())
         } else Row(Modifier.fillMaxSize()) {
-            Column(Modifier.width(OTokens.Size.contentMax / 2).fillMaxHeight().padding(OTokens.Spacing.space4), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1)) {
-                sections.forEachIndexed { i, (label, ic) -> tab(i, label, ic, Modifier.fillMaxWidth()) }
+            androidx.compose.material3.NavigationRail(Modifier.fillMaxHeight(), containerColor = androidx.compose.ui.graphics.Color.Transparent) {
+                androidx.compose.foundation.layout.Spacer(Modifier.height(OTokens.Spacing.space4))
+                sections.forEachIndexed { i, (label, ic) ->
+                    androidx.compose.material3.NavigationRailItem(
+                        selected = i == section, onClick = { go(i) },
+                        icon = { OIcon(ic, tint = androidx.compose.material3.LocalContentColor.current) },
+                        label = { Text(label, maxLines = 1) },
+                        modifier = Modifier.padding(vertical = OTokens.Spacing.space1),
+                    )
+                }
             }
-            Box(Modifier.width(OTokens.Size.hairline).fillMaxHeight().background(c.line))
             // v0.34 audit: one column up to 600dp (README §6), so help lines stay readable.
             body(Modifier.widthIn(max = OTokens.Size.contentMax + OTokens.Spacing.space12 * 2))
         }
     }
     undo?.let { u ->
-        app.oie.ui.common.Snackbar(u.text, Modifier.align(Alignment.BottomCenter), action = tx.undo) { u.restore(); undo = null }
+        // On a phone it sits above the navigation bar.
+        app.oie.ui.common.Snackbar(u.text, Modifier.align(Alignment.BottomCenter).padding(bottom = if (app.oie.ui.common.isCompact) OTokens.Spacing.space16 else androidx.compose.ui.unit.Dp.Hairline), action = tx.undo) { u.restore(); undo = null }
     }
     }
 }
@@ -232,7 +232,7 @@ private fun Contacts(state: AppState, touched: () -> Unit, offerUndo: Undo) {
     }
     if (state.realMode && state.allowed.none { it.parentLine }) ParentLineCard(state, touched)
     if (state.addRequested) Row(
-        Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space3).clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.selected)
+        Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space3).clip(androidx.compose.material3.MaterialTheme.shapes.medium).background(c.selected)
             .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
     ) {
@@ -338,7 +338,7 @@ private fun QuietSection(state: AppState, touched: () -> Unit, offerUndo: Undo) 
     }
     // v0.43: quiet turned on from the parent's WhatsApp ("/Tito silêncio"): said here, with a way to lift it.
     if (state.quietManual) Row(
-        Modifier.fillMaxWidth().padding(bottom = OTokens.Spacing.space4).clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.selected)
+        Modifier.fillMaxWidth().padding(bottom = OTokens.Spacing.space4).clip(androidx.compose.material3.MaterialTheme.shapes.medium).background(c.selected)
             .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
     ) {
@@ -580,7 +580,7 @@ private fun SignaturePreview(kid: String, emoji: String) {
             append(": " + tx.sampleMessage)
         },
         style = OieType.body, color = c.ink,
-        modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.surface).padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
+        modifier = Modifier.clip(androidx.compose.material3.MaterialTheme.shapes.medium).background(c.surface).padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
     )
 }
 
@@ -685,7 +685,7 @@ private fun ParentLineCard(state: AppState, touched: () -> Unit) {
     var creating by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf<String?>(null) }
     Column(
-        Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space3).clip(RoundedCornerShape(OTokens.Radius.radiusM))
+        Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space3).clip(androidx.compose.material3.MaterialTheme.shapes.medium)
             .background(c.surface).padding(OTokens.Spacing.space4),
         verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
     ) {

@@ -46,6 +46,18 @@
 
 
 
+## 0.52.0
+- **A new look: Material 3 Expressive, Android's own design.** Every screen, for Tito and for you, now uses Google's Material components:
+  - softer, rounder shapes;
+  - colours made from Oiê's coral;
+  - buttons that squish a little when pressed, and movement with a bit of spring.
+  The coral frame round the screen stays, and so does the Nunito type.
+- **Tito's home:** each section (Novas, Pessoas, Grupos) is one group of rows. Someone with news stands out in a warmer colour, with "3 novas".
+- **Chats:** messages from the same person join up, so it's easier to see who said what. The microphone is a big rounded button.
+- **Parent area:** the four sections are in a bar at the bottom on a phone, and down the left side on the tablet.
+- **Nothing else changes:** what Tito can do, who can reach him, and how messages go are all the same.
+- **What you have to do:** nothing.
+
 ## 0.51.0
 - **Tito's list looks right.** In the Lista view:
   - the rows fill the whole width on the tablet;

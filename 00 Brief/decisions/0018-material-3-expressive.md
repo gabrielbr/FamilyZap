@@ -1,0 +1,34 @@
+# 0018 · The app wears Material 3 Expressive
+
+- **Date:** 2026-11-22
+- **Decided by:** the owner. They saw a side-by-side mock-up of today's design and Expressive, and said "I'm inclined on the Material UI". Then: "Just connect to the material design repo", and "Go ahead with the implementation keeping defaults, but we want the frame around it. Build everything in a single release."
+- **Before:** Oiê's own components on the Gabriel Design System core:
+  - radii 4/8/16;
+  - motion 150/250 ms with no bounce;
+  - hairline borders, no shadows;
+  - a hand-made coral palette.
+- **Decision:** the whole app (kid side, parent area, setup) uses Material 3 Expressive, Google's Compose library `androidx.compose.material3` 1.5. It takes Material's defaults:
+  - **colour:** the scheme generated from the brand coral (Fidelity, "Color match", 2025 spec), light and dark, by `design/m3/scheme.py`; dynamic colour off;
+  - **type:** Material's scale, in Nunito (the owner kept the one family);
+  - **shapes:** Material's scale; faces in the 9-sided cookie;
+  - **motion:** Material's expressive motion scheme (springs, a little bounce on spatial moves); "Remove animations" still stops movement;
+  - **components:** Material's buttons, icon buttons, segmented list items, connected button group, badge, switch, text fields, snackbar, navigation rail and bar, sheet look, FAB look;
+  - **kept:** the 4dp coral frame round every screen (the owner), Nunito, the logo, the voice, the touching rounds, the icons.
+- **The toolchain it needs:**
+  - Material 1.5 needs compileSdk 37.1 and Android Gradle Plugin 9.1 or later;
+  - so the build moves to AGP 9.2, Gradle 9.4 and Kotlin 2.3, with AGP's built-in Kotlin;
+  - targetSdk stays 35;
+  - Robolectric stays 4.14 for the screenshot tests.
+- **Why:**
+  - the owner preferred it;
+  - Material's components are maintained by Google and are familiar on Android;
+  - Oiê now writes far fewer components of its own.
+- **What it costs, and how it's held:**
+  - **Coral could spread everywhere.** One filled primary button per screen. News is the soft secondary container with one solid badge.
+  - **New colours appear** (Material's tertiary). They're used nowhere in the UI.
+  - **It moves away from the Gabriel Design System core** (radii, motion, no shadows, the hand-made palette). Recorded as a divergence in the design system's `docs/divergences.md`. The other apps are unchanged.
+  - **Experimental APIs.** Material's Expressive APIs are still marked experimental (opted in once in `app/build.gradle.kts`), so a future upgrade may need small fixes.
+- **Revisit if:**
+  - Tito or the family find the new look harder to use;
+  - Material's Expressive APIs change in a way that breaks the screens;
+  - the design system adopts Expressive for every app (the divergence closes).

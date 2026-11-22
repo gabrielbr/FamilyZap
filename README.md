@@ -8,7 +8,7 @@ What the product is: [PRODUCT.md](PRODUCT.md). The brief: [00 Brief/brief.md](00
 Agents start at [AGENTS.md](AGENTS.md).
 
 ## Design
-`python3 design/build.py --check` checks the tokens (it runs in CI). See [design/README.md](design/README.md).
+Since v0.52 the app wears **Material 3 Expressive** (decision 0018): Google's components, with a colour scheme generated from Oiê's coral, Nunito, and the coral frame. `python3 design/build.py --check` checks the tokens and `python3 design/m3/scheme.py --check` the Material scheme and its contrast (both run in CI). See [design/README.md](design/README.md).
 
 ## The app (v0.1)
 An Android app for the kid's tablet: Jetpack Compose, `app.oie`, min Android 8. The kid side, the setup, the PIN and the parent area all work with **sample family data**. There is **no real WhatsApp connection yet** (`app/src/main/java/app/oie/data/WhatsAppLink.kt`).
@@ -18,7 +18,7 @@ An Android app for the kid's tablet: Jetpack Compose, `app.oie`, min Android 8. 
 ./gradlew testDebugUnitTest        # the message rule, quiet hours, PIN
 ./gradlew verifyRoborazziDebug     # screenshots of the real screens, light and dark
 ```
-Needs JDK 17+ and the Android SDK (platform 35). The logic lives in `app/src/main/java/app/oie/logic/`, with tests in `app/src/test/`.
+Needs JDK 17+ and the Android SDK (platform 37.1, for Material 3 Expressive; the build uses AGP 9.2 and Gradle 9.4). The logic lives in `app/src/main/java/app/oie/logic/`, with tests in `app/src/test/`.
 
 
 How many times each release was downloaded, from GitHub's public counts (no analytics in the app; see `docs/release.md`, "Downloads"):

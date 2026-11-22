@@ -12,7 +12,12 @@ design/
   generated/       OTokens.kt (Compose, package app.oie.ui.theme) and tokens.css (website). Never edit.
 ```
 
+**Since v0.52 (decision 0018)** the app wears Material 3 Expressive. Its colour scheme is generated from the brand coral by `m3/scheme.py` (Material's own colour algorithm, a build-time tool only), into `generated/OieScheme.kt` and the app's copy. Spacing and Oiê's own sizes still come from `OTokens.kt`.
+
 ```sh
+python3 -m pip install materialyoucolor==3.0.4   # once, for m3/scheme.py
+python3 design/m3/scheme.py      # write the Material scheme (and check its contrast)
+python3 design/m3/scheme.py --check
 python3 design/build.py          # write design/generated/
 python3 design/build.py --check  # layer, brand and contrast checks; fails if generated/ is stale
 ```
