@@ -51,6 +51,11 @@
 
 
 
+## 0.56.0
+- **Fixed: an answer could miss Tito after the tablet linked again.** Tito wrote to his cousin in the morning; the cousin answered at 17:00, but it stayed on your phone. After a new link, Oiê's own first-message explanation came back to the tablet looking like you had written in that chat, which hands the chat back to you. Now Oiê always knows its own explanation, so answers within 24 hours reach Tito again.
+- **The problem report says why a message stayed with you** (for example "the 24 hours passed" or "the parent wrote after Tito"), never what it said.
+- **What you have to do:** nothing. Chats where this happened open again as soon as Tito writes there.
+
 ## 0.55.0
 - **Messages for Tito no longer pile up as unread on your phone.** When a message reaches Tito, Oiê marks it read in your WhatsApp a moment later, so the notification goes away and the chat doesn't stay unread for you.
   - What's for you (anything that doesn't reach Tito) stays unread.

@@ -23,6 +23,22 @@ object MessageRule {
     /** Why a message reaches the kid, or null when it stays private to the parent's WhatsApp. */
     enum class Reason { FROM_KID, WHOLE_GROUP, REPLY, NAME, WINDOW }
 
+    /**
+     * v0.56: why a message from an allowed chat stayed with the parent, for the tablet's problem report (never the
+     * text): the kid hasn't written in that chat, the 24 hours passed, it talks about the kid, or the parent wrote
+     * after the kid. Null when it reaches the kid.
+     */
+    enum class Held { NO_KID_MESSAGE, AFTER_24_HOURS, ABOUT_KID, PARENT_WROTE, PARENT_LINE_NOTE }
+
+    fun held(message: Message, chat: Contact, history: List<Message>, names: List<String>, parentWroteAt: Long? = null): Held? {
+        if (reason(message, chat, history, names, parentWroteAt) != null) return null
+        if (chat.parentLine) return Held.PARENT_LINE_NOTE
+        if (aboutKid(message.text, names)) return Held.ABOUT_KID
+        val lastKid = history.filter { it.fromKid && it.chatId == message.chatId && it.at <= message.at }.maxOfOrNull { it.at } ?: return Held.NO_KID_MESSAGE
+        if (parentWroteAt != null && parentWroteAt >= lastKid && parentWroteAt <= message.at) return Held.PARENT_WROTE
+        return Held.AFTER_24_HOURS
+    }
+
     fun isForKid(message: Message, chat: Contact, history: List<Message>, kidName: String): Boolean =
         reason(message, chat, history, listOf(kidName)) != null
 

@@ -43,6 +43,10 @@ object RealInbox {
         val contact = allowed.firstOrNull { it.id == chat || (chatAlt != null && it.id == chatAlt) } ?: return null
         if (contact.parentLine) return null
         if (kidTag.isNotEmpty() && text.startsWith(kidTag)) return null
+        // v0.56: Oiê's own intro (v0.47) is never the parent writing, even when it comes back after a restart or a new
+        // link, when its id is no longer known. It's sent a moment after the kid's message is timed, so taking it for the
+        // parent closed the kid's 24-hour window (the owner: the cousin's 17:00 answer never reached Tito).
+        if (text.startsWith(Intro.MARK)) return null
         return contact.id
     }
 }
