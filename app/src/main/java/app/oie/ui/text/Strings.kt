@@ -150,6 +150,10 @@ interface Strings {
     val parentLineInOwnChat: String
     // v0.41: the unread mark on the parent's line, behind a switch.
     fun unreadMarkTitle(kid: String): String
+    /** v0.55: marking what reaches the kid as read on the parent's WhatsApp. */
+    fun markReadTitle(kid: String): String
+    val markReadSwitch: String
+    fun markReadBody(kid: String): String
     val unreadMarkSwitch: String
     fun unreadMarkBody(kid: String): String
     fun videoFor(to: String): String
@@ -461,6 +465,9 @@ object Pt : Strings {
     override fun parentLineInGroup(kid: String) = "Grupo “$kid” no seu WhatsApp"
     override val parentLineInOwnChat = "Sua Mensagem para você no WhatsApp"
     override fun unreadMarkTitle(kid: String) = "Sua conversa com $kid"
+    override fun markReadTitle(kid: String) = "Mensagens para $kid"
+    override val markReadSwitch = "Marcar como lidas no meu WhatsApp"
+    override fun markReadBody(kid: String) = "O que chega para $kid aparece como lido no seu celular, e a notificação some. Quem mandou vê os tiques azuis, mesmo antes de $kid abrir. O que é para você continua como não lido."
     override val unreadMarkSwitch = "Marcar como não lida no meu WhatsApp"
     override fun unreadMarkBody(kid: String) = "Ligado, o Oiê marca a conversa como não lida a cada mensagem de $kid. O WhatsApp oficial não faz isso, então fica desligado para proteger o seu número."
     override val takePhoto = "Tirar foto"; override val recordVideo = "Gravar vídeo"
@@ -814,6 +821,9 @@ object En : Strings {
     override fun parentLineInGroup(kid: String) = "Group “$kid” in your WhatsApp"
     override val parentLineInOwnChat = "Your Message yourself chat in WhatsApp"
     override fun unreadMarkTitle(kid: String) = "Your chat with $kid"
+    override fun markReadTitle(kid: String) = "Messages for $kid"
+    override val markReadSwitch = "Mark them read in my WhatsApp"
+    override fun markReadBody(kid: String) = "What reaches $kid shows as read on your phone, and the notification goes away. The sender sees the blue ticks, even before $kid opens it. What's for you stays unread."
     override val unreadMarkSwitch = "Mark it unread in my WhatsApp"
     override fun unreadMarkBody(kid: String) = "When this is on, Oiê marks the chat unread with each message from $kid. Official WhatsApp doesn't do this, so it stays off to protect your number."
     override val takePhoto = "Take a photo"; override val recordVideo = "Record a video"

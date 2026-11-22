@@ -312,6 +312,15 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             notifier?.message(m, it, state.bubbleOn, who)
         }
         val kept = d == app.oie.logic.Inbox.Decision.NOTIFY || d == app.oie.logic.Inbox.Decision.QUIET
+        // v0.55: what reached the kid is marked read on the parent's WhatsApp, so the parent's phone isn't notified
+        // of messages that aren't for them (ReadMark). WhatsApp's own receipt, on the background thread.
+        if (app.oie.logic.ReadMark.should(state.markReadOn, d, state.allowed.firstOrNull { it.id == m.chatId }, m)) {
+            val chat = o.optString("chat"); val sender = o.optString("sender"); val at = o.optLong("at")
+            bg {
+                val r = runCatching { link?.markChatRead(chat, sender, m.id, if (at > 0) at else System.currentTimeMillis()) }
+                Diagnostics.log("mark read: ${if (r.isSuccess) "ok" else r.exceptionOrNull()?.javaClass?.simpleName}")
+            }
+        }
         // v0.27: videos and GIFs too; a video over the limit stays in WhatsApp (the chat says so).
         if (kept && app.oie.logic.Moving.download(kind, o.optLong("size"))) bg {
             val bytes = runCatching { link?.download(m.id) }.getOrNull() ?: return@bg

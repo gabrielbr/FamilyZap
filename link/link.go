@@ -835,6 +835,43 @@ func (k *Link) MarkStatusViewed(poster, statusID string, atMillis int64) (err er
 	return k.c.MarkRead(context.Background(), []types.MessageID{types.MessageID(statusID)}, time.UnixMilli(atMillis), types.StatusBroadcastJID, from)
 }
 
+// MarkChatRead marks a message the kid received as read (v0.55, the owner: "messages sent to the kid can be
+// marked as read on the parent's device, so it avoids bombarding the parent with notifications that are not
+// for them"). The parent's phone then shows the chat read and clears its notification; the sender sees the
+// blue ticks. A receipt, not a message. The app calls it only for messages that reached the kid (an allowed
+// chat, after the message rule), when the parent left the switch on. Never the status broadcast, never the
+// parent's own chat.
+func (k *Link) MarkChatRead(chat, sender, id string, atMillis int64) (err error) {
+	defer k.guard("MarkChatRead", &err)
+	c, from, err := readTarget(chat, sender, k.ownJID())
+	if err != nil {
+		return err
+	}
+	return k.c.MarkRead(context.Background(), []types.MessageID{types.MessageID(id)}, time.UnixMilli(atMillis), c, from)
+}
+
+// readTarget parses where a read receipt goes: the chat and, in a group, the sender. It refuses the status
+// broadcast and the parent's own chat (L7: receipts only for what reached the kid).
+func readTarget(chat, sender string, own types.JID) (types.JID, types.JID, error) {
+	c, err := types.ParseJID(chat)
+	if err != nil {
+		return types.EmptyJID, types.EmptyJID, err
+	}
+	if c == types.StatusBroadcastJID || c.Server == types.BroadcastServer {
+		return types.EmptyJID, types.EmptyJID, errors.New("no read receipts on broadcasts")
+	}
+	if !own.IsEmpty() && c.User == own.User && c.Server == own.Server {
+		return types.EmptyJID, types.EmptyJID, errors.New("no read receipts on the parent's own chat")
+	}
+	from := types.EmptyJID
+	if c.Server == types.GroupServer {
+		if from, err = types.ParseJID(sender); err != nil || from.IsEmpty() {
+			return types.EmptyJID, types.EmptyJID, errors.New("a group read needs the sender")
+		}
+	}
+	return c, from, nil
+}
+
 // MaxStatusAudience is the most people a kid's status can go to (Contatos is a family, not a crowd).
 const MaxStatusAudience = 64
 

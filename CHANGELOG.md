@@ -46,6 +46,13 @@
 
 
 
+## 0.55.0
+- **Messages for Tito no longer pile up as unread on your phone.** When a message reaches Tito, Oiê marks it read in your WhatsApp a moment later, so the notification goes away and the chat doesn't stay unread for you.
+  - What's for you (anything that doesn't reach Tito) stays unread.
+  - The person who wrote sees the blue ticks, even before Tito opens it.
+  - Your phone still buzzes once when the message arrives; WhatsApp does that before Oiê can act.
+- **What you have to do:** nothing. It's on; turn it off in Ajustes › Mensagens para Tito if you prefer.
+
 ## 0.54.0
 - **The first message explains Oiê again after a new WhatsApp link.** If you switch which parent's WhatsApp Tito writes from (say, from Dad's to Mom's), or disconnect and link again, the first time Tito writes to each person or group, Oiê sends the short explanation again, from the new number. Before, each chat got it only once, ever.
 - **What you have to do:** when the parent changes, update their name in Ajustes › Nomes, so the explanation says whose WhatsApp it is.

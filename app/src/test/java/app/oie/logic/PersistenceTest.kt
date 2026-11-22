@@ -96,4 +96,14 @@ class PersistenceTest {
         assertEquals(listOf("vovo"), b.introduced.toList())
         assertEquals("5511900000001@s.whatsapp.net", b.introducedBy)
     }
+
+    // v0.55: marking read is on by default, and the parent's choice is kept.
+    @Test fun markReadIsOnByDefaultAndKept() {
+        assertTrue(AppState().markReadOn)
+        val a = AppState(); a.markReadOn = false
+        val b = AppState(); Codec.decode(Codec.encode(a), b)
+        assertFalse(b.markReadOn)
+        val old = AppState(); Codec.decode("{}", old)
+        assertTrue(old.markReadOn)
+    }
 }
