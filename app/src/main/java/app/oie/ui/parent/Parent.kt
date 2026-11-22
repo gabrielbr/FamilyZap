@@ -391,6 +391,7 @@ private fun Settings(state: AppState, touched: () -> Unit, startInNames: Boolean
     Connection(state)
     UnreadMarkSetting(state)
     IntroSetting(state)
+    MarkReadSetting(state)
     Text(tx.names, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     NamesRow(state) { touched(); names = true }
     BubbleSetting(state)
@@ -604,6 +605,17 @@ internal fun IntroSetting(state: AppState) {
     val kid = state.kidName.ifBlank { tx.theKid }
     Text(tx.introTitle, style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
     app.oie.ui.common.SwitchRow(tx.introSwitch, state.introOn, { state.introOn = it }, help = tx.introBody(kid))
+}
+
+/** v0.55: what reaches the kid is marked read on the parent's WhatsApp; on by default. */
+@Composable
+internal fun MarkReadSetting(state: AppState) {
+    val c = OieTheme.colors
+    val tx = str
+    val kid = state.kidName.ifBlank { tx.theKid }
+    // docs/flows/mark-read.md: the line says the sender sees the blue ticks, and what's for the parent stays unread.
+    Text(tx.markReadTitle(kid), style = OieType.title, color = c.ink, modifier = Modifier.padding(top = OTokens.Spacing.space6))
+    app.oie.ui.common.SwitchRow(tx.markReadSwitch, state.markReadOn, { state.markReadOn = it }, help = tx.markReadBody(kid))
 }
 
 /** v0.41: the unread mark on the parent's own line, only once that line exists; off unless the parent turns it on. */

@@ -124,6 +124,8 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var markUnreadOn by mutableStateOf(false)
     /** v0.47: the first message in each chat introduces Oiê (on by default, the owner's choice); and the chats already introduced. */
     var introOn by mutableStateOf(true)
+    /** v0.55: what reaches the kid is marked read on the parent's WhatsApp as it arrives (on by default, the owner's choice). */
+    var markReadOn by mutableStateOf(true)
     /** v0.48: how the kid's home shows people ("list", "photos", "mosaic"); empty = the device's default. */
     var homeView by mutableStateOf("")
     val introduced = mutableStateListOf<String>()

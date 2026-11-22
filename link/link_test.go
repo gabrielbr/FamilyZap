@@ -633,3 +633,24 @@ func TestGroupCacheWithNothingYet(t *testing.T) {
 		t.Fatalf("got %v %v", l, err)
 	}
 }
+
+// v0.55: read receipts go only to a chat or a group's sender, never to a broadcast or the parent's own chat.
+func TestReadTarget(t *testing.T) {
+	own, _ := types.ParseJID("5511900000000@s.whatsapp.net")
+	if c, from, err := readTarget("5511912345678@s.whatsapp.net", "", own); err != nil || c.User != "5511912345678" || !from.IsEmpty() {
+		t.Fatalf("person: %v %v %v", c, from, err)
+	}
+	if c, from, err := readTarget("120363000000000000@g.us", "5511912345678@s.whatsapp.net", own); err != nil || c.Server != types.GroupServer || from.User != "5511912345678" {
+		t.Fatalf("group: %v %v %v", c, from, err)
+	}
+	if _, _, err := readTarget("120363000000000000@g.us", "", own); err == nil {
+		t.Fatal("a group read without its sender must be refused")
+	}
+	if _, _, err := readTarget("status@broadcast", "5511912345678@s.whatsapp.net", own); err == nil {
+		t.Fatal("the status broadcast must be refused")
+	}
+	if _, _, err := readTarget("5511900000000@s.whatsapp.net", "", own); err == nil {
+		t.Fatal("the parent's own chat must be refused")
+	}
+}
+

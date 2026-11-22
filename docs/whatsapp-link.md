@@ -74,6 +74,7 @@ bug from looking like a bot. They follow what wacli (wacli.sh, also built on wha
 | L6 | **Little history.** At pairing, ask for 1 day of history. Oiê shows nothing from before the link. | `HistorySyncConfig` limits |
 | L7 | **No fake activity.** No automatic "online", "typing" or read receipts. Presence is sent only so WhatsApp knows the name. | no `SendChatPresence`, no `MarkRead` (open question: read receipts) |
 | L7 (v0.36) | **One exception: a family status the kid watched is marked viewed,** only when the parent turned Novidades on (the owner chose it, 2026-11-20; the switch says views show as the parent). Chats still send no read receipts. | `MarkStatusViewed` |
+| L7 (v0.55) | **Second exception: a message that reached the kid is marked read** on the parent's WhatsApp as it arrives, so the parent isn't notified of what isn't theirs (decision 0019; on by default, switch in Ajustes, the switch says the sender sees the ticks). Never what stays with the parent, never the parent's line or own chat, never a broadcast. | `ReadMark`, `MarkChatRead`, `readTarget` (tested) |
 | L8 | **The session stays on the tablet,** in the app's private no-backup storage, and is deleted when the parent unlinks. | `noBackupFilesDir`; `Unlink` deletes it |
 | L9 | **A ban stops everything.** On `TemporaryBan` or `LoggedOut`, stop sending. Tell the parent in plain words, in the parent area. Never retry around it. | `events.TemporaryBan`, `events.LoggedOut` |
 
