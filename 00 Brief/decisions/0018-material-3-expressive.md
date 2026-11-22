@@ -28,6 +28,7 @@
   - **New colours appear** (Material's tertiary). They're used nowhere in the UI.
   - **It moves away from the Gabriel Design System core** (radii, motion, no shadows, the hand-made palette). Recorded as a divergence in the design system's `docs/divergences.md`. The other apps are unchanged.
   - **Experimental APIs.** Material's Expressive APIs are still marked experimental (opted in once in `app/build.gradle.kts`), so a future upgrade may need small fixes.
+- **The website** (2026-11-22, the owner: "update the landing page with the new UI, including the mockups"): the drawn tablet shows the Material look, with drawn photos instead of initials. The site's buttons and cards take Material's shapes. The hero's coral field, the logo and the WhatsApp drawings are unchanged.
 - **Revisit if:**
   - Tito or the family find the new look harder to use;
   - Material's Expressive APIs change in a way that breaks the screens;

@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- **Website: the new look.** The tablet drawn on the landing page now shows Oiê as it is since 0.52:
+  - "Oiê, Tito" with the people as photos in the app's scalloped shape, not just initials;
+  - rounder chat bubbles, the pill-shaped text box and the rounded microphone button;
+  - Material's switches in the parents' area.
+  The site's buttons are now pills and its cards rounder, to match. The "photos" are drawings, never real people.
 - **Website: simple visit counts.** The website now counts visits per page, where visitors came from and taps on "Baixar o Oiê", with GoatCounter: no cookies, no personal data, nothing when the browser asks not to be tracked. Every page's footer says so. The app is unchanged and counts nothing (decision 0017).
 - **`scripts/downloads.sh --mine 1`:** also shows the counts without your own download of each release, and how many releases there are.
 - **`scripts/downloads.sh`:** shows how many times each release was downloaded, from GitHub's public counts. Nothing in the app is measured. See `docs/release.md`, "Downloads".

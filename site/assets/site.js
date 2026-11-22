@@ -65,7 +65,7 @@
     familyTitle: "Build your family and see how it works", lgKid: "Who writes", kidSon: "Son", kidDaughter: "Daughter",
     lgParent: "Whose WhatsApp", parMother: "Mom", parFather: "Dad",
     lgRecv: "To whom", rcvGrandma: "Grandma Rosa", rcvGrandpa: "Grandpa Zé", rcvAunt: "Aunt Bia", rcvFriend: "Lucas, from school", familyGo: "See the story",
-    again: "Change the family and watch again", stepOf: "of", storyA11y: "How it works", example: "Example", sent: "Sent", parentArea: "Contacts", waField: "Message", typing: "typing…",
+    again: "Change the family and watch again", stepOf: "of", storyA11y: "How it works", example: "Example", sent: "Sent", hello: "Oiê,", people: "People", parentArea: "Contacts", waField: "Message", typing: "typing…",
     capKid: "on the tablet, with Oiê", capParent: "your WhatsApp, the bridge",
     auntName: "Aunt Bia", friendName: "Lucas, from school",
     yoursH: "Like the home phone.",
@@ -146,6 +146,8 @@
     };
     ORDER.forEach((k, i) => { v["tile" + i] = P.recv[k].init; v["tile" + i + "n"] = P.recv[k].short || P.recv[k].name; });
     all("[data-v]").forEach((el) => { if (el.dataset.v in v && el.id !== "composeKid") el.textContent = v[el.dataset.v]; });
+    // v0.56: the drawn "photos" follow the same people as the names.
+    all("[data-ph]").forEach((el) => { const k = el.dataset.ph === "recv" ? shownRecv : ORDER[+el.dataset.ph.slice(4)]; if (k) el.setAttribute("href", "#ph-" + k); });
     drawPerson($("#silKid"), step === 6 ? parent.sil : kid.sil);
     drawPerson($("#silParent"), parent.sil);
     drawPerson($("#silRecv"), shownRecv);
