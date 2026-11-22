@@ -127,6 +127,11 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     /** v0.48: how the kid's home shows people ("list", "photos", "mosaic"); empty = the device's default. */
     var homeView by mutableStateOf("")
     val introduced = mutableStateListOf<String>()
+    /** v0.54: the WhatsApp (its own chat id) that sent those intros; a new link starts them over (Intro.accountChanged). */
+    var introducedBy by mutableStateOf("")
+
+    /** v0.54: every new WhatsApp link introduces Oiê again in every chat (docs/flows/intro-message.md). */
+    fun forgetIntros() { introduced.clear(); introducedBy = "" }
 
     /** Who sees the kid's statuses: the people in Contatos the kid can reach (Statuses.audience). */
     fun statusAudience(): List<app.oie.logic.Contact> = app.oie.logic.Statuses.audience(allowed)

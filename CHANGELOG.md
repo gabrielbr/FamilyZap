@@ -46,6 +46,10 @@
 
 
 
+## 0.54.0
+- **The first message explains Oiê again after a new WhatsApp link.** If you switch which parent's WhatsApp Tito writes from (say, from Dad's to Mom's), or disconnect and link again, the first time Tito writes to each person or group, Oiê sends the short explanation again, from the new number. Before, each chat got it only once, ever.
+- **What you have to do:** when the parent changes, update their name in Ajustes › Nomes, so the explanation says whose WhatsApp it is.
+
 ## 0.53.0
 - **Tito can zoom into photos.** On a photo opened big, he can:
   - pinch to zoom in, up to 4 times;

@@ -41,7 +41,7 @@ object Codec {
                 .put("viewed", it.viewed).put("reaction", it.reaction)
                 .put("audience", JSONArray(it.audience)).put("posting", it.posting).put("failed", it.failed)
         }))
-        put("postingOn", s.postingOn).put("markUnreadOn", s.markUnreadOn).put("introOn", s.introOn).put("homeView", s.homeView).put("introduced", org.json.JSONArray(s.introduced.toList())).put("quietManual", s.quietManual)
+        put("postingOn", s.postingOn).put("markUnreadOn", s.markUnreadOn).put("introOn", s.introOn).put("homeView", s.homeView).put("introduced", org.json.JSONArray(s.introduced.toList())).put("introducedBy", s.introducedBy).put("quietManual", s.quietManual)
         put("nudgeOn", s.nudgeOn).put("nudgeDismissed", JSONObject(s.nudgeDismissed.toMap())).put("needYouAt", s.needYouAt)
         put("pinHash", s.pinHash ?: JSONObject.NULL)
         put("kidNoticeSeen", s.kidNoticeSeen)
@@ -92,6 +92,7 @@ object Codec {
         s.introOn = o.optBoolean("introOn", true)
         s.homeView = o.optString("homeView")
         s.introduced.clear(); o.optJSONArray("introduced")?.let { a -> for (i in 0 until a.length()) s.introduced += a.getString(i) }
+        s.introducedBy = o.optString("introducedBy", "")
         s.quietManual = o.optBoolean("quietManual")
         s.linkedSince = o.optLong("linkedSince")
         s.statuses.clear()
