@@ -340,6 +340,13 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     var quietCount by mutableStateOf(0)
 
     /** Every message from the WhatsApp link comes in here (logic/Inbox.kt decides). Returns what happened. */
+    /** v0.56: why [m] stayed with the parent (for the problem report), or null if it reaches the kid or isn't from an allowed chat. */
+    fun heldReason(m: Message): app.oie.logic.MessageRule.Held? {
+        val chat = allowed.firstOrNull { it.id == m.chatId } ?: return null
+        if (chat.paused) return null
+        return app.oie.logic.MessageRule.held(m, chat, messages.filter { it.chatId == m.chatId }, kidNames(), parentWroteAt[m.chatId])
+    }
+
     fun receive(m: Message, now: LocalDateTime = LocalDateTime.now()): app.oie.logic.Inbox.Decision {
         val history = messages.filter { it.chatId == m.chatId }
         val d = app.oie.logic.Inbox.decide(m, allowed, history, kidNames(), quietPeriods, now, parentWroteAt[m.chatId])

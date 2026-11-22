@@ -36,4 +36,12 @@ class RealInboxTest {
     }
     @Test fun theLineToTheKidIsNotTakingOver() = assertNull(writing(allowedList = listOf(vovo.copy(parentLine = true))))
     @Test fun aChatThatIsNotAllowedIsIgnored() = assertNull(writing(allowedList = emptyList()))
+
+    // v0.56 (the owner: the cousin's 17:00 answer to Tito's morning message never reached him, after a re-link):
+    // Oiê's own intro, coming back after a restart or a new link (its id no longer known), is not the parent writing.
+    @Test fun oiesOwnIntroIsNotTheParent() {
+        assertNull(writing(text = Intro.MARK + " Tito está escrevendo pelo WhatsApp de Ana, com o app Oiê, no tablet."))
+        assertNull(writing(text = "Oiê · Tito is writing from Ana's WhatsApp, with the Oiê app, on the tablet."))
+    }
 }
+

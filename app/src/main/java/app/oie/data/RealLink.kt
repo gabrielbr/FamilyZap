@@ -305,6 +305,9 @@ class RealLink(private val context: Context, private val state: AppState) : oiel
             state.allowed, o.optLong("at"), kind, o.optString("text"), o.optString("replyTo").ifEmpty { null }, o.optInt("durationSec"), o.optLong("size"),
             kidIds = state.messages.mapTo(HashSet()) { it.id }, kidTag = signed(""),
         )?.copy(sender = o.optString("sender"), senderAlt = o.optString("senderAlt"), senderName = o.optString("senderName")) ?: return
+        // v0.56: before deciding, note why a message would stay with the parent (the reason only, never the text), so
+        // the problem report can tell "held because the parent wrote" from "never arrived".
+        state.heldReason(m)?.let { Diagnostics.log("in: held (${it.name.lowercase()})") }
         val d = state.receive(m)
         // v0.29: with "Bolha na tela" on, the notification is also that chat's bubble.
         if (d == app.oie.logic.Inbox.Decision.NOTIFY) state.allowed.firstOrNull { it.id == m.chatId }?.let {

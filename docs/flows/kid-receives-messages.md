@@ -187,3 +187,11 @@ The rule above (name, reply, 24 hours, talk about the kid, the parent taking ove
 - **Memory ✅:** runs read as one person's.
 - **Accessibility ✅:** the same labels and long-press actions.
 
+## v0.56: a fix to the 24-hour window, and why something was held
+_The owner, 2026-11-22: Tito wrote to his cousin in the morning; the cousin answered from their own phone at 17:00, not as a reply, and it never reached him. The tablet had linked again during the day._
+
+- **Found:** the parent writing in a chat closes the window (v0.40). Oiê's own intro (v0.47) goes out a few seconds after the kid's message is timed. When it came back after a new link (or a restart), its id was no longer known, so it was taken for the parent, after the kid, and the window closed.
+- **Fixed:** a message that starts with Oiê's mark ("Oiê ·") is never the parent writing (`RealInbox.parentWriting`, tested by `RealInboxTest` and `HeldReasonTest`, which failed before the fix).
+- **Seen next time:** every message from an allowed chat that stays with the parent writes one line in the problem report, with the reason and never the text: `in: held (no_kid_message | after_24_hours | about_kid | parent_wrote | parent_line_note)` (`MessageRule.held`).
+- **No change to the rule itself:** what reaches the kid is the same as before; only the false "parent wrote" is gone.
+
