@@ -172,7 +172,7 @@ internal fun StatusWriter(state: AppState, onPost: (String) -> Unit, onBack: () 
             Column(Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6)) {
                 // What the family will see; the field below writes it.
                 Box(
-                    Modifier.fillMaxWidth().heightIn(min = OTokens.Size.contactTile * 2).clip(RoundedCornerShape(OTokens.Radius.radiusM))
+                    Modifier.fillMaxWidth().heightIn(min = OTokens.Size.contactTile * 2).clip(androidx.compose.material3.MaterialTheme.shapes.medium)
                         .background(c.selected).padding(OTokens.Spacing.space6),
                     contentAlignment = Alignment.Center,
                 ) {

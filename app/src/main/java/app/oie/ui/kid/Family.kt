@@ -144,8 +144,7 @@ internal fun ReactionChips(m: Message, alignEnd: Boolean) {
         shown.forEach { (e, n) ->
             Text(
                 if (n > 1) "$e $n" else e, style = OieType.caption, color = c.ink,
-                modifier = Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(c.surface)
-                    .border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusL))
+                modifier = Modifier.clip(androidx.compose.material3.MaterialTheme.shapes.extraLarge).background(c.surface)
                     .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
             )
         }
@@ -192,8 +191,7 @@ private fun MediaTile(m: Message, onOpen: () -> Unit) {
     val context = LocalContext.current
     val label = when (m.kind) { Kind.VIDEO -> tx.video; Kind.GIF -> tx.gifLabel; else -> tx.photo }
     Box(
-        Modifier.aspectRatio(1f).clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.surface)
-            .border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusS))
+        Modifier.aspectRatio(1f).clip(androidx.compose.material3.MaterialTheme.shapes.small).background(c.surface)
             .pressable(label = label, onClick = onOpen).semantics { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) {
@@ -210,7 +208,7 @@ private fun MediaTile(m: Message, onOpen: () -> Unit) {
             if (m.kind == Kind.GIF) Text(
                 tx.gifLabel, style = OieType.caption, color = c.ink,
                 modifier = Modifier.align(Alignment.TopStart).padding(OTokens.Spacing.space2)
-                    .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.surface).padding(horizontal = OTokens.Spacing.space2),
+                    .clip(androidx.compose.material3.MaterialTheme.shapes.small).background(c.surface).padding(horizontal = OTokens.Spacing.space2),
             )
         }
     }
@@ -231,7 +229,7 @@ internal fun PhotoScreen(media: String, from: String, onBack: () -> Unit) {
             Text(tx.mediaFrom(tx.photo, from), style = OieType.title, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
         Box(Modifier.fillMaxSize().padding(OTokens.Spacing.space6), contentAlignment = Alignment.Center) {
-            bmp?.let { Image(it.asImageBitmap(), tx.photo, Modifier.clip(RoundedCornerShape(OTokens.Radius.radiusM)), contentScale = ContentScale.Fit) }
+            bmp?.let { Image(it.asImageBitmap(), tx.photo, Modifier.clip(androidx.compose.material3.MaterialTheme.shapes.medium), contentScale = ContentScale.Fit) }
         }
     }
 }
@@ -281,8 +279,7 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
         }
         Canvas(
             Modifier.weight(1f).fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin, vertical = OTokens.Spacing.space4)
-                .clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.drawPaper)
-                .border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusM))
+                .clip(androidx.compose.material3.MaterialTheme.shapes.medium).background(c.drawPaper)
                 .onSizeChanged { size = it }
                 .semantics { contentDescription = tx.drawA11y }
                 .pointerInput(color, thick) {
@@ -341,9 +338,9 @@ internal fun DrawPad(to: String, onDone: (android.graphics.Bitmap) -> Unit, onBa
 private fun Toggle(label: String, on: Boolean, onClick: () -> Unit) {
     val c = OieTheme.colors
     Box(
-        Modifier.heightIn(min = OTokens.Spacing.space12).clip(RoundedCornerShape(OTokens.Radius.radiusL))
+        Modifier.heightIn(min = OTokens.Spacing.space12).clip(androidx.compose.material3.MaterialTheme.shapes.extraLarge)
             .background(app.oie.ui.common.motionColor(if (on) c.selected else c.surface))
-            .border(BorderStroke(OTokens.Size.hairline, app.oie.ui.common.motionColor(if (on) c.selected else c.line)), RoundedCornerShape(OTokens.Radius.radiusL))
+            .border(BorderStroke(OTokens.Size.hairline, app.oie.ui.common.motionColor(if (on) c.selected else c.line)), androidx.compose.material3.MaterialTheme.shapes.extraLarge)
             .pressableSelect(on, role = Role.RadioButton, onClick = onClick)
             .padding(horizontal = OTokens.Spacing.space4),
         contentAlignment = Alignment.Center,
@@ -392,8 +389,7 @@ private fun Reminder(ct: Contact, text: String, onOpen: () -> Unit, onDismiss: (
     val tx = str
     Row(
         Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth().padding(top = OTokens.Spacing.space4)
-            .clip(RoundedCornerShape(OTokens.Radius.radiusM)).background(c.surface)
-            .border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusM)),
+            .clip(androidx.compose.material3.MaterialTheme.shapes.medium).background(c.surface),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(

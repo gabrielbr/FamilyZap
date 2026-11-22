@@ -85,9 +85,9 @@ fun PeriodEditor(initial: QuietPeriod?, onSave: (QuietPeriod) -> Unit, onDelete:
                 Box(
                     // v0.34 audit round 2: room inside, so a label at large text never touches the edge.
                     Modifier.defaultMinSize(minWidth = OTokens.Spacing.space12, minHeight = OTokens.Spacing.space12)
-                        .clip(RoundedCornerShape(OTokens.Radius.radiusL))
+                        .clip(androidx.compose.material3.MaterialTheme.shapes.extraLarge)
                         .background(app.oie.ui.common.motionColor(if (on) c.selected else c.surface))
-                        .border(OTokens.Size.hairline, app.oie.ui.common.motionColor(if (on) c.ink else c.line), RoundedCornerShape(OTokens.Radius.radiusL))
+                        .border(OTokens.Size.hairline, app.oie.ui.common.motionColor(if (on) c.ink else c.line), androidx.compose.material3.MaterialTheme.shapes.extraLarge)
                         .pressableToggle(on, role = Role.Checkbox) { touched(); days = if (on) days - d else days + d },
                     contentAlignment = Alignment.Center,
                 ) { Text(tx.dayShort[d.value - 1], modifier = Modifier.padding(horizontal = OTokens.Spacing.space2), style = OieType.label, color = if (on) c.onSelected else c.ink) }
@@ -116,17 +116,8 @@ fun PeriodEditor(initial: QuietPeriod?, onSave: (QuietPeriod) -> Unit, onDelete:
             // Fresh review: the dialog's buttons are the app's own (Usar main, Cancelar quiet), not bare links.
             confirmButton = { app.oie.ui.common.PrimaryButton(tx.ok, { val t = LocalTime.of(tp.hour, tp.minute); if (which == "start") start = t else end = t; picking = null }) },
             dismissButton = { QuietButton(tx.cancel, { picking = null }) },
-            containerColor = c.surface,
             text = {
-                TimePicker(
-                    tp,
-                    colors = TimePickerDefaults.colors(
-                        clockDialColor = c.page, selectorColor = c.mint, containerColor = c.surface,
-                        timeSelectorSelectedContainerColor = c.selected, timeSelectorSelectedContentColor = c.onSelected,
-                        timeSelectorUnselectedContainerColor = c.page, timeSelectorUnselectedContentColor = c.ink,
-                        clockDialSelectedContentColor = c.onMint, clockDialUnselectedContentColor = c.ink,
-                    ),
-                )
+                TimePicker(tp)
             },
         )
     }

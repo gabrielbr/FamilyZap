@@ -98,3 +98,14 @@ Unchanged per component: Conexão's connecting, connected and down states; the s
 | 13 | Accessibility | ✅ The tabs keep `Role.Tab` and their selected state. The Nomes row is a button with its value read out. |
 | 14 | Ethics | ✅ Nothing hidden: the help and the risk text are one tap away, in Ajuda. |
 | 15 | Evidence | 🟡 Watch the owner find "apelidos", "Novidades" and "versão" on the tablet. |
+
+## v0.52: Material navigation (decision 0018)
+- **Same four sections:** Contatos, Silêncio, Ajustes, Ajuda.
+- **Tablet:** Material's navigation rail on the left.
+- **Phone:** Material's navigation bar at the bottom, the thumb's reach (it was a 2 × 2 grid of tabs on top).
+- **Undo:** on a phone, the undo snackbar sits above the bar.
+
+**Review (§13):**
+- **Conventions ✅:** Android's standard top-level navigation.
+- **Speed ✅:** one tap to any section, as before.
+

@@ -42,7 +42,7 @@ fun UpdateSheet(updater: Updater) {
     } ?: return
     Box(Modifier.fillMaxSize().background(c.scrim).clickable(enabled = st !is State.Downloading) { if (st is State.Available) updater.later(offer) }, contentAlignment = Alignment.BottomCenter) {
         Column(
-            Modifier.width(OTokens.Size.contentMax).clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
+            Modifier.width(OTokens.Size.contentMax).clip(androidx.compose.material3.MaterialTheme.shapes.extraLarge.copy(bottomStart = androidx.compose.foundation.shape.ZeroCornerSize, bottomEnd = androidx.compose.foundation.shape.ZeroCornerSize))
                 .background(c.surface).clickable(enabled = false) {}.padding(OTokens.Spacing.space8),
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
         ) {

@@ -209,7 +209,7 @@ fun VideoBubble(media: String?, seconds: Int, tooBig: Boolean, parent: String, o
     val frame = rememberVideoFrame(media)
     Box(
         // Half the column on a tablet; narrower when a phone has less room (v0.27 audit).
-        Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(OTokens.Radius.radiusS))
+        Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().aspectRatio(16f / 9f).clip(androidx.compose.material3.MaterialTheme.shapes.small)
             .background(c.line).pressableCombined(onLongClick = onLongPress, onClick = onWatch) // v0.46: long press reacts
             .semantics(mergeDescendants = true) { contentDescription = tx.playVideoA11y(seconds) },
         contentAlignment = Alignment.Center,
@@ -221,7 +221,7 @@ fun VideoBubble(media: String?, seconds: Int, tooBig: Boolean, parent: String, o
         Text(
             clockOf(seconds), style = OieType.caption, color = c.ink,
             modifier = Modifier.align(Alignment.BottomEnd).padding(OTokens.Spacing.space2)
-                .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.surface).padding(horizontal = OTokens.Spacing.space2),
+                .clip(androidx.compose.material3.MaterialTheme.shapes.small).background(c.surface).padding(horizontal = OTokens.Spacing.space2),
         )
     }
 }
@@ -238,7 +238,7 @@ fun GifBubble(media: String?, onLongPress: (() -> Unit)? = null, onWatch: () -> 
     val bytes = rememberBytes(media)
     val animate = app.oie.ui.common.animationsOn()
     Box(
-        Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.line)
+        Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().clip(androidx.compose.material3.MaterialTheme.shapes.small).background(c.line)
             .pressableCombined(onLongClick = onLongPress, onClick = onWatch).semantics(mergeDescendants = true) { contentDescription = tx.notifGif },
     ) {
         // Round 3: while it arrives, the placeholder says so (as a video does).
@@ -251,7 +251,7 @@ fun GifBubble(media: String?, onLongPress: (() -> Unit)? = null, onWatch: () -> 
         Text(
             tx.gifLabel, style = OieType.caption, color = c.ink,
             modifier = Modifier.align(Alignment.TopStart).padding(OTokens.Spacing.space2)
-                .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.surface).padding(horizontal = OTokens.Spacing.space2),
+                .clip(androidx.compose.material3.MaterialTheme.shapes.small).background(c.surface).padding(horizontal = OTokens.Spacing.space2),
         )
     }
 }
@@ -280,7 +280,7 @@ fun VideoScreen(media: String?, gif: Boolean, from: String, onBack: () -> Unit) 
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space6, Alignment.CenterVertically),
         ) {
-            Box(Modifier.weight(1f, fill = false).widthIn(max = OTokens.Size.contentMax * 2).clip(RoundedCornerShape(OTokens.Radius.radiusM)), contentAlignment = Alignment.Center) {
+            Box(Modifier.weight(1f, fill = false).widthIn(max = OTokens.Size.contentMax * 2).clip(androidx.compose.material3.MaterialTheme.shapes.medium), contentAlignment = Alignment.Center) {
                 if (bytes != null) VideoSurface(
                     bytes, loop = gif, muted = gif, play = playing, modifier = Modifier.fillMaxWidth(),
                     onProgress = { p, l -> position = p; length = l }, onEnd = { playing = false; position = 0 },
@@ -358,7 +358,7 @@ fun VideoPreview(draft: VideoDraft, to: String, onSwap: () -> Unit, onSend: () -
                 else -> {
                     Text(tx.preparingVideo, style = OieType.body, color = c.muted)
                     // The bar: ink filling a hairline track, at the column's width.
-                    Box(Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().height(OTokens.Spacing.space1).clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.line)) {
+                    Box(Modifier.widthIn(max = OTokens.Size.contentMax / 2).fillMaxWidth().height(OTokens.Spacing.space1).clip(androidx.compose.material3.MaterialTheme.shapes.small).background(c.line)) {
                         Box(Modifier.fillMaxWidth(draft.progress.coerceIn(0f, 1f)).height(OTokens.Spacing.space1).background(c.ink))
                     }
                 }

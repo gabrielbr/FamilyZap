@@ -2,6 +2,8 @@
 
 _Stage 4. Every value lives in [`design/`](../design/README.md) (core + brand + product layers) and is generated into `design/generated/`; this file explains how to use it._
 
+**Since v0.52 (2026-11-22, [decision 0018](../00%20Brief/decisions/0018-material-3-expressive.md)) the app wears Material 3 Expressive:** Google's components, colour scheme, type scale, shapes and motion, with Oiê's coral as the seed, Nunito as the family and the coral frame round every screen. Sections 4, 5, 6 and 10 say how. The website, the logo, the voice and the graphic device are unchanged.
+
 ## 1. Character
 _Stage 2 strategy, approved by the owner on 2026-11-18._
 
@@ -38,40 +40,40 @@ Files and rules in [`01 Brand/logo/README.md`](../01%20Brand/logo/README.md):
 - **Don'ts:** no recolouring (and no green, yellow or pink), no stretching, no bubbles, hearts, houses or faces, never without the circumflex.
 
 ## 4. Colour
-Proportion: about 60 page, 30 ink, at most 10 accent. Values and every contrast ratio are in [`design/brand/oie/brand.md`](../design/brand/oie/brand.md); the checks run with `python3 design/build.py --check`.
+**v0.52:** Material's colour scheme, generated from the brand coral `#E8573C` by Material's own algorithm (the Fidelity scheme, which keeps the seed's colour; 2025 spec) in `design/m3/scheme.py`, into `ui/theme/OieScheme.kt`. Never edit the generated file. Dynamic colour (from the wallpaper) stays off, so the brand holds. The script checks every text pair at 4.5:1 and graphics at 3:1 in both themes.
 
-| Token | Light | Dark | Role | Contrast |
-|---|---|---|---|---|
-| page | `#FFF6EE` | `#1F1210` | page background | n/a |
-| surface | `#FFFFFF` | `#2A1714` | cards | n/a |
-| ink | `#2A1714` | `#FBEFE6` | text, icons | 16.0:1 / 16.1:1 on page |
-| muted | `#6E5650` | `#C9B3AA` | secondary text | 6.3:1 / 9.1:1 |
-| line | `#EFD9CC` | `#3D2823` | hairlines (decorative) | n/a |
-| accent (core `mint`) | `#E8573C` | `#E8573C` | one per screen: the main action, the frame. Fill only | 3.4:1 / 5.1:1 (graphic) |
-| on-accent (core `on-mint`) | `#2A1714` | `#1F1210` | text on accent | 4.8:1 / 5.1:1 |
-| stop (core `coral`) | `#B23A2E` | `#FF8C78` | destructive fills, always with a word | on-coral 5.9:1 / 8.1:1 |
-| coral-text | `#A12E24` | `#FF9A88` | errors as text | 6.7:1 / 8.9:1 |
-| selected | `#FCE1D6` | `#4A2620` | active tab, picked chip or contact | ink on it 13.7:1 / 11.7:1 |
+| Material role | Light | Dark | Used for |
+|---|---|---|---|
+| surface | `#FFF8F6` | `#1D100E` | the page |
+| surface-container (low, -, high, highest) | `#FFF0EE` … `#F7DDD8` | `#261816` … `#41312E` | cards, rows, bubbles, the input |
+| on-surface / on-surface-variant | `#261816` / `#59413C` | `#F7DDD8` / `#E1BFB8` | text, icons / secondary text |
+| primary / on-primary | `#AC2C16` / `#FFFFFF` | `#FFB4A5` / `#650A00` | the one filled action, section titles, the badge |
+| primary-container | `#CE452C` | `#F56044` | the record button (FAB), faces on rows with news |
+| secondary-container | `#FFA08D` | `#763225` | picked things, rows and cards with news, the kid's own bubbles |
+| error / error-container | `#BA1A1A` / `#FFDAD6` | `#FFB4AB` / `#93000A` | stop and errors, always with a word |
+| outline / outline-variant | `#8D706B` / `#E1BFB8` | `#A88A84` / `#59413C` | outlined buttons, dividers |
 
-**The accent rule:** one filled coral element per screen. Picked things use `selected`, not coral. Colour never carries meaning alone: a word always goes with it.
+- **The frame** keeps the brand coral `#E8573C` (the core rule), as do the QR code's ground and the drawing pad.
+- **The accent rule, Material's way:** one filled primary button per screen. News is the soft secondary container with one solid badge. Colour never carries meaning alone: a word always goes with it.
 
 ## 5. Typography
-**Nunito** is the only family (SIL OFL 1.1; 400, 600, 700, 800; Portuguese accents).
+**Nunito** is the only family (SIL OFL 1.1; 400, 600, 700, 800; Portuguese accents). **v0.52:** it fills Material 3 Expressive's type scale (sizes, line heights and weights are Material's). Nunito has no 500, so Material's medium weight uses the 600 file.
 
-| Role | Size / line | Weight | Job |
+| Oiê role | Material style | Size / line | Job |
 |---|---|---|---|
-| display | 30/36 | 800 | the greeting on the kid's home, one per screen |
-| title | 22/28 | 700 | screen and sheet titles |
-| label | 16/22 | 700 | buttons, contact names |
-| body | 16/24 | 400 | messages, explanations |
-| body-small | 14/22 | 400 | secondary lines |
-| caption | 13/18 | 600 | times, small labels (nothing that carries meaning under 12sp) |
+| display | display small, emphasized | 36/44 | the greeting on the kid's home, one per screen |
+| title | title large, emphasized | 22/28 | screen and sheet titles, names on cards |
+| label | title medium | 16/24 | contact names, labels |
+| body | body large | 16/24 | messages, explanations |
+| body-small | body medium | 14/20 | secondary lines |
+| caption | body small | 12/16 | times, small labels (never less than 12sp) |
 
-Line length 45–70 characters (`content-max` 600dp on the tablet).
+Buttons, chips, the navigation bar and the badge use Material's own label styles. Line length 45–70 characters (`content-max` 600dp on the tablet).
 
 ## 6. Grid & space
 - **Spacing (core):** 4, 8, 12, 16, 24, 32, 40, 48, 64. No other values.
-- **Radii (core):** 4 controls, 8 cards, 16 pills and sheets, round for photos.
+- **Shapes (v0.52):** Material's shape scale: extra-small 4, small 8, medium 12 (cards), large 16 (bubbles, tiles), extra-large 28 (sheets), full (buttons). Every face wears Material's 9-sided cookie shape.
+- **Motion (v0.52):** Material's expressive motion scheme (springs, with a little bounce on spatial moves); with "Remove animations" on, nothing moves.
 - **App:** 16dp side margins on the phone and 24 on the tablet; one column up to 600dp.
 - **Social:** 4:5 posts on a 6-column grid with 64 px margins.
 - **Web:** 12 columns, max width 1200 px. The website (`site/`, since 2026-11-20) is the coral hero field carrying **the family line**: an ink line with cream station rings (the touching rounds) from the kid to the parent's WhatsApp to the family, which continues down the page as a coral spine with each section as a station. Its message is the app's message row on cream, never a bubble. **v2 (decision 0013):** the website tells that story with silhouettes (built from the touching rounds) holding the devices, and draws the parent's and the receiver's phones as WhatsApp screens in WhatsApp-like colours. That is the one place green and bubbles appear, and it's for the website only; the kid's tablet always shows Oiê's own screen.
@@ -94,16 +96,20 @@ Full rules in [`01 Brand/imagery-and-icons.md`](../01%20Brand/imagery-and-icons.
 - never emoji as icons.
 
 ## 10. Components
-The rules are below. Previews come with the first screens (Stage 5), built from the tokens only.
-- **Main button:** 52dp tall, coral fill, ink label, verb first. One per screen.
-- **Quiet button:** 52dp, surface fill with a line border, ink label.
-- **Person row (kid home, phone; v0.38):** 48dp round photo, name in label with when in caption, the last message in body-small on one line (bold ink when unread), "N novas" pill. One tap opens the conversation.
-- **Person card (kid home, tablet; v0.38):** surface, hairline, 8dp radius; photo, name in title, when, the last message on two lines, and two quiet buttons, Escrever and Gravar áudio (gone in quiet hours or while the link is down). Even columns, at least 300dp wide. Only allowed contacts appear, in the parent's order.
-- **Message row:** the kid's messages on `selected`, family messages on `surface`, with ink text, times in caption and muted. Not green bubbles, and no WhatsApp look.
-- **Record button:** round, coral, 72dp inside the conversation. Hold to record a voice message, release to send, slide away to cancel. It is the screen's one accent.
-- **Notice sheet:** the parent's risk notice and the kid's first-use notice. Title, body and one main button. It appears once and is never dismissed by accident.
-- **Chip:** 16dp radius, `selected` when picked.
-- **Snackbar:** ink ground, page text, at most one action.
+**v0.52:** Material 3 Expressive's components, in `ui/common/Components.kt` and the screens.
+- **Main button:** Material's filled button, medium size (56dp), verb first, the shape that squares a little when pressed. One per screen.
+- **Quiet button:** Material's outlined button (56dp); with no word, the outlined icon button (56dp on the tablet, 40dp with a 48dp target on a phone).
+- **Text button:** Material's (Arrumar, Esqueci o PIN, Remover), in primary.
+- **Person row (Lista):** Material's segmented list item: each section is one group, big outer corners, small gaps. Face, name, the last message, the time and the "N novas" badge. A row with news is the secondary container with bold text.
+- **Person card (Mosaico, Fotos):** the container colour, large shape, no border; news is the secondary container with the badge.
+- **View choice (Arrumar):** Material's connected button group (Lista, Fotos, Mosaico); the picked one is filled, round and checked.
+- **Message:** the kid's on the secondary container, family on the high surface container, large shape; one person's run joins up with small corners where their bubbles meet. The sender's name in primary; "Fora dos contatos" in an outlined tag. "Novas" is a small chip in the middle.
+- **Input:** a pill on the high container, a 2dp primary edge while typing.
+- **Record button:** Material's medium FAB look: primary container, rounded square with its shadow, round while recording. It is the conversation's one filled thing.
+- **Parent area navigation:** Material's navigation rail on the tablet, its navigation bar on a phone.
+- **Sheet:** Material's bottom sheet look: extra-large top corners, the drag handle, its container colour.
+- **Switch, time picker, outlined text field, snackbar, badge:** Material's, in their own colours.
+- **Not green bubbles, and no WhatsApp look** (unchanged).
 
 ## 11. Production
 - **Screen:** colours are sRGB HEX; logos and icons are SVG or Android vector drawables; the generated files are `design/generated/OTokens.kt` and `tokens.css`.

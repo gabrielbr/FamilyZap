@@ -59,6 +59,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.ui.semantics.role
@@ -302,7 +303,8 @@ fun Conversation(
             Bar {
                 QuietButton(null, { state.drafts[contactId] = draft; if (onLeave != null) onLeave() else state.route = Route.KidHome }, icon = R.drawable.gg_ic_back, contentDescription = tx.back)
                 // Fresh review: the same letters as on the home tile ("Vó", "Vô").
-                app.oie.ui.common.Avatar(contact, OTokens.Size.avatar, letters = app.oie.logic.Initials.of(state.reachable.map { it.name })[contact.name])
+                // v0.52 audit: a smaller face on a phone, so the name has room.
+                app.oie.ui.common.Avatar(contact, if (app.oie.ui.common.isCompact) OTokens.Spacing.space10 else OTokens.Size.avatar, letters = app.oie.logic.Initials.of(state.reachable.map { it.name })[contact.name])
                 Text(contact.name, style = OieType.title, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 // v0.33: the photos, videos and GIFs in this chat. A word on the tablet, the icon alone on a phone.
                 // v0.34 audit round 2: "Fotos" keeps its word on a phone too (README §9; decision 0010 covers the composer only).
@@ -339,7 +341,7 @@ fun Conversation(
             val moving = app.oie.ui.common.animationsOn()
             LazyColumn(
                 Modifier.weight(1f).fillMaxWidth().padding(horizontal = app.oie.ui.common.sideMargin),
-                state = list, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
+                state = list, verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space1),
                 // Room under the last message for the undo snackbar, so it never covers what's being sent.
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = if (pending != null) OTokens.Spacing.space16 + OTokens.Spacing.space12 else OTokens.Spacing.space4),
             ) {
@@ -361,7 +363,11 @@ fun Conversation(
                             SenderLine(app.oie.logic.GroupSender.of(m, state.allowed, state.parentName))
                     }
                     val failed = m.id in state.failed
-                    Bubble(m, contact.name, status = if (failed) tx.notSent else null, parent = state.parentName,
+                    // v0.52 (decision 0018): one person's run of messages joins up: the corners where two of their bubbles meet are small.
+                    fun sameRun(a: Message?, b: Message?, cut: Boolean) = a != null && b != null && !cut && a.fromKid == b.fromKid && (a.fromKid || senderKey(a) == senderKey(b))
+                    val joinTop = sameRun(visible.getOrNull(i - 1), m, i == firstUnread)
+                    val joinBottom = sameRun(m, visible.getOrNull(i + 1), i + 1 == firstUnread)
+                    Bubble(m, contact.name, status = if (failed) tx.notSent else null, parent = state.parentName, joinTop = joinTop, joinBottom = joinBottom,
                         onMenu = { menuFor = m }, onPhoto = { bigPhoto = it }) { watching = it }
                     ReactionChips(m, alignEnd = m.fromKid)
                     if (app.oie.data.ReadAloud.reading == m.id) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
@@ -386,7 +392,6 @@ fun Conversation(
                     Text(tx.reactHint, style = OieType.caption, color = c.muted, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                 }
             }
-            Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
             // Round 4: the slip line sits above the composer, so the kid can still type or tap meanwhile.
             if (slip) Text(tx.holdToRecord, style = OieType.body, color = c.ink,
                 modifier = Modifier.fillMaxWidth().padding(start = app.oie.ui.common.sideMargin, end = app.oie.ui.common.sideMargin, top = OTokens.Spacing.space3)
@@ -439,20 +444,21 @@ fun Conversation(
                     // v0.38: Escrever on the home's card opens the chat the same way.
                     if (inBubble || start == app.oie.data.Start.WRITE) LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
                     val focused by interaction.collectIsFocusedAsState()
-                    val shape = RoundedCornerShape(OTokens.Radius.radiusS)
+                    val shape = androidx.compose.material3.MaterialTheme.shapes.extraLarge
                     androidx.compose.foundation.text.BasicTextField(
                         state = field,
                         modifier = Modifier.weight(1f).focusRequester(focus).contentReceiver(receiver),
                         textStyle = OieType.body.copy(color = c.ink),
-                        cursorBrush = androidx.compose.ui.graphics.SolidColor(c.ink),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(androidx.compose.material3.MaterialTheme.colorScheme.primary),
                         interactionSource = interaction,
                         lineLimits = androidx.compose.foundation.text.input.TextFieldLineLimits.MultiLine(maxHeightInLines = 5),
                         decorator = { inner ->
-                            // The look of the field before v0.31: surface, a hairline (ink and thicker when focused).
+                            // v0.52 (decision 0018): a Material pill on the high container; a 2dp primary edge while typing.
                             Box(
-                                Modifier.heightIn(min = OTokens.Spacing.space12 + OTokens.Spacing.space2).clip(shape).background(c.surface)
-                                    .border(if (focused) OTokens.Size.hairline * 2 else OTokens.Size.hairline, if (focused) c.ink else c.line, shape)
-                                    .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
+                                Modifier.heightIn(min = androidx.compose.material3.ButtonDefaults.MediumContainerHeight).clip(shape)
+                                    .background(androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHigh)
+                                    .then(if (focused) Modifier.border(OTokens.Size.hairline * 2, androidx.compose.material3.MaterialTheme.colorScheme.primary, shape) else Modifier)
+                                    .padding(horizontal = OTokens.Spacing.space6, vertical = OTokens.Spacing.space3),
                                 contentAlignment = Alignment.CenterStart,
                             ) {
                                 if (field.text.isEmpty()) Text(if (compact) tx.writeShort else tx.writeTo(contact.name), style = OieType.body, color = c.muted, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
@@ -506,7 +512,7 @@ fun Conversation(
         if (micError || photoError) Text(
             if (micError) tx.micError else tx.photoError, style = OieType.body, color = c.coralText,
             modifier = Modifier.align(Alignment.TopCenter).padding(top = OTokens.Size.header + OTokens.Spacing.space4, start = app.oie.ui.common.sideMargin, end = app.oie.ui.common.sideMargin)
-                .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.coralSoft)
+                .clip(androidx.compose.material3.MaterialTheme.shapes.small).background(c.coralSoft)
                 .pressable(role = null, label = tx.close) { micError = false; photoError = false }
                 .semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite }
                 .padding(OTokens.Spacing.space3),
@@ -543,10 +549,10 @@ fun Conversation(
         stickerNote?.let { note ->
             LaunchedEffect(note) { delay(4_000); stickerNote = null }
             Text(
-                note, style = OieType.body, color = c.ink,
+                note, style = OieType.body, color = androidx.compose.material3.MaterialTheme.colorScheme.inverseOnSurface,
                 modifier = Modifier.align(Alignment.TopCenter).padding(top = OTokens.Size.header + OTokens.Spacing.space4)
-                    .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.surface)
-                    .border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusS)).padding(OTokens.Spacing.space3),
+                    .clip(androidx.compose.material3.MaterialTheme.shapes.medium).background(androidx.compose.material3.MaterialTheme.colorScheme.inverseSurface)
+                    .padding(OTokens.Spacing.space3),
             )
         }
         menuFor?.let { m ->
@@ -589,13 +595,18 @@ private fun RecordButton(recording: Boolean, kept: Boolean, onStart: (tap: Boole
     val keep by androidx.compose.runtime.rememberUpdatedState(onKeep)
     Box(contentAlignment = Alignment.Center) {
     // The arrow to slide up to, only while the recording is held.
+    val sc = androidx.compose.material3.MaterialTheme.colorScheme
     if (recording && !kept) Box(
         Modifier.offset(y = -(OTokens.Size.record + OTokens.Spacing.space2)).size(OTokens.Size.button).clip(CircleShape)
-            .background(c.surface).border(OTokens.Size.hairline, c.line, CircleShape).clearAndSetSemantics { },
+            .background(sc.surfaceContainerHigh).clearAndSetSemantics { },
         contentAlignment = Alignment.Center,
     ) { OIcon(R.drawable.gg_ic_chevron, Modifier.rotate(-90f), tint = c.ink) }
     Box(
-        Modifier.size(OTokens.Size.record).scale(if (recording) 0.97f else 1f).clip(CircleShape).background(c.mint)
+        // v0.52 (decision 0018): Material 3 Expressive's medium FAB: the primary container, its rounded square and
+        // shadow; while recording it turns round (the shape says something is happening, with the clock beside it).
+        Modifier.size(OTokens.Size.record).scale(if (recording) 0.97f else 1f)
+            .shadow(FAB_SHADOW, if (recording) CircleShape else androidx.compose.material3.FloatingActionButtonDefaults.mediumShape)
+            .clip(if (recording) CircleShape else androidx.compose.material3.FloatingActionButtonDefaults.mediumShape).background(sc.primaryContainer)
             .semantics {
                 role = Role.Button
                 contentDescription = if (recording) tx.recordingA11y else tx.recordA11y
@@ -626,18 +637,19 @@ private fun RecordButton(recording: Boolean, kept: Boolean, onStart: (tap: Boole
                 }
             },
         contentAlignment = Alignment.Center,
-    ) { OIcon(if (recording && kept) R.drawable.gg_ic_stop else R.drawable.gg_ic_mic, tint = c.onMint, size = OTokens.Spacing.space8) }
+    ) { OIcon(if (recording && kept) R.drawable.gg_ic_stop else R.drawable.gg_ic_mic, tint = sc.onPrimaryContainer, size = OTokens.Spacing.space8) }
     }
 }
 
 /** "Novas": where the unread messages start (v0.34 audit, flow kid-receives-messages.md). */
 @Composable
 private fun NewLine() {
-    val c = OieTheme.colors
-    Row(Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space2), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3)) {
-        Box(Modifier.weight(1f).height(OTokens.Size.hairline).background(c.line))
-        Text(str.newMessages, style = OieType.caption, color = c.muted)
-        Box(Modifier.weight(1f).height(OTokens.Size.hairline).background(c.line))
+    // v0.52 (decision 0018): a small Material chip in the middle, instead of a line.
+    val sc = androidx.compose.material3.MaterialTheme.colorScheme
+    Box(Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space3), contentAlignment = Alignment.Center) {
+        Text(str.newMessages, style = androidx.compose.material3.MaterialTheme.typography.labelLarge, color = sc.onSecondaryContainer,
+            modifier = Modifier.clip(androidx.compose.foundation.shape.CircleShape).background(sc.secondaryContainer)
+                .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space1))
     }
 }
 
@@ -652,17 +664,20 @@ private fun senderKey(m: Message): String = if (m.fromParent) "parent" else m.se
 private fun SenderLine(who: app.oie.logic.GroupSender.Who) {
     val c = OieTheme.colors
     Row(
-        Modifier.fillMaxWidth().padding(top = OTokens.Spacing.space2).semantics(mergeDescendants = true) {},
+        Modifier.fillMaxWidth().padding(top = OTokens.Spacing.space3, bottom = OTokens.Spacing.space1, start = OTokens.Spacing.space3).semantics(mergeDescendants = true) {},
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2),
     ) {
-        Text(who.name, style = OieType.label, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+        Text(who.name, style = androidx.compose.material3.MaterialTheme.typography.labelLarge, color = androidx.compose.material3.MaterialTheme.colorScheme.primary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
         if (!who.onList) Text(
             str.notInContacts, style = OieType.caption, color = c.muted, maxLines = 1,
-            modifier = Modifier.border(BorderStroke(OTokens.Size.hairline, c.muted), RoundedCornerShape(OTokens.Radius.radiusL))
+            modifier = Modifier.border(BorderStroke(OTokens.Size.hairline, androidx.compose.material3.MaterialTheme.colorScheme.outline), androidx.compose.material3.MaterialTheme.shapes.small)
                 .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
         )
     }
 }
+
+/** Material's resting FAB elevation (6dp), drawn as a shadow on the record button. */
+private val FAB_SHADOW = OTokens.Spacing.space1 + OTokens.Spacing.space1 / 2
 
 /** How long a short note (a slip, a problem) stays; and the recording clock's tick. */
 private const val NOTE_MS = 4_000L
@@ -674,8 +689,15 @@ private const val MAX_RECORDING_MS = 120_000L
 
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class) // combinedClickable: tap and long press on media (v0.46)
 @Composable
-private fun Bubble(m: Message, name: String, status: String? = null, parent: String = "", onMenu: (() -> Unit)? = null, onPhoto: (String) -> Unit = {}, onWatch: (Message) -> Unit = {}) {
+private fun Bubble(m: Message, name: String, status: String? = null, parent: String = "", joinTop: Boolean = false, joinBottom: Boolean = false,
+                   onMenu: (() -> Unit)? = null, onPhoto: (String) -> Unit = {}, onWatch: (Message) -> Unit = {}) {
     val c = OieTheme.colors
+    val sc = androidx.compose.material3.MaterialTheme.colorScheme
+    val big = (androidx.compose.material3.MaterialTheme.shapes.large as androidx.compose.foundation.shape.CornerBasedShape)
+    val small = androidx.compose.material3.MaterialTheme.shapes.extraSmall.topStart
+    // The sender's side gets the small corner where a run continues; the other side stays round.
+    val shape = if (m.fromKid) big.copy(topEnd = if (joinTop) small else big.topEnd, bottomEnd = if (joinBottom) small else big.bottomEnd)
+                else big.copy(topStart = if (joinTop) small else big.topStart, bottomStart = if (joinBottom) small else big.bottomStart)
     val tx = str
     // v0.33: a long press opens the reactions (and Ouvir); TalkBack gets the same as its long-press action.
     val menu = if (onMenu == null || m.kind == Kind.DELETED) Modifier else Modifier
@@ -684,15 +706,14 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (m.fromKid) Arrangement.End else Arrangement.Start) {
         Row(
             Modifier.widthIn(max = OTokens.Size.contentMax).then(menu)
-                .clip(RoundedCornerShape(OTokens.Radius.radiusM))
-                .background(if (m.fromKid) c.selected else c.surface)
-                .then(if (m.fromKid) Modifier else Modifier.border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusM)))
+                .clip(shape)
+                .background(if (m.fromKid) sc.secondaryContainer else sc.surfaceContainerHigh)
                 .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
             // v0.34 audit: beside a picture or a video the time sits at the bottom, like a caption.
             verticalAlignment = if (m.kind in setOf(Kind.PHOTO, Kind.VIDEO, Kind.GIF, Kind.STICKER)) Alignment.Bottom else Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
         ) {
-            val ink = if (m.fromKid) c.onSelected else c.ink
+            val ink = if (m.fromKid) sc.onSecondaryContainer else sc.onSurface
             when (m.kind) {
                 Kind.VOICE -> {
                     // v0.11: plays the real recording when there is one; tap again to stop.
@@ -734,7 +755,7 @@ private fun Bubble(m: Message, name: String, status: String? = null, parent: Str
                     Text(m.text, style = OieType.body, color = ink)
                 }
             }
-            Text(status ?: hour(tx, m.at), style = OieType.caption, color = c.muted, maxLines = 1, softWrap = false)
+            Text(status ?: hour(tx, m.at), style = OieType.caption, color = if (m.fromKid) sc.onSecondaryContainer else sc.onSurfaceVariant, maxLines = 1, softWrap = false)
         }
     }
 }
@@ -753,7 +774,7 @@ private fun StickerRows(state: AppState, onMake: () -> Unit, onPick: (String) ->
         STICKERS.forEach { (w, res) ->
             Image(
                 painterResource(res), contentDescription = tx.sendSticker(w),
-                modifier = Modifier.size(tile).clip(RoundedCornerShape(OTokens.Radius.radiusL))
+                modifier = Modifier.size(tile).clip(androidx.compose.material3.MaterialTheme.shapes.extraLarge)
                     .pressable { onPick(w) },
             )
         }
@@ -788,7 +809,7 @@ private fun StickerRows(state: AppState, onMake: () -> Unit, onPick: (String) ->
 private fun FamilyStickerTile(media: String, side: androidx.compose.ui.unit.Dp, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     // v0.27: an animated family sticker moves in the sheet too.
-    Box(modifier.size(side).clip(RoundedCornerShape(OTokens.Radius.radiusL)).background(OieTheme.colors.page), contentAlignment = Alignment.Center) {
+    Box(modifier.size(side).clip(androidx.compose.material3.MaterialTheme.shapes.extraLarge).background(OieTheme.colors.page), contentAlignment = Alignment.Center) {
         MovingImage(media, side - OTokens.Spacing.space4, contentDescription = null)
     }
 }
@@ -848,7 +869,7 @@ internal fun PhotoPreview(name: String, to: String, onSwap: () -> Unit, onSend: 
         ) {
             if (bmp != null) Image(
                 bmp.asImageBitmap(), contentDescription = tx.photoPreviewA11y,
-                modifier = Modifier.weight(1f, fill = false).clip(RoundedCornerShape(OTokens.Radius.radiusM)),
+                modifier = Modifier.weight(1f, fill = false).clip(androidx.compose.material3.MaterialTheme.shapes.medium),
                 contentScale = ContentScale.Fit,
             )
             // Fresh review: the main button first, as on every other screen.
@@ -868,13 +889,13 @@ private fun PhotoThumb(media: String?) {
     val bmp = rememberPhoto(media, Photos.MAX_SIDE / 4)
     // v0.34 audit round 2: while it loads, a tile of the photo's size holds its place (so the chat doesn't jump).
     if (bmp == null && media != null) {
-        Box(Modifier.size(OTokens.Size.contactTile * 2).clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.line).semantics { contentDescription = tx.photo })
+        Box(Modifier.size(OTokens.Size.contactTile * 2).clip(androidx.compose.material3.MaterialTheme.shapes.small).background(c.line).semantics { contentDescription = tx.photo })
     } else if (bmp == null) {
         Text(tx.photo, style = OieType.body, color = c.muted)
     } else {
         Image(
             bmp.asImageBitmap(), contentDescription = tx.photo,
-            modifier = Modifier.size(OTokens.Size.contactTile * 2).clip(RoundedCornerShape(OTokens.Radius.radiusS)),
+            modifier = Modifier.size(OTokens.Size.contactTile * 2).clip(androidx.compose.material3.MaterialTheme.shapes.small),
             contentScale = ContentScale.Crop,
         )
     }

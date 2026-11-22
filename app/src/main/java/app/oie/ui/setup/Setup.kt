@@ -208,11 +208,7 @@ fun Field(label: String, value: String, onChange: (String) -> Unit, help: String
                 capitalization = if (names) androidx.compose.ui.text.input.KeyboardCapitalization.Words else androidx.compose.ui.text.input.KeyboardCapitalization.Sentences,
                 keyboardType = keyboard,
             ),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = c.ink, unfocusedTextColor = c.ink, focusedContainerColor = c.surface,
-                unfocusedContainerColor = c.surface, focusedBorderColor = c.ink, unfocusedBorderColor = c.muted, cursorColor = c.ink,
-                errorBorderColor = c.coralText, errorContainerColor = c.surface, errorTextColor = c.ink, errorCursorColor = c.ink,
-            ),
+            // v0.52 (decision 0018): Material's outlined field in its own colours.
         )
         if (error != null) Text(error, style = OieType.caption, color = c.coralText, modifier = Modifier.semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite })
         else if (help.isNotBlank()) Text(help, style = OieType.caption, color = c.muted)
@@ -288,7 +284,7 @@ private fun ContactsStep(state: AppState, next: () -> Unit, back: () -> Unit) {
             // v0.34 audit: a picked row is `selected` (README: picked things), and TalkBack hears "checked".
             Row(
                 Modifier.fillMaxWidth().heightIn(min = OTokens.Size.rowMin)
-                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(OTokens.Radius.radiusM)).background(app.oie.ui.common.motionColor(if (on) c.selected else androidx.compose.ui.graphics.Color.Transparent))
+                    .clip(androidx.compose.material3.MaterialTheme.shapes.medium).background(app.oie.ui.common.motionColor(if (on) c.selected else androidx.compose.ui.graphics.Color.Transparent))
                     .pressableToggle(on, role = Role.Checkbox) { if (on) picked.remove(ct.id) else { picked.add(ct.id); lastPicked = ct.id } }
                     .padding(horizontal = OTokens.Spacing.space2, vertical = OTokens.Spacing.space1),
                 verticalAlignment = Alignment.CenterVertically,

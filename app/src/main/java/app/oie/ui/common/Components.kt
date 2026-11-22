@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package app.oie.ui.common
 
 import androidx.compose.foundation.BorderStroke
@@ -47,6 +49,7 @@ import androidx.compose.ui.semantics.liveRegion
 import app.oie.ui.theme.OTokens
 import app.oie.ui.theme.OieTheme
 import app.oie.ui.theme.OieType
+import androidx.compose.material3.toShape
 
 /** Narrow screens (a phone, under 600dp): smaller margins, wrapping button rows, stacked parent area (v0.13 audit). */
 val isCompact: Boolean
@@ -65,9 +68,7 @@ fun Modifier.pressable(enabled: Boolean = true, role: Role? = Role.Button, label
     val pressed by source.collectIsPressedAsState()
     val moving = animationsOn()
     val scale by androidx.compose.animation.core.animateFloatAsState(
-        if (pressed && enabled) PRESSED else 1f,
-        androidx.compose.animation.core.tween(if (moving) OTokens.Motion.motionStandard else 0, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-        label = "press",
+        if (pressed && enabled) PRESSED else 1f, pressSpec(moving), label = "press",
     )
     this.graphicsLayer { scaleX = scale; scaleY = scale }
         .clickable(source, androidx.compose.material3.ripple(), enabled = enabled, onClickLabel = label, role = role, onClick = onClick)
@@ -76,6 +77,11 @@ fun Modifier.pressable(enabled: Boolean = true, role: Role? = Role.Button, label
 /** Pressed things scale to 97% (AGENTS.md, Motion). */
 private const val PRESSED = 0.97f
 
+/** v0.52 (decision 0018): Material's expressive fast spring; with "Remove animations", no movement. */
+@Composable
+private fun pressSpec(moving: Boolean): androidx.compose.animation.core.FiniteAnimationSpec<Float> =
+    if (moving) androidx.compose.material3.MaterialTheme.motionScheme.fastSpatialSpec() else androidx.compose.animation.core.snap()
+
 /**
  * v0.49 (the owner: "every action of the user has one small interaction animation"; docs/flows/interaction-motion.md):
  * the same 97% press for any touch target, given the target's own interaction source.
@@ -83,11 +89,7 @@ private const val PRESSED = 0.97f
 fun Modifier.pressScale(source: androidx.compose.foundation.interaction.MutableInteractionSource, enabled: Boolean = true): Modifier = composed {
     val pressed by source.collectIsPressedAsState()
     val moving = animationsOn()
-    val scale by androidx.compose.animation.core.animateFloatAsState(
-        if (pressed && enabled) PRESSED else 1f,
-        androidx.compose.animation.core.tween(if (moving) OTokens.Motion.motionStandard else 0, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-        label = "press",
-    )
+    val scale by androidx.compose.animation.core.animateFloatAsState(if (pressed && enabled) PRESSED else 1f, pressSpec(moving), label = "press")
     this.graphicsLayer { scaleX = scale; scaleY = scale }
 }
 
@@ -122,11 +124,7 @@ fun Modifier.pressableCombined(
 fun Modifier.pressScaleOnHold(key: Any?, onLongPress: () -> Unit): Modifier = composed {
     var held by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     val moving = animationsOn()
-    val scale by androidx.compose.animation.core.animateFloatAsState(
-        if (held) PRESSED else 1f,
-        androidx.compose.animation.core.tween(if (moving) OTokens.Motion.motionStandard else 0, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-        label = "hold",
-    )
+    val scale by androidx.compose.animation.core.animateFloatAsState(if (held) PRESSED else 1f, pressSpec(moving), label = "hold")
     this.graphicsLayer { scaleX = scale; scaleY = scale }
         .pointerInput(key) { detectTapGestures(onPress = { held = true; tryAwaitRelease(); held = false }, onLongPress = { onLongPress() }) }
 }
@@ -136,78 +134,84 @@ fun Modifier.pressScaleOnHold(key: Any?, onLongPress: () -> Unit): Modifier = co
 fun motionColor(target: androidx.compose.ui.graphics.Color): androidx.compose.ui.graphics.Color {
     val moving = animationsOn()
     return androidx.compose.animation.animateColorAsState(
-        target, androidx.compose.animation.core.tween(if (moving) OTokens.Motion.motionStandard else 0, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+        target, if (moving) androidx.compose.material3.MaterialTheme.motionScheme.fastEffectsSpec() else androidx.compose.animation.core.snap(),
         label = "pick",
     ).value
 }
 
-/** The one coral action on a screen (README §10: main button). */
+/**
+ * v0.52 (decision 0018): Material 3 Expressive buttons, in the medium size (56dp, AGENTS.md targets),
+ * with Material's press: the round shape squares a little while held.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ButtonInside(text: String?, icon: Int?, iconOnly: Boolean, tint: Color) {
+    if (icon != null) androidx.compose.material3.Icon(painterResource(icon), if (iconOnly || text == null) text else null, Modifier.size(androidx.compose.material3.ButtonDefaults.MediumIconSize), tint = tint)
+    if (icon != null && !iconOnly && text != null) androidx.compose.foundation.layout.Spacer(Modifier.size(androidx.compose.material3.ButtonDefaults.MediumIconSpacing))
+    if (text != null && (!iconOnly || icon == null)) Text(text, style = androidx.compose.material3.ButtonDefaults.textStyleFor(androidx.compose.material3.ButtonDefaults.MediumContainerHeight))
+}
+
+/** The one filled coral action on a screen (README §10: main button): Material's filled button. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, icon: Int? = null, iconOnly: Boolean = false) {
-    val c = OieTheme.colors
-    Row(
-        modifier
-            // v0.29: icon only on a narrow screen (the chat's Enviar); the word stays for TalkBack.
-            .then(if (iconOnly && icon != null) Modifier.semantics { contentDescription = text } else Modifier)
-            .height(OTokens.Size.button)
-            .clip(RoundedCornerShape(OTokens.Radius.radiusS))
-            .background(if (enabled) c.mint else c.line)
-            .pressable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = OTokens.Spacing.space6),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2, Alignment.CenterHorizontally),
-    ) {
-        // v0.34 audit: a disabled button's icon is muted like its word, so it never looks half on.
-        if (icon != null) OIcon(icon, tint = if (enabled) c.onMint else c.muted)
-        if (!iconOnly || icon == null) Text(text, style = OieType.label, color = if (enabled) c.onMint else c.muted)
-    }
+    val size = androidx.compose.material3.ButtonDefaults.MediumContainerHeight
+    androidx.compose.material3.Button(
+        onClick = onClick, modifier = modifier.heightIn(min = size).then(if (iconOnly && icon != null) Modifier.semantics { contentDescription = text } else Modifier),
+        enabled = enabled, shapes = androidx.compose.material3.ButtonDefaults.shapesFor(size),
+        contentPadding = androidx.compose.material3.ButtonDefaults.contentPaddingFor(size),
+    ) { ButtonInside(text, icon, iconOnly, androidx.compose.material3.LocalContentColor.current) }
 }
 
-/** The stop button (README §3): the deeper brick fill with its on-stop text, for the one destructive action, always with a word. */
+/** The stop button (README §3): Material's filled button in the error colours, always with a word. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StopButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val c = OieTheme.colors
-    Box(
-        modifier.height(OTokens.Size.button).clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.coral)
-            .pressable(onClick = onClick).padding(horizontal = OTokens.Spacing.space6),
-        contentAlignment = Alignment.Center,
-    ) { Text(text, style = OieType.label, color = c.onCoral) }
-}
-
-/** A quiet button: surface fill, hairline border, ink label (README §10). */
-@Composable
-fun QuietButton(text: String?, onClick: () -> Unit, modifier: Modifier = Modifier, icon: Int? = null, contentDescription: String? = null) {
-    val c = OieTheme.colors
-    Row(
-        modifier
-            // v0.34 audit: buttons are 52dp (AGENTS.md, Targets); an icon-only one stays a 52dp square.
-            .defaultMinSize(minWidth = OTokens.Size.button, minHeight = OTokens.Size.button)
-            .clip(RoundedCornerShape(OTokens.Radius.radiusS))
-            .background(c.surface)
-            .border(BorderStroke(OTokens.Size.hairline, c.line), RoundedCornerShape(OTokens.Radius.radiusS))
-            .pressable(onClick = onClick)
-            // v0.38: a word with a fuller TalkBack name ("Escrever" → "Escrever para Vovó" on a card) says the fuller one.
-            .then(if (text != null && contentDescription != null) Modifier.semantics(mergeDescendants = true) { this.contentDescription = contentDescription } else Modifier)
-            .padding(horizontal = if (text == null) OTokens.Spacing.space3 else OTokens.Spacing.space4),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space2, Alignment.CenterHorizontally),
-    ) {
-        if (icon != null) OIcon(icon, contentDescription = if (text == null) contentDescription else null)
-        if (text != null) Text(text, style = OieType.label, color = c.ink)
-    }
+    val size = androidx.compose.material3.ButtonDefaults.MediumContainerHeight
+    val s = androidx.compose.material3.MaterialTheme.colorScheme
+    androidx.compose.material3.Button(
+        onClick = onClick, modifier = modifier.heightIn(min = size), shapes = androidx.compose.material3.ButtonDefaults.shapesFor(size),
+        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = s.error, contentColor = s.onError),
+        contentPadding = androidx.compose.material3.ButtonDefaults.contentPaddingFor(size),
+    ) { ButtonInside(text, null, false, s.onError) }
 }
 
 /**
- * A plain ink text link (Remover, Esqueci o PIN). v0.34 audit: its word starts on the column's edge
- * like the text around it (no inner side padding), wraps on a narrow screen, and keeps a 48dp target.
+ * A quiet button (README §10): Material's outlined button; with no word, Material's outlined icon
+ * button (56dp). v0.38: a word with a fuller TalkBack name says the fuller one.
  */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun TextLink(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, color: Color = OieTheme.colors.ink) {
-    Box(
-        // v0.34 audit round 2: as tall as a button, so a link beside buttons lines up with them.
-        modifier.defaultMinSize(minWidth = OTokens.Spacing.space12, minHeight = OTokens.Size.button).pressable(onClick = onClick),
-        contentAlignment = Alignment.CenterStart,
-    ) { Text(text, style = OieType.label.copy(textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline), color = color) }
+fun QuietButton(text: String?, onClick: () -> Unit, modifier: Modifier = Modifier, icon: Int? = null, contentDescription: String? = null) {
+    val size = androidx.compose.material3.ButtonDefaults.MediumContainerHeight
+    if (text == null && icon != null) {
+        // v0.52 audit: on a phone, Material's small icon button (its touch area stays 48dp), so titles beside it fit.
+        androidx.compose.material3.OutlinedIconButton(
+            onClick = onClick,
+            modifier = modifier.size(if (isCompact) androidx.compose.material3.IconButtonDefaults.smallContainerSize() else androidx.compose.material3.IconButtonDefaults.mediumContainerSize()),
+            shapes = androidx.compose.material3.IconButtonDefaults.shapes(),
+        ) { androidx.compose.material3.Icon(painterResource(icon), contentDescription, Modifier.size(if (isCompact) androidx.compose.material3.IconButtonDefaults.smallIconSize else androidx.compose.material3.IconButtonDefaults.mediumIconSize)) }
+        return
+    }
+    androidx.compose.material3.OutlinedButton(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = size)
+            .then(if (text != null && contentDescription != null) Modifier.semantics(mergeDescendants = true) { this.contentDescription = contentDescription } else Modifier),
+        shapes = androidx.compose.material3.ButtonDefaults.shapesFor(size),
+        // v0.52 audit: a quiet button keeps the smaller side padding, so "Gravar áudio" fits on one line in a card.
+        contentPadding = androidx.compose.material3.ButtonDefaults.contentPaddingFor(androidx.compose.material3.ButtonDefaults.MinHeight),
+    ) { ButtonInside(text, icon, false, androidx.compose.material3.LocalContentColor.current) }
+}
+
+/** A text button (Remover, Esqueci o PIN): Material's text button, 48dp tall. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun TextLink(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, color: Color = androidx.compose.material3.MaterialTheme.colorScheme.primary) {
+    androidx.compose.material3.TextButton(
+        onClick = onClick, modifier = modifier.heightIn(min = OTokens.Spacing.space12),
+        shapes = androidx.compose.material3.ButtonDefaults.shapes(),
+        colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = color),
+    ) { Text(text, style = androidx.compose.material3.MaterialTheme.typography.labelLarge) }
 }
 
 /**
@@ -228,10 +232,7 @@ fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit, help
             Text(label, style = OieType.label, color = c.ink)
             if (help != null) Text(help, style = OieType.caption, color = c.muted)
         }
-        androidx.compose.material3.Switch(
-            checked = checked, onCheckedChange = null,
-            colors = androidx.compose.material3.SwitchDefaults.colors(checkedTrackColor = c.ink, checkedThumbColor = c.page, uncheckedTrackColor = c.line, uncheckedThumbColor = c.muted, uncheckedBorderColor = c.muted),
-        )
+        androidx.compose.material3.Switch(checked = checked, onCheckedChange = null)
     }
 }
 
@@ -251,17 +252,20 @@ fun BottomSheet(onClose: () -> Unit, content: @Composable androidx.compose.found
     ) {
         androidx.compose.foundation.layout.Column(
             Modifier.widthIn(max = OTokens.Size.contentMax).fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = OTokens.Radius.radiusL, topEnd = OTokens.Radius.radiusL))
-                .background(c.surface).pointerInput(Unit) { detectTapGestures { } }
+                .clip(androidx.compose.material3.BottomSheetDefaults.ExpandedShape)
+                .background(androidx.compose.material3.BottomSheetDefaults.ContainerColor).pointerInput(Unit) { detectTapGestures { } }
                 // v0.34 audit round 2: a downward drag closes it too (Material's sheet gesture), besides Back and the scrim.
                 .pointerInput(onClose) {
                     var pulled = 0f
                     detectVerticalDragGestures(onDragStart = { pulled = 0f }, onDragEnd = { if (pulled > OTokens.Spacing.space16.toPx()) onClose() }) { _, dy -> pulled += dy }
                 }
-                .padding(horizontal = sideMargin + OTokens.Spacing.space2, vertical = OTokens.Spacing.space8),
+                .padding(start = sideMargin + OTokens.Spacing.space2, end = sideMargin + OTokens.Spacing.space2, bottom = OTokens.Spacing.space8),
             verticalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
-            content = content,
-        )
+        ) {
+            // Material's drag handle, centred at the top.
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { androidx.compose.material3.BottomSheetDefaults.DragHandle() }
+            content()
+        }
     }
 }
 
@@ -271,22 +275,13 @@ fun BottomSheet(onClose: () -> Unit, content: @Composable androidx.compose.found
  */
 @Composable
 fun Snackbar(text: String, modifier: Modifier = Modifier, action: String? = null, onAction: () -> Unit = {}) {
-    val c = OieTheme.colors
-    Row(
-        modifier.padding(horizontal = sideMargin, vertical = OTokens.Spacing.space4).widthIn(max = OTokens.Size.contentMax).fillMaxWidth()
-            .clip(RoundedCornerShape(OTokens.Radius.radiusS)).background(c.snackbar)
-            .padding(start = OTokens.Spacing.space6, end = if (action == null) OTokens.Spacing.space6 else OTokens.Spacing.space2)
-            .defaultMinSize(minHeight = OTokens.Spacing.space12)
+    androidx.compose.material3.Snackbar(
+        modifier.padding(horizontal = sideMargin, vertical = OTokens.Spacing.space4).widthIn(max = OTokens.Size.contentMax)
             .semantics { liveRegion = androidx.compose.ui.semantics.LiveRegionMode.Polite },
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space4),
-    ) {
-        Text(text, style = OieType.body, color = c.page, modifier = Modifier.weight(1f).padding(vertical = OTokens.Spacing.space3))
-        if (action != null) Box(
-            Modifier.defaultMinSize(minWidth = OTokens.Spacing.space12, minHeight = OTokens.Spacing.space12).pressable(onClick = onAction)
-                .padding(horizontal = OTokens.Spacing.space3),
-            contentAlignment = Alignment.Center,
-        ) { Text(action, style = OieType.label, color = c.page) }
-    }
+        // v0.52 audit: the action in Material's snackbar action colour (inverse primary), readable on the dark ground.
+        action = if (action == null) null else ({ androidx.compose.material3.TextButton(onAction,
+            colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = androidx.compose.material3.SnackbarDefaults.actionColor)) { Text(action) } }),
+    ) { Text(text) }
 }
 
 /** A core line icon (design/core/icons), tinted ink by default. */
@@ -298,16 +293,23 @@ fun OIcon(res: Int, modifier: Modifier = Modifier, tint: Color = OieTheme.colors
 /** The core icon glyph size: 22dp (AGENTS.md, Icons). */
 val ICON: Dp = OTokens.Spacing.space6 - OTokens.Spacing.space1 / 2
 
-/** A family member's photo, or their initial on the soft coral round (imagery rules). */
+/** v0.52 (decision 0018): every face wears the same Material shape, the 9-sided cookie. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun Initial(name: String, size: Dp, modifier: Modifier = Modifier, letters: String? = null) {
+fun avatarShape(): androidx.compose.ui.graphics.Shape = androidx.compose.material3.MaterialShapes.Cookie9Sided.toShape()
+
+/** A family member's photo, or their initial on the cookie (imagery rules). */
+@Composable
+fun Initial(name: String, size: Dp, modifier: Modifier = Modifier, letters: String? = null, strong: Boolean = false) {
     val c = OieTheme.colors
-    Box(modifier.size(size).clip(CircleShape).background(c.selected), contentAlignment = Alignment.Center) {
+    val sc = androidx.compose.material3.MaterialTheme.colorScheme
+    // v0.52: on a row with news (the secondary container) the face is the primary container, so it still shows.
+    Box(modifier.size(size).clip(avatarShape()).background(if (strong) sc.primaryContainer else c.selected), contentAlignment = Alignment.Center) {
         Text(
             letters?.replaceFirstChar { it.uppercase() } ?: name.firstOrNull()?.uppercase() ?: "?",
             // v0.34 audit: display is the greeting's alone (README §5, one per screen); a big initial is a title.
             style = OieType.title,
-            color = c.onSelected, textAlign = TextAlign.Center,
+            color = if (strong) sc.onPrimaryContainer else c.onSelected, textAlign = TextAlign.Center,
         )
     }
 }
@@ -317,7 +319,7 @@ fun Initial(name: String, size: Dp, modifier: Modifier = Modifier, letters: Stri
  * the letter circle; otherwise the letter circle. Decorative: the name is always next to it.
  */
 @Composable
-fun Avatar(contact: app.oie.logic.Contact, size: Dp, modifier: Modifier = Modifier, letters: String? = null) {
+fun Avatar(contact: app.oie.logic.Contact, size: Dp, modifier: Modifier = Modifier, letters: String? = null, strong: Boolean = false) {
     val context = androidx.compose.ui.platform.LocalContext.current
     // v0.34 audit: opened and decoded off the main thread, at the size it shows (not the full picture).
     val px = with(androidx.compose.ui.platform.LocalDensity.current) { size.roundToPx() }
@@ -328,40 +330,41 @@ fun Avatar(contact: app.oie.logic.Contact, size: Dp, modifier: Modifier = Modifi
         }
     }
     val shown = picture
-    if (shown == null) Initial(contact.name, size, modifier, letters)
+    if (shown == null) Initial(contact.name, size, modifier, letters, strong)
     else androidx.compose.foundation.Image(
         shown, contentDescription = null, contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-        modifier = modifier.size(size).clip(CircleShape).background(OieTheme.colors.selected),
+        modifier = modifier.size(size).clip(avatarShape()).background(OieTheme.colors.selected),
     )
 }
 
-/** The top bar: 56dp, a hairline under it (README §6). */
+/** The top bar (decision 0018): Material's top app bar height, on the surface, with no line under it. */
 @Composable
 fun Bar(content: @Composable RowScope.() -> Unit) {
     val c = OieTheme.colors
     Row(
         // v0.47: 8dp above and below the 52dp buttons, so they never touch the frame or the line under the bar.
-        Modifier.fillMaxWidth().heightIn(min = OTokens.Size.header).padding(horizontal = sideMargin, vertical = OTokens.Spacing.space2),
+        Modifier.fillMaxWidth().heightIn(min = androidx.compose.material3.TopAppBarDefaults.TopAppBarExpandedHeight).padding(horizontal = sideMargin, vertical = OTokens.Spacing.space2),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
         content = content,
     )
-    Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
 }
 
 /** A one-line banner under the bar (quiet hours, offline, link dropped). */
 @Composable
 fun Banner(icon: Int, text: String) {
     val c = OieTheme.colors
+    val s = androidx.compose.material3.MaterialTheme.colorScheme
     Row(
-        Modifier.fillMaxWidth().background(c.surface).padding(horizontal = sideMargin, vertical = OTokens.Spacing.space3),
+        Modifier.padding(horizontal = sideMargin, vertical = OTokens.Spacing.space1).fillMaxWidth()
+            .clip(androidx.compose.material3.MaterialTheme.shapes.large).background(s.secondaryContainer)
+            .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space3),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
     ) {
-        OIcon(icon)
-        Text(text, style = OieType.body, color = c.ink)
+        OIcon(icon, tint = s.onSecondaryContainer)
+        Text(text, style = OieType.body, color = s.onSecondaryContainer)
     }
-    Box(Modifier.fillMaxWidth().height(OTokens.Size.hairline).background(c.line))
 }
 
 /**
