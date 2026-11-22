@@ -46,6 +46,14 @@
 
 
 
+## 0.53.0
+- **Tito can zoom into photos.** On a photo opened big, he can:
+  - pinch to zoom in, up to 4 times;
+  - drag to look around;
+  - double-tap to zoom in on a spot, and double-tap again to see the whole photo.
+  With TalkBack, the photo has "Ampliar" and "Ver inteira".
+- **What you have to do:** nothing.
+
 ## 0.52.0
 - **A new look: Material 3 Expressive, Android's own design.** Every screen, for Tito and for you, now uses Google's Material components:
   - softer, rounder shapes;

@@ -66,6 +66,8 @@ interface Strings {
     fun writeTo(name: String): String
     fun sendingTo(name: String): String
     val photoError: String
+    /** v0.53: TalkBack on a photo shown big: zoom in, back to the whole photo, and the state while zoomed. */
+    val zoomIn: String; val zoomWhole: String; val zoomedIn: String
     val recordA11y: String; val recordingA11y: String
     fun stickerA11y(word: String): String
     fun sendSticker(word: String): String
@@ -372,6 +374,7 @@ object Pt : Strings {
     override fun writeTo(name: String) = "Escreva para $name"
     override fun sendingTo(name: String) = "Mandando para $name"
     override val photoError = "Não deu para abrir essa foto. Tente outra."
+    override val zoomIn = "Ampliar"; override val zoomWhole = "Ver inteira"; override val zoomedIn = "Ampliada"
     override val recordA11y = "Gravar áudio"; override val recordingA11y = "Gravando. Toque para mandar"
     override fun stickerA11y(word: String) = "Figurinha: $word"
     override fun sendSticker(word: String) = "Mandar figurinha $word"
@@ -720,6 +723,7 @@ object En : Strings {
     override fun writeTo(name: String) = "Write to $name"
     override fun sendingTo(name: String) = "Sending to $name"
     override val photoError = "Couldn't open that photo. Try another one."
+    override val zoomIn = "Zoom in"; override val zoomWhole = "See it whole"; override val zoomedIn = "Zoomed in"
     override val recordA11y = "Record a voice message"; override val recordingA11y = "Recording. Tap to send"
     override fun stickerA11y(word: String) = "Sticker: $word"
     override fun sendSticker(word: String) = "Send sticker $word"
