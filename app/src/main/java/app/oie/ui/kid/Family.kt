@@ -1,5 +1,17 @@
 package app.oie.ui.kid
 
+import androidx.compose.ui.draw.clipToBounds
+
+import androidx.compose.foundation.gestures.detectTransformGestures
+
+import kotlinx.coroutines.launch
+
+import androidx.compose.ui.semantics.customActions
+
+import androidx.compose.ui.semantics.stateDescription
+
+import androidx.compose.ui.graphics.graphicsLayer
+
 import app.oie.ui.common.pressableSelect
 
 import androidx.compose.foundation.BorderStroke
@@ -229,8 +241,65 @@ internal fun PhotoScreen(media: String, from: String, onBack: () -> Unit) {
             Text(tx.mediaFrom(tx.photo, from), style = OieType.title, color = c.ink, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
         Box(Modifier.fillMaxSize().padding(OTokens.Spacing.space6), contentAlignment = Alignment.Center) {
-            bmp?.let { Image(it.asImageBitmap(), tx.photo, Modifier.clip(androidx.compose.material3.MaterialTheme.shapes.medium), contentScale = ContentScale.Fit) }
+            bmp?.let { ZoomablePhoto(it, tx.photo) }
         }
+    }
+}
+
+/**
+ * v0.53 (the owner: "the kid cannot pinch to zoom the images"; flow docs/flows/photo-zoom.md): pinch to zoom up to 4×,
+ * drag to move while zoomed, double-tap to zoom in at a point or back to the whole photo. TalkBack gets "Ampliar" and
+ * "Ver inteira" and hears "Ampliada" while zoomed. The double-tap moves on Material's spring (at once with "Remove
+ * animations"); pinching follows the fingers.
+ */
+@Composable
+private fun ZoomablePhoto(bmp: android.graphics.Bitmap, label: String) {
+    val tx = str
+    var area by remember { mutableStateOf(androidx.compose.ui.unit.IntSize.Zero) }
+    var zoom by remember(bmp) { mutableStateOf(app.oie.logic.Zoom.State()) }
+    val scale = remember(bmp) { androidx.compose.animation.core.Animatable(1f) }
+    val x = remember(bmp) { androidx.compose.animation.core.Animatable(0f) }
+    val y = remember(bmp) { androidx.compose.animation.core.Animatable(0f) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val moving = app.oie.ui.common.animationsOn()
+    val spec = androidx.compose.material3.MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+    val aw = area.width.toFloat(); val ah = area.height.toFloat()
+    val (fw, fh) = app.oie.logic.Zoom.fitted(bmp.width.toFloat(), bmp.height.toFloat(), aw, ah)
+    // Follows the fingers at once; a double-tap or a TalkBack action glides there.
+    fun show(s: app.oie.logic.Zoom.State, glide: Boolean) {
+        zoom = s
+        scope.launch {
+            if (glide && moving) {
+                launch { scale.animateTo(s.scale, spec) }; launch { x.animateTo(s.x, spec) }; launch { y.animateTo(s.y, spec) }
+            } else { scale.snapTo(s.scale); x.snapTo(s.x); y.snapTo(s.y) }
+        }
+    }
+    Box(
+        // v0.53 audit (P1): a zoomed photo stays inside its area, so the bar and Back are never covered.
+        Modifier.fillMaxSize().clipToBounds().onSizeChanged { area = it }
+            .semantics {
+                contentDescription = label
+                if (zoom.zoomed) stateDescription = tx.zoomedIn
+                customActions = listOf(
+                    androidx.compose.ui.semantics.CustomAccessibilityAction(tx.zoomIn) { show(app.oie.logic.Zoom.zoomIn(zoom, fw, fh, aw, ah), true); true },
+                    androidx.compose.ui.semantics.CustomAccessibilityAction(tx.zoomWhole) { show(app.oie.logic.Zoom.State(), true); true },
+                )
+            }
+            .pointerInput(bmp) {
+                detectTapGestures(onDoubleTap = { p -> show(app.oie.logic.Zoom.doubleTap(zoom, p.x - size.width / 2f, p.y - size.height / 2f, fw, fh, aw, ah), true) })
+            }
+            .pointerInput(bmp) {
+                detectTransformGestures { centroid, pan, gz, _ ->
+                    show(app.oie.logic.Zoom.gesture(zoom, gz, centroid.x - size.width / 2f, centroid.y - size.height / 2f, pan.x, pan.y, fw, fh, aw, ah), false)
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            bmp.asImageBitmap(), null,
+            Modifier.fillMaxSize().graphicsLayer { scaleX = scale.value; scaleY = scale.value; translationX = x.value; translationY = y.value },
+            contentScale = ContentScale.Fit,
+        )
     }
 }
 
