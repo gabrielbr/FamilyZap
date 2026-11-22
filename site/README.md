@@ -2,6 +2,12 @@
 
 The landing page: static pages, no build step, no cookies, no tracking.
 
+**The new look (2026-11-22):** since the app's 0.52 (Material 3 Expressive, decision 0018), the drawn tablet shows the app as it is:
+- the home with "Oiê, Tito", a "Pessoas" title and the four people as drawn photos (`ph-grandma`, `ph-grandpa`, `ph-aunt`, `ph-friend`) in Material's 9-sided cookie (`#cookie`);
+- the chat's bubbles, the pill input and the FAB-like mic;
+- the parents' area with grouped rows and Material's switch.
+Its colours are the app's light scheme (`--m3-*` in `site.css`, copied from `OieScheme.kt`; copy them again if the scheme changes). The site's buttons are pills and its cards 16dp, as in the app. The "photos" are illustrations, never real faces (imagery rules).
+
 **Visit counts (2026-11-21, decision 0017):** `assets/count.js`, on every page, sends GoatCounter the page, the other site that linked here (no query) and taps on "Baixar o Oiê" (links marked `data-count="baixar"`). Nothing is stored on the visitor's device, and nothing is counted with Do Not Track or Global Privacy Control on, or off the published host. Every footer says so. Stop counting your own visits on a browser with `?naocontar=1` (undo with `?contar=1`). The GoatCounter site is `ogabriel` (`CODE` at the top of the file; dashboard ogabriel.goatcounter.com). The app itself counts nothing.
 
 **v2 (2026-11-20, decision 0013):** a scrolling story told with people.

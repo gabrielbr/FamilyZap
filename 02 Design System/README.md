@@ -2,7 +2,7 @@
 
 _Stage 4. Every value lives in [`design/`](../design/README.md) (core + brand + product layers) and is generated into `design/generated/`; this file explains how to use it._
 
-**Since v0.52 (2026-11-22, [decision 0018](../00%20Brief/decisions/0018-material-3-expressive.md)) the app wears Material 3 Expressive:** Google's components, colour scheme, type scale, shapes and motion, with Oiê's coral as the seed, Nunito as the family and the coral frame round every screen. Sections 4, 5, 6 and 10 say how. The website, the logo, the voice and the graphic device are unchanged.
+**Since v0.52 (2026-11-22, [decision 0018](../00%20Brief/decisions/0018-material-3-expressive.md)) the app wears Material 3 Expressive:** Google's components, colour scheme, type scale, shapes and motion, with Oiê's coral as the seed, Nunito as the family and the coral frame round every screen. Sections 4, 5, 6 and 10 say how. The logo, the voice and the graphic device are unchanged. The website's drawn tablet and its buttons and cards follow the app since 2026-11-22.
 
 ## 1. Character
 _Stage 2 strategy, approved by the owner on 2026-11-18._
