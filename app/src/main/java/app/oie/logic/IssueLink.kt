@@ -9,7 +9,7 @@ import java.net.URLEncoder
  * newest lines are kept and the body says so.
  */
 object IssueLink {
-    const val REPO = "gabrielbr/FamilyZap" // private: only the owner can file (owner's decision, 2026-11-19)
+    const val REPO = "gabrielbr/oie-dev" // private: only the owner can file (owner's decision, 2026-11-19)
     /** Keeps the whole address well under the ~8k characters browsers and GitHub accept. */
     const val MAX_ENCODED_BODY = 6_000
 

@@ -11,7 +11,7 @@ class IssueLinkTest {
 
     @Test fun aShortReportGoesWhole() {
         val url = IssueLink.build("Relatório", "Oiê 0.18.0", listOf("a", "b"), ::note)
-        assertTrue(url.startsWith("https://github.com/gabrielbr/FamilyZap/issues/new?title=Relat"))
+        assertTrue(url.startsWith("https://github.com/gabrielbr/oie-dev/issues/new?title=Relat"))
         val b = body(url)
         assertTrue(b.contains("Oiê 0.18.0") && b.contains("a\nb"))
         assertFalse(b.contains("últimas"))

@@ -1,7 +1,7 @@
 {
   "$comment": "Oiê's own tokens (design/product/oie/README.md): the core tokens it pulls with \"@\", what only Oiê has, and the contrast pairs it must pass in light and dark.",
   "layer": {
-    "$comment": "Oiê (gabrielbr/familyzap), Android, Jetpack Compose (app.oie.ui.theme). Light and dark. Dressed in the Oiê brand (brands.oie). Fairy mode is not carried: the owner's decision, 2026-11-18 (it would bring pink back, which the brand bans, see 01 Brand/imagery-and-icons.md).",
+    "$comment": "Oiê (gabrielbr/oie-dev), Android, Jetpack Compose (app.oie.ui.theme). Light and dark. Dressed in the Oiê brand (brands.oie). Fairy mode is not carried: the owner's decision, 2026-11-18 (it would bring pink back, which the brand bans, see 01 Brand/imagery-and-icons.md).",
     "consumers": [
       "Oiê (familyzap/app, not started)"
     ],

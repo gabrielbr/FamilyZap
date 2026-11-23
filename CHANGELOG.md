@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **README for families.** It opens with the logo, the tagline, a download link and the app's own screens, then says what the kid can do, what the parent decides, why it's private, and the WhatsApp risk in plain words. The developer part moved below. It no longer says the app runs on sample data, which stopped being true at v0.12.
 - **Website: the new look.** The tablet drawn on the landing page now shows Oiê as it is since 0.52:
   - "Oiê, Tito" with the people as photos in the app's scalloped shape, not just initials;
   - rounder chat bubbles, the pill-shaped text box and the rounded microphone button;
@@ -50,6 +51,10 @@
 
 
 
+
+## 0.57.0
+- **The code moved to a new address: github.com/gabrielbr/oie-dev** (it was FamilyZap). "Enviar para o GitHub" in Ajuda › Problemas, and the website's links to the code, now go straight there. Older copies of Oiê still work, because GitHub forwards the old address.
+- **What you have to do:** nothing.
 
 ## 0.56.0
 - **Fixed: an answer could miss Tito after the tablet linked again.** Tito wrote to his cousin in the morning; the cousin answered at 17:00, but it stayed on your phone. After a new link, Oiê's own first-message explanation came back to the tablet looking like you had written in that chat, which hands the chat back to you. Now Oiê always knows its own explanation, so answers within 24 hours reach Tito again.
