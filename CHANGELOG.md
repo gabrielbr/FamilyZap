@@ -51,6 +51,10 @@
 
 
 
+## 0.57.0
+- **The code moved to a new address: github.com/gabrielbr/oie-dev** (it was FamilyZap). "Enviar para o GitHub" in Ajuda › Problemas, and the website's links to the code, now go straight there. Older copies of Oiê still work, because GitHub forwards the old address.
+- **What you have to do:** nothing.
+
 ## 0.56.0
 - **Fixed: an answer could miss Tito after the tablet linked again.** Tito wrote to his cousin in the morning; the cousin answered at 17:00, but it stayed on your phone. After a new link, Oiê's own first-message explanation came back to the tablet looking like you had written in that chat, which hands the chat back to you. Now Oiê always knows its own explanation, so answers within 24 hours reach Tito again.
 - **The problem report says why a message stayed with you** (for example "the 24 hours passed" or "the parent wrote after Tito"), never what it said.
