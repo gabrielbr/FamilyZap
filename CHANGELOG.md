@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- **README for families.** It opens with the logo, the tagline, a download link and the app's own screens, then says what the kid can do, what the parent decides, why it's private, and the WhatsApp risk in plain words. The developer part moved below. It no longer says the app runs on sample data, which stopped being true at v0.12.
 - **Website: the new look.** The tablet drawn on the landing page now shows Oiê as it is since 0.52:
   - "Oiê, Tito" with the people as photos in the app's scalloped shape, not just initials;
   - rounder chat bubbles, the pill-shaped text box and the rounded microphone button;
