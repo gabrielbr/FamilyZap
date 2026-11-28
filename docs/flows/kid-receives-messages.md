@@ -222,3 +222,10 @@ The owner: "lines separating days in chats, so my kid knows that one message was
 
 ## v0.58: pictures keep a shape the chat can hold (issue #88)
 A GIF or video in a bubble takes its own shape, but only between 9:16 (an upright phone video) and 21:9. Outside that it's cropped to the nearest. An odd size used to close Oiê when the chat opened. Photos, stickers and video thumbnails were already a fixed size.
+
+## v0.59: a message that arrives twice is kept once (issues #88, #90)
+WhatsApp can deliver the same message again, for example after the tablet reconnects.
+- **On arrival:** a message whose id is already in that chat is dropped. It's not notified, downloaded or marked read again. The problem report says "in: already have it, dropped".
+- **On load:** copies saved twice before 0.59 are cleaned up, keeping the first.
+- **In the chat:** each message id is listed once, whatever is stored.
+- **Why:** the chat's list needs each message once. A repeated one closed Oiê on opening the chat (`Key … was already used`).

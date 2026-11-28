@@ -42,7 +42,7 @@ import app.oie.ui.theme.OieTheme
  */
 class BubbleActivity : MainActivity()
 
-object BuildConfigInfo { const val VERSION = "0.58.0" }
+object BuildConfigInfo { const val VERSION = "0.59.0" }
 
 val LocalUpdater = androidx.compose.runtime.staticCompositionLocalOf<app.oie.update.Updater?> { null }
 val LocalNotifier = androidx.compose.runtime.staticCompositionLocalOf<app.oie.data.Notifier?> { null }

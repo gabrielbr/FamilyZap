@@ -322,7 +322,8 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
     /** Messages the kid sees in a chat: the approved rule (MessageRule) over the chat's history. */
     fun visible(contactId: String): List<Message> {
         val chat = allowed.firstOrNull { it.id == contactId } ?: return emptyList()
-        val history = messages.filter { it.chatId == contactId }.sortedBy { it.at }
+        // v0.59 (issue #90): one entry per message id, whatever is stored, so the chat's list never sees an id twice.
+        val history = messages.filter { it.chatId == contactId }.distinctBy { it.id }.sortedBy { it.at }
         return history.filter { MessageRule.isForKid(it, chat, history, kidNames()) }
     }
 
@@ -349,6 +350,12 @@ class AppState(val link: SampleLink = SampleLink(), val clock: () -> Long = Syst
 
     fun receive(m: Message, now: LocalDateTime = LocalDateTime.now()): app.oie.logic.Inbox.Decision {
         val history = messages.filter { it.chatId == m.chatId }
+        // v0.59 (issue #90): WhatsApp can send the same message again (after a reconnect). It's kept once; the
+        // second copy is dropped, so it isn't notified, downloaded or marked read twice either.
+        if (m.kind != Kind.REACTION && history.any { it.id == m.id }) {
+            app.oie.data.Diagnostics.log("in: already have it, dropped")
+            return app.oie.logic.Inbox.Decision.DROP
+        }
         val d = app.oie.logic.Inbox.decide(m, allowed, history, kidNames(), quietPeriods, now, parentWroteAt[m.chatId])
         when (d) {
             app.oie.logic.Inbox.Decision.DROP -> {}

@@ -52,6 +52,10 @@
 
 
 
+## 0.59.0
+- **Fixed: Oiê closing when Tito opened that group (for real this time).** WhatsApp sometimes sends the same message again, for example after the tablet reconnects. Oiê kept both copies, and a chat with the same message twice couldn't open, so Oiê closed every time. Now a message that arrives again is ignored, copies already saved on the tablet are cleaned up when Oiê starts, and a chat never shows a message twice. 0.58's change to pictures stays, but it wasn't this crash: the new report showed the real error.
+- **What you have to do:** nothing. Update Oiê and open the group again.
+
 ## 0.58.0
 - **Fixed: Oiê closing when Tito opened a certain group.** A GIF or video can arrive with an odd size, for example very thin and tall. In the chat its picture took that shape with no limit, and Android couldn't measure a picture that tall, so Oiê closed. Now pictures in a chat keep a shape between upright phone video (9:16) and wide screen (21:9).
 - **A line for each day in chats.** Above the first message of each day, a thin line says when it was: "Hoje", "Ontem", the weekday for the last week, then the date ("18 de novembro", with the year when it's another year). In a group, the name of who wrote shows again under each new day.
