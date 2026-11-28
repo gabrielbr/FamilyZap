@@ -13,7 +13,7 @@ Ideas and planned work. When something ships, move it into the docs.
 
 ## Next
 - Check with Tito whether a weekday on the day line ("Quarta") reads as this week's; past 3 days a date may be clearer (v0.58 audit, evidence item 15).
-- Confirm the fix for issue #88 from the next report from that group, if Oiê closes there again (v0.58 keeps the error now).
+- Confirm with the owner that the group opens on v0.59 (issues #88, #90), then close both issues.
 
 ## Later
 - Material 3 Expressive across the app: done in v0.52 (decision 0018). Next, when Material's Expressive APIs leave "experimental": drop the opt-in and re-check the screens.

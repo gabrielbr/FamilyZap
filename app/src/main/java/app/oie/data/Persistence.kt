@@ -154,6 +154,9 @@ object Codec {
                 )
             }
         }
+        // v0.59 (issue #90): a message saved twice before (WhatsApp sent it again) is kept once, the first copy.
+        val seen = HashSet<Pair<String, String>>()
+        s.messages.retainAll { seen.add(it.chatId to it.id) }
         s.drafts.clear(); o.optJSONObject("drafts")?.let { d -> d.keys().forEach { k -> s.drafts[k] = d.getString(k) } }
         s.lastSeen.clear(); o.optJSONObject("lastSeen")?.let { d -> d.keys().forEach { k -> s.lastSeen[k] = d.getLong(k) } }
         s.kidOrder.clear(); o.optJSONArray("kidOrder")?.let { a -> for (i in 0 until a.length()) s.kidOrder += a.getString(i) }
