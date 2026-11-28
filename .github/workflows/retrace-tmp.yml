@@ -31,8 +31,8 @@ jobs:
       - name: Retrace
         run: |
           M=mapping.txt
-          V=$(grep -oP '^# compiler_version: \K.*' $M)
-          curl -sfL -o r8.jar "https://dl.google.com/android/maven2/com/android/tools/r8/$V/r8-$V.jar"
-          java -cp r8.jar com.android.tools.r8.retrace.Retrace $M tool/.github/retrace/stack.txt
+          R8=$(find ~/.gradle/caches -name 'r8-*.jar' -o -name 'builder-*.jar' | grep -E '/r8-[0-9]' | head -1)
+          echo "R8: $R8"
+          java -cp "$R8" com.android.tools.r8.retrace.Retrace $M tool/.github/retrace/stack.txt || true
           echo "---- the classes"
           for c in x81 y11 br2 h81 ta1 n22 gm0 sl1 ct2 tl1 rl1 m7 n81 nc1 r10 cu1 f80 u10 wi2 vi2 m9; do grep -E "^[^ #].* -> $c:$" $M || echo "$c ?"; done
