@@ -69,3 +69,9 @@ _The owner asked (2026-11-19) whether the report could go to GitHub directly, as
 | 13 | Accessibility | ✅ Buttons with words; 48dp targets. |
 | 14 | Ethics | ✅ Nothing leaves the tablet by itself; nothing personal in it; said under the buttons. |
 | 15 | Evidence | 🟡 Does it catch the photo crash? The owner's next test will say. |
+
+## v0.58: the crash itself is never cut
+Issue #88 showed only the bottom 38 lines of a long stack trace: what went wrong had been cut off, so the crash couldn't be read.
+- **On the tablet,** a crash is written as the error with its first 14 lines, then each cause ("Caused by") with its first 8. It used to be the whole trace cut at 4,000 characters, which could lose the cause.
+- **On GitHub,** when the report is too long for the link, the start of the last crash is kept above the newest lines, with "…" where lines were left out. The note says how many lines fit ("Só 52 de 300 linhas cabem aqui").
+- **Nothing else changes:** no message text or names, numbers masked, and only the parent submits it.

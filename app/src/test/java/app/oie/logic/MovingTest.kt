@@ -42,4 +42,15 @@ class MovingTest {
         assertTrue(Moving.kindOf(webp(0x02)) == "animated webp")
         assertTrue(Moving.kindOf(webp(0x00)) == "still")
     }
+
+    // v0.58, issue #88: a video's or GIF's own shape is kept to one a chat can show and measure.
+    @Test fun bubbleShapeIsKeptSane() {
+        org.junit.Assert.assertEquals(16f / 9f, Moving.bubbleRatio(1920, 1080), 0.001f)
+        org.junit.Assert.assertEquals(9f / 16f, Moving.bubbleRatio(1080, 1920), 0.001f)
+        org.junit.Assert.assertEquals(1f, Moving.bubbleRatio(480, 480), 0.001f)
+        org.junit.Assert.assertEquals(Moving.TALLEST, Moving.bubbleRatio(1, 2000), 0.001f)
+        org.junit.Assert.assertEquals(Moving.WIDEST, Moving.bubbleRatio(5000, 2), 0.001f)
+        org.junit.Assert.assertEquals(Moving.DEFAULT_RATIO, Moving.bubbleRatio(0, 0), 0.001f)
+        org.junit.Assert.assertEquals(Moving.DEFAULT_RATIO, Moving.bubbleRatio(640, -1), 0.001f)
+    }
 }

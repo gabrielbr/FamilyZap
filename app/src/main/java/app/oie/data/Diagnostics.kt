@@ -24,7 +24,7 @@ object Diagnostics {
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
             runCatching {
-                log("CRASH on ${t.name}: ${e.stackTraceToString().take(4000)}")
+                log("CRASH on ${t.name}: " + app.oie.logic.CrashText.of(e))
                 recordCrash(System.currentTimeMillis())
             }
             previous?.uncaughtException(t, e)

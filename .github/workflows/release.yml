@@ -83,6 +83,15 @@ jobs:
           OIE_KEY_ALIAS: ${{ secrets.OIE_KEY_ALIAS }}
           OIE_KEY_PASSWORD: ${{ secrets.OIE_KEY_PASSWORD }}
         run: ./gradlew --no-daemon testDebugUnitTest verifyRoborazziDebug lintDebug assembleRelease
+      # v0.58: the R8 map, to turn a crash in the problem report back into real names (docs/release.md, "Crashes").
+      # Kept here in the private repo only: it names the code, so it never goes to the public releases.
+      - uses: actions/upload-artifact@v4
+        if: steps.v.outputs.go == 'true'
+        with:
+          name: mapping-${{ steps.v.outputs.version }}
+          path: app/build/outputs/mapping/release/mapping.txt
+          retention-days: 90
+          if-no-files-found: warn
       - name: APK and SHA256SUMS.txt
         if: steps.v.outputs.go == 'true'
         env:
