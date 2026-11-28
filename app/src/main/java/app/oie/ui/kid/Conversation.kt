@@ -81,6 +81,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.text.style.TextAlign
 import app.oie.R
 import app.oie.data.AppState
@@ -262,6 +263,9 @@ fun Conversation(
     val seenAtOpen = remember(contactId) { state.lastSeen[contactId] ?: 0L }
     val firstUnread = remember(contactId, visible.size) { visible.indexOfFirst { !it.fromKid && it.at > seenAtOpen } }
     LaunchedEffect(contactId, visible.size) { state.lastSeen[contactId] = state.clock() }
+    // v0.58: a line above the first message of each day (flow kid-receives-messages.md).
+    val dayStarts = remember(visible) { app.oie.logic.DayLine.starts(visible.map { it.at }) }
+    val today = remember(contactId, visible.size) { app.oie.logic.DayLine.dayOf(state.clock(), ZoneId.systemDefault()) }
     var slip by remember { mutableStateOf(slipPreview) }
     LaunchedEffect(slip) { if (slip) { delay(NOTE_MS); slip = false } }
     LaunchedEffect(micError, photoError) { if (micError || photoError) { delay(NOTE_MS); micError = false; photoError = false } }
@@ -354,19 +358,20 @@ fun Conversation(
                       placementSpec = if (moving) androidx.compose.animation.core.tween(OTokens.Motion.motionStandard, easing = androidx.compose.animation.core.FastOutSlowInEasing) else null,
                       fadeOutSpec = if (moving) androidx.compose.animation.core.tween(OTokens.Motion.motionStandard) else null,
                   )) {
+                    if (i in dayStarts) DayLineRow(app.oie.logic.DayLine.label(m.at, today))
                     if (i == firstUnread) NewLine()
                     // v0.46 (groups as groups): who said it, once per run, as in WhatsApp; "Fora dos contatos" for
                     // anyone who isn't on the kid's list.
                     if (contact.isGroup && !contact.parentLine && !m.fromKid) {
                         val prev = visible.getOrNull(i - 1)
-                        if (i == firstUnread || prev == null || prev.fromKid || senderKey(prev) != senderKey(m))
+                        if (i == firstUnread || i in dayStarts || prev == null || prev.fromKid || senderKey(prev) != senderKey(m))
                             SenderLine(app.oie.logic.GroupSender.of(m, state.allowed, state.parentName))
                     }
                     val failed = m.id in state.failed
                     // v0.52 (decision 0018): one person's run of messages joins up: the corners where two of their bubbles meet are small.
                     fun sameRun(a: Message?, b: Message?, cut: Boolean) = a != null && b != null && !cut && a.fromKid == b.fromKid && (a.fromKid || senderKey(a) == senderKey(b))
-                    val joinTop = sameRun(visible.getOrNull(i - 1), m, i == firstUnread)
-                    val joinBottom = sameRun(m, visible.getOrNull(i + 1), i + 1 == firstUnread)
+                    val joinTop = sameRun(visible.getOrNull(i - 1), m, i == firstUnread || i in dayStarts)
+                    val joinBottom = sameRun(m, visible.getOrNull(i + 1), i + 1 == firstUnread || i + 1 in dayStarts)
                     Bubble(m, contact.name, status = if (failed) tx.notSent else null, parent = state.parentName, joinTop = joinTop, joinBottom = joinBottom,
                         onMenu = { menuFor = m }, onPhoto = { bigPhoto = it }) { watching = it }
                     ReactionChips(m, alignEnd = m.fromKid)
@@ -650,6 +655,31 @@ private fun NewLine() {
         Text(str.newMessages, style = androidx.compose.material3.MaterialTheme.typography.labelLarge, color = sc.onSecondaryContainer,
             modifier = Modifier.clip(androidx.compose.foundation.shape.CircleShape).background(sc.secondaryContainer)
                 .padding(horizontal = OTokens.Spacing.space4, vertical = OTokens.Spacing.space1))
+    }
+}
+
+/**
+ * v0.58: the day above its first message: a hairline each side and the day in small muted words between them.
+ * Not a chip, so "Novas" stays the one thing that stands out. TalkBack reads it as a heading.
+ */
+@Composable
+private fun DayLineRow(day: app.oie.logic.DayLine.Day) {
+    val c = OieTheme.colors
+    val tx = str
+    val words = when (day) {
+        app.oie.logic.DayLine.Day.Today -> tx.today
+        app.oie.logic.DayLine.Day.Yesterday -> tx.yesterday
+        is app.oie.logic.DayLine.Day.Weekday -> tx.weekday(day.day)
+        is app.oie.logic.DayLine.Day.Date -> tx.dayLong(day.day, day.month, day.year)
+    }
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = OTokens.Spacing.space3).semantics(mergeDescendants = true) { heading() },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(OTokens.Spacing.space3),
+    ) {
+        androidx.compose.material3.HorizontalDivider(Modifier.weight(1f), color = c.line)
+        Text(words, style = OieType.caption, color = c.muted)
+        androidx.compose.material3.HorizontalDivider(Modifier.weight(1f), color = c.line)
     }
 }
 

@@ -42,6 +42,13 @@ Each release has:
 
 You can also run the workflow by hand (**Actions › release › Run workflow**). It does the same check, so running it twice doesn't publish twice.
 
+## Crashes
+A release's code is shrunk and renamed by R8, so a crash in the problem report reads like `at x81.c(...)`. Since v0.58:
+- the release workflow keeps that version's map as an artifact named `mapping-<version>`, for 90 days. It stays in this private repo, never in the public releases.
+- to read a crash, download the map from that release's workflow run, then:
+  `java -cp r8.jar com.android.tools.r8.retrace.Retrace mapping.txt crash.txt`. Take `r8.jar` from Google's Maven at the version on the map's `compiler_version` line.
+- the problem report keeps the start of the last crash: the error, its first lines and each "Caused by". A GitHub issue keeps them too, even when only the newest lines fit.
+
 ## Downloads
 `scripts/downloads.sh` prints one line per release (date, version, APK downloads) and the total, from GitHub's public counts for `gabrielbr/oie-releases`. It needs `curl` and `python3`, and no token.
 - **No analytics:** nothing in the app is measured; it only reads what GitHub already shows on the releases page.

@@ -78,6 +78,18 @@ class PhoneScreensTest {
             messages += app.oie.logic.Message("g4", "primos", true, now - 30 * 60_000, app.oie.logic.Kind.TEXT, "Eu vou")
         }, "primos")
     }
+    // v0.58: a line for each day, on a phone at 1.3× text; the oldest is a date from another year.
+    @Test fun conversationDays() = shot("p62-conversation-days", bigText = true) {
+        val day = 24L * 60 * 60_000
+        app.oie.ui.kid.Conversation(ready().apply {
+            kidNoticeSeen = true; reactTipUsed = true
+            messages += app.oie.logic.Message("d1", "vovo", false, now - 400 * day, app.oie.logic.Kind.TEXT, "Feliz aniversário, Tito")
+            messages += app.oie.logic.Message("d2", "vovo", true, now - 400 * day + 60_000, app.oie.logic.Kind.TEXT, "Obrigado, vó")
+            messages += app.oie.logic.Message("d3", "vovo", false, now - 2 * day, app.oie.logic.Kind.TEXT, "Tito, domingo tem bolo")
+            messages += app.oie.logic.Message("d4", "vovo", true, now - 60_000, app.oie.logic.Kind.TEXT, "Eu vou")
+            lastSeen["vovo"] = now
+        }, "vovo")
+    }
     // v0.50: Novas on a phone, with a group in it, at 1.3× text.
     @Test fun kidHomeUnread() = shot("p61-kid-home-unread", bigText = true) { KidHome(ready().apply { kidNoticeSeen = true; messages += app.oie.logic.Message("pg", "primos", false, now - 60_000, app.oie.logic.Kind.TEXT, "Quem vem domingo?", sender = "5511987650001@s.whatsapp.net") }) }
     // v0.48: Fotos and Mosaico on a phone, with the sections, at 1.3× text.

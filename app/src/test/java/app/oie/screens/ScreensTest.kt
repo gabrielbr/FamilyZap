@@ -102,6 +102,23 @@ class ScreensTest {
         messages += Message("g4", "primos", true, now - 30 * 60_000, Kind.TEXT, "Eu vou")
         messages += Message("g5", "primos", false, now - 20 * 60_000, Kind.TEXT, "Levo o Tito às 10h", fromParent = true)
     }
+    /** v0.58: a group chat over several days, each day under its own line; the same sender's name shows again under a new day. */
+    private fun daysChat() = ready().apply {
+        kidNoticeSeen = true; reactTipUsed = true
+        val vo = "5511987650001@s.whatsapp.net"
+        val day = 24L * 60 * 60_000
+        messages += Message("d1", "primos", false, now - 300 * day, Kind.TEXT, "Feliz Natal, família", sender = vo)
+        messages += Message("d2", "primos", false, now - 40 * day, Kind.TEXT, "Quem vem no feriado?", sender = vo)
+        messages += Message("d3", "primos", true, now - 40 * day + 5 * 60_000, Kind.TEXT, "Eu")
+        messages += Message("d4", "primos", false, now - 3 * day, Kind.TEXT, "Tito, vamos ao parque sábado?", fromParent = true)
+        messages += Message("d5", "primos", false, now - day, Kind.TEXT, "Domingo tem bolo aqui em casa", sender = vo)
+        messages += Message("d6", "primos", false, now - 30 * 60_000, Kind.TEXT, "Venham cedo", sender = vo)
+        messages += Message("d7", "primos", true, now - 20 * 60_000, Kind.TEXT, "Eu vou")
+        lastSeen["primos"] = now
+    }
+    @Test fun conversationDaysLight() = shot("85-conversation-days", false) { app.oie.ui.kid.Conversation(daysChat(), "primos") }
+    @Test fun conversationDaysDark() = shot("85-conversation-days", true) { app.oie.ui.kid.Conversation(daysChat(), "primos") }
+    @Test fun conversationDaysEnglish() = shot("85-conversation-days-en", false, english = true) { app.oie.ui.kid.Conversation(daysChat(), "primos") }
     @Test fun groupChatLight() = shot("79-group-chat", false) { app.oie.ui.kid.Conversation(groupChat(), "primos") }
     @Test fun groupChatDark() = shot("79-group-chat", true) { app.oie.ui.kid.Conversation(groupChat(), "primos") }
     @Test fun kidHomeNewsDark() = shot("78-kid-home-news", true) { KidHome(withNews()) }

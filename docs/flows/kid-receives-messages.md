@@ -195,3 +195,27 @@ _The owner, 2026-11-22: Tito wrote to his cousin in the morning; the cousin answ
 - **Seen next time:** every message from an allowed chat that stays with the parent writes one line in the problem report, with the reason and never the text: `in: held (no_kid_message | after_24_hours | about_kid | parent_wrote | parent_line_note)` (`MessageRule.held`).
 - **No change to the rule itself:** what reaches the kid is the same as before; only the false "parent wrote" is gone.
 
+
+## v0.58: a line for each day
+The owner: "lines separating days in chats, so my kid knows that one message was from another day."
+- **Where:** in the conversation, above the first message of each day, and above the chat's first message.
+- **What it looks like:** a hairline on each side, with the day in the middle in small muted text.
+  - It isn't a chip, so it never competes with "Novas".
+  - When a day starts where the unread messages start, the day line comes first and "Novas" sits under it.
+- **What it says:**
+
+  | Day | PT | EN |
+  |---|---|---|
+  | Today | Hoje | Today |
+  | Yesterday | Ontem | Yesterday |
+  | 2 to 6 days ago | the weekday ("Quarta") | "Wednesday" |
+  | Older, this year | "18 de novembro" | "November 18" |
+  | Older, another year | "18 de novembro de 2025" | "November 18, 2025" |
+
+  The days follow the tablet's clock and time zone. A chat left open past midnight gets "Hoje" for the new day's messages; the earlier ones become "Ontem" the next time the chat opens.
+- **Runs:** a day line cuts a run of joined bubbles, and in a group the sender's name shows again under it, as it does under "Novas".
+- **TalkBack:** the line reads as its words ("Ontem") and is a heading, so a reader can jump from day to day.
+- **Branches:**
+  - a chat with no messages has no line;
+  - reactions don't count, because they sit on a message;
+  - the message the kid is sending (during its 5 seconds to undo) is today's.

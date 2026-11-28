@@ -316,6 +316,10 @@ interface Strings {
     fun voicePreview(seconds: Int): String
     fun weekday(day: Int): String
     fun date(day: Int, month: Int): String
+    /** v0.58: the day line in a chat. */
+    val today: String
+    /** v0.58: an older day in a chat, spelled out ("18 de novembro"); [year] only when it isn't this year. */
+    fun dayLong(day: Int, month: Int, year: Int?): String
     fun writeA11y(name: String): String
     fun recordA11yTo(name: String): String
 }
@@ -582,7 +586,7 @@ object Pt : Strings {
     override val crashPointer = "O Oiê fechou sozinho há pouco. Há um relatório para copiar."; override val openReport = "Ver relatório"
     override val sendToGitHub = "Enviar para o GitHub"
     override fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean) = "Relatório do tablet · Oiê $version · %02d/%02d".format(day, month) + if (crashed) " · fechou sozinho" else ""
-    override fun reportCut(kept: Int, total: Int) = "Só as últimas $kept de $total linhas cabem aqui. O relatório inteiro pode ser copiado no tablet."
+    override fun reportCut(kept: Int, total: Int) = "Só $kept de $total linhas cabem aqui. O relatório inteiro pode ser copiado no tablet."
 
     // v0.34 audit: no time here; the message already shows it.
     override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean) = when (r) {
@@ -667,6 +671,10 @@ object Pt : Strings {
     override fun voicePreview(seconds: Int) = "Áudio · %d:%02d".format(seconds / 60, seconds % 60)
     override fun weekday(day: Int) = listOf("Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo")[(day - 1).coerceIn(0, 6)]
     override fun date(day: Int, month: Int) = "%02d/%02d".format(day, month)
+    override val today = "Hoje"
+    override fun dayLong(day: Int, month: Int, year: Int?) =
+        "$day de " + listOf("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro")[(month - 1).coerceIn(0, 11)] +
+            (if (year != null) " de $year" else "")
     override fun writeA11y(name: String) = "Escrever para $name"
     override fun recordA11yTo(name: String) = "Gravar áudio para $name"
 }
@@ -938,7 +946,7 @@ object En : Strings {
     override val crashPointer = "Oiê closed by itself recently. There's a report to copy."; override val openReport = "See report"
     override val sendToGitHub = "Send to GitHub"
     override fun issueTitle(version: String, day: Int, month: Int, crashed: Boolean) = "Tablet report · Oiê $version · %02d/%02d".format(day, month) + if (crashed) " · closed by itself" else ""
-    override fun reportCut(kept: Int, total: Int) = "Only the last $kept of $total lines fit here. The whole report can be copied on the tablet."
+    override fun reportCut(kept: Int, total: Int) = "Only $kept of $total lines fit here. The whole report can be copied on the tablet."
 
     override fun receiptLine(r: app.oie.logic.Receipt, who: String, group: Boolean) = when (r) {
         app.oie.logic.Receipt.READ -> if (group) "Someone saw it" else "$who saw it"
@@ -1023,6 +1031,10 @@ object En : Strings {
     override fun voicePreview(seconds: Int) = "Voice message · %d:%02d".format(seconds / 60, seconds % 60)
     override fun weekday(day: Int) = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")[(day - 1).coerceIn(0, 6)]
     override fun date(day: Int, month: Int) = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")[(month - 1).coerceIn(0, 11)] + " $day"
+    override val today = "Today"
+    override fun dayLong(day: Int, month: Int, year: Int?) =
+        listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")[(month - 1).coerceIn(0, 11)] +
+            " $day" + (if (year != null) ", $year" else "")
     override fun writeA11y(name: String) = "Write to $name"
     override fun recordA11yTo(name: String) = "Record audio for $name"
 }
