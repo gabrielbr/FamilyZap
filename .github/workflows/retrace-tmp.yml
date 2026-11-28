@@ -23,13 +23,14 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" "platforms;android-37.1" > /dev/null
           export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
           link/build-aar.sh
-          ./gradlew --no-daemon -q :app:minifyReleaseWithR8
-          head -6 app/build/outputs/mapping/release/mapping.txt
+          ./gradlew --no-daemon -q assembleRelease
+          find app/build -name 'mapping*.txt' | head
+          M=$(find app/build -name mapping.txt | head -1); cp "$M" "$GITHUB_WORKSPACE/mapping.txt"; head -6 "$GITHUB_WORKSPACE/mapping.txt"
       - uses: actions/upload-artifact@v4
-        with: { name: mapping-0.57.0, path: src/app/build/outputs/mapping/release/mapping.txt, retention-days: 90 }
+        with: { name: mapping-0.57.0, path: mapping.txt, retention-days: 90 }
       - name: Retrace
         run: |
-          M=src/app/build/outputs/mapping/release/mapping.txt
+          M=mapping.txt
           V=$(grep -oP '^# compiler_version: \K.*' $M)
           curl -sfL -o r8.jar "https://dl.google.com/android/maven2/com/android/tools/r8/$V/r8-$V.jar"
           java -cp r8.jar com.android.tools.r8.retrace.Retrace $M tool/.github/retrace/stack.txt
