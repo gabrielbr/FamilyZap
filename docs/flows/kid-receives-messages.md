@@ -219,3 +219,6 @@ The owner: "lines separating days in chats, so my kid knows that one message was
   - a chat with no messages has no line;
   - reactions don't count, because they sit on a message;
   - the message the kid is sending (during its 5 seconds to undo) is today's.
+
+## v0.58: pictures keep a shape the chat can hold (issue #88)
+A GIF or video in a bubble takes its own shape, but only between 9:16 (an upright phone video) and 21:9. Outside that it's cropped to the nearest. An odd size used to close Oiê when the chat opened. Photos, stickers and video thumbnails were already a fixed size.

@@ -52,6 +52,12 @@
 
 
 
+## 0.58.0
+- **Fixed: Oiê closing when Tito opened a certain group.** A GIF or video can arrive with an odd size, for example very thin and tall. In the chat its picture took that shape with no limit, and Android couldn't measure a picture that tall, so Oiê closed. Now pictures in a chat keep a shape between upright phone video (9:16) and wide screen (21:9).
+- **A line for each day in chats.** Above the first message of each day, a thin line says when it was: "Hoje", "Ontem", the weekday for the last week, then the date ("18 de novembro", with the year when it's another year). In a group, the name of who wrote shows again under each new day.
+- **Problem reports keep the crash.** When Oiê closes, the report now keeps the error and what caused it, even when only the newest lines fit in the GitHub link. Each release also keeps what's needed to read a crash. This report's error had been cut off.
+- **What you have to do:** nothing. If Oiê closes again in that group, send a new report from Ajuda › Problemas.
+
 ## 0.57.0
 - **The code moved to a new address: github.com/gabrielbr/oie-dev** (it was FamilyZap). "Enviar para o GitHub" in Ajuda › Problemas, and the website's links to the code, now go straight there. Older copies of Oiê still work, because GitHub forwards the old address.
 - **What you have to do:** nothing.

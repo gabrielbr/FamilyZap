@@ -136,7 +136,7 @@ internal fun VideoSurface(
     bytes: ByteArray, loop: Boolean, muted: Boolean, play: Boolean, modifier: Modifier = Modifier,
     onProgress: (Int, Int) -> Unit = { _, _ -> }, onEnd: () -> Unit = {},
 ) {
-    var ratio by remember { mutableFloatStateOf(16f / 9f) }
+    var ratio by remember { mutableFloatStateOf(app.oie.logic.Moving.DEFAULT_RATIO) }
     var prepared by remember(bytes) { mutableStateOf(false) }
     val player = remember(bytes) { MediaPlayer() }
     DisposableEffect(player) { onDispose { runCatching { player.release() } } }
@@ -159,7 +159,11 @@ internal fun VideoSurface(
                             player.setDataSource(BytesSource(bytes))
                             player.isLooping = loop
                             if (muted) player.setVolume(0f, 0f)
-                            player.setOnVideoSizeChangedListener { _, vw, vh -> if (vw > 0 && vh > 0) ratio = vw.toFloat() / vh }
+                            player.setOnVideoSizeChangedListener { _, vw, vh ->
+                                // v0.58 (issue #88): kept between 9:16 and 21:9, so an odd size can't ask the chat for a height it can't measure.
+                                if (vw > 0 && vh > 0) ratio = app.oie.logic.Moving.bubbleRatio(vw, vh)
+                                if (vw.toFloat() / vh.coerceAtLeast(1) != ratio) Diagnostics.log("video: odd size ${vw}x$vh, shown at ${"%.2f".format(ratio)}")
+                            }
                             player.setOnCompletionListener { onEnd() }
                             player.setOnPreparedListener { prepared = true; runCatching { onProgress(0, it.duration) } }
                             player.prepareAsync()
@@ -246,7 +250,7 @@ fun GifBubble(media: String?, onLongPress: (() -> Unit)? = null, onWatch: () -> 
             Text(tx.arriving, style = OieType.body, color = c.muted)
         }
         else if (animate) VideoSurface(bytes, loop = true, muted = true, play = true, modifier = Modifier.fillMaxWidth())
-        else rememberFirstFrame(bytes)?.let { Image(it.asImageBitmap(), contentDescription = null, modifier = Modifier.fillMaxWidth(), contentScale = ContentScale.FillWidth) }
+        else rememberFirstFrame(bytes)?.let { GifStill(it) }
             ?: Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f))
         Text(
             tx.gifLabel, style = OieType.caption, color = c.ink,
@@ -254,6 +258,18 @@ fun GifBubble(media: String?, onLongPress: (() -> Unit)? = null, onWatch: () -> 
                 .clip(androidx.compose.material3.MaterialTheme.shapes.small).background(c.surface).padding(horizontal = OTokens.Spacing.space2),
         )
     }
+}
+
+/**
+ * v0.58 (issue #88): a GIF's first frame in its bubble, at the bubble's width, in a shape kept between 9:16 and
+ * 21:9 (cropped to it), so its height is always one a chat can measure.
+ */
+@Composable
+internal fun GifStill(frame: android.graphics.Bitmap) {
+    Image(
+        frame.asImageBitmap(), contentDescription = null, contentScale = ContentScale.Crop,
+        modifier = Modifier.fillMaxWidth().aspectRatio(app.oie.logic.Moving.bubbleRatio(frame.width, frame.height)),
+    )
 }
 
 /**
